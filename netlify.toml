@@ -1,6 +1,10 @@
 [build]
-  command = "npm run build"
+  command = "cd ../.. && npm run build --workspace=apps/admin-portal"
   publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [[headers]]
   for = "/*"
