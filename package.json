@@ -60,7 +60,8 @@
     "vite-plugin-svgr": "^4.3.0"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.30.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.30.1",
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.0.8"
   },
   "overrides": {
     "react-helmet-async": {
