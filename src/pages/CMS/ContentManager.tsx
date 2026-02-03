@@ -88,9 +88,9 @@ export default function ContentManager() {
         setContent({
             ...content,
             sections: {
-                ...content.sections,
+                ...(content.sections || {}),
                 [sectionId]: {
-                    ...content.sections[sectionId],
+                    ...(content.sections?.[sectionId] as SectionContent),
                     [field]: value
                 }
             }
@@ -104,7 +104,7 @@ export default function ContentManager() {
         setContent({
             ...content,
             sections: {
-                ...content.sections,
+                ...(content.sections || {}),
                 [id]: {
                     heading: newSectionId, // Use the input as initial heading
                     content: ""
@@ -264,7 +264,7 @@ export default function ContentManager() {
                                 <textarea
                                     className="w-full rounded-lg border border-gray-300 bg-transparent py-3 px-4 text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:text-white/90"
                                     rows={4}
-                                    value={(content.sections['policy_links']?.content || "").replace(/<[^>]*>/g, '')}
+                                    value={(content.sections?.['policy_links']?.content || "").replace(/<[^>]*>/g, '')}
                                     onChange={(e) => handleSectionChange('policy_links', 'content', e.target.value)}
                                     placeholder="Code of Conduct::/code-of-conduct"
                                 />
@@ -273,7 +273,7 @@ export default function ContentManager() {
                                 <Label>Donate Button Text</Label>
                                 <Input
                                     type="text"
-                                    value={(content.sections['donate_label']?.content || "").replace(/<[^>]*>/g, '')}
+                                    value={(content.sections?.['donate_label']?.content || "").replace(/<[^>]*>/g, '')}
                                     onChange={(e) => handleSectionChange('donate_label', 'content', e.target.value)}
                                     placeholder="e.g. SUPPORT US"
                                 />
@@ -282,7 +282,7 @@ export default function ContentManager() {
                                 <Label>Donate Button URL</Label>
                                 <Input
                                     type="text"
-                                    value={(content.sections['donate_url']?.content || "").replace(/<[^>]*>/g, '')}
+                                    value={(content.sections?.['donate_url']?.content || "").replace(/<[^>]*>/g, '')}
                                     onChange={(e) => handleSectionChange('donate_url', 'content', e.target.value)}
                                     placeholder="https://donate-link.com"
                                 />
@@ -292,7 +292,7 @@ export default function ContentManager() {
                 )}
 
                 <div className="space-y-8">
-                    {content && Object.entries(content.sections)
+                    {content && Object.entries(content.sections || {})
                         .filter(([key]) => pageId !== 'footer' || !['policy_links', 'donate_label', 'donate_url'].includes(key))
                         .map(([key, section]) => (
                             <div key={key} className="p-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
@@ -321,7 +321,7 @@ export default function ContentManager() {
                             </div>
                         ))}
 
-                    {content && Object.keys(content.sections).length === 0 && (
+                    {content && Object.keys(content.sections || {}).length === 0 && (
                         <div className="py-12 text-center text-gray-500 italic">
                             No content sections found. Add one to get started.
                         </div>

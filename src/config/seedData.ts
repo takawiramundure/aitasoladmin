@@ -40,19 +40,7 @@ export const SEED_DATA = {
                 }
             ]
         },
-        coping: {
-            resources: [
-                {
-                    id: '1',
-                    title: "Hospice Niagara Grief Support",
-                    subtitle: "",
-                    content: "Hospice Niagara offers a variety of programs and workshops to help adults as well as programs that give children and youth a safe space to explore their feelings of grief and loss.\n\n(905) 984-8766\ninfo@hospiceniagara.ca",
-                    icon: "heart-outline",
-                    link: "tel:9059848766",
-                    isActive: true
-                }
-            ]
-        },
+
         programs: {
             programs: [
                 {

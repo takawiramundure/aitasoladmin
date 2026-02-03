@@ -96,14 +96,15 @@ export default function HomePageManager() {
                 });
 
                 // Override with existing data from DB
+                // Override with existing data from DB
                 if (data.sections) {
-                    Object.keys(data.sections).forEach(key => {
+                    const sections = data.sections;
+                    Object.keys(sections).forEach(key => {
                         if (mergedSections[key]) {
                             // Merge incoming data over defaults.
-                            // Firestore omits keys that are undefined, so this preserves defaults for missing keys.
-                            mergedSections[key] = { ...mergedSections[key], ...data.sections[key] };
+                            mergedSections[key] = { ...mergedSections[key], ...sections[key] };
                         } else {
-                            mergedSections[key] = data.sections[key];
+                            mergedSections[key] = sections[key];
                         }
                     });
                 }

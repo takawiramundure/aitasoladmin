@@ -3,10 +3,11 @@ import { doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, deleteDoc 
 import { SiteSettings } from "../types/siteSettings";
 
 export interface PageContent {
-    title: string;
-    sections: Record<string, SectionContent>;
+    title?: string;
+    sections?: Record<string, SectionContent>;
     lastUpdated?: string;
     updatedBy?: string;
+    [key: string]: any; // Allow flexible content structure
 }
 
 export interface SectionContent {
