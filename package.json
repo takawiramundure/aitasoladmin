@@ -30,6 +30,7 @@
     "firebase-admin": "^13.6.0",
     "flatpickr": "^4.6.13",
     "gapi-script": "^1.2.0",
+    "lucide-react": "^0.563.0",
     "react": "^19.0.0",
     "react-apexcharts": "^1.7.0",
     "react-dnd": "^16.0.1",

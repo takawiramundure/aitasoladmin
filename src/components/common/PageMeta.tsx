@@ -7,6 +7,7 @@ const PageMeta = ({
   title: string;
   description: string;
 }) => (
+  // @ts-ignore - React 19 type compatibility
   <Helmet>
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -14,6 +15,7 @@ const PageMeta = ({
 );
 
 export const AppWrapper = ({ children }: { children: React.ReactNode }) => (
+  // @ts-ignore - React 19 type compatibility specific fix
   <HelmetProvider><>{children}</></HelmetProvider>
 );
 
