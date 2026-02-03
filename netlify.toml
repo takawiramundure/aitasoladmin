@@ -1,5 +1,5 @@
 [build]
-  command = "npm install --include=dev && npm run build"
+  command = "cd ../.. && npm install && npm run build -w apps/admin-portal"
   publish = "dist"
 
 [build.environment]
