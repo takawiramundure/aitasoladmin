@@ -14,8 +14,6 @@ export default function MediaPickerModal({ isOpen, onClose, onSelect }: MediaPic
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} showCloseButton={true} className="max-w-5xl h-[80vh]">
-            <MediaLibrary onSelect={handleSelect} onClose={onClose} />
-        </Modal>
+        <MediaLibrary isOpen={isOpen} onSelect={handleSelect} onClose={onClose} />
     );
 }

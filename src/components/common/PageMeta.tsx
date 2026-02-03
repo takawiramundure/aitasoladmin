@@ -14,7 +14,7 @@ const PageMeta = ({
 );
 
 export const AppWrapper = ({ children }: { children: React.ReactNode }) => (
-  <HelmetProvider>{children}</HelmetProvider>
+  <HelmetProvider><>{children}</></HelmetProvider>
 );
 
 export default PageMeta;

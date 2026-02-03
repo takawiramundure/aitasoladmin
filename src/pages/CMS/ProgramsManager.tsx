@@ -5,6 +5,7 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Alert from "../../components/ui/alert/Alert";
 import { FirestoreService } from "../../services/firestore";
+import { useSite } from "../../context/SiteContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -12,6 +13,7 @@ import { storage } from "../../firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import MediaPickerModal from "../../components/common/MediaPickerModal";
+import { SEED_DATA } from "../../config/seedData";
 import { GridIcon } from "../../icons";
 
 // ---- Sortable Item Component ----
@@ -42,6 +44,7 @@ interface Program {
 }
 
 export default function ProgramsManager() {
+    const { currentSite } = useSite();
     const [programs, setPrograms] = useState<Program[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -86,18 +89,45 @@ export default function ProgramsManager() {
         }
     ];
 
+    const getBweicDefaultPrograms = (): Program[] => [
+        {
+            id: 'b1',
+            title: 'Healing & Wellness Circle: Winter Gathering',
+            description: 'A trauma-informed, culturally safe space for Black women to heal, rest, and reclaim their emotional wellbeing. Our winter gathering focuses on collective care and resilience.',
+            link: '#',
+            imageUrl: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&h=600&fit=crop',
+            isActive: true
+        },
+        {
+            id: 'b2',
+            title: 'Leadership Development Workshop',
+            description: 'Building confidence and capacity through leadership development, financial literacy, and self-advocacy programs that navigate systems with clarity.',
+            link: '#',
+            imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop',
+            isActive: true
+        },
+        {
+            id: 'b3',
+            title: 'The Sovereignty Circle Mentorship',
+            description: 'Experience-led mentorship matching for specific professional and life pathways, designed to bridge gaps in care and connection.',
+            link: '#',
+            imageUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=800&h=600&fit=crop',
+            isActive: true
+        }
+    ];
+
     useEffect(() => {
         loadPrograms();
-    }, []);
+    }, [currentSite]);
 
     const loadPrograms = async () => {
         setLoading(true);
         try {
-            const data: any = await FirestoreService.getPageContent("programs");
+            const data: any = await FirestoreService.getPageContent("programs", currentSite.id);
             if (data && data.programs && data.programs.length > 0) {
                 setPrograms(data.programs);
             } else {
-                setPrograms(defaultPrograms);
+                setPrograms(currentSite.id === 'bweic' ? getBweicDefaultPrograms() : defaultPrograms);
             }
         } catch (err) {
             console.error(err);
@@ -112,7 +142,7 @@ export default function ProgramsManager() {
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("programs", { programs } as any);
+            await FirestoreService.savePageContent("programs", { programs } as any, currentSite.id);
             setSuccessMsg("Changes saved successfully!");
         } catch (err) {
             console.error(err);
@@ -176,6 +206,25 @@ export default function ProgramsManager() {
         }
     };
 
+    const seedDefaults = () => {
+        if (confirm("This will overwrite current items with default data. Are you sure?")) {
+            // @ts-ignore
+            const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+            // @ts-ignore
+            if (siteData?.programs?.programs) {
+                // @ts-ignore
+                const defaults = siteData.programs.programs;
+                setPrograms(defaults);
+                // Auto-save
+                FirestoreService.savePageContent("programs", { programs: defaults } as any, currentSite.id)
+                    .then(() => setSuccessMsg("Default data restored and saved."))
+                    .catch(() => setError("Failed to save seed data."));
+            } else {
+                setError("No default seed data found for this site.");
+            }
+        }
+    };
+
     if (loading) return <div className="p-6">Loading...</div>;
 
     return (
@@ -193,6 +242,7 @@ export default function ProgramsManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <Button variant="outline" onClick={seedDefaults}>Seed Defaults</Button>
                         <Button variant="outline" onClick={addProgram}>+ Add Program</Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}

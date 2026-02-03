@@ -5,6 +5,7 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Alert from "../../components/ui/alert/Alert";
 import { FirestoreService } from "../../services/firestore";
+import { useSite } from "../../context/SiteContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -13,6 +14,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import MediaPickerModal from "../../components/common/MediaPickerModal";
 import { GridIcon } from "../../icons";
+import { SEED_DATA } from "../../config/seedData";
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -43,6 +45,7 @@ interface Resource {
 }
 
 export default function ResourcesManager() {
+    const { currentSite } = useSite();
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -60,102 +63,23 @@ export default function ResourcesManager() {
         })
     );
 
-    const defaultResources: Resource[] = [
-        {
-            id: '1',
-            title: "A Guide for People and Families Struggling with Suicide",
-            description: "Developed by St. Joe’s experts and those with lived experience, this guide supports those experiencing thoughts of suicide and their loved ones.",
-            type: 'Guide',
-            link: "https://www.niagararegion.ca/living/health_wellness/mentalhealth/pdf/guide-struggling-with-suicide.pdf",
-            imageUrl: '',
-            isActive: true
-        },
-        {
-            id: '2',
-            title: "A Toolkit for People Impacted by a Suicide Loss",
-            description: "Tools and strategies for coping, crisis planning, and safely sharing stories of suicide loss.",
-            type: 'Toolkit',
-            link: "https://www.mentalhealthcommission.ca/sites/default/files/2019-03/suicide_attempt_toolkit_eng.pdf",
-            imageUrl: "https://framerusercontent.com/images/cbdYTd1QZL10w8mJmSyFGK1oQ94.svg",
-            isActive: true
-        },
-        {
-            id: '3',
-            title: "Hope and Healing After Suicide",
-            description: "Information on speaking about suicide loss, working through grief, funeral arrangements, and finding professional support.",
-            type: 'Guide',
-            link: "https://www.camh.ca/hopeandhealing",
-            imageUrl: '',
-            isActive: true
-        },
-        {
-            id: '4',
-            title: "“When a Parent Dies by Suicide… What Kids Want to Know”",
-            description: "Addresses how to respond to common questions asked by children who have lost a parent/caregiver to suicide.",
-            type: 'Guide',
-            link: "https://www.camh.ca/en/health-info/guides-and-publications/when-a-parent-dies-by-suicide",
-            imageUrl: '',
-            isActive: true
-        },
-        {
-            id: '5',
-            title: "A Proactive Planning Workbook for Communities",
-            description: "Checklists and resources to help communities develop, implement and monitor a suicide postvention strategy.",
-            type: 'Workbook',
-            link: "https://framerusercontent.com/assets/bKN7Usb2qM2Xr8NmiiFMOvmqg.pdf",
-            imageUrl: '',
-            isActive: true
-        },
-        {
-            id: '6',
-            title: "School-based suicide prevention initiative",
-            description: "Enhance understanding of best practices in school-based prevention and postvention.",
-            type: 'Guide',
-            link: "https://smho-smso.ca/online-resources/school-based-suicide-prevention-life-promotion-initiatives-resources-for-community-based-providers/",
-            imageUrl: '',
-            isActive: true
-        },
-        {
-            id: '7',
-            title: "Talking to Children About a Suicide",
-            description: "A guide for parents/caregivers of children under 12 on how to speak with them when a suicide occurs.",
-            type: 'Guide',
-            link: "https://suicideprevention.ca/resource/talking-to-children-about-a-suicide/",
-            imageUrl: "https://framerusercontent.com/images/P6yM7YNRDcYKvnOSU3Fuxc7pxs.svg",
-            isActive: true
-        },
-        {
-            id: '8',
-            title: "A Manager’s Guide to Suicide Postvention",
-            description: "Action steps for workplace leaders including immediate, short-term, and long-term responses.",
-            type: 'Guide',
-            link: "https://theactionalliance.org/resource/managers-guide-suicide-postvention-workplace-10-action-steps-dealing-aftermath-suicide",
-            imageUrl: "https://framerusercontent.com/images/zxW4YtfnBLTWtc13HxKOCdzNYM.svg",
-            isActive: true
-        },
-        {
-            id: '9',
-            title: "Zero Suicide toolkit",
-            description: "Support for organizations outside the health care sector to expand suicide prevention potential.",
-            type: 'Toolkit',
-            link: "https://www.niagararegion.ca/living/health_wellness/mentalhealth/wellbeing/zero-suicide.aspx",
-            imageUrl: '',
-            isActive: true
-        }
-    ];
+    const getDefaultResources = (): Resource[] => {
+        const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+        return siteData?.resources?.resources || [];
+    };
 
     useEffect(() => {
         loadResources();
-    }, []);
+    }, [currentSite]);
 
     const loadResources = async () => {
         setLoading(true);
         try {
-            const data: any = await FirestoreService.getPageContent("resources");
+            const data: any = await FirestoreService.getPageContent("resources", currentSite.id);
             if (data && data.resources && data.resources.length > 0) {
                 setResources(data.resources);
             } else {
-                setResources(defaultResources);
+                setResources(getDefaultResources());
             }
         } catch (err) {
             console.error(err);
@@ -170,7 +94,7 @@ export default function ResourcesManager() {
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("resources", { resources } as any);
+            await FirestoreService.savePageContent("resources", { resources } as any, currentSite.id);
             setSuccessMsg("Changes saved successfully!");
         } catch (err) {
             console.error(err);
@@ -252,6 +176,26 @@ export default function ResourcesManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <Button
+                            variant="secondary"
+                            onClick={async () => {
+                                if (confirm("This will overwrite current resources with defaults. Continue?")) {
+                                    setLoading(true);
+                                    try {
+                                        const defaults = getDefaultResources();
+                                        await FirestoreService.savePageContent("resources", { resources: defaults } as any, currentSite.id);
+                                        setResources(defaults);
+                                        setSuccessMsg("Defaults seeded successfully!");
+                                    } catch (err) {
+                                        setError("Failed to seed defaults.");
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }
+                            }}
+                        >
+                            Seed Defaults
+                        </Button>
                         <Button variant="outline" onClick={addResource}>+ Add Resource</Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}

@@ -9,6 +9,13 @@ import { useEffect, useState } from "react";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { SortableItem } from "../../components/common/SortableItem";
+import { FirestoreService } from "../../services/firestore";
+import { SEED_DATA } from "../../config/seedData";
+import { SETTINGS_SEED_DATA } from "../../config/settingsSeedData";
+import { SITES } from "../../config/sites";
+import Button from "../../components/ui/button/Button";
+import Alert from "../../components/ui/alert/Alert";
+import { auth } from "../../firebaseConfig";
 
 export default function Home() {
   const { isConnected, connect, propertyId, fetchData, analyticsData, demographicsData, topPagesData, deviceData, engagementData, loadingData, error } = useAnalytics();
@@ -56,6 +63,44 @@ export default function Home() {
     if (id === 'traffic' || id === 'pages') return "col-span-12 lg:col-span-8";
     // Devices and Demographics take up 4 columns (1/3 width)
     return "col-span-12 lg:col-span-4";
+  };
+
+  const [seeding, setSeeding] = useState(false);
+  const [seedStatus, setSeedStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
+
+  const handleSeedData = async () => {
+    if (!confirm("This will overwrite existing content for ALL sites with the real-world defaults. Continue?")) return;
+
+    setSeeding(true);
+    setSeedStatus(null);
+    try {
+      console.log("Starting seeding process...");
+      console.log("Current User:", auth.currentUser?.email, "UID:", auth.currentUser?.uid);
+      for (const site of SITES) {
+        setSeedStatus({ type: 'success', msg: `Seeding ${site.name} content...` });
+        const siteData = SEED_DATA[site.id as keyof typeof SEED_DATA];
+        if (siteData) {
+          for (const [pageId, content] of Object.entries(siteData)) {
+            console.log(`Seeding page: ${pageId} for site: ${site.id}`);
+            await FirestoreService.savePageContent(pageId, content as any, site.id);
+          }
+        }
+
+        // Seed settings
+        setSeedStatus({ type: 'success', msg: `Seeding ${site.name} settings...` });
+        const siteSettings = SETTINGS_SEED_DATA[site.id];
+        if (siteSettings) {
+          console.log(`Seeding settings for site: ${site.id}`);
+          await FirestoreService.saveSiteSettings(site.id, siteSettings);
+        }
+      }
+      setSeedStatus({ type: 'success', msg: "Successfully seeded all site content and settings with real-world data!" });
+    } catch (err) {
+      console.error("Seeding error:", err);
+      setSeedStatus({ type: 'error', msg: `Failed to seed data: ${err instanceof Error ? err.message : 'Unknown error'}` });
+    } finally {
+      setSeeding(false);
+    }
   };
 
   return (
@@ -108,6 +153,34 @@ export default function Home() {
                 {loadingData ? 'Loading...' : 'Refresh Data'}
               </button>
             </div>
+          </div>
+        )}
+      </div>
+
+      <div className="mb-6 p-6 bg-white rounded-lg shadow dark:bg-gray-800 border border-blue-100 dark:border-blue-900/30">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Site Data Initialization</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Initialize your Firestore database with real-world content for all sites.
+            </p>
+          </div>
+          <Button
+            onClick={handleSeedData}
+            disabled={seeding}
+            className="whitespace-nowrap"
+          >
+            {seeding ? "Seeding..." : "Seed Real-World Content"}
+          </Button>
+        </div>
+
+        {seedStatus && (
+          <div className="mt-4">
+            <Alert
+              variant={seedStatus.type}
+              title={seedStatus.type === 'success' ? "Success" : "Error"}
+              message={seedStatus.msg}
+            />
           </div>
         )}
       </div>

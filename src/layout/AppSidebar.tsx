@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { Link, useLocation } from "react-router";
 
 // Assume these icons are imported from an icon library
@@ -12,7 +12,7 @@ import {
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-
+import { useSite } from "../context/SiteContext";
 
 type NavItem = {
   name: string;
@@ -21,57 +21,151 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-const navItems: NavItem[] = [
-  {
-    icon: <GridIcon />,
-    name: "Dashboard",
-    path: "/",
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Hero Slider",
-    path: "/cms/hero",
-  },
-  {
-    name: "Page Sections",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "About Section", path: "/cms/about" },
-      { name: "Understanding", path: "/cms/understanding" },
-      { name: "Coping Section", path: "/cms/coping" },
-      { name: "Programs", path: "/cms/programs" },
-      { name: "Resources", path: "/cms/resources" },
-      { name: "Footer Details", path: "/cms/footer" },
-    ],
-  },
-  {
-    icon: <BoxCubeIcon />,
-    name: "Media Library",
-    path: "/cms/media",
-  },
-];
-
-const othersItems: NavItem[] = [
-  {
-    icon: <UserCircleIcon />,
-    name: "Users",
-    path: "/users",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-  {
-    icon: <PlugInIcon />,
-    name: "Settings",
-    path: "/settings",
-  },
-];
-
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
+  const { currentSite } = useSite();
   const location = useLocation();
+
+  const navItems = useMemo(() => {
+    const commonItems: NavItem[] = [
+      {
+        icon: <GridIcon />,
+        name: "Dashboard",
+        path: "/",
+      }
+    ];
+
+    if (currentSite.id === 'bweic') {
+      return [
+        ...commonItems,
+        {
+          icon: <BoxCubeIcon />,
+          name: "Hero Slider",
+          path: "/cms/hero",
+        },
+        {
+          name: "Home Page Settings",
+          icon: <PageIcon />,
+          path: "/cms/home-settings",
+        },
+        {
+          name: "Who We Are",
+          icon: <UserCircleIcon />,
+          subItems: [
+            { name: "Our Story", path: "/cms/our-story" },
+            { name: "Leadership", path: "/cms/leadership" },
+            { name: "Board Members", path: "/cms/board-members" },
+            { name: "Careers", path: "/cms/careers" },
+          ]
+        },
+        {
+          name: "Our Work",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "Healing & Wellness", path: "/cms/healing-wellness" },
+            { name: "Empowerment", path: "/cms/empowerment" },
+            { name: "Community", path: "/cms/community-belonging" },
+            { name: "Sovereignty Circle", path: "/cms/sovereignty-circle" },
+          ]
+        },
+        {
+          name: "Media Center",
+          icon: <BoxCubeIcon />,
+          subItems: [
+            { name: "Videos", path: "/cms/videos" },
+            { name: "Partners", path: "/cms/partners" },
+            { name: "Media Library", path: "/cms/media" },
+          ]
+        },
+        {
+          name: "Events",
+          icon: <PageIcon />,
+          path: "/cms/upcoming-events",
+        },
+        {
+          icon: <PageIcon />,
+          name: "Take Action",
+          path: "/cms/take-action",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Blog",
+          path: "/cms/blog",
+        },
+        {
+          icon: <BoxCubeIcon />,
+          name: "Shop",
+          path: "/cms/shop",
+        },
+        {
+          icon: <PageIcon />,
+          name: "Footer Details",
+          path: "/cms/footer",
+        },
+      ];
+    }
+
+    // Default NSPC Menu
+    return [
+      ...commonItems,
+      {
+        icon: <BoxCubeIcon />,
+        name: "Hero Slider",
+        path: "/cms/hero",
+      },
+      {
+        name: "Page Sections",
+        icon: <PageIcon />,
+        subItems: [
+          { name: "About Section", path: "/cms/about" },
+          { name: "Understanding", path: "/cms/understanding" },
+          { name: "Coping Section", path: "/cms/coping" },
+          { name: "24/7 Crisis Support", path: "/cms/crisis-support" },
+          { name: "Programs", path: "/cms/programs" },
+          { name: "Resources", path: "/cms/resources" },
+          { name: "Footer Details", path: "/cms/footer" },
+        ],
+      },
+      {
+        name: "Media Center",
+        icon: <BoxCubeIcon />,
+        subItems: [
+          { name: "Videos", path: "/cms/videos" },
+          { name: "Partners", path: "/cms/partners" },
+        ]
+      },
+      {
+        icon: <BoxCubeIcon />,
+        name: "Media Library",
+        path: "/cms/media",
+      },
+    ];
+  }, [currentSite.id]);
+
+
+
+  const othersItems: NavItem[] = [
+    {
+      icon: <UserCircleIcon />,
+      name: "Users",
+      path: "/users",
+    },
+    {
+      icon: <UserCircleIcon />,
+      name: "User Profile",
+      path: "/profile",
+    },
+    {
+      icon: <PlugInIcon />,
+      name: "Settings",
+      path: "/settings",
+    },
+    {
+      icon: <PlugInIcon />,
+      name: "Site Settings",
+      path: "/settings/site",
+    },
+  ];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -107,10 +201,16 @@ const AppSidebar: React.FC = () => {
       });
     });
 
+    // Only auto-close if we navigated to a route that isn't in a submenu?? 
+    // Actually, simply removing the else block might be safer for UX: if I'm on a page that isn't in a submenu, keep the last one open? 
+    // Or, if I navigate away, I probably expect it to update.
+    // But if 'submenuMatched' is false, it means I'm on a top level page or somewhere else.
+    // The issue was definitely the constant re-running. Now that navItems is memoized, this effect runs only when location or currentSite changes.
+    // This is correct behavior now.
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [location, isActive]);
+  }, [location.pathname, navItems, isActive]);
 
   useEffect(() => {
     if (openSubmenu !== null) {
@@ -203,7 +303,7 @@ const AppSidebar: React.FC = () => {
               style={{
                 height:
                   openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? `${subMenuHeight[`${menuType}-${index}`]}px`
+                    ? `${subMenuHeight[`${menuType}-${index}`] || 0}px`
                     : "0px",
               }}
             >

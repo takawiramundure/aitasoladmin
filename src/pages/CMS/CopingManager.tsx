@@ -5,10 +5,12 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Alert from "../../components/ui/alert/Alert";
 import { FirestoreService } from "../../services/firestore";
+import { useSite } from "../../context/SiteContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import RichTextEditor from "../../components/form/RichTextEditor";
+import { SEED_DATA } from "../../config/seedData";
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -39,6 +41,7 @@ interface CopingResource {
 }
 
 export default function CopingManager() {
+    const { currentSite } = useSite();
     const [resources, setResources] = useState<CopingResource[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -53,67 +56,24 @@ export default function CopingManager() {
         })
     );
 
-    // Default data from Coping.tsx
-    const defaultResources: CopingResource[] = [
-        {
-            id: '1',
-            title: "Hospice Niagara Grief Support",
-            subtitle: "",
-            content: "Hospice Niagara offers a variety of programs and workshops to help adults as well as programs that give children and youth a safe space to explore their feelings of grief and loss.\n\n(905) 984-8766\ninfo@hospiceniagara.ca",
-            icon: "heart-outline",
-            link: "tel:9059848766",
-            isActive: true
-        },
-        {
-            id: '2',
-            title: "Bereaved Families of Ontario",
-            subtitle: "",
-            content: "An association of parents who have lost a child through death and for children up to 19 years who have lost parents, siblings, or other significant persons through death. One-to-one and telephone support is also available.\n\n905-318-0070",
-            icon: "people-outline",
-            link: "tel:9053180070",
-            isActive: true
-        },
-        {
-            id: '3',
-            title: "Grief Share: Niagara Life Centre",
-            subtitle: "",
-            content: "Grief Share is a friendly support group of people who will walk alongside you through one of life’s most difficult experiences. Groups meet weekly to help you face these challenges and move toward rebuilding your life.\n\n905-934-0021",
-            icon: "cafe-outline",
-            link: "tel:9059340021",
-            isActive: true
-        },
-        {
-            id: '4',
-            title: "CMHA Ontario Bereavement Program",
-            subtitle: "",
-            content: "Whether you need support for your own grief or you’re supporting someone in theirs, grief is unique and CMHA is available to support you on your journey in a safe and supportive environment.",
-            icon: "medkit-outline",
-            link: "https://ontario.cmha.ca/",
-            isActive: true
-        },
-        {
-            id: '5',
-            title: "Hope for Wellness Helpline",
-            subtitle: "(for Indigenous Peoples)",
-            content: "Available to all Indigenous people across Canada. Experienced and culturally competent counsellors are reachable by telephone and online ‘chat’ 24/7.\n\n1-855-242-3310",
-            icon: "call-outline",
-            link: "tel:18552423310",
-            isActive: true
-        }
-    ];
+    // Default data
+    const getDefaultResources = (): CopingResource[] => {
+        const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+        return siteData?.coping?.resources || [];
+    };
 
     useEffect(() => {
         loadResources();
-    }, []);
+    }, [currentSite]);
 
     const loadResources = async () => {
         setLoading(true);
         try {
-            const data: any = await FirestoreService.getPageContent("coping");
+            const data: any = await FirestoreService.getPageContent("coping", currentSite.id);
             if (data && data.resources && data.resources.length > 0) {
                 setResources(data.resources);
             } else {
-                setResources(defaultResources);
+                setResources(getDefaultResources());
             }
         } catch (err) {
             console.error(err);
@@ -128,7 +88,7 @@ export default function CopingManager() {
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("coping", { resources } as any);
+            await FirestoreService.savePageContent("coping", { resources } as any, currentSite.id);
             setSuccessMsg("Changes saved successfully!");
         } catch (err) {
             console.error(err);
@@ -191,6 +151,20 @@ export default function CopingManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <Button variant="outline" onClick={() => {
+                            if (confirm("This will overwrite current changes with default data. Are you sure?")) {
+                                const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+                                if (siteData?.coping?.resources) {
+                                    setResources(siteData.coping.resources);
+                                    // Auto-save after seeding
+                                    FirestoreService.savePageContent("coping", { resources: siteData.coping.resources } as any, currentSite.id)
+                                        .then(() => setSuccessMsg("Default data seeded and saved!"))
+                                        .catch(() => setError("Failed to save seeded data."));
+                                }
+                            }
+                        }}>
+                            Seed Defaults
+                        </Button>
                         <Button variant="outline" onClick={addResource}>+ Add Resource</Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}

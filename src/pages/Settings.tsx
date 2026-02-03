@@ -1,60 +1,46 @@
 import { useState, useEffect } from "react";
 import PageBreadcrumb from "../components/common/PageBreadCrumb";
 import PageMeta from "../components/common/PageMeta";
-import { db } from "../firebaseConfig";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-
-interface SiteSettings {
-    siteTitle: string;
-    siteDescription: string;
-    siteKeywords: string;
-    supportEmail: string;
-    supportTicketLink: string;
-    headerScripts: string;
-    bodyScripts: string;
-    maintenanceMode: boolean;
-}
-
-const defaultSettings: SiteSettings = {
-    siteTitle: "Niagara Suicide Prevention Coalition",
-    siteDescription: "Working together to prevent suicide in Niagara.",
-    siteKeywords: "suicide prevention, niagara, coalition, help, support",
-    supportEmail: "",
-    supportTicketLink: "",
-    headerScripts: "",
-    bodyScripts: "",
-    maintenanceMode: false,
-};
+import { FirestoreService } from "../services/firestore";
+import { useSite } from "../context/SiteContext";
+import { SiteSettings } from "../types/siteSettings";
 
 export default function Settings() {
-    const [settings, setSettings] = useState<SiteSettings>(defaultSettings);
+    const { currentSite } = useSite();
+    const [settings, setSettings] = useState<Partial<SiteSettings>>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState({ type: "", text: "" });
 
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const docRef = doc(db, "settings", "global");
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    setSettings({ ...defaultSettings, ...docSnap.data() });
-                }
-            } catch (error) {
-                console.error("Error fetching settings:", error);
-            } finally {
-                setLoading(false);
+        if (currentSite) {
+            fetchSettings();
+        }
+    }, [currentSite]);
+
+    const fetchSettings = async () => {
+        setLoading(true);
+        try {
+            const data = await FirestoreService.getSiteSettings(currentSite.id);
+            if (data) {
+                setSettings(data);
+            } else {
+                // Initialize with defaults if needed
+                setSettings({ siteTitle: currentSite.name });
             }
-        };
-        fetchSettings();
-    }, []);
+        } catch (error) {
+            console.error("Error fetching settings:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         setMessage({ type: "", text: "" });
         try {
-            await setDoc(doc(db, "settings", "global"), settings);
+            await FirestoreService.saveSiteSettings(currentSite.id, settings as SiteSettings);
             setMessage({ type: "success", text: "Settings saved successfully!" });
         } catch (error) {
             console.error("Error saving settings:", error);
@@ -69,10 +55,10 @@ export default function Settings() {
     return (
         <>
             <PageMeta
-                title="Settings | Digital Maples Labs CMS Dashboard"
+                title={`Settings - ${currentSite.name} | Digital Maples Labs CMS`}
                 description="Manage your application settings"
             />
-            <PageBreadcrumb pageTitle="Settings" />
+            <PageBreadcrumb pageTitle={`Settings - ${currentSite.name}`} />
             <div className="mx-auto max-w-270">
                 <form onSubmit={handleSave}>
                     <div className="grid grid-cols-1 gap-8">
@@ -91,8 +77,9 @@ export default function Settings() {
                                     <input
                                         className="w-full rounded border border-stroke bg-gray py-3 px-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         type="text"
-                                        value={settings.siteTitle}
+                                        value={settings.siteTitle || ""}
                                         onChange={(e) => setSettings({ ...settings, siteTitle: e.target.value })}
+                                        placeholder={currentSite.name}
                                     />
                                 </div>
 
@@ -103,8 +90,9 @@ export default function Settings() {
                                     <textarea
                                         className="w-full rounded border border-stroke bg-gray py-3 px-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         rows={3}
-                                        value={settings.siteDescription}
+                                        value={settings.siteDescription || ""}
                                         onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
+                                        placeholder="Enter site description for SEO..."
                                     ></textarea>
                                 </div>
 
@@ -115,12 +103,17 @@ export default function Settings() {
                                     <input
                                         className="w-full rounded border border-stroke bg-gray py-3 px-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         type="text"
-                                        value={settings.siteKeywords}
+                                        value={settings.siteKeywords || ""}
                                         onChange={(e) => setSettings({ ...settings, siteKeywords: e.target.value })}
+                                        placeholder="keyword1, keyword2, keyword3"
                                     />
                                 </div>
                             </div>
                         </div>
+
+
+
+
 
                         {/* Advanced Settings */}
                         <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -138,7 +131,7 @@ export default function Settings() {
                                         className="w-full rounded border border-stroke bg-gray py-3 px-4.5 font-mono text-sm text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         rows={5}
                                         placeholder="<script>...</script>"
-                                        value={settings.headerScripts}
+                                        value={settings.headerScripts || ""}
                                         onChange={(e) => setSettings({ ...settings, headerScripts: e.target.value })}
                                     ></textarea>
                                 </div>
@@ -151,7 +144,7 @@ export default function Settings() {
                                         className="w-full rounded border border-stroke bg-gray py-3 px-4.5 font-mono text-sm text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         rows={5}
                                         placeholder="<script>...</script>"
-                                        value={settings.bodyScripts}
+                                        value={settings.bodyScripts || ""}
                                         onChange={(e) => setSettings({ ...settings, bodyScripts: e.target.value })}
                                     ></textarea>
                                 </div>
@@ -174,7 +167,7 @@ export default function Settings() {
                                         className="w-full rounded border border-stroke bg-gray py-3 px-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         type="url"
                                         placeholder="https://support.example.com"
-                                        value={settings.supportTicketLink}
+                                        value={settings.supportTicketLink || ""}
                                         onChange={(e) => setSettings({ ...settings, supportTicketLink: e.target.value })}
                                     />
                                 </div>
@@ -186,8 +179,9 @@ export default function Settings() {
                                     <input
                                         className="w-full rounded border border-stroke bg-gray py-3 px-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                                         type="email"
-                                        value={settings.supportEmail}
+                                        value={settings.supportEmail || ""}
                                         onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
+                                        placeholder="contact@example.com"
                                     />
                                 </div>
 
@@ -221,9 +215,9 @@ export default function Settings() {
                                 {saving ? "Saving..." : "Save Settings"}
                             </button>
                         </div>
-                    </div>
-                </form>
-            </div>
+                    </div >
+                </form >
+            </div >
         </>
     );
 }

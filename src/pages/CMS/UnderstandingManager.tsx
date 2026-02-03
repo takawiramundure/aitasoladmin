@@ -5,6 +5,7 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Alert from "../../components/ui/alert/Alert";
 import { FirestoreService } from "../../services/firestore";
+import { useSite } from "../../context/SiteContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -13,6 +14,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import MediaPickerModal from "../../components/common/MediaPickerModal";
 import { GridIcon } from "../../icons";
+import { SEED_DATA } from "../../config/seedData";
 
 // ---- Sortable Item Component for Cards ----
 function SortableCardItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -48,6 +50,7 @@ interface UnderstandingCard {
 }
 
 export default function UnderstandingManager() {
+    const { currentSite } = useSite();
     const [cards, setCards] = useState<UnderstandingCard[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -121,14 +124,19 @@ export default function UnderstandingManager() {
         { name: "Purple", value: "#9C27B0" }
     ];
 
+    const getDefaultCards = (): UnderstandingCard[] => {
+        const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+        return siteData?.understanding?.cards || [];
+    };
+
     useEffect(() => {
         loadCards();
-    }, []);
+    }, [currentSite]);
 
     const loadCards = async () => {
         setLoading(true);
         try {
-            const data: any = await FirestoreService.getPageContent("understanding");
+            const data: any = await FirestoreService.getPageContent("understanding", currentSite.id);
             if (data && data.cards && data.cards.length > 0) {
                 // Normalize existing data if it's in the old string[] format
                 const normalizedCards = data.cards.map((card: any) => ({
@@ -142,7 +150,7 @@ export default function UnderstandingManager() {
                 }));
                 setCards(normalizedCards);
             } else {
-                setCards(defaultCards);
+                setCards(getDefaultCards());
             }
         } catch (err) {
             console.error(err);
@@ -157,7 +165,7 @@ export default function UnderstandingManager() {
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("understanding", { cards } as any);
+            await FirestoreService.savePageContent("understanding", { cards } as any, currentSite.id);
             setSuccessMsg("Changes saved successfully!");
         } catch (err) {
             console.error(err);

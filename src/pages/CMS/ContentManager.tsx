@@ -2,6 +2,7 @@ import PageMeta from "../../components/common/PageMeta";
 import { useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { FirestoreService, PageContent, SectionContent } from "../../services/firestore";
+import { useSite } from "../../context/SiteContext";
 import Button from "../../components/ui/button/Button";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
@@ -12,6 +13,7 @@ import Alert from "../../components/ui/alert/Alert";
 
 export default function ContentManager() {
     const { pageId } = useParams();
+    const { currentSite } = useSite();
     const [content, setContent] = useState<PageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -40,13 +42,13 @@ export default function ContentManager() {
         if (pageId) {
             loadContent(pageId);
         }
-    }, [pageId]);
+    }, [pageId, currentSite]);
 
     const loadContent = async (id: string) => {
         setLoading(true);
         setError("");
         try {
-            const data = await FirestoreService.getPageContent(id);
+            const data = await FirestoreService.getPageContent(id, currentSite.id);
             if (data) {
                 setContent(data);
             } else {
@@ -70,7 +72,7 @@ export default function ContentManager() {
         setSuccessMsg("");
         setError("");
         try {
-            await FirestoreService.savePageContent(pageId, content);
+            await FirestoreService.savePageContent(pageId, content, currentSite.id);
             setSuccessMsg("Content saved successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err: any) {
@@ -114,8 +116,67 @@ export default function ContentManager() {
     };
 
     const seedAboutUs = () => {
-        // ... (existing About Us seed logic) ...
-        // I will keep this hidden or remove it later as per plan, but for now I'm adding Footer seed logic below
+        setContent({
+            title: "About Us",
+            sections: {
+                who_we_are: {
+                    heading: "Who we are",
+                    content: `
+                        <div class="space-y-6 text-center">
+                            <p>
+                                Founded in 2003 in response to rising suicide rates in the Niagara Region,
+                                the Niagara Suicide Prevention Coalition (NSPC) was established by a group of over
+                                20 community agencies and concerned individuals.
+                            </p>
+                            <p>
+                                The coalition’s purpose is to build strong, lasting partnerships across the community
+                                to implement a coordinated suicide prevention strategy that addresses the needs of all
+                                Niagara residents and reflects the values of a caring and compassionate community.
+                            </p>
+                            <p class="font-medium">
+                                The NSPC is a non-funded, volunteer-driven coalition.
+                            </p>
+                        </div>
+                    `
+                },
+                our_mandate: {
+                    heading: "Our Mandate",
+                    content: `
+                        <div class="space-y-6 text-center">
+                            <p>
+                                Niagara Suicide Prevention Coalition exists to bring interested community organizations,
+                                groups, individuals and volunteers together to make Niagara a suicide-safer community.
+                            </p>
+                            <p>
+                                The work of the NSPC is carried out by working groups under the direction of the NSPC Reference committee.
+                                Our focus is suicide prevention, intervention, and postvention.
+                            </p>
+                            <p>
+                                Guided by our six key areas of strategic focus; public awareness, media education, access to services,
+                                means safety, training, and evaluation/research, we continue to establish and build on our community partnerships,
+                                with involvement to date totaling over 20 local agencies and members.
+                            </p>
+                        </div>
+                    `
+                },
+                our_membership: {
+                    heading: "Our Membership",
+                    content: `
+                        <div class="space-y-6 text-center">
+                            <p>
+                                Membership is open to community agencies, organizations, and individuals who live or work
+                                in the Niagara Region and are committed to supporting the mandate of the Niagara Suicide Prevention Coalition.
+                                Anyone with an interest in suicide prevention, intervention, and postvention is encouraged to get involved.
+                            </p>
+                            <p>
+                                To become a member please reach out via our contact form.
+                            </p>
+                        </div>
+                    `
+                }
+            }
+        });
+        setSuccessMsg("Seeded About Us data! Click Save to persist.");
     };
 
     const seedFooter = () => {
@@ -174,6 +235,11 @@ export default function ContentManager() {
                         {pageId === 'footer' && (
                             <Button variant="outline" onClick={seedFooter}>
                                 Seed Footer Content
+                            </Button>
+                        )}
+                        {pageId === 'about' && (
+                            <Button variant="outline" onClick={seedAboutUs}>
+                                Seed About Us Content
                             </Button>
                         )}
                         <Button variant="outline" onClick={() => setIsModalOpen(true)}>

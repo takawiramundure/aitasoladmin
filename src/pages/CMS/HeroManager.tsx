@@ -7,11 +7,13 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Alert from "../../components/ui/alert/Alert";
 import { FirestoreService } from "../../services/firestore";
+import { useSite } from "../../context/SiteContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { storage } from "../../firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { SEED_DATA } from "../../config/seedData";
 
 // ---- Sortable Item Component for Slides ----
 function SortableSlideItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -46,6 +48,7 @@ interface HeroSlide {
 }
 
 export default function HeroManager() {
+    const { currentSite } = useSite();
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -65,58 +68,24 @@ export default function HeroManager() {
         })
     );
 
-    // Default slides from existing website
-    const defaultSlides: HeroSlide[] = [
-        {
-            id: '1',
-            title: 'From Hope to Action',
-            subtitle: 'Working together to prevent suicide in Niagara',
-            cta: 'Learn More',
-            link: '/about',
-            imageUrl: 'https://framerusercontent.com/images/wc0ePGAq0ilyxrjRTyJBiIYU7Mg.jpg',
-            isActive: true
-        },
-        {
-            id: '2',
-            title: 'Support is Available',
-            subtitle: 'You are not alone. Help is just a call away.',
-            cta: 'Find Support',
-            link: '/resources',
-            imageUrl: 'https://framerusercontent.com/images/MGQFjextPpzCvga9tnxWOMLwBs.png',
-            isActive: true
-        },
-        {
-            id: '3',
-            title: 'Education & Training',
-            subtitle: 'Equipping our community with life-saving skills.',
-            cta: 'View Programs',
-            link: '/programs',
-            imageUrl: 'https://framerusercontent.com/images/BZLSGNJ6TrSoQ1ESugRPqGtEJ8M.png',
-            isActive: true
-        },
-        {
-            id: '4',
-            title: 'Join the Coalition',
-            subtitle: 'Together we can make a difference.',
-            cta: 'About Us',
-            link: '/about',
-            imageUrl: 'https://framerusercontent.com/images/Jr30hbdKzKUp7VptCadUYyY34.png',
-            isActive: true
-        }
-    ];
+    // Site-specific default slides
+    const getDefaultSlides = (): HeroSlide[] => {
+        const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+        return siteData?.hero_slider?.slides || [];
+    };
 
     useEffect(() => {
         loadSlides();
-    }, []);
+    }, [currentSite.id]); // Reload when site changes
 
     const loadSlides = async () => {
         setLoading(true);
         try {
-            const data: any = await FirestoreService.getPageContent("hero_slider");
+            const data: any = await FirestoreService.getPageContent("hero_slider", currentSite.id);
             if (data && data.slides && data.slides.length > 0) {
                 setSlides(data.slides);
             } else {
-                setSlides(defaultSlides);
+                setSlides(getDefaultSlides());
             }
         } catch (err) {
             console.error(err);
@@ -131,7 +100,7 @@ export default function HeroManager() {
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("hero_slider", { slides } as any);
+            await FirestoreService.savePageContent("hero_slider", { slides } as any, currentSite.id);
             setSuccessMsg("Hero slider updated successfully!");
         } catch (err) {
             console.error(err);
@@ -147,7 +116,7 @@ export default function HeroManager() {
 
         setUploading(slideId);
         try {
-            const storageRef = ref(storage, `hero_slider/${Date.now()}_${file.name}`);
+            const storageRef = ref(storage, `${currentSite.id}/hero_slider/${Date.now()}_${file.name}`);
             const snapshot = await uploadBytes(storageRef, file);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
@@ -182,7 +151,7 @@ export default function HeroManager() {
                         const filename = `migrated_slide_${Date.now()}_${i}.jpg`;
 
                         // Upload to firebase
-                        const storageRef = ref(storage, `hero_slider/${filename}`);
+                        const storageRef = ref(storage, `${currentSite.id}/hero_slider/${filename}`);
                         const snapshot = await uploadBytes(storageRef, blob);
                         const firebaseURL = await getDownloadURL(snapshot.ref);
 
@@ -198,7 +167,7 @@ export default function HeroManager() {
             if (changed) {
                 setSlides(updatedSlides);
                 // Auto save after migration
-                await FirestoreService.savePageContent("hero_slider", { slides: updatedSlides } as any);
+                await FirestoreService.savePageContent("hero_slider", { slides: updatedSlides } as any, currentSite.id);
                 setSuccessMsg("All images successfully migrated to Firebase!");
             } else {
                 setSuccessMsg("No external images found to migrate.");

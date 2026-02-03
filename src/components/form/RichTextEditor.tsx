@@ -15,6 +15,7 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
             [{ 'header': [1, 2, 3, false] }],
             ['bold', 'italic', 'underline', 'strike'],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'align': [] }],
             ['link', 'clean']
         ],
     };
