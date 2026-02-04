@@ -7,6 +7,7 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import Alert from "../../components/ui/alert/Alert";
+import ImagePicker from '../../components/form/ImagePicker'; // Import ImagePicker
 import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface HomeSection extends SectionContent {
@@ -255,15 +256,14 @@ export default function HomePageManager() {
                                                         {(section.images || []).map((img, idx) => (
                                                             <div key={idx} className="flex gap-4 items-end bg-white p-3 border rounded shadow-sm dark:bg-gray-800 dark:border-gray-700">
                                                                 <div className="flex-1">
-                                                                    <Label className="text-xs mb-1">Image URL</Label>
-                                                                    <Input
+                                                                    <ImagePicker
+                                                                        label="Image URL"
                                                                         value={img.url}
-                                                                        onChange={(e) => {
+                                                                        onChange={(url) => {
                                                                             const newImages = [...(section.images || [])];
-                                                                            newImages[idx] = { ...newImages[idx], url: e.target.value };
+                                                                            newImages[idx] = { ...newImages[idx], url };
                                                                             handleSectionChange(config.id, "images", newImages);
                                                                         }}
-                                                                        placeholder="https://..."
                                                                     />
                                                                 </div>
                                                                 <div className="flex-1">
@@ -368,32 +368,28 @@ export default function HomePageManager() {
                                             {config.id === 'founder' && (
                                                 <div className="mt-4 space-y-4">
                                                     <div>
-                                                        <Label>Main Portrait (Large)</Label>
-                                                        <Input
-                                                            type="text"
+                                                        <ImagePicker
+                                                            label="Main Portrait (Large)"
                                                             value={section.images?.[0]?.url || ""}
-                                                            onChange={(e) => {
+                                                            onChange={(url) => {
                                                                 const newImages = [...(section.images || [])];
                                                                 if (!newImages[0]) newImages[0] = { url: "", alt: "" };
-                                                                newImages[0].url = e.target.value;
+                                                                newImages[0].url = url;
                                                                 handleSectionChange(config.id, "images", newImages);
                                                             }}
-                                                            placeholder="https://..."
                                                         />
                                                     </div>
                                                     <div>
-                                                        <Label>Secondary Image (Small Inset)</Label>
-                                                        <Input
-                                                            type="text"
+                                                        <ImagePicker
+                                                            label="Secondary Image (Small Inset)"
                                                             value={section.images?.[1]?.url || ""}
-                                                            onChange={(e) => {
+                                                            onChange={(url) => {
                                                                 const newImages = [...(section.images || [])];
                                                                 if (!newImages[0]) newImages[0] = { url: "", alt: "" };
                                                                 if (!newImages[1]) newImages[1] = { url: "", alt: "" };
-                                                                newImages[1].url = e.target.value;
+                                                                newImages[1].url = url;
                                                                 handleSectionChange(config.id, "images", newImages);
                                                             }}
-                                                            placeholder="https://..."
                                                         />
                                                     </div>
 
@@ -456,5 +452,3 @@ export default function HomePageManager() {
                 </div>
             </div>
         </>
-    );
-}
