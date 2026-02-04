@@ -35,6 +35,14 @@ interface Event {
 export default function EventsManager() {
     const { currentSite } = useSite();
     const [events, setEvents] = useState<Event[]>([]);
+
+    // Limits
+    const MAX_DESCRIPTION_LENGTH = 400;
+
+    const getCleanLength = (html: string) => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        return doc.body.textContent?.length || 0;
+    };
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -84,6 +92,12 @@ export default function EventsManager() {
     const handleSave = async () => {
         if (!formData.title || !formData.date) {
             setError("Title and Date are required.");
+            return;
+        }
+
+        const currentLength = getCleanLength(formData.description || "");
+        if (currentLength > MAX_DESCRIPTION_LENGTH) {
+            setError(`Description is too long (${currentLength}/${MAX_DESCRIPTION_LENGTH} chars). Please shorten it.`);
             return;
         }
 
@@ -351,6 +365,11 @@ export default function EventsManager() {
                                 value={formData.description || ""}
                                 onChange={(val) => setFormData({ ...formData, description: val })}
                             />
+                            <div className="flex justify-end mt-1">
+                                <span className={`text-xs ${getCleanLength(formData.description || "") > MAX_DESCRIPTION_LENGTH ? "text-red-500 font-bold" : "text-gray-400"}`}>
+                                    {getCleanLength(formData.description || "")} / {MAX_DESCRIPTION_LENGTH} chars
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
