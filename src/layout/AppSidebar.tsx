@@ -123,6 +123,7 @@ const AppSidebar: React.FC = () => {
           { name: "24/7 Crisis Support", path: "/cms/crisis-support" },
           { name: "Programs", path: "/cms/programs" },
           { name: "Resources", path: "/cms/resources" },
+          { name: "Suicide Facts", path: "/cms/suicide-facts" },
           { name: "Footer Details", path: "/cms/footer" },
         ],
       },

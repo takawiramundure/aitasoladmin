@@ -35,6 +35,7 @@ import PartnerManager from "./pages/CMS/PartnerManager";
 import ProductManager from "./pages/CMS/ProductManager";
 import BlogManager from "./pages/CMS/BlogManager";
 import FooterManager from "./pages/CMS/FooterManager";
+import SuicideFactsManager from "./pages/CMS/SuicideFactsManager";
 import UserManagement from "./pages/Users/UserManagement";
 import { AuthProvider } from "./context/AuthContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
@@ -72,6 +73,7 @@ export default function App() {
                     <Route path="/cms/blog" element={<BlogManager />} />
                     <Route path="/cms/shop" element={<ProductManager />} />
                     <Route path="/cms/footer" element={<FooterManager />} />
+                    <Route path="/cms/suicide-facts" element={<SuicideFactsManager />} />
                     <Route path="/cms/:pageId" element={<ContentManager />} />
                     <Route path="/users" element={<UserManagement />} />
 

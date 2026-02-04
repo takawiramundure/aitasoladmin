@@ -176,26 +176,7 @@ export default function ResourcesManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <Button
-                            variant="secondary"
-                            onClick={async () => {
-                                if (confirm("This will overwrite current resources with defaults. Continue?")) {
-                                    setLoading(true);
-                                    try {
-                                        const defaults = getDefaultResources();
-                                        await FirestoreService.savePageContent("resources", { resources: defaults } as any, currentSite.id);
-                                        setResources(defaults);
-                                        setSuccessMsg("Defaults seeded successfully!");
-                                    } catch (err) {
-                                        setError("Failed to seed defaults.");
-                                    } finally {
-                                        setLoading(false);
-                                    }
-                                }
-                            }}
-                        >
-                            Seed Defaults
-                        </Button>
+
                         <Button variant="outline" onClick={addResource}>+ Add Resource</Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}
