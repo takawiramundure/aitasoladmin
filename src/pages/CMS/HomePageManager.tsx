@@ -452,3 +452,5 @@ export default function HomePageManager() {
                 </div>
             </div>
         </>
+    );
+}
