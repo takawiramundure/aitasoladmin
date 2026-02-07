@@ -17,6 +17,12 @@ export const SITES: Site[] = [
     name: 'BWEIC',
     domain: 'bweic.netlify.app',
     description: 'Black Women Empowerment Initiative Canada'
+  },
+  {
+    id: 'kmfw',
+    name: 'KMFW',
+    domain: 'kindmindsfamilywellness.org',
+    description: 'Kind Minds Family Wellness'
   }
 ];
 

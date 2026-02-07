@@ -58,13 +58,21 @@ const bweicNavigation: NavigationItem[] = [
     }
 ];
 
-// Simple NSPC navigation (since it's a mobile app, this is minimal for now)
 const nspcNavigation: NavigationItem[] = [
     { id: 'nav-home', name: 'Home', path: '/', order: 1 },
     { id: 'nav-resources', name: 'Resources', path: '/resources', order: 2 },
     { id: 'nav-understanding', name: 'Understanding', path: '/understanding', order: 3 },
     { id: 'nav-coping', name: 'Coping', path: '/coping', order: 4 },
     { id: 'nav-programs', name: 'Programs', path: '/programs', order: 5 }
+];
+
+const kmfwNavigation: NavigationItem[] = [
+    { id: 'nav-home', name: 'Home', path: '/', order: 1 },
+    { id: 'nav-about', name: 'Our Story', path: '/about', order: 2 },
+    { id: 'nav-services', name: 'Programs & Services', path: '/services', order: 3 },
+    { id: 'nav-impact', name: 'Impact', path: '/impact', order: 4 },
+    { id: 'nav-join-us', name: 'Join Us', path: '/join', order: 5 },
+    { id: 'nav-contact', name: 'Contact', path: '/contact', order: 6 }
 ];
 
 export const SETTINGS_SEED_DATA: Record<string, SiteSettings> = {
@@ -113,6 +121,31 @@ export const SETTINGS_SEED_DATA: Record<string, SiteSettings> = {
             headerBg: '#FEFEFE'
         },
         navigation: bweicNavigation,
+        metadata: {
+            lastUpdated: new Date().toISOString(),
+            updatedBy: 'system'
+        }
+    },
+    kmfw: {
+        siteId: 'kmfw',
+        branding: {
+            logo: '/logo-dark.png',
+            siteName: 'Kind Minds Family Wellness',
+            favicon: '/favicon.ico'
+        },
+        theme: {
+            primary: '#0D9488',
+            secondary: '#1C1917',
+            accent: '#D97706',
+            textDark: '#1C1917',
+            textLight: '#FFFFFF',
+            brandColor: '#0D9488',
+            brandColorDark: '#0a7a70',
+            brandColorLight: '#0f9f92',
+            topBarBg: '#0D9488',
+            headerBg: '#FFFFFF'
+        },
+        navigation: kmfwNavigation,
         metadata: {
             lastUpdated: new Date().toISOString(),
             updatedBy: 'system'

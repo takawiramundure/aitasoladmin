@@ -105,6 +105,46 @@ const AppSidebar: React.FC = () => {
       ];
     }
 
+    if (currentSite.id === 'kmfw') {
+      return [
+        ...commonItems,
+        {
+          icon: <BoxCubeIcon />,
+          name: "Hero Slider",
+          path: "/cms/hero",
+        },
+        {
+          name: "Home Sections",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "About Section", path: "/cms/about" },
+            { name: "Mindfulness", path: "/cms/mindfulness" },
+            { name: "Support Services", path: "/cms/services" },
+          ],
+        },
+        {
+          name: "Multi-Page CMS",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "Our Story", path: "/cms/our-story" },
+            { name: "Events & News", path: "/cms/upcoming-events" },
+            { name: "Impact Stories", path: "/cms/impact" },
+            { name: "Join Us", path: "/cms/join-us" },
+          ]
+        },
+        {
+          icon: <BoxCubeIcon />,
+          name: "Media Library",
+          path: "/cms/media",
+        },
+        {
+          icon: <PageIcon />,
+          name: "Footer Details",
+          path: "/cms/footer",
+        },
+      ];
+    }
+
     // Default NSPC Menu
     return [
       ...commonItems,
