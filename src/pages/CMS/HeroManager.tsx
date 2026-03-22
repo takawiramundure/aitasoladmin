@@ -42,6 +42,7 @@ interface HeroSlide {
     imageUrl: string;
     title: string;
     subtitle: string;
+    pillText?: string;
     cta: string;
     link: string;
     isActive: boolean;
@@ -187,6 +188,7 @@ export default function HeroManager() {
             imageUrl: "",
             title: "New Slide",
             subtitle: "Subtitle goes here",
+            pillText: "",
             cta: "Learn More",
             link: "#",
             isActive: true
@@ -204,6 +206,21 @@ export default function HeroManager() {
         if (confirm("Are you sure you want to delete this slide?")) {
             setSlides(slides.filter(s => s.id !== id));
         }
+    };
+
+    const seedKMFWHero = () => {
+        const kmfwSlide: HeroSlide = {
+            id: Date.now().toString(),
+            imageUrl: "/assets/illustrations/butterfly.jpg",
+            title: "You don't have to navigate this alone.",
+            subtitle: "We provide a gentle hand and expert guidance for families seeking mental health support. Your journey to wellness starts with a single, safe step.",
+            pillText: "Welcome to Kind Minds Family Wellness",
+            cta: "Get Support Now",
+            link: "/services",
+            isActive: true
+        };
+        setSlides([kmfwSlide]);
+        setSuccessMsg("KMFW Hero content seeded! Remember to click Save Changes.");
     };
 
     const handleDragEnd = (event: DragEndEvent) => {
@@ -234,6 +251,11 @@ export default function HeroManager() {
                         </p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
+                        {currentSite.id === 'kmfw' && (
+                            <Button variant="outline" onClick={seedKMFWHero}>
+                                Seed KMFW Hero Content
+                            </Button>
+                        )}
                         <Button variant="outline" onClick={migrateImages} disabled={migrating}>
                             {migrating ? "Migrating..." : "↻ Migrate Images to Storage"}
                         </Button>
@@ -250,7 +272,11 @@ export default function HeroManager() {
                 <div className="mb-6 p-4 bg-blue-50 text-blue-800 rounded-lg text-sm border border-blue-100">
                     <h4 className="font-semibold mb-1">Image Guidelines:</h4>
                     <ul className="list-disc pl-5 space-y-1">
-                        <li>Recommended resolution: <strong>1920x1080 px</strong> (16:9 aspect ratio)</li>
+                        {currentSite.id === 'kmfw' ? (
+                            <li>Recommended resolution: <strong>800x800 px</strong> (Square 1:1 format). Image will be cropped into a decorative bordered container.</li>
+                        ) : (
+                            <li>Recommended resolution: <strong>1920x1080 px</strong> (16:9 aspect ratio)</li>
+                        )}
                         <li>Format: JPG or WebP. Max size: 2MB.</li>
                     </ul>
                 </div>
@@ -347,6 +373,17 @@ export default function HeroManager() {
                                                 />
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
+                                                <div className="col-span-2">
+                                                    <Label>Pill Text (Optional Highlight Tag)</Label>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="e.g. Welcome to Kind Minds"
+                                                        value={slide.pillText || ""}
+                                                        onChange={(e) => updateSlide(slide.id, 'pillText', e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4 mt-4">
                                                 <div>
                                                     <Label>Button Text</Label>
                                                     <Input

@@ -33,7 +33,27 @@ export default function ContentManager() {
         programs: "Programs & Services Section",
         resources: "Resources Section",
         media: "Media Library",
-        footer: "Footer Details"
+        footer: "Footer Details",
+        // KMFW Pages
+        "our-story": "Our Story",
+        "meet-our-team": "Meet Our Team",
+        "our-strategic-plan": "Our Strategic Plan",
+        services: "Services Gateway",
+        "grounded-counseling": "Grounded Counseling",
+        "educational-programs": "Educational Programs & Workshops",
+        "advocacy-education": "Advocacy & Education",
+        "community-support": "Community Support",
+        "system-navigation": "System Navigation",
+        impact: "Impact Gateway",
+        newsletters: "Newsletters",
+        "success-stories": "Success Stories",
+        "research-consultancy": "Research & Consultancy",
+        "neurodivergent-project": "NeuroDivergent Project",
+        "join-us": "Join Us Gateway",
+        funders: "Our Funders & Sponsors",
+        partners: "Our Partners",
+        careers: "Careers",
+        volunteer: "Volunteering"
     };
 
     const title = pageTitles[pageId || ""] || "Content Manager";

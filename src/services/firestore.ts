@@ -16,6 +16,7 @@ export interface SectionContent {
     images?: { url: string; alt: string }[];
     enabled?: boolean;
     stats?: { value: string; label: string }[];
+    items?: any[]; // Generic array for varying lists (testimonials, pillars, features)
     subtitle?: string;
     quote?: string;
     author_name?: string;

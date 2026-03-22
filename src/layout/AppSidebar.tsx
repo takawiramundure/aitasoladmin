@@ -114,23 +114,65 @@ const AppSidebar: React.FC = () => {
           path: "/cms/hero",
         },
         {
-          name: "Home Sections",
+          name: "Home Page Settings",
           icon: <PageIcon />,
+          path: "/cms/home-settings",
+        },
+        {
+          name: "About KMFW",
+          icon: <UserCircleIcon />,
           subItems: [
-            { name: "About Section", path: "/cms/about" },
-            { name: "Mindfulness", path: "/cms/mindfulness" },
-            { name: "Support Services", path: "/cms/services" },
+            { name: "About Gateway", path: "/cms/about" },
+            { name: "Our Story", path: "/cms/our-story" },
+            { name: "Meet Our Team", path: "/cms/meet-our-team" },
+            { name: "Strategic Plan", path: "/cms/our-strategic-plan" },
           ],
         },
         {
-          name: "Multi-Page CMS",
+          name: "Services & Programs",
           icon: <PageIcon />,
           subItems: [
-            { name: "Our Story", path: "/cms/our-story" },
-            { name: "Events & News", path: "/cms/upcoming-events" },
-            { name: "Impact Stories", path: "/cms/impact" },
-            { name: "Join Us", path: "/cms/join-us" },
+            { name: "Services Gateway", path: "/cms/services" },
+            { name: "Grounded Counseling", path: "/cms/grounded-counseling" },
+            { name: "Educational Programs", path: "/cms/educational-programs" },
+            { name: "Advocacy & Education", path: "/cms/advocacy-education" },
+            { name: "Community Support", path: "/cms/community-support" },
+            { name: "System Navigation", path: "/cms/system-navigation" },
+          ],
+        },
+        {
+          name: "Research",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "Research & Consultancy", path: "/cms/research-consultancy" },
+            { name: "NeuroDivergent", path: "/cms/neurodivergent-project" },
           ]
+        },
+        {
+          name: "Impact",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "Impact Gateway", path: "/cms/impact" },
+            { name: "Events & Gala", path: "/cms/upcoming-events" },
+            { name: "Newsletters", path: "/cms/newsletters" },
+            { name: "Success Stories", path: "/cms/success-stories" },
+          ]
+        },
+        {
+          name: "Join Us",
+          icon: <BoxCubeIcon />,
+          subItems: [
+            { name: "Join Us Gateway", path: "/cms/join-us" },
+            { name: "Funders & Sponsors", path: "/cms/funders" },
+            { name: "Partners", path: "/cms/partners" },
+            { name: "Careers", path: "/cms/careers" },
+            { name: "Volunteering", path: "/cms/volunteer" },
+          ]
+        },
+        {
+          name: "News & Blog",
+          icon: <GridIcon />,
+          path: "/cms/blog"
         },
         {
           icon: <BoxCubeIcon />,

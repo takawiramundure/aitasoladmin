@@ -250,6 +250,14 @@ export default function ProgramsManager() {
                     </div>
                 </div>
 
+                <div className="mb-6 p-4 border rounded-lg bg-blue-50 text-blue-800 border-blue-100 dark:bg-blue-900/20 dark:text-blue-200 dark:border-blue-800">
+                    <h4 className="font-semibold mb-1">Image Upload Guidelines:</h4>
+                    <ul className="list-disc pl-5 space-y-1 text-sm">
+                        <li><strong>Program Graphics/Logos:</strong> Recommended 800x600 px (4:3) or 800x800 px (1:1).</li>
+                        <li><strong>Format:</strong> JPG, PNG, or WebP. Max size: 2MB.</li>
+                    </ul>
+                </div>
+
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
 
