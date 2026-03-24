@@ -23,6 +23,7 @@ import Home from "./pages/Dashboard/Home";
 import ContentManager from "./pages/CMS/ContentManager";
 import HomePageManager from "./pages/CMS/HomePageManager";
 import AboutPageManager from "./pages/CMS/AboutPageManager";
+import OurStoryManager from "./pages/CMS/OurStoryManager";
 import HeroManager from "./pages/CMS/HeroManager";
 import UnderstandingManager from "./pages/CMS/UnderstandingManager";
 import CopingManager from "./pages/CMS/CopingManager";
@@ -62,6 +63,7 @@ export default function App() {
                     {/* CMS Routes */}
                     <Route path="/cms/home-settings" element={<HomePageManager />} />
                     <Route path="/cms/about" element={<AboutPageManager />} />
+                    <Route path="/cms/our-story" element={<OurStoryManager />} />
                     <Route path="/cms/hero" element={<HeroManager />} />
                     <Route path="/cms/understanding" element={<UnderstandingManager />} />
                     <Route path="/cms/coping" element={<CopingManager />} />
