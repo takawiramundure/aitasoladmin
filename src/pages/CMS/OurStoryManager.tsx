@@ -31,8 +31,8 @@ const getDefaultContent = (): Record<string, SectionContent> => {
     return {
         header: {
             heading: "Our Story",
-            subtitle: "Inaugural Event",
-            content: "",
+            subtitle: "About Us",
+            content: "<p>How a group of Black professionals came together to build a community rooted in culture, care, and collective healing.</p>",
             enabled: true,
             images: [{ url: '/assets/illustrations/gala-hero-bg.jpg', alt: 'Our Story Hero' }]
         },
@@ -42,7 +42,9 @@ const getDefaultContent = (): Record<string, SectionContent> => {
             enabled: true,
             items: [
                 { title: 'Trauma-Informed Care', desc: '15+ years of experience delivering trauma-informed support.', icon: 'Heart' },
-                { title: 'Collective Approach', desc: 'We engage the worldview and lived experiences of our clients.', icon: 'Users' }
+                { title: 'Collective Approach', desc: 'We engage the worldview and lived experiences of our clients.', icon: 'Users' },
+                { title: 'Community-Rooted', desc: 'Grounded in Kitchener-Waterloo, acknowledging the traditional territory of the Anishinaabe, Haudenosaunee, and Neutral Nations.', icon: 'Globe' },
+                { title: 'Research-Backed', desc: 'Our work draws on substantial evidence that effective support for the Black community must be grounded in cultural identity and respect.', icon: 'BookOpen' }
             ]
         },
         culturalIdentity: {
@@ -130,6 +132,23 @@ export default function OurStoryManager() {
         }
     };
 
+    const handleRestoreDefaults = async () => {
+        if (!window.confirm("Are you sure you want to restore the original 4-card 'Our Story' configuration? This will overwrite your current settings.")) return;
+        setSaving(true);
+        try {
+            const defaultData = { title: "Our Story", sections: getDefaultContent() };
+            await FirestoreService.savePageContent('our-story', defaultData as OurStoryPageContent, currentSite.id);
+            setContent(defaultData as OurStoryPageContent);
+            setSuccessMsg("Restored original defaults successfully! Please review and click Save Changes if you wish to confirm.");
+            setTimeout(() => setSuccessMsg(""), 5000);
+        } catch (err: any) {
+            console.error(err);
+            setError("Failed to restore defaults.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const handleSectionChange = (sectionId: string, field: keyof OurStorySection, value: any) => {
         if (!content) return;
         setContent({
@@ -174,9 +193,14 @@ export default function OurStoryManager() {
                             Configure content for the {currentSite.name} origin story, identity, and background.
                         </p>
                     </div>
-                    <Button onClick={handleSave} disabled={saving}>
-                        {saving ? "Saving..." : "Save Changes"}
-                    </Button>
+                    <div className="flex gap-3">
+                        <Button onClick={handleRestoreDefaults} variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" disabled={saving}>
+                            Restore Original Layout
+                        </Button>
+                        <Button onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving..." : "Save Changes"}
+                        </Button>
+                    </div>
                 </div>
 
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
