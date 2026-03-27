@@ -23,6 +23,7 @@ interface FooterContent {
     phone: string;
     address_line1: string;
     address_line2: string;
+    appointment_only?: boolean;
     social_instagram: string;
     social_twitter: string;
     social_facebook: string;
@@ -46,6 +47,7 @@ const DEFAULT_FOOTER: FooterContent = {
     phone: '+1-226-336-1988',
     address_line1: '(By Appointment Only)',
     address_line2: '2 King Street West, Suite 100, Kitchener, ON N2G 1A3',
+    appointment_only: true,
     social_instagram: '',
     social_twitter: '',
     social_facebook: '',
@@ -320,6 +322,16 @@ export default function FooterManager() {
                             <Label>Address Line 2</Label>
                             <Input value={content.address_line2} onChange={e => set('address_line2', e.target.value)} placeholder="Ontario, Canada" />
                         </div>
+                    </div>
+                    <div className="flex items-center gap-3 mt-4">
+                        <input
+                            id="appointment-only"
+                            type="checkbox"
+                            checked={content.appointment_only}
+                            onChange={e => set('appointment_only', e.target.checked)}
+                            className="w-4 h-4 text-blue-600 rounded"
+                        />
+                        <Label htmlFor="appointment-only" className="mb-0 cursor-pointer">Show "By Appointment Only" Badge in Footer</Label>
                     </div>
                 </Section>
 
