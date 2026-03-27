@@ -14,11 +14,17 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
         toolbar: [
             [{ 'header': [1, 2, 3, false] }],
             ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote'],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
             [{ 'align': [] }],
             ['link', 'clean']
         ],
     };
+
+    const formats = [
+        'header', 'bold', 'italic', 'underline', 'strike',
+        'blockquote', 'list', 'align', 'link'
+    ];
 
     return (
         <div className="flex flex-col gap-2">
@@ -29,6 +35,7 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
                     value={value}
                     onChange={onChange}
                     modules={modules}
+                    formats={formats}
                     className="h-64 mb-12 text-gray-900 dark:text-gray-100" // mb-12 to account for toolbar height
                 />
             </div>
