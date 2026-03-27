@@ -442,11 +442,11 @@ export default function ContentManager() {
                     heading: "Our People",
                     content: "Every person at Kind Minds Family Wellness brings a unique perspective and an unwavering commitment to our community.",
                     items: [
-                        { title: "Board Of Directors", desc: "KMFW Board of Directors comprise individuals from various professional backgrounds who oversee the legal and financial obligations of the coalition and meet quarterly.", icon: "Shield" },
-                        { title: "Advisory Committee", desc: "The Advisory committee comprises professionals from clinical and nonclinical backgrounds who provide expert insight and practical knowledge into various subject areas that inform KMFW operations and strategic directions.", icon: "Star" },
-                        { title: "Executive Director", desc: "Leads the organization's strategic vision and operations.", icon: "Briefcase" },
-                        { title: "Project Coordinators", desc: "Manage specific community programs and initiatives.", icon: "Users" },
-                        { title: "Clinical Consultants", desc: "Provide culturally responsive clinical support and guidance.", icon: "Heart" }
+                        { id: "board", title: "Board Of Directors", description: "KMFW Board of Directors comprise individuals from various professional backgrounds who oversee the legal and financial obligations of the coalition and meet quarterly.", icon: "Shield", color: "bg-blue-50 text-blue-600" },
+                        { id: "advisory", title: "Advisory Committee", description: "The Advisory committee comprises professionals from clinical and nonclinical backgrounds who provide expert insight and practical knowledge into various subject areas that inform KMFW operations and strategic directions.", icon: "Star", color: "bg-purple-50 text-purple-600" },
+                        { id: "ed", title: "Executive Director", description: "Leads the organization's strategic vision and operations.", icon: "Briefcase", color: "bg-amber-50 text-amber-600" },
+                        { id: "coordinators", title: "Project Coordinators", description: "Manage specific community programs and initiatives.", icon: "Users", color: "bg-green-50 text-green-600" },
+                        { id: "consultants", title: "Clinical Consultants", description: "Provide culturally responsive clinical support and guidance.", icon: "Heart", color: "bg-rose-50 text-rose-600" }
                     ]
                 },
                 mentors: {
