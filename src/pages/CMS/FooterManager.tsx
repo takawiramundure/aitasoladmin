@@ -43,7 +43,7 @@ const DEFAULT_FOOTER: FooterContent = {
     crisis_banner_number: '988',
     crisis_banner_label: 'Call or Text 988',
     email: 'info@kindmindsfamilywellness.org',
-    phone: '',
+    phone: '+1-226-336-1988',
     address_line1: 'Kitchener-Waterloo Area,',
     address_line2: 'Ontario, Canada',
     social_instagram: '',
