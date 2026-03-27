@@ -217,12 +217,20 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
                             <>
                                 <span className="text-gray-400">/</span>
                                 {(() => {
-                                    const parts = currentPath.substring(siteRoot.length + 1).split('/');
+                                    // Use a more robust way to get the relative path
+                                    let relativePath = currentPath;
+                                    if (currentPath.startsWith(siteRoot)) {
+                                        relativePath = currentPath.substring(siteRoot.length).replace(/^\//, '');
+                                    }
+                                    
+                                    if (!relativePath) return null;
+
+                                    const parts = relativePath.split('/').filter(Boolean);
                                     let accumulatedPath = siteRoot;
                                     return parts.map((part, index) => {
                                         accumulatedPath += `/${part}`;
                                         const isLast = index === parts.length - 1;
-                                        const thisPath = accumulatedPath; // capture for closure
+                                        const thisPath = accumulatedPath;
 
                                         return (
                                             <div key={index} className="flex items-center gap-1">

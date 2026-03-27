@@ -82,7 +82,6 @@ export default function ImagePicker({
                     onChange(url);
                     setIsLibraryOpen(false);
                 }}
-                basePath="uploads"
             />
         </div>
     );

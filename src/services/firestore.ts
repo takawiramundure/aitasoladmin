@@ -17,6 +17,7 @@ export interface SectionContent {
     enabled?: boolean;
     stats?: { value: string; label: string }[];
     items?: any[]; // Generic array for varying lists (testimonials, pillars, features)
+    list?: any[];  // Specifically for lists of people or structured items
     subtitle?: string;
     quote?: string;
     author_name?: string;
@@ -29,6 +30,20 @@ export interface ThemeSettings {
     typography: {
         displayFont: string;
         bodyFont: string;
+        h1Font?: string;
+        h2Font?: string;
+        h3Font?: string;
+        h4Font?: string;
+        h5Font?: string;
+        h6Font?: string;
+        highlightFont?: string;
+        h1Align?: 'left' | 'center' | 'right';
+        h2Align?: 'left' | 'center' | 'right';
+        h3Align?: 'left' | 'center' | 'right';
+        h4Align?: 'left' | 'center' | 'right';
+        h5Align?: 'left' | 'center' | 'right';
+        h6Align?: 'left' | 'center' | 'right';
+        highlightAlign?: 'left' | 'center' | 'right';
         h1Size: string;
         h2Size: string;
         h3Size: string;

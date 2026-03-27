@@ -11,6 +11,20 @@ const DEFAULT_THEME: ThemeSettings = {
     typography: {
         displayFont: "Plus Jakarta Sans",
         bodyFont: "Inter",
+        h1Font: "",
+        h2Font: "",
+        h3Font: "",
+        h4Font: "",
+        h5Font: "",
+        h6Font: "",
+        highlightFont: "",
+        h1Align: undefined,
+        h2Align: undefined,
+        h3Align: undefined,
+        h4Align: undefined,
+        h5Align: undefined,
+        h6Align: undefined,
+        highlightAlign: undefined,
         h1Size: "4.5rem",
         h2Size: "3.5rem",
         h3Size: "2.5rem",
@@ -167,6 +181,70 @@ export default function ThemeManager() {
                                     <option value="right">Right Aligned</option>
                                 </select>
                             </div>
+
+                            {/* Individual Fonts (Granular) */}
+                            <div className="pt-6 border-t border-gray-100 mt-6">
+                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-wider mb-4">Granular Font Overrides</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                    {(['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const).map(lvl => (
+                                        <div key={lvl} className="grid grid-cols-2 gap-2 p-3 bg-gray-50/50 rounded-xl border border-gray-100">
+                                            <div className="space-y-1">
+                                                <Label className="text-[10px] uppercase font-bold text-gray-400">{lvl} Font</Label>
+                                                <select 
+                                                    className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs outline-none"
+                                                    value={(settings.typography as any)[`${lvl}Font`] || ""}
+                                                    onChange={(e) => updateTypography(`${lvl}Font` as any, e.target.value)}
+                                                >
+                                                    <option value="">Global</option>
+                                                    {COMMON_FONTS.map(f => <option key={f} value={f}>{f}</option>)}
+                                                </select>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label className="text-[10px] uppercase font-bold text-gray-400">{lvl} Align</Label>
+                                                <select 
+                                                    className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs outline-none"
+                                                    value={(settings.typography as any)[`${lvl}Align`] || ""}
+                                                    onChange={(e) => updateTypography(`${lvl}Align` as any, e.target.value)}
+                                                >
+                                                    <option value="">Global</option>
+                                                    <option value="left">Left</option>
+                                                    <option value="center">Center</option>
+                                                    <option value="right">Right</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div className="grid grid-cols-2 gap-2 p-3 bg-primary/5 rounded-xl border border-primary/10 lg:col-span-2">
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] uppercase font-bold text-primary/60">Highlight Font</Label>
+                                            <select 
+                                                className="w-full px-2 py-1 bg-white border border-primary/20 rounded-lg text-xs outline-none"
+                                                value={settings.typography.highlightFont || ""}
+                                                onChange={(e) => updateTypography('highlightFont', e.target.value)}
+                                            >
+                                                <option value="">Global</option>
+                                                {COMMON_FONTS.map(f => <option key={f} value={f}>{f}</option>)}
+                                            </select>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label className="text-[10px] uppercase font-bold text-primary/60">Highlight Align</Label>
+                                            <select 
+                                                className="w-full px-2 py-1 bg-white border border-primary/20 rounded-lg text-xs outline-none"
+                                                value={settings.typography.highlightAlign || ""}
+                                                onChange={(e) => updateTypography('highlightAlign', e.target.value as any)}
+                                            >
+                                                <option value="">Global</option>
+                                                <option value="left">Left</option>
+                                                <option value="center">Center</option>
+                                                <option value="right">Right</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p className="mt-4 text-[11px] text-gray-400 italic">
+                                    Leave as "Global" to use the primary fonts defined above.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -204,30 +282,56 @@ export default function ThemeManager() {
                     </div>
                     
                     <div className="space-y-8">
-                        <div style={{ textAlign: settings.typography.headingAlignment }}>
+                        <div>
                             <span className="text-[10px] text-primary/60 font-mono block mb-1 uppercase tracking-tighter">Headline H1 / {settings.typography.h1Size}</span>
-                            <h1 style={{ fontFamily: settings.typography.displayFont, fontSize: settings.typography.h1Size, fontWeight: 800, lineHeight: 1.1, color: '#111' }}>
+                            <h1 style={{ 
+                                textAlign: (settings.typography.h1Align || settings.typography.headingAlignment) as any,
+                                fontFamily: settings.typography.h1Font || settings.typography.displayFont, 
+                                fontSize: settings.typography.h1Size, 
+                                fontWeight: 800, 
+                                lineHeight: 1.1, 
+                                color: '#111' 
+                            }}>
                                 The Future of Mindful Wellness
                             </h1>
                         </div>
                         
-                        <div style={{ textAlign: settings.typography.headingAlignment }}>
+                        <div>
                             <span className="text-[10px] text-primary/60 font-mono block mb-1 uppercase tracking-tighter">Subheading H2 / {settings.typography.h2Size}</span>
-                            <h2 style={{ fontFamily: settings.typography.displayFont, fontSize: settings.typography.h2Size, fontWeight: 700, lineHeight: 1.2, color: '#333' }}>
+                            <h2 style={{ 
+                                textAlign: (settings.typography.h2Align || settings.typography.headingAlignment) as any,
+                                fontFamily: settings.typography.h2Font || settings.typography.displayFont, 
+                                fontSize: settings.typography.h2Size, 
+                                fontWeight: 700, 
+                                lineHeight: 1.2, 
+                                color: '#333' 
+                            }}>
                                 Empowering Black Excellence through cultural safety.
                             </h2>
                         </div>
 
                         <div style={{ textAlign: settings.typography.alignment }}>
                             <span className="text-[10px] text-primary/60 font-mono block mb-1 uppercase tracking-tighter">Body Text / {settings.typography.bodySize}</span>
-                            <p style={{ fontFamily: settings.typography.bodyFont, fontSize: settings.typography.bodySize, lineHeight: 1.7, color: '#555' }}>
+                            <p style={{ 
+                                fontFamily: settings.typography.bodyFont, 
+                                fontSize: settings.typography.bodySize, 
+                                lineHeight: 1.7, 
+                                color: '#555' 
+                            }}>
                                 This is a sample paragraph demonstrate how your content will appear across all pages. Choosing the right font balance ensures that your mission is communicated clearly and professionally.
                             </p>
                         </div>
 
                         <div className="pt-6 border-t border-gray-200">
                              <span className="text-[10px] text-primary/60 font-mono block mb-2 uppercase tracking-tighter">Highlight Text / {settings.typography.highlightSize}</span>
-                             <p style={{ fontFamily: settings.typography.bodyFont, fontSize: settings.typography.highlightSize, fontWeight: 600, color: 'var(--color-primary, #0D9488)', fontStyle: 'italic' }}>
+                             <p style={{ 
+                                 textAlign: (settings.typography.highlightAlign || settings.typography.alignment) as any,
+                                 fontFamily: settings.typography.highlightFont || settings.typography.bodyFont, 
+                                 fontSize: settings.typography.highlightSize, 
+                                 fontWeight: 600, 
+                                 color: 'var(--color-primary, #0D9488)', 
+                                 fontStyle: 'italic' 
+                             }}>
                                  "Our story is rooted in community, care, and resilience."
                              </p>
                         </div>

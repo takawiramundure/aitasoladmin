@@ -37,7 +37,7 @@ export default function ContentManager() {
         // KMFW Pages
         "our-story": "Our Story",
         "meet-our-team": "Meet Our Team",
-        "our-strategic-plan": "Our Strategic Plan",
+        "strategic-plan": "Strategic Plan",
         services: "Services Gateway",
         "grounded-counseling": "Grounded Counseling",
         "educational-programs": "Educational Programs & Workshops",
@@ -103,7 +103,7 @@ export default function ContentManager() {
         }
     };
 
-    const handleSectionChange = (sectionId: string, field: keyof SectionContent, value: string) => {
+    const handleSectionChange = (sectionId: string, field: keyof SectionContent, value: any) => {
         if (!content) return;
         setContent({
             ...content,
@@ -233,6 +233,237 @@ export default function ContentManager() {
         setSuccessMsg("Seeded Success Stories data! Click Save to persist.");
     };
 
+    const seedServicesGateway = () => {
+        setContent({
+            title: "Services Gateway",
+            sections: {
+                intro: {
+                    heading: "What We Offer",
+                    content: "Holistic Support for *Every Member* of the Family"
+                },
+                counseling: {
+                    heading: "Culturally Grounded Counseling",
+                    content: "Faith-based and identity-affirming therapy that honors your unique lived experiences and cultural heritage."
+                },
+                family_support: {
+                    heading: "Family & Youth Support",
+                    content: "Empowering the next generation through mentorship, workshops, and specialized counseling for youth."
+                },
+                system_navigation: {
+                    heading: "System Navigation",
+                    content: "Expert guidance through complex health, education, and social systems to ensure your family gets the care it deserves."
+                },
+                community_integration: {
+                    heading: "Community Integration",
+                    content: "Building social networks and support groups that foster resilience and collective healing within the community."
+                },
+                crisis_support: {
+                    heading: "Crisis Support Advocacy",
+                    content: "Immediate advocacy and resource identification for families facing urgent mental health or social challenges."
+                },
+                research: {
+                    heading: "Research & Insights",
+                    content: "Evidence-based studies focusing on Black community wellness to drive systemic change and better policy."
+                }
+            }
+        });
+        setSuccessMsg("Seeded Services Gateway data!");
+    };
+
+    const seedGroundedCounseling = () => {
+        setContent({
+            title: "Grounded Counseling",
+            sections: {
+                hero: {
+                    heading: "Culturally Grounded Counseling",
+                    content: "Providing Afrocentric counseling and therapeutic support tailored for Black individuals, families, and couples to promote emotional well-being and resilience."
+                },
+                success_benefits: {
+                    heading: "Success, Benefit, and Evaluation",
+                    content: `
+                        <p>At KMFW, we ensure that program and service needs are effectively addressed and that room for subsequent meetings is left open to our clients. We are very passionate about the services we provide and are committed to ensuring that service recipients observe and experience this commitment.</p>
+                        <p>Our clients are offered tailored services and ongoing opportunities to evaluate and modify their personalized expected outcomes as needed. We are passionate about fostering services that are evidence-informed and targeted to clients' needs. Therefore, we encourage and appreciate clients' constructive feedback as it ensures that our services are exceptionally delivered.</p>
+                    `
+                },
+                referral_process: {
+                    heading: "Referral Process for Counseling",
+                    content: `
+                        <p>We accept self-referrals from prospective clients, their family/informal supports, or by a professional third party. Please complete the enclosed "counseling form" below.</p>
+                        <p>Do you need assistance completing the referral/intake form? We are here to help! Feel free to reach out to us via phone at <strong>226-336-1988</strong> or send us an email at <strong>info@kindmindsfamilywellness.org</strong>.</p>
+                        <div class="flex flex-wrap gap-4 mt-6">
+                            <a href="https://docs.google.com/forms/d/e/1FAIpQLSfM_1Gf-AXxz_QSdEvVM9iwc2san9x33Jk6_-D_fEagAxtt7A/viewform" target="_blank" class="btn-primary">Counseling Intake Form</a>
+                        </div>
+                    `
+                }
+            }
+        });
+        setSuccessMsg("Seeded Grounded Counseling data!");
+    };
+
+    const seedEducationalPrograms = () => {
+        setContent({
+            title: "Educational Programs & Groups",
+            sections: {
+                hero: {
+                    heading: "Educational Programs & Groups",
+                    content: "Culturally Informed Educational Programs and Support Groups designed for all stages of life."
+                },
+                wazee: {
+                    heading: "Wazee (Seniors' Group)",
+                    content: `
+                        <p>(Means 'Elderly' in Swahili). A weekly virtual program designed to foster social connections, communication, and support among the elderly within the Black community. Integrates guest speakers and health/economic needs discussions.</p>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLScW6YxRVuOfpZ2GDiEZe8GmxKYBZET2jlH1c79y_e8lbI5NFQ/viewform" target="_blank" class="text-primary font-bold">Register for Wazee →</a>
+                    `
+                },
+                fambul_tok: {
+                    heading: "Fambul Tok (Adult Groups)",
+                    content: `
+                        <p>(Means 'family meeting' in Krio). Adult conversation circles tackling parenting in Canada, Western expectations, and culturally-informed strategies promoting family wellness.</p>
+                        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdZGd4N0D-hNAerSFr0iXFTjVI21jqw9cDXFg45seIOsyUs4w/viewform" target="_blank" class="text-highlight font-bold">Join Adult Circles →</a>
+                    `
+                },
+                kungiyar_mata: {
+                    heading: "Kungiyar Mata (Women's Circle)",
+                    content: `
+                        <p>(Means 'women's group' in Hausa). An 8-week support group for Black and racialized women identifying as survivors of gender-based violence. Fosters healing, resilience, and empowerment.</p>
+                        <a href="#" class="text-accent font-bold">Register for Healing Horizon →</a>
+                    `
+                },
+                isibaya_samadoda: {
+                    heading: "Isibaya Samadoda (Men's Circle)",
+                    content: `
+                        <p>(Means 'Men's Circle' in Zulu). A space for African, Black, or Caribbean men in Waterloo Region to connect, build belonging, have fun, and face life's challenges together.</p>
+                        <a href="#" class="text-charcoal font-bold">Register for Men's Circle →</a>
+                    `
+                }
+            }
+        });
+        setSuccessMsg("Seeded Educational Programs data!");
+    };
+
+    const seedAdvocacyEducation = () => {
+        setContent({
+            title: "Advocacy & Education",
+            sections: {
+                hero: {
+                    heading: "Advocacy, Training & Education",
+                    content: "Education and Advocacy on Anti-Black Racism and Systemic Oppression, Cross-Cultural Leadership, Organizational Culture, and more."
+                },
+                workshops: {
+                    heading: "Workshops & Training",
+                    content: `
+                        <p>We are committed to reaching out and providing culturally-informed educational workshops and training to service providers to marginalized (specifically Black-identifying) groups within the community. Through such cooperation, we foster a culturally safe and positive space that encourages and respects the perspectives of all Black and racialized service recipients.</p>
+                        <p>Our standard workshop on inclusivity is an 8-hour (2 half-day) training. We have several two-hour workshops and workshop series on different aspects of Diversity, Equity, Inclusion, Belonging, and Access.</p>
+                        <p>We offer opportunities for organizations to request specific and curated workshops, such as grant writing for grassroots organizations, cross-cultural leadership, and focus groups.</p>
+                        <div class="mt-6">
+                            <a href="https://docs.google.com/forms/d/1UfLrO2XSuHy-zZpGVy1YtCmC3CzlVXKYtpef3Tx3Z24/viewform" target="_blank" class="btn-primary">Request a Workshop</a>
+                        </div>
+                    `
+                }
+            }
+        });
+        setSuccessMsg("Seeded Advocacy & Education data!");
+    };
+
+    const seedCommunitySupport = () => {
+        setContent({
+            title: "Community Support",
+            sections: {
+                hero: {
+                    heading: "Community Support & Engagement",
+                    content: "We provide educational support groups, Newcomer to Canada support, sporting and extracurricular activities, and aid in navigating community resources."
+                },
+                navigating_resources: {
+                    heading: "Navigating Resources",
+                    content: "We assist in navigating community resources, including food access, housing, clothing, medical support, transportation, and other vital social services."
+                },
+                community_events: {
+                    heading: "Community Events",
+                    content: "We regularly host events like the Storytelling Festival, Bike Riding Festival, and Summer BBQs across the Waterloo Region to foster unity and joy in our community."
+                }
+            }
+        });
+        setSuccessMsg("Seeded Community Support data!");
+    };
+
+    const seedSystemNavigation = () => {
+        setContent({
+            title: "System Navigation",
+            sections: {
+                hero: {
+                    heading: "System Navigation",
+                    content: "How we can support and work with you to bridge gaps and facilitate access to essential systems and services."
+                },
+                assessments: {
+                    heading: "Client-Centered Assessment",
+                    content: "Thorough assessments to identify individual needs and barriers within desired systems, ensuring a personalized approach to navigation."
+                },
+                guidance: {
+                    heading: "Guidance and Support",
+                    content: "Our team provides tailored guidance throughout the navigation process, connecting clients with relevant services and resources aligned with their goals."
+                },
+                navigation: {
+                    heading: "Expert Navigation",
+                    content: "Leveraging our in-depth knowledge of diverse systems, we bridge gaps and facilitate access to essential services."
+                },
+                advocacy: {
+                    heading: "Advocacy and Education",
+                    content: "We empower clients by educating them about their rights, options, and responsibilities within systems, while advocating on their behalf to overcome obstacles."
+                },
+                collaboration: {
+                    heading: "Stakeholder Collaboration",
+                    content: "We build robust networks with stakeholders to expand access to resources and support for our community, fostering collaboration and synergy."
+                },
+                learning: {
+                    heading: "Data Management and Continuous Learning",
+                    content: "We maintain accurate records to evaluate navigation effectiveness, while staying informed about policy changes and emerging trends to enhance our skills."
+                },
+                quote: {
+                    heading: "Our Commitment",
+                    content: `
+                        <p class="italic font-bold">"At KMFW, our System Navigation Support embodies more than mere assistance – it's a testament to our commitment to equity, empowerment, and community well-being. Together, we navigate towards a brighter, more inclusive future."</p>
+                    `
+                }
+            }
+        });
+        setSuccessMsg("Seeded System Navigation data!");
+    };
+
+    const seedMeetOurTeam = () => {
+        setContent({
+            title: "Meet Our Team",
+            enabled: true,
+            sections: {
+                hero: {
+                    heading: "Meet Our Team",
+                    content: "A passionate collective of Black professionals, advocates, and community members dedicated to culturally grounded wellness."
+                },
+                teams: {
+                    heading: "Our People",
+                    content: "Every person at Kind Minds Family Wellness brings a unique perspective and an unwavering commitment to our community.",
+                    items: [
+                        { title: "Board Of Directors", desc: "KMFW Board of Directors comprise individuals from various professional backgrounds who oversee the legal and financial obligations of the coalition and meet quarterly.", icon: "Shield" },
+                        { title: "Advisory Committee", desc: "The Advisory committee comprises professionals from clinical and nonclinical backgrounds who provide expert insight and practical knowledge into various subject areas that inform KMFW operations and strategic directions.", icon: "Star" },
+                        { title: "Executive Director", desc: "Leads the organization's strategic vision and operations.", icon: "Briefcase" },
+                        { title: "Project Coordinators", desc: "Manage specific community programs and initiatives.", icon: "Users" },
+                        { title: "Clinical Consultants", desc: "Provide culturally responsive clinical support and guidance.", icon: "Heart" }
+                    ]
+                },
+                mentors: {
+                    heading: "Black Youth Impact",
+                    subtitle: "Community Program",
+                    content: "Hover over each card to meet our mentors — passionate leaders dedicated to empowering the next generation.",
+                    enabled: true,
+                    list: [
+                        { name: "Placeholder Mentor 1", role: "Role Description", bio: "Bio information...", image: "" },
+                        { name: "Placeholder Mentor 2", role: "Role Description", bio: "Bio information...", image: "" }
+                    ]
+                }
+            }
+        });
+        setSuccessMsg("Seeded Meet Our Team data!");
+    };
+
     const seedFooter = () => {
         setContent({
             title: "Footer Details",
@@ -306,6 +537,44 @@ export default function ContentManager() {
                                 Seed Success Stories
                             </Button>
                         )}
+                        
+                        {/* Services Seeding */}
+                        {pageId === 'services' && (
+                            <Button variant="outline" onClick={seedServicesGateway}>
+                                Seed Services Gateway
+                            </Button>
+                        )}
+                        {pageId === 'grounded-counseling' && (
+                            <Button variant="outline" onClick={seedGroundedCounseling}>
+                                Seed Counseling
+                            </Button>
+                        )}
+                        {pageId === 'educational-programs' && (
+                            <Button variant="outline" onClick={seedEducationalPrograms}>
+                                Seed Educational Programs
+                            </Button>
+                        )}
+                        {pageId === 'advocacy-education' && (
+                            <Button variant="outline" onClick={seedAdvocacyEducation}>
+                                Seed Advocacy & Education
+                            </Button>
+                        )}
+                        {pageId === 'community-support' && (
+                            <Button variant="outline" onClick={seedCommunitySupport}>
+                                Seed Community Support
+                            </Button>
+                        )}
+                        {pageId === 'system-navigation' && (
+                            <Button variant="outline" onClick={seedSystemNavigation}>
+                                Seed System Navigation
+                            </Button>
+                        )}
+                        {pageId === 'meet-our-team' && (
+                            <Button variant="outline" onClick={seedMeetOurTeam}>
+                                Seed Meet Our Team
+                            </Button>
+                        )}
+
                         <Button variant="outline" onClick={() => setIsModalOpen(true)}>
                             + Add Section
                         </Button>
@@ -360,8 +629,17 @@ export default function ContentManager() {
                         .filter(([key]) => pageId !== 'footer' || !['policy_links', 'donate_label', 'donate_url'].includes(key))
                         .map(([key, section]) => (
                             <div key={key} className="p-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
-                                <div className="mb-3">
+                                <div className="mb-3 flex items-center justify-between">
                                     <Label>Section ID: <span className="font-mono text-xs text-gray-400">{key}</span></Label>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-gray-500 uppercase">Visible</span>
+                                        <input 
+                                            type="checkbox"
+                                            checked={section.enabled !== false}
+                                            onChange={(e) => handleSectionChange(key, "enabled", e.target.checked)}
+                                            className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="grid gap-5">
