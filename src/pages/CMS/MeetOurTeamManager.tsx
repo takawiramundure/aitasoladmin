@@ -250,17 +250,21 @@ export default function MeetOurTeamManager() {
                         title="Mentors Section" 
                         expanded={expandedSections.mentors} 
                         onToggle={toggleSection}
-                    >
-                         <div className="grid gap-4 mb-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <Label className="mb-0">Enable Mentors Section</Label>
+                        action={
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                <span className="text-[10px] font-bold uppercase text-gray-400">
+                                    {content.mentors.enabled ? 'Enabled' : 'Disabled'}
+                                </span>
                                 <button 
                                     onClick={() => updateNestedField('mentors', 'enabled', !content.mentors.enabled)}
-                                    className={`w-10 h-5 rounded-full relative transition-colors ${content.mentors.enabled ? 'bg-highlight' : 'bg-gray-200'}`}
+                                    className={`w-8 h-4 rounded-full relative transition-colors ${content.mentors.enabled ? 'bg-highlight' : 'bg-gray-300'}`}
                                 >
-                                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${content.mentors.enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.mentors.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
                                 </button>
                             </div>
+                        }
+                    >
+                         <div className="grid gap-4 mb-6">
                             <div><Label>Mentors Subtitle</Label><Input value={content.mentors.subtitle} onChange={(e) => updateNestedField('mentors', 'subtitle', e.target.value)} /></div>
                             <div><Label>Mentors Title</Label><Input value={content.mentors.title} onChange={(e) => updateNestedField('mentors', 'title', e.target.value)} /></div>
                             <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl" rows={2} value={content.mentors.description} onChange={(e) => updateNestedField('mentors', 'description', e.target.value)} /></div>
@@ -319,14 +323,17 @@ export default function MeetOurTeamManager() {
     );
 }
 
-function SectionBox({ id, title, expanded, onToggle, children }: any) {
+function SectionBox({ id, title, expanded, onToggle, action, children }: any) {
     return (
         <div className="border border-gray-100 rounded-2xl overflow-hidden">
             <div 
                 className="flex items-center justify-between p-4 bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors"
                 onClick={() => onToggle(id)}
             >
-                <h3 className="font-bold text-gray-700">{title}</h3>
+                <div className="flex items-center gap-4">
+                    <h3 className="font-bold text-gray-700">{title}</h3>
+                    {action}
+                </div>
                 {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </div>
             {expanded && (
