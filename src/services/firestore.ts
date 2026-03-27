@@ -22,6 +22,7 @@ export interface SectionContent {
     author_name?: string;
     author_title?: string;
     signature?: string;
+    videoUrl?: string;
 }
 
 export const FirestoreService = {
@@ -380,6 +381,54 @@ export const FirestoreService = {
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting product:", error);
+            throw error;
+        }
+    },
+
+    // SEO Management
+    getSEOData: async (siteId: string): Promise<any | null> => {
+        try {
+            const collectionName = `${siteId}_settings`;
+            const docRef = doc(db, collectionName, "seo");
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists() ? docSnap.data() : null;
+        } catch (error) {
+            console.error("Error fetching SEO data:", error);
+            throw error;
+        }
+    },
+
+    saveSEOData: async (siteId: string, seoData: any) => {
+        try {
+            const collectionName = `${siteId}_settings`;
+            const docRef = doc(db, collectionName, "seo");
+            await setDoc(docRef, seoData);
+        } catch (error) {
+            console.error("Error saving SEO data:", error);
+            throw error;
+        }
+    },
+
+    // Footer Management
+    getFooterData: async (siteId: string): Promise<any | null> => {
+        try {
+            const collectionName = `${siteId}_content`;
+            const docRef = doc(db, collectionName, "footer");
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists() ? docSnap.data() : null;
+        } catch (error) {
+            console.error("Error fetching footer data:", error);
+            throw error;
+        }
+    },
+
+    saveFooterData: async (siteId: string, footerData: any) => {
+        try {
+            const collectionName = `${siteId}_content`;
+            const docRef = doc(db, collectionName, "footer");
+            await setDoc(docRef, footerData);
+        } catch (error) {
+            console.error("Error saving footer data:", error);
             throw error;
         }
     }

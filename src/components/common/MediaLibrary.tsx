@@ -38,7 +38,60 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
 
     useEffect(() => {
         loadMedia(currentPath);
+        if (isRoot) {
+            ensureVideosFolder();
+        }
     }, [currentPath]);
+
+    const ensureVideosFolder = async () => {
+        try {
+            const videosRef = ref(storage, `${siteRoot}/videos`);
+            const res = await listAll(videosRef);
+            if (res.items.length === 0 && res.prefixes.length === 0) {
+                // Create .keep file to 'create' the folder
+                const keepRef = ref(storage, `${siteRoot}/videos/.keep`);
+                await uploadBytes(keepRef, new Blob([""], { type: "text/plain" }));
+                loadMedia(currentPath);
+            }
+        } catch (e) {
+            console.error("Error ensuring videos folder:", e);
+        }
+    };
+
+    const getVideoDuration = (file: File): Promise<number> => {
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = () => {
+                window.URL.revokeObjectURL(video.src);
+                resolve(video.duration);
+            };
+            video.onerror = () => resolve(0);
+            video.src = URL.createObjectURL(file);
+        });
+    };
+
+    const getTotalVideosDuration = async (): Promise<number> => {
+        try {
+            const videosRef = ref(storage, `${siteRoot}/videos`);
+            const res = await listAll(videosRef);
+            const durations = await Promise.all(res.items.map(async (item) => {
+                if (item.name === '.keep') return 0;
+                const url = await getDownloadURL(item);
+                return new Promise<number>((resolve) => {
+                    const video = document.createElement('video');
+                    video.preload = 'metadata';
+                    video.onloadedmetadata = () => resolve(video.duration);
+                    video.onerror = () => resolve(0);
+                    video.src = url;
+                });
+            }));
+            return durations.reduce((acc, curr) => acc + curr, 0);
+        } catch (e) {
+            console.error("Error calculating total duration:", e);
+            return 0;
+        }
+    };
 
     const loadMedia = async (path: string) => {
         setLoading(true);
@@ -82,15 +135,28 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
         setUploading(true);
         setError("");
         try {
+            // Video Constraints
+            if (isVideo(file.name)) {
+                const duration = await getVideoDuration(file);
+                if (duration > 120) {
+                    throw new Error("Video exceeds maximum duration of 2 minutes.");
+                }
+
+                const totalDuration = await getTotalVideosDuration();
+                if (totalDuration + duration > 1800) {
+                    throw new Error("Total videos duration would exceed 30 minutes limit.");
+                }
+            }
+
             const storageRef = ref(storage, `${currentPath}/${Date.now()}_${file.name}`);
             await uploadBytes(storageRef, file);
             setSuccessMsg("File uploaded successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
             loadMedia(currentPath);
             if (onUploadFinish) onUploadFinish();
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            setError("Failed to upload file.");
+            setError(err.message || "Failed to upload file.");
         } finally {
             setUploading(false);
         }
@@ -226,6 +292,14 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
 
             {/* File Grid */}
             <div className="flex-1 overflow-y-auto p-4">
+                {currentPath.endsWith('/videos') && (
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-3 text-blue-800 text-sm">
+                        <VideoIcon className="w-5 h-5 flex-shrink-0" />
+                        <div>
+                            <span className="font-bold">Video Folder Limits:</span> Max 2 mins per video. Max 30 mins total library duration.
+                        </div>
+                    </div>
+                )}
                 {loading ? (
                     <div className="flex justify-center items-center h-40">Loading...</div>
                 ) : items.length === 0 ? (

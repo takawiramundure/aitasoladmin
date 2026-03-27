@@ -1,55 +1,120 @@
 import { useState, useEffect } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import PageMeta from "../../components/common/PageMeta";
-import { FirestoreService, PageContent } from "../../services/firestore";
 import { useSite } from "../../context/SiteContext";
 import Button from "../../components/ui/button/Button";
 import Alert from "../../components/ui/alert/Alert";
 import Input from "../../components/form/input/InputField";
 import Label from "../../components/form/Label";
-import { Plus, Trash2, Download } from "lucide-react";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
-import { db } from "../../firebaseConfig";
+import { Plus, Trash2, Save, Zap, Link, ChevronDown, ChevronRight } from "lucide-react";
+import { FirestoreService } from "../../services/firestore";
 
-interface FooterLink {
-    label: string;
-    url: string;
-}
+interface FooterLink { label: string; url: string; }
+interface NavColumn { heading: string; links: FooterLink[]; }
 
-interface NewsletterSubscriber {
-    id: string;
+interface FooterContent {
+    logo_url: string;
+    tagline: string;
+    crisis_banner_enabled: boolean;
+    crisis_banner_text: string;
+    crisis_banner_number: string;
+    crisis_banner_label: string;
     email: string;
-    subscribedAt: any;
+    phone: string;
+    address_line1: string;
+    address_line2: string;
+    social_instagram: string;
+    social_twitter: string;
+    social_facebook: string;
+    social_linkedin: string;
+    social_youtube: string;
+    nav_columns: NavColumn[];
+    policy_links: FooterLink[];
+    copyright_text: string;
+    developer_text: string;
+    developer_url: string;
 }
+
+const DEFAULT_FOOTER: FooterContent = {
+    logo_url: '/logo-footer.png',
+    tagline: '',
+    crisis_banner_enabled: true,
+    crisis_banner_text: 'IMMEDIATE CRISIS SUPPORT',
+    crisis_banner_number: '988',
+    crisis_banner_label: 'Call or Text 988',
+    email: 'info@kindmindsfamilywellness.org',
+    phone: '',
+    address_line1: 'Kitchener-Waterloo Area,',
+    address_line2: 'Ontario, Canada',
+    social_instagram: '',
+    social_twitter: '',
+    social_facebook: '',
+    social_linkedin: '',
+    social_youtube: '',
+    nav_columns: [
+        {
+            heading: 'Explore',
+            links: [
+                { label: 'About Our Story', url: '/about' },
+                { label: 'Programs & Services', url: '/services' },
+                { label: 'Community Events', url: '/events' },
+                { label: 'Success Stories', url: '/impact/success-stories' },
+                { label: 'Newsletters & Media', url: '/impact/newsletters' },
+            ]
+        },
+        {
+            heading: 'Join Us',
+            links: [
+                { label: 'Donate', url: '/donate' },
+                { label: 'Volunteer', url: '/join-us/volunteer' },
+                { label: 'Careers', url: '/join-us/careers' },
+                { label: 'Partner With Us', url: '/contact' },
+                { label: 'Our Partners', url: '/join-us/partners' },
+                { label: 'Our Funders', url: '/join-us/funders' },
+            ]
+        },
+    ],
+    policy_links: [
+        { label: 'Privacy Policy', url: '/privacy' },
+        { label: 'Terms of Service', url: '/terms' },
+    ],
+    copyright_text: '',
+    developer_text: 'Designed by Digital Maples Labs Inc.',
+    developer_url: 'https://digitalmaples.ca',
+};
+
+const SECTION_LABELS: Record<string, string> = {
+    brand: 'Brand & Logo',
+    crisis: 'Crisis Banner',
+    contact: 'Contact Information',
+    social: 'Social Media Links',
+    nav: 'Navigation Columns',
+    policy: 'Policy Links & Legal',
+};
 
 export default function FooterManager() {
     const { currentSite } = useSite();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [content, setContent] = useState<any>({});
+    const [seeding, setSeeding] = useState(false);
+    const [content, setContent] = useState<FooterContent>(DEFAULT_FOOTER);
     const [status, setStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
-    const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
-    const [loadingSubs, setLoadingSubs] = useState(false);
+    const [openSection, setOpenSection] = useState<string>('brand');
+
+    const siteId = currentSite?.id || 'kmfw';
 
     useEffect(() => {
         loadContent();
-        loadSubscribers();
     }, [currentSite.id]);
 
     const loadContent = async () => {
         setLoading(true);
         try {
-            const data = await FirestoreService.getPageContent('footer', currentSite.id);
+            const data = await FirestoreService.getFooterData(siteId);
             if (data) {
-                // Flatten structure if needed or use as is. 
-                // We'll store fields in the root of the 'footer' doc for simplicity, or in 'sections' if strictly following PageContent.
-                // Let's use root for flexibility as we did in other managers.
-                setContent(data);
+                setContent({ ...DEFAULT_FOOTER, ...data });
             } else {
-                setContent({
-                    title: 'Footer',
-                    sections: {}
-                });
+                setContent(DEFAULT_FOOTER);
             }
         } catch (err) {
             console.error(err);
@@ -59,34 +124,12 @@ export default function FooterManager() {
         }
     };
 
-    const loadSubscribers = async () => {
-        if (currentSite.id !== 'bweic') return; // Only BWEIC for now
-        setLoadingSubs(true);
-        try {
-            const q = query(
-                collection(db, 'bweic_newsletter_subscribers'),
-                orderBy('subscribedAt', 'desc')
-            );
-            const snapshot = await getDocs(q);
-            const subs = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            })) as NewsletterSubscriber[];
-            setSubscribers(subs);
-        } catch (err) {
-            console.error("Error loading subscribers:", err);
-            // Don't error blocking the page
-        } finally {
-            setLoadingSubs(false);
-        }
-    };
-
     const handleSave = async () => {
         setSaving(true);
         setStatus(null);
         try {
-            await FirestoreService.savePageContent('footer', content, currentSite.id);
-            setStatus({ type: 'success', msg: 'Footer updated successfully!' });
+            await FirestoreService.saveFooterData(siteId, content);
+            setStatus({ type: 'success', msg: 'Footer saved successfully! Changes will appear on the website.' });
         } catch (err) {
             console.error(err);
             setStatus({ type: 'error', msg: 'Failed to save footer.' });
@@ -95,404 +138,316 @@ export default function FooterManager() {
         }
     };
 
-    const handleLinkChange = (index: number, field: keyof FooterLink, value: string) => {
-        const links = [...(content.policy_links || [])];
-        links[index] = { ...links[index], [field]: value };
-        setContent({ ...content, policy_links: links });
-    };
-
-    const addLink = () => {
-        const links = [...(content.policy_links || []), { label: '', url: '' }];
-        setContent({ ...content, policy_links: links });
-    };
-
-    const removeLink = (index: number) => {
-        const links = [...(content.policy_links || [])];
-        links.splice(index, 1);
-        setContent({ ...content, policy_links: links });
-    };
-
-    const handleCrisisLineChange = (index: number, field: string, value: string) => {
-        const lines = [...(content.crisis_lines || [])];
-        lines[index] = { ...lines[index], [field]: value };
-        setContent({ ...content, crisis_lines: lines });
-    };
-
-    const addCrisisLine = () => {
-        const lines = [...(content.crisis_lines || []), { label: '', value: '' }];
-        setContent({ ...content, crisis_lines: lines });
-    };
-
-    const removeCrisisLine = (index: number) => {
-        const lines = [...(content.crisis_lines || [])];
-        lines.splice(index, 1);
-        setContent({ ...content, crisis_lines: lines });
-    };
-
-    const handleExtraLinkChange = (index: number, field: string, value: string) => {
-        const links = [...(content.extra_links || [])];
-        links[index] = { ...links[index], [field]: value };
-        setContent({ ...content, extra_links: links });
-    };
-
-    const addExtraLink = () => {
-        const links = [...(content.extra_links || []), { label: '', url: '' }];
-        setContent({ ...content, extra_links: links });
-    };
-
-    const removeExtraLink = (index: number) => {
-        const links = [...(content.extra_links || [])];
-        links.splice(index, 1);
-        setContent({ ...content, extra_links: links });
-    };
-
-    const exportSubscribers = () => {
-        if (subscribers.length === 0) {
-            alert("No subscribers to export.");
-            return;
+    const handleSeedDefault = async () => {
+        setSeeding(true);
+        setStatus(null);
+        try {
+            await FirestoreService.saveFooterData(siteId, DEFAULT_FOOTER);
+            setContent(DEFAULT_FOOTER);
+            setStatus({ type: 'success', msg: 'Footer seeded with KMFW default content!' });
+        } catch (err) {
+            console.error(err);
+            setStatus({ type: 'error', msg: 'Failed to seed.' });
+        } finally {
+            setSeeding(false);
         }
-
-        const headers = ["Email", "Date Subscribed"];
-        const csvContent = [
-            headers.join(","),
-            ...subscribers.map(sub => {
-                const date = sub.subscribedAt?.toDate ? sub.subscribedAt.toDate().toLocaleString() : new Date(sub.subscribedAt).toLocaleString();
-                return `${sub.email},"${date}"`;
-            })
-        ].join("\n");
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `newsletter_subscribers_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
     };
 
-    if (loading) return <div>Loading...</div>;
+    const set = (key: keyof FooterContent, value: any) => setContent(prev => ({ ...prev, [key]: value }));
+
+    // Nav column helpers
+    const addColumn = () => set('nav_columns', [...content.nav_columns, { heading: 'New Column', links: [] }]);
+    const removeColumn = (i: number) => set('nav_columns', content.nav_columns.filter((_, idx) => idx !== i));
+    const updateColumn = (i: number, key: keyof NavColumn, value: any) => {
+        const cols = [...content.nav_columns];
+        cols[i] = { ...cols[i], [key]: value };
+        set('nav_columns', cols);
+    };
+    const addLink = (colIdx: number) => {
+        const cols = [...content.nav_columns];
+        cols[colIdx].links = [...cols[colIdx].links, { label: '', url: '' }];
+        set('nav_columns', cols);
+    };
+    const updateLink = (colIdx: number, linkIdx: number, field: keyof FooterLink, value: string) => {
+        const cols = [...content.nav_columns];
+        cols[colIdx].links[linkIdx] = { ...cols[colIdx].links[linkIdx], [field]: value };
+        set('nav_columns', cols);
+    };
+    const removeLink = (colIdx: number, linkIdx: number) => {
+        const cols = [...content.nav_columns];
+        cols[colIdx].links = cols[colIdx].links.filter((_, idx) => idx !== linkIdx);
+        set('nav_columns', cols);
+    };
+
+    // Policy link helpers
+    const addPolicyLink = () => set('policy_links', [...(content.policy_links || []), { label: '', url: '' }]);
+    const updatePolicyLink = (i: number, field: keyof FooterLink, value: string) => {
+        const links = [...(content.policy_links || [])];
+        links[i] = { ...links[i], [field]: value };
+        set('policy_links', links);
+    };
+    const removePolicyLink = (i: number) => set('policy_links', (content.policy_links || []).filter((_, idx) => idx !== i));
+
+    const inputCls = "w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white";
+    const sectionCls = "bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden";
+    const headerCls = "w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
+    const bodyOpen = "p-5 border-t border-gray-100 dark:border-gray-700 space-y-4";
+
+    const Section = ({ id, children }: { id: string; children: React.ReactNode }) => {
+        const isOpen = openSection === id;
+        return (
+            <div className={sectionCls}>
+                <button className={headerCls} onClick={() => setOpenSection(isOpen ? '' : id)}>
+                    <span className="font-semibold text-gray-800 dark:text-white">{SECTION_LABELS[id]}</span>
+                    {isOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
+                </button>
+                {isOpen && <div className={bodyOpen}>{children}</div>}
+            </div>
+        );
+    };
+
+    if (loading) return <div className="p-8 text-center text-gray-500">Loading footer settings...</div>;
 
     return (
         <>
-            <PageMeta title="Footer Manager" description="Manage footer content and settings" />
+            <PageMeta title="Footer Manager | KMFW Admin" description="Manage footer content and settings" />
             <PageBreadcrumb pageTitle="Footer Manager" />
 
-            <div className="grid grid-cols-1 gap-8">
-                {/* CTA Section */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h2 className="text-xl font-bold mb-4 dark:text-white">Call to Action (Top of Footer)</h2>
-                    <div className="space-y-4">
-                        <div>
-                            <Label>Heading</Label>
-                            <Input
-                                value={content.donate_heading || ""}
-                                onChange={e => setContent({ ...content, donate_heading: e.target.value })}
-                                placeholder="Join The Movement"
-                            />
-                        </div>
-                        <div>
-                            <Label>Content</Label>
-                            <textarea
-                                className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                rows={3}
-                                value={content.donate_content || ""}
-                                onChange={e => setContent({ ...content, donate_content: e.target.value })}
-                                placeholder="Take action today..."
-                            />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label>Button Text</Label>
-                                <Input
-                                    value={content.donate_label || ""}
-                                    onChange={e => setContent({ ...content, donate_label: e.target.value })}
-                                    placeholder="Partner With Us"
-                                />
-                            </div>
-                            <div>
-                                <Label>Button URL</Label>
-                                <Input
-                                    value={content.donate_url || ""}
-                                    onChange={e => setContent({ ...content, donate_url: e.target.value })}
-                                    placeholder="/take-action"
-                                />
-                            </div>
-                        </div>
+            <div className="p-6 space-y-6">
+                {/* Header */}
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Footer Manager</h1>
+                        <p className="text-sm text-gray-500 mt-1">Edit all footer content — changes go live on the website after saving.</p>
                     </div>
-                </div>
-
-                {/* Crisis Info Section */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold dark:text-white">Crisis Info (Left Helper)</h2>
-                        <Button onClick={addCrisisLine} size="sm" variant="outline">
-                            <Plus className="w-4 h-4 mr-2" /> Add Line
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleSeedDefault}
+                            disabled={seeding}
+                            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                            <Zap className="w-4 h-4" />
+                            {seeding ? 'Seeding...' : 'Seed Default KMFW Data'}
+                        </button>
+                        <Button onClick={handleSave} disabled={saving}>
+                            <Save className="w-4 h-4 mr-2" />
+                            {saving ? 'Saving...' : 'Save Footer'}
                         </Button>
-                    </div>
-                    <div className="space-y-4 mb-6">
-                        <div>
-                            <Label>Heading</Label>
-                            <Input
-                                value={content.help_heading || ""}
-                                onChange={e => setContent({ ...content, help_heading: e.target.value })}
-                                placeholder="Need help now?"
-                            />
-                        </div>
-                        <div>
-                            <Label>Subtext</Label>
-                            <Input
-                                value={content.help_subtext || ""}
-                                onChange={e => setContent({ ...content, help_subtext: e.target.value })}
-                                placeholder="There are crisis services available..."
-                            />
-                        </div>
-                    </div>
-                    <div className="space-y-3">
-                        {content.crisis_lines && content.crisis_lines.length > 0 ? (
-                            content.crisis_lines.map((line: any, idx: number) => (
-                                <div key={idx} className="flex gap-4 items-end bg-gray-50 dark:bg-gray-700 p-3 rounded">
-                                    <div className="flex-1">
-                                        <label className="text-xs mb-1 block text-gray-500">Label (e.g. 'Emergency:')</label>
-                                        <Input
-                                            value={line.label}
-                                            onChange={e => handleCrisisLineChange(idx, 'label', e.target.value)}
-                                            placeholder="9-8-8 Crisis Helpline:"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label className="text-xs mb-1 block text-gray-500">Value (e.g. '911')</label>
-                                        <Input
-                                            value={line.value}
-                                            onChange={e => handleCrisisLineChange(idx, 'value', e.target.value)}
-                                            placeholder="988"
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={() => removeCrisisLine(idx)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-gray-500 text-sm">No crisis lines added.</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Extra Links (Code of Conduct / Whistleblower) */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold dark:text-white">Extra Links (Top Right)</h2>
-                        <Button onClick={addExtraLink} size="sm" variant="outline">
-                            <Plus className="w-4 h-4 mr-2" /> Add Link
-                        </Button>
-                    </div>
-                    <div className="space-y-3">
-                        {content.extra_links && content.extra_links.length > 0 ? (
-                            content.extra_links.map((link: any, idx: number) => (
-                                <div key={idx} className="flex gap-4 items-end bg-gray-50 dark:bg-gray-700 p-3 rounded">
-                                    <div className="flex-1">
-                                        <label className="text-xs mb-1 block text-gray-500">Label</label>
-                                        <Input
-                                            value={link.label}
-                                            onChange={e => handleExtraLinkChange(idx, 'label', e.target.value)}
-                                            placeholder="Code of Conduct"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label className="text-xs mb-1 block text-gray-500">URL</label>
-                                        <Input
-                                            value={link.url}
-                                            onChange={e => handleExtraLinkChange(idx, 'url', e.target.value)}
-                                            placeholder="/code-of-conduct"
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={() => removeExtraLink(idx)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-gray-500 text-sm">No extra links added.</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Policy Links */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold dark:text-white">Footer Links</h2>
-                        <Button onClick={addLink} size="sm" variant="outline">
-                            <Plus className="w-4 h-4 mr-2" /> Add Link
-                        </Button>
-                    </div>
-                    <div className="space-y-3">
-                        {content.policy_links && content.policy_links.length > 0 ? (
-                            content.policy_links.map((link: FooterLink, idx: number) => (
-                                <div key={idx} className="flex gap-4 items-end bg-gray-50 dark:bg-gray-700 p-3 rounded">
-                                    <div className="flex-1">
-                                        <label className="text-xs mb-1 block text-gray-500">Label</label>
-                                        <Input
-                                            value={link.label}
-                                            onChange={e => handleLinkChange(idx, 'label', e.target.value)}
-                                            placeholder="Privacy Policy"
-                                        />
-                                    </div>
-                                    <div className="flex-1">
-                                        <label className="text-xs mb-1 block text-gray-500">URL</label>
-                                        <Input
-                                            value={link.url}
-                                            onChange={e => handleLinkChange(idx, 'url', e.target.value)}
-                                            placeholder="/privacy"
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={() => removeLink(idx)}
-                                        className="p-2 text-red-500 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </div>
-                            ))
-                        ) : (
-                            <p className="text-gray-500 text-sm">No custom links added.</p>
-                        )}
                     </div>
                 </div>
 
                 {status && (
-                    <Alert variant={status.type} title={status.type === 'success' ? "Success" : "Error"} message={status.msg} />
+                    <Alert variant={status.type} title={status.type === 'success' ? 'Saved!' : 'Error'} message={status.msg} />
                 )}
 
-
-
-                {/* Copyright Settings */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h2 className="text-xl font-bold mb-4 dark:text-white">Copyright Settings</h2>
-                    <div className="space-y-4">
+                {/* Brand & Logo */}
+                <Section id="brand">
+                    <div>
+                        <Label>Logo URL</Label>
+                        <Input value={content.logo_url} onChange={e => set('logo_url', e.target.value)} placeholder="/logo-footer.png" />
+                        {content.logo_url && (
+                            <img src={content.logo_url} alt="Logo preview" className="mt-2 h-16 object-contain border rounded" onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                        )}
+                    </div>
+                    <div>
+                        <Label>Tagline (optional short description under logo)</Label>
+                        <Input value={content.tagline} onChange={e => set('tagline', e.target.value)} placeholder="Empowering Black community wellness in Waterloo Region" />
+                    </div>
+                    <div>
+                        <Label>Copyright Text (leave empty for auto-generated)</Label>
+                        <Input value={content.copyright_text} onChange={e => set('copyright_text', e.target.value)} placeholder={`© ${new Date().getFullYear()} Kind Minds Family Wellness. All rights reserved.`} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label>Copyright Text</Label>
-                            <Input
-                                value={content.copyright_text || ""}
-                                onChange={e => setContent({ ...content, copyright_text: e.target.value })}
-                                placeholder="© 2026 Black Women Empowerment Initiative Canada. All rights reserved."
-                            />
-                            <p className="text-xs text-gray-500 mt-1">Leave empty to use default auto-generated copyright.</p>
+                            <Label>Developer Credit Text</Label>
+                            <Input value={content.developer_text} onChange={e => set('developer_text', e.target.value)} placeholder="Designed by Digital Maples Labs Inc." />
+                        </div>
+                        <div>
+                            <Label>Developer URL</Label>
+                            <Input value={content.developer_url} onChange={e => set('developer_url', e.target.value)} placeholder="https://digitalmaples.ca" />
+                        </div>
+                    </div>
+                </Section>
+
+                {/* Crisis Banner */}
+                <Section id="crisis">
+                    <div className="flex items-center gap-3 mb-2">
+                        <input
+                            id="crisis-enabled"
+                            type="checkbox"
+                            checked={content.crisis_banner_enabled}
+                            onChange={e => set('crisis_banner_enabled', e.target.checked)}
+                            className="w-4 h-4 rounded text-blue-600"
+                        />
+                        <label htmlFor="crisis-enabled" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Enable Crisis Banner at top of footer
+                        </label>
+                    </div>
+                    <div className={!content.crisis_banner_enabled ? 'opacity-40 pointer-events-none space-y-4' : 'space-y-4'}>
+                        <div>
+                            <Label>Banner Text (left label)</Label>
+                            <Input value={content.crisis_banner_text} onChange={e => set('crisis_banner_text', e.target.value)} placeholder="IMMEDIATE CRISIS SUPPORT" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label>Developer Text</Label>
-                                <Input
-                                    value={content.developer_text || ""}
-                                    onChange={e => setContent({ ...content, developer_text: e.target.value })}
-                                    placeholder="Developed by Digital Maples Labs Inc"
-                                />
+                                <Label>Phone Number (e.g. 988)</Label>
+                                <Input value={content.crisis_banner_number} onChange={e => set('crisis_banner_number', e.target.value)} placeholder="988" />
                             </div>
                             <div>
-                                <Label>Developer URL</Label>
-                                <Input
-                                    value={content.developer_url || ""}
-                                    onChange={e => setContent({ ...content, developer_url: e.target.value })}
-                                    placeholder="http://digitalmaples.agency"
-                                />
+                                <Label>Button Label</Label>
+                                <Input value={content.crisis_banner_label} onChange={e => set('crisis_banner_label', e.target.value)} placeholder="Call or Text 988" />
                             </div>
                         </div>
                     </div>
-                </div>
+                </Section>
 
-                {/* Social Media Links */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h2 className="text-xl font-bold mb-4 dark:text-white">Social Media Links</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Contact Info */}
+                <Section id="contact">
+                    <div>
+                        <Label>Email Address</Label>
+                        <Input value={content.email} onChange={e => set('email', e.target.value)} placeholder="info@kindmindsfamilywellness.org" />
+                    </div>
+                    <div>
+                        <Label>Phone Number (optional)</Label>
+                        <Input value={content.phone} onChange={e => set('phone', e.target.value)} placeholder="+1 (519) 000-0000" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <Label>Instagram URL</Label>
-                            <Input
-                                value={content.social_instagram || ""}
-                                onChange={e => setContent({ ...content, social_instagram: e.target.value })}
-                                placeholder="https://instagram.com/..."
-                            />
+                            <Label>Address Line 1</Label>
+                            <Input value={content.address_line1} onChange={e => set('address_line1', e.target.value)} placeholder="Kitchener-Waterloo Area," />
                         </div>
                         <div>
-                            <Label>Twitter (X) URL</Label>
-                            <Input
-                                value={content.social_twitter || ""}
-                                onChange={e => setContent({ ...content, social_twitter: e.target.value })}
-                                placeholder="https://twitter.com/..."
-                            />
-                        </div>
-                        <div>
-                            <Label>LinkedIn URL</Label>
-                            <Input
-                                value={content.social_linkedin || ""}
-                                onChange={e => setContent({ ...content, social_linkedin: e.target.value })}
-                                placeholder="https://linkedin.com/..."
-                            />
-                        </div>
-                        <div>
-                            <Label>Facebook URL</Label>
-                            <Input
-                                value={content.social_facebook || ""}
-                                onChange={e => setContent({ ...content, social_facebook: e.target.value })}
-                                placeholder="https://facebook.com/..."
-                            />
+                            <Label>Address Line 2</Label>
+                            <Input value={content.address_line2} onChange={e => set('address_line2', e.target.value)} placeholder="Ontario, Canada" />
                         </div>
                     </div>
-                </div>
+                </Section>
 
-                <div className="flex justify-end">
+                {/* Social Media */}
+                <Section id="social">
+                    <p className="text-sm text-gray-500 mb-2">Leave a field empty to hide that social icon.</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                            { key: 'social_instagram', label: 'Instagram', placeholder: 'https://instagram.com/kindmindsfamilywellness' },
+                            { key: 'social_twitter', label: 'Twitter / X', placeholder: 'https://twitter.com/kmfw' },
+                            { key: 'social_facebook', label: 'Facebook', placeholder: 'https://facebook.com/kindmindsfamilywellness' },
+                            { key: 'social_linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/company/kmfw' },
+                            { key: 'social_youtube', label: 'YouTube', placeholder: 'https://youtube.com/@kmfw' },
+                        ].map(({ key, label, placeholder }) => (
+                            <div key={key}>
+                                <Label>{label} URL</Label>
+                                <Input
+                                    value={(content as any)[key] || ''}
+                                    onChange={e => set(key as keyof FooterContent, e.target.value)}
+                                    placeholder={placeholder}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </Section>
+
+                {/* Navigation Columns */}
+                <Section id="nav">
+                    <p className="text-sm text-gray-500 mb-4">Add up to 3 navigation columns for the footer. Each column has a heading and a list of links.</p>
+                    <div className="space-y-6">
+                        {content.nav_columns.map((col, colIdx) => (
+                            <div key={colIdx} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex-1 mr-4">
+                                        <Label>Column Heading</Label>
+                                        <Input
+                                            value={col.heading}
+                                            onChange={e => updateColumn(colIdx, 'heading', e.target.value)}
+                                            placeholder="Explore"
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={() => removeColumn(colIdx)}
+                                        className="p-2 text-red-500 hover:bg-red-50 rounded dark:hover:bg-red-900/20 mt-6"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-2 mb-3">
+                                    {col.links.map((link, linkIdx) => (
+                                        <div key={linkIdx} className="flex gap-2 items-center">
+                                            <div className="flex-1">
+                                                <input
+                                                    type="text"
+                                                    value={link.label}
+                                                    onChange={e => updateLink(colIdx, linkIdx, 'label', e.target.value)}
+                                                    placeholder="Link Label"
+                                                    className={inputCls}
+                                                />
+                                            </div>
+                                            <div className="flex-1 relative">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                                    <Link className="w-3.5 h-3.5" />
+                                                </span>
+                                                <input
+                                                    type="text"
+                                                    value={link.url}
+                                                    onChange={e => updateLink(colIdx, linkIdx, 'url', e.target.value)}
+                                                    placeholder="/path or https://"
+                                                    className={`${inputCls} pl-8`}
+                                                />
+                                            </div>
+                                            <button
+                                                onClick={() => removeLink(colIdx, linkIdx)}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <Button onClick={() => addLink(colIdx)} variant="outline" size="sm">
+                                    <Plus className="w-3 h-3 mr-1" /> Add Link
+                                </Button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {content.nav_columns.length < 3 && (
+                        <Button onClick={addColumn} variant="outline" className="mt-4">
+                            <Plus className="w-4 h-4 mr-2" /> Add Column
+                        </Button>
+                    )}
+                </Section>
+
+                {/* Policy Links */}
+                <Section id="policy">
+                    <p className="text-sm text-gray-500 mb-3">These links appear at the bottom right of the footer (Privacy Policy, Terms of Service, etc.)</p>
+                    <div className="space-y-2">
+                        {(content.policy_links || []).map((link, i) => (
+                            <div key={i} className="flex gap-3 items-center">
+                                <div className="flex-1">
+                                    <input type="text" value={link.label} onChange={e => updatePolicyLink(i, 'label', e.target.value)} placeholder="Privacy Policy" className={inputCls} />
+                                </div>
+                                <div className="flex-1 relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><Link className="w-3.5 h-3.5" /></span>
+                                    <input type="text" value={link.url} onChange={e => updatePolicyLink(i, 'url', e.target.value)} placeholder="/privacy or https://" className={`${inputCls} pl-8`} />
+                                </div>
+                                <button onClick={() => removePolicyLink(i)} className="p-2 text-red-500 hover:bg-red-50 rounded dark:hover:bg-red-900/20">
+                                    <Trash2 className="w-4 h-4" />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                    <Button onClick={addPolicyLink} variant="outline" className="mt-3">
+                        <Plus className="w-4 h-4 mr-2" /> Add Policy Link
+                    </Button>
+                </Section>
+
+                {/* Save Button */}
+                <div className="flex justify-end pt-4">
                     <Button onClick={handleSave} disabled={saving}>
-                        {saving ? "Saving..." : "Save Footer Settings"}
+                        <Save className="w-4 h-4 mr-2" />
+                        {saving ? 'Saving...' : 'Save Footer Settings'}
                     </Button>
                 </div>
-
-                {/* Newsletter Subscribers (Read-Only/Export) */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mt-4">
-                    <div className="flex justify-between items-center mb-6">
-                        <div>
-                            <h2 className="text-xl font-bold dark:text-white">Newsletter Subscribers</h2>
-                            <p className="text-sm text-gray-500">Export captured emails for use in MailChimp or other tools.</p>
-                        </div>
-                        <Button onClick={exportSubscribers} variant="outline" disabled={subscribers.length === 0}>
-                            <Download className="w-4 h-4 mr-2" />
-                            Export CSV
-                        </Button>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="border-b dark:border-gray-700 text-gray-500 text-sm">
-                                    <th className="py-3 px-4">Email</th>
-                                    <th className="py-3 px-4 text-right">Date Subscribed</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loadingSubs ? (
-                                    <tr><td colSpan={2} className="p-4 text-center">Loading...</td></tr>
-                                ) : subscribers.length > 0 ? (
-                                    subscribers.map(sub => (
-                                        <tr key={sub.id} className="border-b dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                            <td className="py-3 px-4 dark:text-white">{sub.email}</td>
-                                            <td className="py-3 px-4 text-right text-gray-500 text-sm">
-                                                {sub.subscribedAt?.toDate ? sub.subscribedAt.toDate().toLocaleDateString() : 'N/A'}
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr><td colSpan={2} className="p-4 text-center text-gray-500">No subscribers yet.</td></tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
             </div>
         </>
     );

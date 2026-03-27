@@ -8,6 +8,7 @@ import Input from "../../components/form/input/InputField";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import Alert from "../../components/ui/alert/Alert";
 import ImagePicker from '../../components/form/ImagePicker';
+import VideoPicker from '../../components/form/VideoPicker';
 import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface HomeSection extends SectionContent {
@@ -24,6 +25,7 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'coreFoundations', label: 'Core Foundations' },
             { id: 'mindfulness', label: 'Mindfulness Section' },
             { id: 'mission', label: 'Mission / Objectives' },
+            { id: 'slideshow', label: 'Animated Image Slideshow' },
             { id: 'slider', label: 'Gallery Slider' },
             { id: 'howItWorks', label: 'How It Works' },
             { id: 'testimonials', label: 'Testimonials' }
@@ -60,12 +62,19 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                     { text: 'Holistic wellness workshops' },
                     { text: 'Spiritually-affirming practices' }
                 ],
-                images: [{ url: '/assets/illustrations/meditation.jpg', alt: 'Mindfulness and Meditation' }]
+                images: [{ url: '/assets/illustrations/meditation.jpg', alt: 'Mindfulness and Meditation' }],
+                videoUrl: ""
             },
             mission: {
                 heading: "Mission Statement",
                 content: "<p>Your mission statement goes here.</p>",
                 enabled: true
+            },
+            slideshow: {
+                heading: "Our Community in Action",
+                content: "",
+                enabled: true,
+                images: []
             },
             slider: {
                 heading: "Gallery",
@@ -402,8 +411,8 @@ export default function HomePageManager() {
                                                 </div>
                                             )}
 
-                                            {/* Slider Section - Gallery Images */}
-                                            {config.id === 'slider' && (
+                                             {/* Slider & Slideshow Section - Gallery Images */}
+                                            {(config.id === 'slider' || config.id === 'slideshow') && (
                                                 <div className="mt-4">
                                                     <Label>Gallery Images</Label>
                                                     <div className="space-y-3">
@@ -463,10 +472,19 @@ export default function HomePageManager() {
 
                                             {/* Mindfulness Image / General Specific Image block */}
                                             {config.id === 'mindfulness' && (
-                                                 <div className="mt-4 space-y-4">
+                                                  <div className="mt-4 space-y-4">
+                                                      <div>
+                                                         <VideoPicker
+                                                             label="Video URL (YouTube or Media Library)"
+                                                             value={section.videoUrl || ""} 
+                                                             onChange={(url) => handleSectionChange(config.id, "videoUrl", url)} 
+                                                             placeholder="https://www.youtube.com/watch?v=..."
+                                                             helpText="Paste a YouTube link or pick an uploaded MP4 from the Media Library.\nMax individual video duration: 2 minutes."
+                                                         />
+                                                     </div>
                                                      <div>
                                                          <ImagePicker
-                                                             label="Feature Image"
+                                                             label="Feature Image (Fallback)"
                                                              value={section.images?.[0]?.url || ""}
                                                              helpText="Recommended: 800x1000px portrait."
                                                              onChange={(url) => {

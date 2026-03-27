@@ -153,7 +153,8 @@ const AppSidebar: React.FC = () => {
           icon: <PageIcon />,
           subItems: [
             { name: "Impact Gateway", path: "/cms/impact" },
-            { name: "Events & Gala", path: "/cms/upcoming-events" },
+            { name: "Upcoming Events", path: "/cms/upcoming-events" },
+            { name: "Black Excellence Gala", path: "/cms/black-excellence-gala" },
             { name: "Newsletters", path: "/cms/newsletters" },
             { name: "Success Stories", path: "/cms/success-stories" },
           ]
@@ -247,6 +248,11 @@ const AppSidebar: React.FC = () => {
       icon: <PlugInIcon />,
       name: "Site Settings",
       path: "/settings/site",
+    },
+    {
+      icon: <PlugInIcon />,
+      name: "SEO Manager",
+      path: "/settings/seo",
     },
   ];
 

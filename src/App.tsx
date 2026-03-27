@@ -15,6 +15,7 @@ import Calendar from "./pages/Calendar";
 import BasicTables from "./pages/Tables/BasicTables";
 import Settings from "./pages/Settings";
 import SiteSettingsManager from "./pages/Settings/SiteSettingsManager";
+import SEOManager from "./pages/Settings/SEOManager";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
@@ -38,6 +39,8 @@ import ProductManager from "./pages/CMS/ProductManager";
 import BlogManager from "./pages/CMS/BlogManager";
 import FooterManager from "./pages/CMS/FooterManager";
 import SuicideFactsManager from "./pages/CMS/SuicideFactsManager";
+import NewslettersManager from "./pages/CMS/NewslettersManager";
+import GalaManager from "./pages/CMS/GalaManager";
 import UserManagement from "./pages/Users/UserManagement";
 import { AuthProvider } from "./context/AuthContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
@@ -78,6 +81,8 @@ export default function App() {
                     <Route path="/cms/shop" element={<ProductManager />} />
                     <Route path="/cms/footer" element={<FooterManager />} />
                     <Route path="/cms/suicide-facts" element={<SuicideFactsManager />} />
+                    <Route path="/cms/newsletters" element={<NewslettersManager />} />
+                    <Route path="/cms/black-excellence-gala" element={<GalaManager />} />
                     <Route path="/cms/:pageId" element={<ContentManager />} />
                     <Route path="/users" element={<UserManagement />} />
 
@@ -85,6 +90,7 @@ export default function App() {
                     <Route path="/profile" element={<UserProfiles />} />
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/settings/site" element={<SiteSettingsManager />} />
+                    <Route path="/settings/seo" element={<SEOManager />} />
                     <Route path="/calendar" element={<Calendar />} />
                     <Route path="/blank" element={<Blank />} />
 

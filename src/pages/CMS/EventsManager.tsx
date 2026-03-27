@@ -10,6 +10,7 @@ import { FirestoreService } from "../../services/firestore";
 import { useSite } from "../../context/SiteContext";
 import MediaLibrary from "../../components/common/MediaLibrary";
 import RichTextEditor from "../../components/form/RichTextEditor";
+import LinkPicker from "../../components/form/LinkPicker";
 import {
     PencilIcon,
     TrashBinIcon,
@@ -198,7 +199,38 @@ export default function EventsManager() {
                         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Events Manager</h1>
                         <p className="text-gray-500 mt-1">Manage upcoming events, workshops, and gatherings.</p>
                     </div>
-                    <div>
+                    <div className="flex gap-3">
+                        <Button variant="outline" onClick={() => {
+                            if (!confirm("This will add sample events. Continue?")) return;
+                            const sampleEvents = [
+                                {
+                                    title: "Black Excellence Gala 2026",
+                                    date: new Date("2026-04-11T18:00:00"),
+                                    formattedDate: "April 11, 2026",
+                                    timeRange: "6:00 PM - 11:00 PM",
+                                    location: "St. George Banquet Hall, Waterloo",
+                                    category: "Gala",
+                                    imageUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800",
+                                    description: "<p>Our signature annual celebration of Black brilliance and achievement. Join us for a monumental evening of awards, networking, and community building.</p>",
+                                    registrationUrl: "/black-excellence-gala"
+                                },
+                                {
+                                    title: "Community Wellness Workshop",
+                                    date: new Date("2024-07-20T10:00:00"),
+                                    formattedDate: "July 20, 2024",
+                                    timeRange: "10:00 AM - 2:00 PM",
+                                    location: "KMFW Office",
+                                    category: "Wellness",
+                                    imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800",
+                                    description: "A restorative session focused on mental health and community support.",
+                                    registrationUrl: "#"
+                                }
+                            ];
+                            sampleEvents.forEach(e => FirestoreService.saveEvent(currentSite.id, e));
+                            setTimeout(loadEvents, 1000);
+                        }}>
+                            Seed Events
+                        </Button>
                         <Button onClick={openNewEventModal} startIcon={<PlusIcon className="w-5 h-5" />}>
                             Add Event
                         </Button>
@@ -334,10 +366,10 @@ export default function EventsManager() {
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
-                            <Label>Registration URL</Label>
-                            <Input
+                            <Label>Registration URL / Goal Page</Label>
+                            <LinkPicker
                                 value={formData.registrationUrl || ""}
-                                onChange={(e) => setFormData({ ...formData, registrationUrl: e.target.value })}
+                                onChange={(val) => setFormData({ ...formData, registrationUrl: val })}
                                 placeholder="https://..."
                             />
                         </div>

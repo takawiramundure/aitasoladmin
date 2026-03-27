@@ -199,6 +199,40 @@ export default function ContentManager() {
         setSuccessMsg("Seeded About Us data! Click Save to persist.");
     };
 
+    const seedImpact = () => {
+        setContent({
+            title: "Impact Gateway",
+            sections: {
+                hero: {
+                    heading: "Our Collective Impact",
+                    content: "<p>Empowering the Black community through culturally-responsive support and Advocacy.</p>"
+                },
+                stats: {
+                    heading: "2023 at a Glance",
+                    content: "500+ Individuals Supported\n20+ Community Partners\n150+ Wellness Workshops"
+                }
+            }
+        });
+        setSuccessMsg("Seeded Impact data! Click Save to persist.");
+    };
+
+    const seedSuccessStories = () => {
+        setContent({
+            title: "Success Stories",
+            sections: {
+                intro: {
+                    heading: "Voices of Resilience",
+                    content: "<p>Real stories from individuals and families who have found strength and support through KMFW programs.</p>"
+                },
+                story_1: {
+                    heading: "Finding a Path to Healing",
+                    content: "<p>'KMFW didn't just provide counseling; they provided a community that understood my cultural context...' - Sarah J.</p>"
+                }
+            }
+        });
+        setSuccessMsg("Seeded Success Stories data! Click Save to persist.");
+    };
+
     const seedFooter = () => {
         setContent({
             title: "Footer Details",
@@ -254,12 +288,22 @@ export default function ContentManager() {
                     <div className="flex gap-3">
                         {pageId === 'footer' && (
                             <Button variant="outline" onClick={seedFooter}>
-                                Seed Footer Content
+                                Seed Footer
                             </Button>
                         )}
                         {pageId === 'about' && (
                             <Button variant="outline" onClick={seedAboutUs}>
-                                Seed About Us Content
+                                Seed About Us
+                            </Button>
+                        )}
+                        {pageId === 'impact' && (
+                            <Button variant="outline" onClick={seedImpact}>
+                                Seed Impact
+                            </Button>
+                        )}
+                        {pageId === 'success-stories' && (
+                            <Button variant="outline" onClick={seedSuccessStories}>
+                                Seed Success Stories
                             </Button>
                         )}
                         <Button variant="outline" onClick={() => setIsModalOpen(true)}>
