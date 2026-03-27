@@ -44,6 +44,7 @@ import NewslettersManager from "./pages/CMS/NewslettersManager";
 import GalaManager from "./pages/CMS/GalaManager";
 import MeetOurTeamManager from "./pages/CMS/MeetOurTeamManager";
 import StrategicPlanManager from "./pages/CMS/StrategicPlanManager";
+import ContactPageManager from "./pages/CMS/ContactPageManager";
 import UserManagement from "./pages/Users/UserManagement";
 import { AuthProvider } from "./context/AuthContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
@@ -88,6 +89,7 @@ export default function App() {
                     <Route path="/cms/black-excellence-gala" element={<GalaManager />} />
                     <Route path="/cms/meet-our-team" element={<MeetOurTeamManager />} />
                     <Route path="/cms/strategic-plan" element={<StrategicPlanManager />} />
+                    <Route path="/cms/contact" element={<ContactPageManager />} />
                     <Route path="/cms/:pageId" element={<ContentManager />} />
                     <Route path="/users" element={<UserManagement />} />
 

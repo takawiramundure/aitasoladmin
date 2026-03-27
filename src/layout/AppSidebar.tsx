@@ -126,6 +126,7 @@ const AppSidebar: React.FC = () => {
             { name: "Our Story", path: "/cms/our-story" },
             { name: "Meet Our Team", path: "/cms/meet-our-team" },
             { name: "Strategic Plan", path: "/cms/strategic-plan" },
+            { name: "Contact Us", path: "/cms/contact" },
           ],
         },
         {
