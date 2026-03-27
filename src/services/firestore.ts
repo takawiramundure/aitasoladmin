@@ -38,6 +38,7 @@ export interface ThemeSettings {
         bodySize: string;
         highlightSize: string;
         alignment: 'left' | 'center' | 'right';
+        headingAlignment: 'left' | 'center' | 'right';
     };
     colors?: {
         primary: string;

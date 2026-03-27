@@ -19,7 +19,8 @@ const DEFAULT_THEME: ThemeSettings = {
         h6Size: "1.125rem",
         bodySize: "1.125rem",
         highlightSize: "1.5rem",
-        alignment: 'left'
+        alignment: 'left',
+        headingAlignment: 'center'
     }
 };
 
@@ -142,7 +143,7 @@ export default function ThemeManager() {
                             </div>
                             
                             <div className="space-y-2">
-                                <Label>Global Text Alignment</Label>
+                                <Label>Global Text Alignment (Body)</Label>
                                 <select 
                                     className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                     value={settings.typography.alignment}
@@ -150,6 +151,19 @@ export default function ThemeManager() {
                                 >
                                     <option value="left">Left Aligned (Standard)</option>
                                     <option value="center">Center Aligned</option>
+                                    <option value="right">Right Aligned</option>
+                                </select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                                <Label>Headings Alignment</Label>
+                                <select 
+                                    className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                    value={settings.typography.headingAlignment}
+                                    onChange={(e) => updateTypography('headingAlignment', e.target.value as any)}
+                                >
+                                    <option value="left">Left Aligned</option>
+                                    <option value="center">Center Aligned (Standard for Titles)</option>
                                     <option value="right">Right Aligned</option>
                                 </select>
                             </div>
@@ -189,22 +203,22 @@ export default function ThemeManager() {
                         <div className="px-2 py-1 bg-white rounded text-[10px] font-bold text-gray-400 shadow-sm uppercase">Renderer</div>
                     </div>
                     
-                    <div className="space-y-8" style={{ textAlign: settings.typography.alignment }}>
-                        <div>
+                    <div className="space-y-8">
+                        <div style={{ textAlign: settings.typography.headingAlignment }}>
                             <span className="text-[10px] text-primary/60 font-mono block mb-1 uppercase tracking-tighter">Headline H1 / {settings.typography.h1Size}</span>
                             <h1 style={{ fontFamily: settings.typography.displayFont, fontSize: settings.typography.h1Size, fontWeight: 800, lineHeight: 1.1, color: '#111' }}>
                                 The Future of Mindful Wellness
                             </h1>
                         </div>
                         
-                        <div>
+                        <div style={{ textAlign: settings.typography.headingAlignment }}>
                             <span className="text-[10px] text-primary/60 font-mono block mb-1 uppercase tracking-tighter">Subheading H2 / {settings.typography.h2Size}</span>
                             <h2 style={{ fontFamily: settings.typography.displayFont, fontSize: settings.typography.h2Size, fontWeight: 700, lineHeight: 1.2, color: '#333' }}>
                                 Empowering Black Excellence through cultural safety.
                             </h2>
                         </div>
 
-                        <div>
+                        <div style={{ textAlign: settings.typography.alignment }}>
                             <span className="text-[10px] text-primary/60 font-mono block mb-1 uppercase tracking-tighter">Body Text / {settings.typography.bodySize}</span>
                             <p style={{ fontFamily: settings.typography.bodyFont, fontSize: settings.typography.bodySize, lineHeight: 1.7, color: '#555' }}>
                                 This is a sample paragraph demonstrate how your content will appear across all pages. Choosing the right font balance ensures that your mission is communicated clearly and professionally.
