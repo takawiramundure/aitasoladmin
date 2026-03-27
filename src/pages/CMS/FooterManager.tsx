@@ -128,7 +128,7 @@ export default function FooterManager() {
         setSaving(true);
         setStatus(null);
         try {
-            await FirestoreService.saveFooterData(siteId, content);
+            await FirestoreService.saveFooterData(content, siteId);
             setStatus({ type: 'success', msg: 'Footer saved successfully! Changes will appear on the website.' });
         } catch (err) {
             console.error(err);
@@ -142,7 +142,7 @@ export default function FooterManager() {
         setSeeding(true);
         setStatus(null);
         try {
-            await FirestoreService.saveFooterData(siteId, DEFAULT_FOOTER);
+            await FirestoreService.saveFooterData(DEFAULT_FOOTER, siteId);
             setContent(DEFAULT_FOOTER);
             setStatus({ type: 'success', msg: 'Footer seeded with KMFW default content!' });
         } catch (err) {
