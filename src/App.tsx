@@ -42,6 +42,7 @@ import FooterManager from "./pages/CMS/FooterManager";
 import SuicideFactsManager from "./pages/CMS/SuicideFactsManager";
 import NewslettersManager from "./pages/CMS/NewslettersManager";
 import GalaManager from "./pages/CMS/GalaManager";
+import MeetOurTeamManager from "./pages/CMS/MeetOurTeamManager";
 import UserManagement from "./pages/Users/UserManagement";
 import { AuthProvider } from "./context/AuthContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
@@ -84,6 +85,7 @@ export default function App() {
                     <Route path="/cms/suicide-facts" element={<SuicideFactsManager />} />
                     <Route path="/cms/newsletters" element={<NewslettersManager />} />
                     <Route path="/cms/black-excellence-gala" element={<GalaManager />} />
+                    <Route path="/cms/meet-our-team" element={<MeetOurTeamManager />} />
                     <Route path="/cms/:pageId" element={<ContentManager />} />
                     <Route path="/users" element={<UserManagement />} />
 
