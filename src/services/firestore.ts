@@ -25,6 +25,29 @@ export interface SectionContent {
     videoUrl?: string;
 }
 
+export interface ThemeSettings {
+    typography: {
+        displayFont: string;
+        bodyFont: string;
+        h1Size: string;
+        h2Size: string;
+        h3Size: string;
+        h4Size: string;
+        h5Size: string;
+        h6Size: string;
+        bodySize: string;
+        highlightSize: string;
+        alignment: 'left' | 'center' | 'right';
+    };
+    colors?: {
+        primary: string;
+        highlight: string;
+        accent: string;
+        cream: string;
+        charcoal: string;
+    };
+}
+
 export const FirestoreService = {
     // Fetch content for a specific page with siteId
     getPageContent: async (pageId: string, siteId: string): Promise<PageContent | null> => {
@@ -422,13 +445,37 @@ export const FirestoreService = {
         }
     },
 
-    saveFooterData: async (siteId: string, footerData: any) => {
+    saveFooterData: async (data: any, siteId: string) => {
         try {
             const collectionName = `${siteId}_content`;
-            const docRef = doc(db, collectionName, "footer");
-            await setDoc(docRef, footerData);
+            const docRef = doc(db, collectionName, 'footer');
+            await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() });
         } catch (error) {
             console.error("Error saving footer data:", error);
+            throw error;
+        }
+    },
+
+    // Theme Settings
+    getThemeSettings: async (siteId: string): Promise<ThemeSettings | null> => {
+        try {
+            const collectionName = `${siteId}_settings`;
+            const docRef = doc(db, collectionName, 'theme');
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists() ? docSnap.data() as ThemeSettings : null;
+        } catch (error) {
+            console.error("Error fetching theme settings:", error);
+            return null;
+        }
+    },
+
+    saveThemeSettings: async (data: ThemeSettings, siteId: string) => {
+        try {
+            const collectionName = `${siteId}_settings`;
+            const docRef = doc(db, collectionName, 'theme');
+            await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() });
+        } catch (error) {
+            console.error("Error saving theme settings:", error);
             throw error;
         }
     }

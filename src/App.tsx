@@ -16,6 +16,7 @@ import BasicTables from "./pages/Tables/BasicTables";
 import Settings from "./pages/Settings";
 import SiteSettingsManager from "./pages/Settings/SiteSettingsManager";
 import SEOManager from "./pages/Settings/SEOManager";
+import ThemeManager from "./pages/Settings/ThemeManager";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
@@ -91,6 +92,7 @@ export default function App() {
                     <Route path="/settings" element={<Settings />} />
                     <Route path="/settings/site" element={<SiteSettingsManager />} />
                     <Route path="/settings/seo" element={<SEOManager />} />
+                    <Route path="/settings/theme" element={<ThemeManager />} />
                     <Route path="/calendar" element={<Calendar />} />
                     <Route path="/blank" element={<Blank />} />
 

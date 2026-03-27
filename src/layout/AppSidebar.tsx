@@ -254,6 +254,11 @@ const AppSidebar: React.FC = () => {
       name: "SEO Manager",
       path: "/settings/seo",
     },
+    {
+      icon: <PlugInIcon />,
+      name: "Theme Manager",
+      path: "/settings/theme",
+    },
   ];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
