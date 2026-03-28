@@ -114,14 +114,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         localStorage.removeItem('impersonatedUserId');
     };
 
-    const value = {
+    const value = React.useMemo(() => ({
         user,
         profile: impersonatedProfile || realProfile,
         isImpersonating: !!impersonatedProfile,
         loading,
         impersonate,
         stopImpersonation
-    };
+    }), [user, impersonatedProfile, realProfile, loading]);
 
     return (
         <AuthContext.Provider value={value}>

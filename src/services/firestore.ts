@@ -494,5 +494,58 @@ export const FirestoreService = {
             console.error("Error saving theme settings:", error);
             throw error;
         }
+    },
+
+    // Generic Settings Management
+    getSettings: async (siteId: string, docId: string): Promise<any | null> => {
+        try {
+            const collectionName = `${siteId}_settings`;
+            const docRef = doc(db, collectionName, docId);
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists() ? docSnap.data() : null;
+        } catch (error) {
+            console.error(`Error fetching ${docId} settings:`, error);
+            throw error;
+        }
+    },
+
+    saveSettings: async (siteId: string, docId: string, data: any) => {
+        try {
+            const collectionName = `${siteId}_settings`;
+            const docRef = doc(db, collectionName, docId);
+            await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() }, { merge: true });
+        } catch (error) {
+            console.error(`Error saving ${docId} settings:`, error);
+            throw error;
+        }
+    },
+
+    // Message Management
+    getMessages: async (siteId: string): Promise<any[]> => {
+        try {
+            const collectionName = `${siteId}_messages`;
+            const messagesRef = collection(db, collectionName);
+            const snapshot = await getDocs(messagesRef);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a: any, b: any) => {
+                    const timeA = (a.createdAt?.seconds || a.timestamp?.seconds || 0);
+                    const timeB = (b.createdAt?.seconds || b.timestamp?.seconds || 0);
+                    return timeB - timeA;
+                });
+        } catch (error) {
+            console.error("Error fetching messages:", error);
+            return [];
+        }
+    },
+
+    deleteMessage: async (siteId: string, messageId: string) => {
+        try {
+            const collectionName = `${siteId}_messages`;
+            const docRef = doc(db, collectionName, messageId);
+            await deleteDoc(docRef);
+        } catch (error) {
+            console.error("Error deleting message:", error);
+            throw error;
+        }
     }
 };

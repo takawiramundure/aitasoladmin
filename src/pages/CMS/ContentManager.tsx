@@ -10,6 +10,7 @@ import RichTextEditor from "../../components/form/RichTextEditor";
 
 import { Modal } from "../../components/ui/modal";
 import Alert from "../../components/ui/alert/Alert";
+import { Trash2 } from "lucide-react";
 
 export default function ContentManager() {
     const { pageId } = useParams();
@@ -62,7 +63,7 @@ export default function ContentManager() {
         if (pageId) {
             loadContent(pageId);
         }
-    }, [pageId, currentSite]);
+    }, [pageId, currentSite?.id]);
 
     const loadContent = async (id: string) => {
         setLoading(true);
@@ -115,6 +116,13 @@ export default function ContentManager() {
                 }
             }
         });
+    };
+
+    const handleRemoveSection = (sectionId: string) => {
+        if (!content || !window.confirm(`Are you sure you want to remove the section "${sectionId}"?`)) return;
+        const newSections = { ...content.sections };
+        delete newSections[sectionId];
+        setContent({ ...content, sections: newSections });
     };
 
     const handleAddSection = () => {
@@ -237,6 +245,10 @@ export default function ContentManager() {
         setContent({
             title: "Services Gateway",
             sections: {
+                header: {
+                    heading: "Our Services",
+                    content: "<div class='text-lg'>Culturally-attuned programs designed for the Black community.</div>"
+                },
                 intro: {
                     heading: "What We Offer",
                     content: "Holistic Support for *Every Member* of the Family"
@@ -631,14 +643,23 @@ export default function ContentManager() {
                             <div key={key} className="p-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
                                 <div className="mb-3 flex items-center justify-between">
                                     <Label>Section ID: <span className="font-mono text-xs text-gray-400">{key}</span></Label>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs font-medium text-gray-500 uppercase">Visible</span>
-                                        <input 
-                                            type="checkbox"
-                                            checked={section.enabled !== false}
-                                            onChange={(e) => handleSectionChange(key, "enabled", e.target.checked)}
-                                            className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
-                                        />
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-medium text-gray-500 uppercase">Visible</span>
+                                            <input 
+                                                type="checkbox"
+                                                checked={section.enabled !== false}
+                                                onChange={(e) => handleSectionChange(key, "enabled", e.target.checked)}
+                                                className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                                            />
+                                        </div>
+                                        <button 
+                                            onClick={() => handleRemoveSection(key)}
+                                            className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                            title="Remove Section"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
                                     </div>
                                 </div>
 

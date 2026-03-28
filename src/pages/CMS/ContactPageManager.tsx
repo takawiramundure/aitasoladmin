@@ -6,7 +6,7 @@ import Button from "../../components/ui/button/Button";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Alert from "../../components/ui/alert/Alert";
-import { Eye, EyeOff, Save, Clock, MapPin, Trash2, Plus } from 'lucide-react';
+import { Eye, EyeOff, Save, Clock, MapPin, Trash2, Plus, Mail } from 'lucide-react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 
 const DEFAULT_DATA = {
@@ -32,6 +32,8 @@ export default function ContactPageManager() {
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [recipientEmail, setRecipientEmail] = useState("info@kindmindsfamilywellness.org");
+    const [sendgridApiKey, setSendgridApiKey] = useState("");
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
 
@@ -40,11 +42,29 @@ export default function ContactPageManager() {
     const loadContent = async () => {
         setLoading(true);
         try {
+            // Fetch notification settings
+            const settings = await FirestoreService.getSettings(currentSite.id, 'notifications');
+            if (settings) {
+                if (settings.recipient_email) setRecipientEmail(settings.recipient_email);
+                if (settings.sendgrid_api_key) setSendgridApiKey(settings.sendgrid_api_key);
+            }
+
             const data = await FirestoreService.getPageContent('contact', currentSite.id);
-            setContent(data || DEFAULT_DATA);
+
+            setContent(data ? {
+                ...DEFAULT_DATA,
+                ...data,
+                hero: { ...DEFAULT_DATA.hero, ...(data.hero || {}) },
+                info: {
+                    ...DEFAULT_DATA.info,
+                    ...(data.info || {}),
+                    hours: data.info?.hours ?? DEFAULT_DATA.info.hours,
+                }
+            } : DEFAULT_DATA);
         } catch (err: any) {
             console.error(err);
             setError("Failed to load content.");
+            setContent(DEFAULT_DATA);
         } finally {
             setLoading(false);
         }
@@ -56,7 +76,11 @@ export default function ContactPageManager() {
         setSuccessMsg(""); setError("");
         try {
             await FirestoreService.savePageContent('contact', content, currentSite.id);
-            setSuccessMsg("Contact page content saved successfully!");
+            await FirestoreService.saveSettings(currentSite.id, 'notifications', { 
+                recipient_email: recipientEmail,
+                sendgrid_api_key: sendgridApiKey
+            });
+            setSuccessMsg("Contact page and notification settings saved successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err: any) {
             console.error(err);
@@ -210,6 +234,36 @@ export default function ContactPageManager() {
                                     onChange={e => setInfo('disclaimer', e.target.value)}
                                 />
                                 <p className="text-[10px] text-gray-400 mt-1">This note appears below the office hours.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Notification Settings */}
+                    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
+                            <Mail className="w-5 h-5 text-primary" /> Notification Settings
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300">Recipient Email Address</label>
+                                <Input
+                                    type="email"
+                                    value={recipientEmail}
+                                    onChange={(e) => setRecipientEmail(e.target.value)}
+                                    placeholder="e.g. info@kindmindsfamilywellness.org"
+                                />
+                                <p className="text-xs text-gray-400">Where website contact form submissions are tracked.</p>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-bold text-gray-700 dark:text-gray-300">SendGrid API Key (Optional)</label>
+                                <Input
+                                    type="password"
+                                    value={sendgridApiKey}
+                                    onChange={(e) => setSendgridApiKey(e.target.value)}
+                                    placeholder="SG.xxx..."
+                                />
+                                <p className="text-xs text-gray-400">Required to enable automated email notifications. Keep this secure.</p>
                             </div>
                         </div>
                     </div>

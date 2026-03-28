@@ -94,6 +94,22 @@ const SECTION_LABELS: Record<string, string> = {
     policy: 'Policy Links & Legal',
 };
 
+const Section = ({ id, isOpen, onToggle, children }: { id: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) => {
+    const sectionCls = "bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden";
+    const headerCls = "w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
+    const bodyOpen = "p-5 border-t border-gray-100 dark:border-gray-700 space-y-4";
+    
+    return (
+        <div className={sectionCls}>
+            <button className={headerCls} onClick={onToggle}>
+                <span className="font-semibold text-gray-800 dark:text-white">{SECTION_LABELS[id]}</span>
+                {isOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
+            </button>
+            {isOpen && <div className={bodyOpen}>{children}</div>}
+        </div>
+    );
+};
+
 export default function FooterManager() {
     const { currentSite } = useSite();
     const [loading, setLoading] = useState(true);
@@ -191,22 +207,6 @@ export default function FooterManager() {
     const removePolicyLink = (i: number) => set('policy_links', (content.policy_links || []).filter((_, idx) => idx !== i));
 
     const inputCls = "w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white";
-    const sectionCls = "bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden";
-    const headerCls = "w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
-    const bodyOpen = "p-5 border-t border-gray-100 dark:border-gray-700 space-y-4";
-
-    const Section = ({ id, children }: { id: string; children: React.ReactNode }) => {
-        const isOpen = openSection === id;
-        return (
-            <div className={sectionCls}>
-                <button className={headerCls} onClick={() => setOpenSection(isOpen ? '' : id)}>
-                    <span className="font-semibold text-gray-800 dark:text-white">{SECTION_LABELS[id]}</span>
-                    {isOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
-                </button>
-                {isOpen && <div className={bodyOpen}>{children}</div>}
-            </div>
-        );
-    };
 
     if (loading) return <div className="p-8 text-center text-gray-500">Loading footer settings...</div>;
 
@@ -243,7 +243,7 @@ export default function FooterManager() {
                 )}
 
                 {/* Brand & Logo */}
-                <Section id="brand">
+                <Section id="brand" isOpen={openSection === 'brand'} onToggle={() => setOpenSection(openSection === 'brand' ? '' : 'brand')}>
                     <div>
                         <Label>Logo URL</Label>
                         <Input value={content.logo_url} onChange={e => set('logo_url', e.target.value)} placeholder="/logo-footer.png" />
@@ -272,7 +272,7 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Crisis Banner */}
-                <Section id="crisis">
+                <Section id="crisis" isOpen={openSection === 'crisis'} onToggle={() => setOpenSection(openSection === 'crisis' ? '' : 'crisis')}>
                     <div className="flex items-center gap-3 mb-2">
                         <input
                             id="crisis-enabled"
@@ -304,7 +304,7 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Contact Info */}
-                <Section id="contact">
+                <Section id="contact" isOpen={openSection === 'contact'} onToggle={() => setOpenSection(openSection === 'contact' ? '' : 'contact')}>
                     <div>
                         <Label>Email Address</Label>
                         <Input value={content.email} onChange={e => set('email', e.target.value)} placeholder="info@kindmindsfamilywellness.org" />
@@ -336,7 +336,7 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Social Media */}
-                <Section id="social">
+                <Section id="social" isOpen={openSection === 'social'} onToggle={() => setOpenSection(openSection === 'social' ? '' : 'social')}>
                     <p className="text-sm text-gray-500 mb-2">Leave a field empty to hide that social icon.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
@@ -359,7 +359,7 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Navigation Columns */}
-                <Section id="nav">
+                <Section id="nav" isOpen={openSection === 'nav'} onToggle={() => setOpenSection(openSection === 'nav' ? '' : 'nav')}>
                     <p className="text-sm text-gray-500 mb-4">Add up to 3 navigation columns for the footer. Each column has a heading and a list of links.</p>
                     <div className="space-y-6">
                         {content.nav_columns.map((col, colIdx) => (
@@ -430,7 +430,7 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Policy Links */}
-                <Section id="policy">
+                <Section id="policy" isOpen={openSection === 'policy'} onToggle={() => setOpenSection(openSection === 'policy' ? '' : 'policy')}>
                     <p className="text-sm text-gray-500 mb-3">These links appear at the bottom right of the footer (Privacy Policy, Terms of Service, etc.)</p>
                     <div className="space-y-2">
                         {(content.policy_links || []).map((link, i) => (

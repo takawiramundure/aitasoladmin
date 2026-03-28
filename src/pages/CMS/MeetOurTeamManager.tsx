@@ -84,7 +84,7 @@ export default function MeetOurTeamManager() {
 
     useEffect(() => {
         loadContent();
-    }, [currentSite]);
+    }, [currentSite?.id]);
 
     const loadContent = async () => {
         setLoading(true);

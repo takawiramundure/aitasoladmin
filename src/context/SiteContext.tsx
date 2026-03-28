@@ -59,11 +59,11 @@ export function SiteProvider({ children }: { children: ReactNode }) {
         }
     };
 
-    const value: SiteContextType = {
+    const value = React.useMemo(() => ({
         currentSite,
         switchSite,
-        sites: availableSites // Expose only available sites
-    };
+        sites: availableSites
+    }), [currentSite, switchSite, availableSites]);
 
     return (
         <SiteContext.Provider value={value}>

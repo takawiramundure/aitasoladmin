@@ -45,6 +45,10 @@ import GalaManager from "./pages/CMS/GalaManager";
 import MeetOurTeamManager from "./pages/CMS/MeetOurTeamManager";
 import StrategicPlanManager from "./pages/CMS/StrategicPlanManager";
 import ContactPageManager from "./pages/CMS/ContactPageManager";
+import MessagesManager from "./pages/CMS/MessagesManager";
+import PageVisibilityManager from "./pages/CMS/PageVisibilityManager";
+import ResearchPageManager from "./pages/CMS/ResearchPageManager";
+import ProjectPageManager from "./pages/CMS/ProjectPageManager";
 import UserManagement from "./pages/Users/UserManagement";
 import { AuthProvider } from "./context/AuthContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
@@ -90,6 +94,10 @@ export default function App() {
                     <Route path="/cms/meet-our-team" element={<MeetOurTeamManager />} />
                     <Route path="/cms/strategic-plan" element={<StrategicPlanManager />} />
                     <Route path="/cms/contact" element={<ContactPageManager />} />
+                    <Route path="/cms/messages" element={<MessagesManager />} />
+                    <Route path="/cms/page-visibility" element={<PageVisibilityManager />} />
+                    <Route path="/cms/research" element={<ResearchPageManager />} />
+                    <Route path="/cms/project-:projectId" element={<ProjectPageManager />} />
                     <Route path="/cms/:pageId" element={<ContentManager />} />
                     <Route path="/users" element={<UserManagement />} />
 

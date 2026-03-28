@@ -119,6 +119,11 @@ const AppSidebar: React.FC = () => {
           path: "/cms/home-settings",
         },
         {
+          icon: <PlugInIcon />,
+          name: "Page Visibility",
+          path: "/cms/page-visibility",
+        },
+        {
           name: "About KMFW",
           icon: <UserCircleIcon />,
           subItems: [
@@ -127,6 +132,7 @@ const AppSidebar: React.FC = () => {
             { name: "Meet Our Team", path: "/cms/meet-our-team" },
             { name: "Strategic Plan", path: "/cms/strategic-plan" },
             { name: "Contact Us", path: "/cms/contact" },
+            { name: "Inbound Messages", path: "/cms/messages" },
           ],
         },
         {
@@ -145,8 +151,10 @@ const AppSidebar: React.FC = () => {
           name: "Research",
           icon: <PageIcon />,
           subItems: [
-            { name: "Research & Consultancy", path: "/cms/research-consultancy" },
-            { name: "NeuroDivergent", path: "/cms/neurodivergent-project" },
+            { name: "Research Gateway", path: "/cms/research" },
+            { name: "Black Wellness", path: "/cms/project-black-wellness" },
+            { name: "PHAC Welfare", path: "/cms/project-phac-child-welfare" },
+            { name: "Umoja Program", path: "/cms/project-umoja-neurodivergent" },
           ]
         },
         {

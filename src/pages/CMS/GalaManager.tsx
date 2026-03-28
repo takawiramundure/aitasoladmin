@@ -57,7 +57,7 @@ export default function GalaManager() {
 
     useEffect(() => {
         loadContent();
-    }, [currentSite]);
+    }, [currentSite?.id]);
 
     const loadContent = async () => {
         setLoading(true);

@@ -72,7 +72,7 @@ export default function StrategicPlanManager() {
     const [successMsg, setSuccessMsg] = useState("");
     const [expanded, setExpanded] = useState<Record<string, boolean>>({ hero: true, roadmap: true, flyer: false, downloads: false });
 
-    useEffect(() => { loadContent(); }, [currentSite]);
+    useEffect(() => { loadContent(); }, [currentSite?.id]);
 
     const loadContent = async () => {
         setLoading(true);
