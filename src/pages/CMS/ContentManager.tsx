@@ -478,6 +478,25 @@ export default function ContentManager() {
         setSuccessMsg("Seeded System Navigation data!");
     };
 
+    const seedFundersSponsors = () => {
+        setContent({
+            title: "Our Funders",
+            enabled: true,
+            sections: {
+                hero: {
+                    heading: "Our Funders",
+                    content: "Kind Minds Family Wellness is profoundly grateful for the support of our funders—they make the difference for us and allow us to accomplish our mission, vision, and to continue working towards our strategic plans!"
+                },
+                thank_you: {
+                    heading: "Thank You",
+                    content: "The generous contributions from our regional sponsors, municipal partners, and community foundations allow us to sustain Afrocentric counseling, youth mentorship programs, and crucial system navigation services for Black families across the Waterloo Region.",
+                    order: 10
+                }
+            }
+        });
+        setSuccessMsg("Seeded Funders data!");
+    };
+
     const seedMeetOurTeam = () => {
         setContent({
             title: "Meet Our Team",
@@ -621,6 +640,11 @@ export default function ContentManager() {
                         {pageId === 'meet-our-team' && (
                             <Button variant="outline" onClick={seedMeetOurTeam}>
                                 Seed Meet Our Team
+                            </Button>
+                        )}
+                        {pageId === 'funders' && (
+                            <Button variant="outline" onClick={seedFundersSponsors}>
+                                Seed Funders & Sponsors
                             </Button>
                         )}
 

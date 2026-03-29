@@ -218,10 +218,10 @@ export default function HomePageManager() {
                 sectionsConfig.forEach(sec => {
                     const defaults = defaultContentForSite[sec.id] || {};
                     initialSections[sec.id] = {
-                        heading: sec.label,
-                        content: "",
-                        enabled: true,
-                        ...defaults
+                        ...defaults,
+                        heading: defaults.heading || sec.label,
+                        content: defaults.content || "",
+                        enabled: defaults.enabled ?? true,
                     };
                 });
                 setContent({
