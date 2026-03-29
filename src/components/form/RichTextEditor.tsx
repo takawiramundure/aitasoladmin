@@ -5,9 +5,9 @@ import 'react-quill-new/dist/quill.snow.css';
 import Label from './Label';
 import MediaLibrary from '../common/MediaLibrary';
 import BlotFormatter from 'quill-blot-formatter';
+import Quill from 'quill';
 
 // @ts-ignore
-const Quill = ReactQuill.Quill || require('react-quill-new').Quill;
 if (Quill && !Quill.imports['modules/blotFormatter']) {
     Quill.register('modules/blotFormatter', BlotFormatter);
 }

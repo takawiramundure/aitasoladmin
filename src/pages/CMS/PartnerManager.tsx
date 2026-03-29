@@ -33,6 +33,13 @@ export default function PartnerManager() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
+    const [isSeeding, setIsSeeding] = useState(false);
+
+    // Page Configuration for Partners (Hero, Video URL)
+    const [pageConfig, setPageConfig] = useState<any>({
+        hero: { heading: "Our Partners", content: "", videoUrl: "" }
+    });
+    const [savingConfig, setSavingConfig] = useState(false);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -54,7 +61,34 @@ export default function PartnerManager() {
 
     useEffect(() => {
         loadPartners();
+        loadPageConfig();
     }, [currentSite.id]);
+
+    const loadPageConfig = async () => {
+        try {
+            const data = await FirestoreService.getPageContent("partners", currentSite.id);
+            if (data && data.sections) {
+                setPageConfig({ ...pageConfig, ...data.sections });
+            }
+        } catch (error) {
+            console.error("Error loading partners page config:", error);
+        }
+    };
+
+    const savePageConfig = async () => {
+        setSavingConfig(true);
+        setError("");
+        setSuccessMsg("");
+        try {
+            await FirestoreService.savePageContent("partners", { sections: pageConfig }, currentSite.id);
+            setSuccessMsg("Page configuration saved successfully!");
+        } catch (error) {
+            console.error("Error saving config:", error);
+            setError("Failed to save page configuration.");
+        } finally {
+            setSavingConfig(false);
+        }
+    };
 
     useEffect(() => {
         if (isModalOpen && formData.services) {
@@ -74,6 +108,52 @@ export default function PartnerManager() {
             setError("Failed to load partners.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const seedPartners = async () => {
+        setIsSeeding(true);
+        try {
+            const partnersToSeed = [
+                { name: 'Family Service Ontario', link: 'https://familyserviceontario.org' },
+                { name: 'Great Kitchener Waterloo Chamber of Commerce', link: '#' },
+                { name: 'Black Health Alliance', link: 'https://blackhealthalliance.ca/about/' },
+                { name: 'African Family Revival Organization (AFRO)', link: 'http://afrofamily.ca/' },
+                { name: 'Sexual Assault Support Centre of Waterloo Region (SASCWR)', link: 'https://www.sascwr.org/' },
+                { name: 'Canadian Aweil Youth Association (CAYA)', link: 'https://cyouthassociation.wixsite.com/canadianaweilyouth' },
+                { name: 'Kinbridge Community Association', link: 'https://www.kinbridge.ca' },
+                { name: 'Onyx Initiative', link: 'https://onyxinitiative.org' },
+                { name: 'Conestoga College', link: 'https://www.conestogac.on.ca' },
+                { name: 'Kitchener Public Library', link: 'https://www.kpl.org' },
+                { name: 'African Women Alliance', link: 'https://afrowomen.ca/' },
+                { name: 'Cambridge Food Bank', link: 'https://cambridgefoodbank.org/' },
+                { name: 'Food Bank of Waterloo Region (FBWR)', link: 'https://www.thefoodbank.ca/about/' },
+                { name: 'Greenway- Chaplin Community Centre', link: 'https://greenwaychaplin.com/' },
+                { name: 'Camino Wellbeing + Mental Health', link: 'https://www.caminowellbeing.ca' },
+                { name: 'Community Justice Initiatives', link: 'https://cjiwr.com' },
+                { name: 'Muslim Social Services Waterloo Region (MSS)', link: 'https://www.muslimsocialserviceskw.org' }
+            ];
+
+            for (let i = 0; i < partnersToSeed.length; i++) {
+                const partner = partnersToSeed[i];
+                await FirestoreService.savePartner(currentSite.id, {
+                    name: partner.name,
+                    type: "Community Partner",
+                    description: "",
+                    website: partner.link,
+                    logo: "",
+                    services: [],
+                    published: true,
+                    order: i
+                });
+            }
+            setSuccessMsg("Successfully seeded partners!");
+            loadPartners();
+        } catch (err) {
+            console.error(err);
+            setError("Failed to seed partners.");
+        } finally {
+            setIsSeeding(false);
         }
     };
 
@@ -160,15 +240,55 @@ export default function PartnerManager() {
                 description="Manage partners and collaborators"
             />
 
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
                 <h1 className="text-2xl font-bold dark:text-white">Partner Manager</h1>
-                <Button onClick={openModal} className="flex items-center gap-2">
-                    <PlusIcon className="w-4 h-4" /> Add Partner
-                </Button>
+                <div className="flex gap-3">
+                    <Button variant="outline" onClick={seedPartners} disabled={isSeeding}>
+                        {isSeeding ? "Seeding..." : "Seed Partners"}
+                    </Button>
+                    <Button onClick={openModal} className="flex items-center gap-2">
+                        <PlusIcon className="w-4 h-4" /> Add Partner
+                    </Button>
+                </div>
             </div>
 
             {error && <Alert variant="error" title="Error" message={error} />}
             {successMsg && <Alert variant="success" title="Success" message={successMsg} />}
+
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-8 border border-gray-100 dark:border-gray-700">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold dark:text-white">Page Configuration (Hero)</h2>
+                    <Button onClick={savePageConfig} disabled={savingConfig} className="bg-blue-600 hover:bg-blue-700">
+                        {savingConfig ? "Saving..." : "Save Page Config"}
+                    </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <Label>Hero Heading</Label>
+                        <Input 
+                            value={pageConfig.hero?.heading || ""}
+                            onChange={(e) => setPageConfig({...pageConfig, hero: {...pageConfig.hero, heading: e.target.value}})}
+                        />
+                    </div>
+                    <div>
+                        <Label>Video Embed URL (YouTube/Vimeo)</Label>
+                        <Input 
+                            placeholder="https://www.youtube.com/watch?v=..."
+                            value={pageConfig.hero?.videoUrl || ""}
+                            onChange={(e) => setPageConfig({...pageConfig, hero: {...pageConfig.hero, videoUrl: e.target.value}})}
+                        />
+                    </div>
+                    <div className="md:col-span-2">
+                        <Label>Hero Description</Label>
+                        <textarea 
+                            className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors"
+                            rows={3}
+                            value={pageConfig.hero?.content || ""}
+                            onChange={(e) => setPageConfig({...pageConfig, hero: {...pageConfig.hero, content: e.target.value}})}
+                        />
+                    </div>
+                </div>
+            </div>
 
             {loading ? (
                 <div className="text-center py-10 text-gray-500">Loading partners...</div>

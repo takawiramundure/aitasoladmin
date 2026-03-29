@@ -497,6 +497,25 @@ export default function ContentManager() {
         setSuccessMsg("Seeded Funders data!");
     };
 
+    const seedPartners = () => {
+        setContent({
+            title: "Our Partners",
+            enabled: true,
+            sections: {
+                hero: {
+                    heading: "Our Partners",
+                    content: "We collaborate with a vast network of organizations dedicated to expanding equity, access, and culturally safe care across the region."
+                },
+                network: {
+                    heading: "Community Network",
+                    content: "<ul><li><a href='https://familyserviceontario.org'>Family Service Ontario</a></li><li><a href='#'>Great Kitchener Waterloo Chamber of Commerce</a></li><li><a href='https://blackhealthalliance.ca/about/'>Black Health Alliance</a></li><li><a href='http://afrofamily.ca/'>African Family Revival Organization (AFRO)</a></li><li><a href='https://www.sascwr.org/'>Sexual Assault Support Centre of Waterloo Region (SASCWR)</a></li><li><a href='https://cyouthassociation.wixsite.com/canadianaweilyouth'>Canadian Aweil Youth Association (CAYA)</a></li><li><a href='https://www.kinbridge.ca'>Kinbridge Community Association</a></li><li><a href='https://onyxinitiative.org'>Onyx Initiative</a></li><li><a href='https://www.conestogac.on.ca'>Conestoga College</a></li><li><a href='https://www.kpl.org'>Kitchener Public Library</a></li><li><a href='https://afrowomen.ca/'>African Women Alliance</a></li><li><a href='https://cambridgefoodbank.org/'>Cambridge Food Bank</a></li><li><a href='https://www.thefoodbank.ca/about/'>Food Bank of Waterloo Region (FBWR)</a></li><li><a href='https://greenwaychaplin.com/'>Greenway- Chaplin Community Centre</a></li><li><a href='https://www.caminowellbeing.ca'>Camino Wellbeing + Mental Health</a></li><li><a href='https://cjiwr.com'>Community Justice Initiatives</a></li><li><a href='https://www.muslimsocialserviceskw.org'>Muslim Social Services Waterloo Region (MSS)</a></li></ul>",
+                    order: 10
+                }
+            }
+        });
+        setSuccessMsg("Seeded Partners data!");
+    };
+
     const seedMeetOurTeam = () => {
         setContent({
             title: "Meet Our Team",
@@ -647,6 +666,11 @@ export default function ContentManager() {
                                 Seed Funders & Sponsors
                             </Button>
                         )}
+                        {pageId === 'partners' && (
+                            <Button variant="outline" onClick={seedPartners}>
+                                Seed Partners
+                            </Button>
+                        )}
 
                         <Button variant="outline" onClick={() => setIsModalOpen(true)}>
                             + Add Section
@@ -751,6 +775,16 @@ export default function ContentManager() {
                                             type="text"
                                             value={section.heading || ""}
                                             onChange={(e) => handleSectionChange(key, "heading", e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <Label>Video Embed URL (Optional YouTube / Vimeo link)</Label>
+                                        <Input
+                                            type="text"
+                                            placeholder="https://www.youtube.com/watch?v=..."
+                                            value={section.videoUrl || ""}
+                                            onChange={(e) => handleSectionChange(key, "videoUrl", e.target.value)}
                                         />
                                     </div>
 
