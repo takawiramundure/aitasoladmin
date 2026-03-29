@@ -96,6 +96,12 @@ const KMFW_PAGE_MAP: Record<string, { label: string; sections: Record<string, st
             ways: 'Ways to Join',
         }
     },
+    blog: {
+        label: 'Blog Page',
+        sections: {
+            main: 'Main Blog Feed'
+        }
+    }
 };
 
 const BWEIC_PAGE_MAP: Record<string, { label: string; sections: Record<string, string> }> = {
