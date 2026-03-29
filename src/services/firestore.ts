@@ -14,7 +14,9 @@ export interface SectionContent {
     heading: string;
     content: string;
     images?: { url: string; alt: string }[];
+    imageAlignment?: 'top' | 'left' | 'right';
     enabled?: boolean;
+    order?: number;
     stats?: { value: string; label: string }[];
     items?: any[]; // Generic array for varying lists (testimonials, pillars, features)
     list?: any[];  // Specifically for lists of people or structured items

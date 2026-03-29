@@ -7,10 +7,12 @@ import Button from "../../components/ui/button/Button";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import RichTextEditor from "../../components/form/RichTextEditor";
+import ImagePicker from "../../components/form/ImagePicker";
 
 import { Modal } from "../../components/ui/modal";
 import Alert from "../../components/ui/alert/Alert";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import MediaLibrary from "../../components/common/MediaLibrary";
 
 export default function ContentManager() {
     const { pageId } = useParams();
@@ -24,6 +26,8 @@ export default function ContentManager() {
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [newSectionId, setNewSectionId] = useState("");
+    const [multiSelectOpenForSection, setMultiSelectOpenForSection] = useState<string | null>(null);
+    const [sectionToDelete, setSectionToDelete] = useState<string | null>(null);
 
     // Map pageId to human readable title
     const pageTitles: Record<string, string> = {
@@ -119,15 +123,47 @@ export default function ContentManager() {
     };
 
     const handleRemoveSection = (sectionId: string) => {
-        if (!content || !window.confirm(`Are you sure you want to remove the section "${sectionId}"?`)) return;
+        setSectionToDelete(sectionId);
+    };
+
+    const confirmRemoveSection = () => {
+        if (!content || !sectionToDelete) return;
         const newSections = { ...content.sections };
-        delete newSections[sectionId];
+        delete newSections[sectionToDelete];
+        setContent({ ...content, sections: newSections });
+        setSectionToDelete(null);
+    };
+
+    const handleMoveSection = (keyToMove: string, direction: 'up' | 'down') => {
+        if (!content || !content.sections) return;
+        
+        const sorted = Object.entries(content.sections).sort((a, b) => (a[1].order ?? 999) - (b[1].order ?? 999));
+        const index = sorted.findIndex(([k]) => k === keyToMove);
+        
+        if (direction === 'up' && index > 0) {
+            const temp = sorted[index];
+            sorted[index] = sorted[index - 1];
+            sorted[index - 1] = temp;
+        } else if (direction === 'down' && index < sorted.length - 1) {
+            const temp = sorted[index];
+            sorted[index] = sorted[index + 1];
+            sorted[index + 1] = temp;
+        } else {
+            return; // No change needed
+        }
+
+        const newSections = { ...content.sections };
+        sorted.forEach((item, i) => {
+            newSections[item[0]].order = i * 10;
+        });
+
         setContent({ ...content, sections: newSections });
     };
 
     const handleAddSection = () => {
         if (!content || !newSectionId.trim()) return;
         const id = newSectionId.trim().toLowerCase().replace(/\s+/g, "_");
+        const maxOrder = Math.max(0, ...Object.values(content.sections || {}).map(s => s.order ?? 0));
 
         setContent({
             ...content,
@@ -135,7 +171,8 @@ export default function ContentManager() {
                 ...(content.sections || {}),
                 [id]: {
                     heading: newSectionId, // Use the input as initial heading
-                    content: ""
+                    content: "",
+                    order: maxOrder + 10
                 }
             }
         });
@@ -639,6 +676,7 @@ export default function ContentManager() {
                 <div className="space-y-8">
                     {content && Object.entries(content.sections || {})
                         .filter(([key]) => pageId !== 'footer' || !['policy_links', 'donate_label', 'donate_url'].includes(key))
+                        .sort((a, b) => (a[1].order ?? 999) - (b[1].order ?? 999))
                         .map(([key, section]) => (
                             <div key={key} className="p-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
                                 <div className="mb-3 flex items-center justify-between">
@@ -653,13 +691,32 @@ export default function ContentManager() {
                                                 className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
                                             />
                                         </div>
-                                        <button 
-                                            onClick={() => handleRemoveSection(key)}
-                                            className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
-                                            title="Remove Section"
-                                        >
-                                            <Trash2 size={14} />
-                                        </button>
+                                        <div className="flex items-center gap-1 border-l pl-4 border-gray-300 dark:border-gray-600">
+                                            <button 
+                                                type="button"
+                                                onClick={(e) => { e.preventDefault(); handleMoveSection(key, 'up'); }}
+                                                className="p-1 text-gray-500 hover:text-primary hover:bg-gray-200 rounded transition-colors"
+                                                title="Move Up"
+                                            >
+                                                <ArrowUp size={16} />
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={(e) => { e.preventDefault(); handleMoveSection(key, 'down'); }}
+                                                className="p-1 text-gray-500 hover:text-primary hover:bg-gray-200 rounded transition-colors"
+                                                title="Move Down"
+                                            >
+                                                <ArrowDown size={16} />
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={(e) => { e.preventDefault(); handleRemoveSection(key); }}
+                                                className="p-1 ml-2 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                title="Remove Section"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -672,6 +729,79 @@ export default function ContentManager() {
                                             onChange={(e) => handleSectionChange(key, "heading", e.target.value)}
                                         />
                                     </div>
+
+                                    {key !== 'hero' && (
+                                        <div className="flex flex-col gap-4 p-4 border rounded-xl bg-gray-50/50 dark:bg-gray-800/50 dark:border-gray-700">
+                                            <div className="flex items-center justify-between">
+                                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Section Images (Supports single Focal Image or Gallery block Arrays)</Label>
+                                            </div>
+
+                                            {/* List all existing images */}
+                                            {(section.images || []).map((img, imgIdx) => (
+                                                <div key={imgIdx} className="flex gap-4 items-start border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0 last:pb-0">
+                                                    <div className="flex-grow">
+                                                        <ImagePicker
+                                                            label={imgIdx === 0 ? "Focal Image (Primary)" : `Gallery Image ${imgIdx + 1}`}
+                                                            value={img.url || ""}
+                                                            onChange={(url) => {
+                                                                const newImages = [...(section.images || [])];
+                                                                newImages[imgIdx] = { url, alt: section.heading || "Image" };
+                                                                handleSectionChange(key, "images", newImages);
+                                                            }}
+                                                            placeholder="Select or upload an image..."
+                                                        />
+                                                    </div>
+                                                    <button 
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            const newImages = [...(section.images || [])];
+                                                            newImages.splice(imgIdx, 1);
+                                                            handleSectionChange(key, "images", newImages);
+                                                        }}
+                                                        className="mt-8 p-2 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                        title="Remove Image"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+                                            ))}
+
+                                            <div className="pt-2 flex gap-3 flex-wrap items-center">
+                                                <Button 
+                                                    variant="outline" 
+                                                    onClick={() => {
+                                                        const newImages = [...(section.images || []), { url: "", alt: "" }];
+                                                        handleSectionChange(key, "images", newImages);
+                                                    }}
+                                                >
+                                                    + Add Image Input (Manual)
+                                                </Button>
+                                                <Button 
+                                                    onClick={() => setMultiSelectOpenForSection(key)}
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md border-0"
+                                                >
+                                                    + Bulk Add Images from Library (Max 5)
+                                                </Button>
+                                            </div>
+
+                                            {/* Image Alignment settings only appear if there is at least one established image */}
+                                            {((section.images || []).length > 0 && section.images?.[0]?.url) && (
+                                                <div className="flex gap-4 items-center pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                    <Label className="flex-shrink-0">Image Alignment (Applies to First Image)</Label>
+                                                    <select 
+                                                        value={section.imageAlignment || 'top'} 
+                                                        onChange={(e) => handleSectionChange(key, "imageAlignment", e.target.value)}
+                                                        className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 w-full sm:w-auto text-sm"
+                                                    >
+                                                        <option value="top">Top (Stacked)</option>
+                                                        <option value="left">Image on Left (Side-by-Side)</option>
+                                                        <option value="right">Image on Right (Side-by-Side)</option>
+                                                    </select>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     <div>
                                         <RichTextEditor
@@ -707,6 +837,41 @@ export default function ContentManager() {
                     <div className="flex justify-end gap-3">
                         <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
                         <Button onClick={handleAddSection}>Create</Button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Media Library Bulk Picker */}
+            <MediaLibrary 
+                isOpen={!!multiSelectOpenForSection}
+                onClose={() => setMultiSelectOpenForSection(null)}
+                multiSelect={true}
+                onSelectMultiple={(urls) => {
+                    if (!multiSelectOpenForSection || !content) return;
+                    const currentSection = content.sections?.[multiSelectOpenForSection];
+                    if (!currentSection) return;
+                    
+                    const newImages = [...(currentSection.images || [])];
+                    urls.forEach(url => {
+                        newImages.push({ url, alt: currentSection.heading || "Gallery Image" });
+                    });
+                    
+                    handleSectionChange(multiSelectOpenForSection, "images", newImages);
+                    setMultiSelectOpenForSection(null);
+                }}
+            />
+
+            {/* Delete Confirmation Modal */}
+            <Modal isOpen={!!sectionToDelete} onClose={() => setSectionToDelete(null)} className="max-w-sm">
+                <div className="p-6 bg-white rounded-xl dark:bg-gray-900 border border-gray-100 dark:border-gray-800 text-center">
+                    <div className="w-16 h-16 bg-red-50 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Trash2 className="w-8 h-8 text-red-500" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Delete Section?</h3>
+                    <p className="text-sm text-gray-500 mb-6">Are you sure you want to delete the <strong className="text-gray-700 dark:text-gray-300">"{sectionToDelete}"</strong> section?</p>
+                    <div className="flex justify-center gap-3 w-full">
+                        <Button variant="outline" className="flex-1" onClick={() => setSectionToDelete(null)}>Cancel</Button>
+                        <Button onClick={confirmRemoveSection} className="flex-1 bg-red-600 hover:bg-red-700 text-white border-none">Delete</Button>
                     </div>
                 </div>
             </Modal>

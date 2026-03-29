@@ -17,13 +17,13 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
             ['blockquote'],
             [{ 'list': 'ordered' }, { 'list': 'bullet' }],
             [{ 'align': [] }],
-            ['link', 'clean']
+            ['link', 'image', 'clean']
         ],
     };
 
     const formats = [
         'header', 'bold', 'italic', 'underline', 'strike',
-        'blockquote', 'list', 'align', 'link'
+        'blockquote', 'list', 'align', 'link', 'image'
     ];
 
     return (

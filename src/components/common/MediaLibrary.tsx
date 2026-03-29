@@ -11,6 +11,8 @@ interface MediaLibraryProps {
     onSelect?: (url: string) => void;
     basePath?: string;
     onClose: () => void;
+    multiSelect?: boolean;
+    onSelectMultiple?: (urls: string[]) => void;
 }
 
 interface FileItem {
@@ -24,9 +26,11 @@ interface MediaLibraryContentProps {
     onSelect?: (url: string) => void;
     basePath?: string;
     onUploadFinish?: () => void;
+    multiSelect?: boolean;
+    onSelectMultiple?: (urls: string[]) => void;
 }
 
-export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }: MediaLibraryContentProps) {
+export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, multiSelect, onSelectMultiple }: MediaLibraryContentProps) {
     const { currentSite } = useSite();
     const siteRoot = currentSite.id;
     const [currentPath, setCurrentPath] = useState(basePath || siteRoot);
@@ -35,6 +39,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
+    const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
 
     useEffect(() => {
         loadMedia(currentPath);
@@ -129,36 +134,46 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
     };
 
     const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
+        const files = Array.from(event.target.files || []);
+        if (files.length === 0) return;
+
+        if (files.length > 5) {
+            setError("You can only upload a maximum of 5 files at a time.");
+            event.target.value = "";
+            return;
+        }
 
         setUploading(true);
         setError("");
         try {
-            // Video Constraints
-            if (isVideo(file.name)) {
-                const duration = await getVideoDuration(file);
-                if (duration > 120) {
-                    throw new Error("Video exceeds maximum duration of 2 minutes.");
+            await Promise.all(files.map(async (file) => {
+                if (isVideo(file.name)) {
+                    const duration = await getVideoDuration(file);
+                    if (duration > 120) {
+                        throw new Error(`Video ${file.name} exceeds max duration of 2 mins.`);
+                    }
+                    const totalDuration = await getTotalVideosDuration();
+                    if (totalDuration + duration > 1800) {
+                        throw new Error("Total videos duration would exceed 30 minutes limit.");
+                    }
                 }
 
-                const totalDuration = await getTotalVideosDuration();
-                if (totalDuration + duration > 1800) {
-                    throw new Error("Total videos duration would exceed 30 minutes limit.");
-                }
-            }
+                // Clean file name
+                const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                const storageRef = ref(storage, `${currentPath}/${Date.now()}_${cleanName}`);
+                await uploadBytes(storageRef, file);
+            }));
 
-            const storageRef = ref(storage, `${currentPath}/${Date.now()}_${file.name}`);
-            await uploadBytes(storageRef, file);
-            setSuccessMsg("File uploaded successfully!");
+            setSuccessMsg(`Successfully uploaded ${files.length} file(s)!`);
             setTimeout(() => setSuccessMsg(""), 3000);
             loadMedia(currentPath);
             if (onUploadFinish) onUploadFinish();
         } catch (err: any) {
             console.error(err);
-            setError(err.message || "Failed to upload file.");
+            setError(err.message || "Failed to upload file(s).");
         } finally {
             setUploading(false);
+            event.target.value = "";
         }
     };
 
@@ -285,8 +300,8 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
 
                         <label className={`cursor-pointer inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 ${uploading ? 'opacity-50' : ''}`}>
                             <PlusIcon className="w-4 h-4 mr-2" />
-                            {uploading ? "Uploading..." : "Upload File"}
-                            <input type="file" accept="image/*,video/*,.pdf,.json,.csv,.zip" className="hidden" onChange={handleUpload} disabled={uploading} />
+                            {uploading ? "Uploading..." : "Upload Files (Max 5)"}
+                            <input type="file" multiple accept="image/*,.webp,video/*,.pdf,.json,.csv,.zip" className="hidden" onChange={handleUpload} disabled={uploading} />
                         </label>
                     </div>
                 </div>
@@ -327,8 +342,26 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
                                 ) : (
                                     <div className="relative">
                                         <div
-                                            className="h-32 bg-gray-200 dark:bg-gray-700 cursor-pointer flex items-center justify-center overflow-hidden"
-                                            onClick={() => onSelect ? onSelect(item.url!) : window.open(item.url, '_blank')}
+                                            className={`h-32 bg-gray-200 dark:bg-gray-700 cursor-pointer flex items-center justify-center overflow-hidden transition-all ${multiSelect && selectedUrls.includes(item.url!) ? 'ring-4 ring-blue-500 scale-95 rounded' : ''}`}
+                                            onClick={() => {
+                                                if (multiSelect) {
+                                                    if (!item.url) return;
+                                                    if (selectedUrls.includes(item.url)) {
+                                                        setSelectedUrls(selectedUrls.filter(u => u !== item.url));
+                                                    } else {
+                                                        if (selectedUrls.length >= 5) {
+                                                            setError("You can only select up to 5 images at a time.");
+                                                            setTimeout(() => setError(""), 3000);
+                                                            return;
+                                                        }
+                                                        setSelectedUrls([...selectedUrls, item.url]);
+                                                    }
+                                                } else if (onSelect) {
+                                                    onSelect(item.url!);
+                                                } else {
+                                                    window.open(item.url, '_blank');
+                                                }
+                                            }}
                                         >
                                             {isVideo(item.name) ? (
                                                 <VideoIcon className="w-12 h-12 text-gray-500" />
@@ -360,7 +393,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
                                             </button>
                                         </div>
 
-                                        {onSelect && (
+                                        {onSelect && !multiSelect && (
                                             <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors pointer-events-none" />
                                         )}
                                     </div>
@@ -370,11 +403,28 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish }:
                     </div>
                 )}
             </div>
+
+            {multiSelect && selectedUrls.length > 0 && (
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
+                    <button 
+                        onClick={() => {
+                            if (onSelectMultiple) {
+                                onSelectMultiple(selectedUrls);
+                                setSelectedUrls([]);
+                            }
+                        }}
+                        className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full shadow-2xl flex items-center gap-2 transform transition-transform hover:scale-105"
+                    >
+                        <PlusIcon className="w-5 h-5" />
+                        Insert {selectedUrls.length} Image{selectedUrls.length > 1 ? 's' : ''}
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
 
-export default function MediaLibrary({ isOpen, onSelect, basePath = "", onClose }: MediaLibraryProps) {
+export default function MediaLibrary({ isOpen, onSelect, basePath = "", onClose, multiSelect, onSelectMultiple }: MediaLibraryProps) {
     const { currentSite } = useSite();
 
     // Only load/render if open to save resources
@@ -387,10 +437,15 @@ export default function MediaLibrary({ isOpen, onSelect, basePath = "", onClose 
             title={`Media Library - ${currentSite.name}`}
             size="2xl"
         >
-            <div className="h-[70vh]">
+            <div className="h-[70vh] relative">
                 <MediaLibraryContent
                     onSelect={onSelect}
                     basePath={basePath}
+                    multiSelect={multiSelect}
+                    onSelectMultiple={(urls) => {
+                        if (onSelectMultiple) onSelectMultiple(urls);
+                        onClose();
+                    }}
                 />
             </div>
         </Modal>
