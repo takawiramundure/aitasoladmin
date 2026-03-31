@@ -40,6 +40,8 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
     const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
+    const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+    const [newFolderName, setNewFolderName] = useState("");
 
     useEffect(() => {
         loadMedia(currentPath);
@@ -47,6 +49,13 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
             ensureVideosFolder();
         }
     }, [currentPath]);
+
+    // Keep currentPath in sync with site root when it changes
+    useEffect(() => {
+        if (isRoot && siteRoot && currentPath !== siteRoot) {
+            setCurrentPath(siteRoot);
+        }
+    }, [siteRoot]);
 
     const ensureVideosFolder = async () => {
         try {
@@ -177,6 +186,40 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
         }
     };
 
+    const handleCreateFolder = async () => {
+        if (!newFolderName.trim()) {
+            setError("Please enter a folder name.");
+            return;
+        }
+
+        const cleanName = newFolderName.trim().replace(/[^a-zA-Z0-9-_]/g, '');
+        if (!cleanName) {
+            setError("Invalid folder name. Use only letters, numbers, hyphens, and underscores.");
+            return;
+        }
+
+        setUploading(true);
+        setError("");
+        try {
+            // Create a dummy file to 'create' the folder symbol in Firebase
+            const dummyRef = ref(storage, `${currentPath}/${cleanName}/.keep`);
+            const blob = new Blob([""], { type: "text/plain" });
+            await uploadBytes(dummyRef, blob);
+            
+            setSuccessMsg(`Folder "${cleanName}" created!`);
+            setTimeout(() => setSuccessMsg(""), 3000);
+            
+            setIsCreatingFolder(false);
+            setNewFolderName("");
+            loadMedia(currentPath);
+        } catch (e: any) {
+            console.error(e);
+            setError(e.message || "Failed to create folder");
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const handleDelete = async (fileItem: FileItem) => {
         if (!confirm(`Are you sure you want to delete ${fileItem.name}?`)) return;
 
@@ -267,40 +310,53 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
                         )}
                     </div>
 
-                    <div className="flex gap-2">
-                        <button
-                            onClick={async () => {
-                                const folderName = prompt("Enter folder name:");
-                                if (folderName) {
-                                    const cleanName = folderName.replace(/[^a-zA-Z0-9-_]/g, '');
-                                    if (!cleanName) return alert("Invalid folder name.");
-
-                                    // Create a dummy file to 'create' the folder
-                                    setUploading(true);
-                                    try {
-                                        const dummyRef = ref(storage, `${currentPath}/${cleanName}/.keep`);
-                                        const blob = new Blob([""], { type: "text/plain" });
-                                        await uploadBytes(dummyRef, blob);
-                                        setSuccessMsg("Folder created!");
-                                        setTimeout(() => setSuccessMsg(""), 3000);
-                                        loadMedia(currentPath);
-                                    } catch (e) {
-                                        console.error(e);
-                                        setError("Failed to create folder");
-                                    } finally {
-                                        setUploading(false);
-                                    }
-                                }
-                            }}
-                            className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                        >
-                            <FolderIcon className="w-4 h-4 mr-2 text-yellow-500" />
-                            New Folder
-                        </button>
+                    <div className="flex items-center gap-2">
+                        {isCreatingFolder ? (
+                            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right-2 duration-200">
+                                <input
+                                    type="text"
+                                    value={newFolderName}
+                                    onChange={(e) => setNewFolderName(e.target.value)}
+                                    placeholder="Folder name..."
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') handleCreateFolder();
+                                        if (e.key === 'Escape') setIsCreatingFolder(false);
+                                    }}
+                                    className="px-3 py-2 text-sm border border-blue-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-800 dark:text-white"
+                                />
+                                <button
+                                    onClick={handleCreateFolder}
+                                    disabled={uploading}
+                                    className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                                    title="Create Folder"
+                                >
+                                    {uploading ? "..." : "✓"}
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsCreatingFolder(false);
+                                        setNewFolderName("");
+                                    }}
+                                    className="p-2 bg-gray-100 text-gray-500 rounded-md hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                                    title="Cancel"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => setIsCreatingFolder(true)}
+                                className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-700 transition-colors"
+                            >
+                                <FolderIcon className="w-4 h-4 mr-2 text-yellow-500" />
+                                New Folder
+                            </button>
+                        )}
 
                         <label className={`cursor-pointer inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 ${uploading ? 'opacity-50' : ''}`}>
                             <PlusIcon className="w-4 h-4 mr-2" />
-                            {uploading ? "Uploading..." : "Upload Files (Max 5)"}
+                            {uploading ? "..." : "Upload Files"}
                             <input type="file" multiple accept="image/*,.webp,video/*,.pdf,.json,.csv,.zip" className="hidden" onChange={handleUpload} disabled={uploading} />
                         </label>
                     </div>

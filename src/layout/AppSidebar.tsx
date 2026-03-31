@@ -250,23 +250,13 @@ const AppSidebar: React.FC = () => {
     },
     {
       icon: <PlugInIcon />,
-      name: "Settings",
-      path: "/settings",
-    },
-    {
-      icon: <PlugInIcon />,
       name: "Site Settings",
       path: "/settings/site",
     },
     {
       icon: <PlugInIcon />,
-      name: "SEO Manager",
-      path: "/settings/seo",
-    },
-    {
-      icon: <PlugInIcon />,
-      name: "Theme Manager",
-      path: "/settings/theme",
+      name: "System Settings",
+      path: "/settings",
     },
   ];
 

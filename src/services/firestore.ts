@@ -16,11 +16,13 @@ export interface SectionContent {
     images?: { url: string; alt: string }[];
     imageAlignment?: 'top' | 'left' | 'right';
     enabled?: boolean;
+    subtitle?: string;
+    buttonText?: string;
+    buttonUrl?: string;
     order?: number;
     stats?: { value: string; label: string }[];
     items?: any[]; // Generic array for varying lists (testimonials, pillars, features)
     list?: any[];  // Specifically for lists of people or structured items
-    subtitle?: string;
     quote?: string;
     author_name?: string;
     author_title?: string;

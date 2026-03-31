@@ -12,10 +12,13 @@ import { availableRoutes } from '../../utils/routes';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
+type TabType = 'general' | 'navigation' | 'theme' | 'seo' | 'scripts' | 'payments';
+
 export default function SiteSettingsManager() {
     const { currentSite } = useSite();
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<TabType>('general');
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
@@ -47,34 +50,56 @@ export default function SiteSettingsManager() {
         try {
             setLoading(true);
             const data = await FirestoreService.getSiteSettings(currentSite.id);
-            if (data) {
-                // Ensure emergencyBar exists
-                if (!data.emergencyBar) {
-                    data.emergencyBar = {
-                        enabled: true,
-                        content: 'National Suicide Helpline available 24/7. Please call or text <a href="tel:988" style="color: white; font-weight: bold; text-decoration: underline;">9-8-8</a>.',
-                        bgColor: '#84cc16' // text-lime-500
-                    };
+            
+            // Auto-initialize if no data found
+            const finalSettings: SiteSettings = data || {
+                siteId: currentSite.id,
+                siteTitle: currentSite.name,
+                siteDescription: '',
+                siteKeywords: '',
+                branding: { 
+                    siteName: currentSite.name, 
+                    logo: '' 
+                },
+                theme: { 
+                    primary: '#3C50E0', 
+                    secondary: '#80CAEE', 
+                    accent: '#F2F4F7', 
+                    textDark: '#1C2434', 
+                    textLight: '#64748B', 
+                    brandColor: '#3C50E0', 
+                    brandColorDark: '#1A233A', 
+                    brandColorLight: '#E2E8F0', 
+                    topBarBg: '#1C2434', 
+                    headerBg: '#FFFFFF' 
+                },
+                navigation: [
+                    { id: '1', name: 'Home', path: '/', order: 1 }
+                ],
+                emergencyBar: {
+                    enabled: false,
+                    content: 'National Suicide Helpline available 24/7. Please call or text <a href="tel:988" style="color: white; font-weight: bold; text-decoration: underline;">9-8-8</a>.',
+                    bgColor: '#84cc16'
+                },
+                topBar: {
+                    enabled: false,
+                    message: '',
+                    phone: '',
+                    email: ''
+                },
+                paymentGateways: {
+                    currency: 'CAD',
+                    stripePublicKey: '',
+                    squareAppId: '',
+                    squareLocationId: ''
+                },
+                metadata: {
+                    lastUpdated: new Date().toISOString(),
+                    updatedBy: 'system'
                 }
-                // Ensure topBar exists even if not in DB yet
-                if (!data.topBar) {
-                    data.topBar = {
-                        enabled: false,
-                        message: '',
-                        phone: '',
-                        email: ''
-                    };
-                }
-                if (!data.paymentGateways) {
-                    data.paymentGateways = {
-                        currency: 'CAD',
-                        stripePublicKey: '',
-                        squareAppId: '',
-                        squareLocationId: ''
-                    };
-                }
-                setSettings(data);
-            }
+            };
+
+            setSettings(finalSettings);
         } catch (error) {
             console.error('Error loading settings:', error);
             setStatus({ type: 'error', msg: 'Failed to load settings' });
@@ -251,17 +276,16 @@ export default function SiteSettingsManager() {
         );
     }
 
-    if (!settings) {
-        return (
-            <div className="p-6">
-                <Alert
-                    variant="error"
-                    title="No Settings Found"
-                    message="Please seed the database first to initialize settings."
-                />
-            </div>
-        );
-    }
+    if (!settings) return null;
+
+    const tabs: { id: TabType; label: string }[] = [
+        { id: 'general', label: 'General & Support' },
+        { id: 'seo', label: 'SEO & Metadata' },
+        { id: 'navigation', label: 'Navigation' },
+        { id: 'theme', label: 'Branding & Theme' },
+        { id: 'payments', label: 'Payments' },
+        { id: 'scripts', label: 'Global Scripts' },
+    ];
 
     return (
         <>
@@ -295,499 +319,531 @@ export default function SiteSettingsManager() {
                     />
                 )}
 
-                {/* Emergency Bar Configuration */}
-                {settings.emergencyBar && (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-lime-500">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Emergency / Alert Bar</h2>
-                            <label className="flex items-center cursor-pointer">
-                                <div className="relative">
-                                    <input
-                                        type="checkbox"
-                                        className="sr-only"
-                                        checked={settings.emergencyBar.enabled}
-                                        onChange={(e) => {
-                                            if (!settings) return;
-                                            setSettings({
-                                                ...settings,
-                                                emergencyBar: { ...settings.emergencyBar!, enabled: e.target.checked }
-                                            });
-                                        }}
-                                    />
-                                    <div className={`block w-10 h-6 rounded-full transition-colors ${settings.emergencyBar.enabled ? 'bg-lime-500' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
-                                    <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${settings.emergencyBar.enabled ? 'transform translate-x-4' : ''}`}></div>
-                                </div>
-                                <div className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
-                                    {settings.emergencyBar.enabled ? 'Enabled' : 'Disabled'}
-                                </div>
-                            </label>
-                        </div>
+                {/* Tab Navigation */}
+                <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-700 pb-px">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-4 py-2 text-sm font-medium transition-all ${
+                                activeTab === tab.id
+                                    ? 'border-b-2 border-blue-600 text-blue-600'
+                                    : 'text-gray-500 hover:text-gray-700'
+                            }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
 
-                        <div className={`space-y-4 ${!settings.emergencyBar.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Content
-                                </label>
-                                <div className="bg-white text-black rounded-lg">
-                                    <ReactQuill
-                                        theme="snow"
-                                        className="h-64 mb-12"
-                                        value={settings.emergencyBar.content}
-                                        onChange={(value) => {
-                                            if (!settings) return;
-                                            setSettings({
-                                                ...settings,
-                                                emergencyBar: { ...settings.emergencyBar!, content: value }
-                                            });
-                                        }}
-                                        modules={{
-                                            toolbar: [
-                                                ['bold', 'italic', 'underline', 'strike'],
-                                                ['link'],
-                                                [{ 'color': [] }, { 'background': [] }],
-                                                ['clean']
-                                            ],
-                                        }}
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Use the toolbar to format text. Links and phone numbers (e.g., <code>tel:988</code>) are supported.
-                                </p>
-                            </div>
+                <div className="mt-6">
+                    {activeTab === 'general' && (
+                        <div className="space-y-6 animate-in fade-in duration-300">
+                             {/* Emergency Bar Configuration */}
+                            {settings.emergencyBar && (
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-lime-500">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Emergency / Alert Bar</h2>
+                                        <label className="flex items-center cursor-pointer">
+                                            <div className="relative">
+                                                <input
+                                                    type="checkbox"
+                                                    className="sr-only"
+                                                    checked={settings.emergencyBar.enabled}
+                                                    onChange={(e) => {
+                                                        if (!settings) return;
+                                                        setSettings({
+                                                            ...settings,
+                                                            emergencyBar: { ...settings.emergencyBar!, enabled: e.target.checked }
+                                                        });
+                                                    }}
+                                                />
+                                                <div className={`block w-10 h-6 rounded-full transition-colors ${settings.emergencyBar.enabled ? 'bg-lime-500' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
+                                                <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${settings.emergencyBar.enabled ? 'transform translate-x-4' : ''}`}></div>
+                                            </div>
+                                            <div className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
+                                                {settings.emergencyBar.enabled ? 'Enabled' : 'Disabled'}
+                                            </div>
+                                        </label>
+                                    </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Background Color
-                                </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="color"
-                                        value={settings.emergencyBar.bgColor}
-                                        onChange={(e) => {
-                                            if (!settings) return;
-                                            setSettings({
-                                                ...settings,
-                                                emergencyBar: { ...settings.emergencyBar!, bgColor: e.target.value }
-                                            });
-                                        }}
-                                        className="w-16 h-10 rounded cursor-pointer"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={settings.emergencyBar.bgColor}
-                                        onChange={(e) => {
-                                            if (!settings) return;
-                                            setSettings({
-                                                ...settings,
-                                                emergencyBar: { ...settings.emergencyBar!, bgColor: e.target.value }
-                                            });
-                                        }}
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                                    <div className={`space-y-4 ${!settings.emergencyBar.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Content
+                                            </label>
+                                            <div className="bg-white text-black rounded-lg">
+                                                <ReactQuill
+                                                    theme="snow"
+                                                    className="h-64 mb-12"
+                                                    value={settings.emergencyBar.content}
+                                                    onChange={(value) => {
+                                                        if (!settings) return;
+                                                        setSettings({
+                                                            ...settings,
+                                                            emergencyBar: { ...settings.emergencyBar!, content: value }
+                                                        });
+                                                    }}
+                                                    modules={{
+                                                        toolbar: [
+                                                            ['bold', 'italic', 'underline', 'strike'],
+                                                            ['link'],
+                                                            [{ 'color': [] }, { 'background': [] }],
+                                                            ['clean']
+                                                        ],
+                                                    }}
+                                                />
+                                            </div>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                Use the toolbar to format text. Links and phone numbers (e.g., <code>tel:988</code>) are supported.
+                                            </p>
+                                        </div>
 
-                {/* Top Bar Configuration */}
-                {settings.topBar && (
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Top Bar Configuration</h2>
-                            <label className="flex items-center cursor-pointer">
-                                <div className="relative">
-                                    <input
-                                        type="checkbox"
-                                        className="sr-only"
-                                        checked={settings.topBar.enabled}
-                                        onChange={(e) => {
-                                            if (!settings) return;
-                                            setSettings({
-                                                ...settings,
-                                                topBar: { ...settings.topBar!, enabled: e.target.checked }
-                                            });
-                                        }}
-                                    />
-                                    <div className={`block w-10 h-6 rounded-full transition-colors ${settings.topBar.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
-                                    <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${settings.topBar.enabled ? 'transform translate-x-4' : ''}`}></div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Background Color
+                                            </label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="color"
+                                                    value={settings.emergencyBar.bgColor}
+                                                    onChange={(e) => {
+                                                        if (!settings) return;
+                                                        setSettings({
+                                                            ...settings,
+                                                            emergencyBar: { ...settings.emergencyBar!, bgColor: e.target.value }
+                                                        });
+                                                    }}
+                                                    className="w-16 h-10 rounded cursor-pointer"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={settings.emergencyBar.bgColor}
+                                                    onChange={(e) => {
+                                                        if (!settings) return;
+                                                        setSettings({
+                                                            ...settings,
+                                                            emergencyBar: { ...settings.emergencyBar!, bgColor: e.target.value }
+                                                        });
+                                                    }}
+                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="ml-3 text-gray-700 dark:text-gray-300 font-medium">
-                                    {settings.topBar.enabled ? 'Enabled' : 'Disabled'}
+                            )}
+
+                            {/* Top Bar Configuration */}
+                            {settings.topBar && (
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                                    <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Support & Contact Tips</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Support Ticket Link (URL)
+                                            </label>
+                                            <input
+                                                type="url"
+                                                value={settings.supportTicketLink || ''}
+                                                onChange={(e) => setSettings({ ...settings, supportTicketLink: e.target.value })}
+                                                placeholder="https://support.example.com"
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Support Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={settings.supportEmail || ''}
+                                                onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
+                                                placeholder="contact@example.com"
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            />
+                                        </div>
+                                        <div className="col-span-2">
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                                Maintenance Mode
+                                                <span className={`inline-block w-2 h-2 rounded-full ${settings.maintenanceMode ? 'bg-red-500' : 'bg-green-500'}`} />
+                                            </label>
+                                            <select
+                                                value={settings.maintenanceMode ? "true" : "false"}
+                                                onChange={(e) => setSettings({ ...settings, maintenanceMode: e.target.value === "true" })}
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            >
+                                                <option value="false">Live (Publicly Accessible)</option>
+                                                <option value="true">Maintenance Mode (Coming Soon Page)</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                            </label>
-                        </div>
-
-                        <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${!settings.topBar.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
-                            <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Message (Left)
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.topBar.message}
-                                    onChange={(e) => {
-                                        if (!settings) return;
-                                        setSettings({
-                                            ...settings,
-                                            topBar: { ...settings.topBar!, message: e.target.value }
-                                        });
-                                    }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="Welcome message..."
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Button Label
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.topBar.buttonLabel || ''}
-                                    onChange={(e) => {
-                                        if (!settings) return;
-                                        setSettings({
-                                            ...settings,
-                                            topBar: { ...settings.topBar!, buttonLabel: e.target.value }
-                                        });
-                                    }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="FIND HELP"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Button Link
-                                </label>
-                                <input
-                                    type="text"
-                                    value={settings.topBar.buttonLink || ''}
-                                    onChange={(e) => {
-                                        if (!settings) return;
-                                        setSettings({
-                                            ...settings,
-                                            topBar: { ...settings.topBar!, buttonLink: e.target.value }
-                                        });
-                                    }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="/#contact"
-                                />
-                            </div>
-                            {/* Hidden Phone/Email for now unless needed, or keep for other sites? keeping enabled=false on topBar effectively hides this block anyway, effectively repurposed per site */}
-                        </div>
-                    </div>
-                )}
-
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Branding</h2>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Site Name
-                            </label>
-                            <input
-                                type="text"
-                                value={settings.branding.siteName}
-                                onChange={(e) => updateBranding('siteName', e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Logo URL
-                            </label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    value={settings.branding.logo}
-                                    onChange={(e) => updateBranding('logo', e.target.value)}
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="/logo.png"
-                                />
-                                <label className={`cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                                    <Upload className="w-4 h-4 mr-2" />
-                                    {uploading ? 'Uploading...' : 'Upload'}
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleLogoUpload}
-                                        disabled={uploading}
-                                    />
-                                </label>
-                            </div>
-                            {settings.branding.logo && (
-                                <img
-                                    src={settings.branding.logo}
-                                    alt="Logo preview"
-                                    className="mt-2 h-16 object-contain border rounded p-2"
-                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                />
                             )}
                         </div>
-                    </div>
-                </div>
+                    )}
 
-                {/* Payment Gateways */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Payment Gateways</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Stripe Public Key
-                            </label>
-                            <input
-                                type="text"
-                                value={settings.paymentGateways?.stripePublicKey || ''}
-                                onChange={(e) => {
-                                    if (!settings) return;
-                                    setSettings({
-                                        ...settings,
-                                        paymentGateways: { ...settings.paymentGateways!, stripePublicKey: e.target.value }
-                                    });
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="pk_test_..."
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Currency
-                            </label>
-                            <input
-                                type="text"
-                                value={settings.paymentGateways?.currency || 'CAD'}
-                                onChange={(e) => {
-                                    if (!settings) return;
-                                    setSettings({
-                                        ...settings,
-                                        paymentGateways: { ...settings.paymentGateways!, currency: e.target.value }
-                                    });
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="CAD"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Square App ID
-                            </label>
-                            <input
-                                type="text"
-                                value={settings.paymentGateways?.squareAppId || ''}
-                                onChange={(e) => {
-                                    if (!settings) return;
-                                    setSettings({
-                                        ...settings,
-                                        paymentGateways: { ...settings.paymentGateways!, squareAppId: e.target.value }
-                                    });
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="sq0idp-..."
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Square Location ID
-                            </label>
-                            <input
-                                type="text"
-                                value={settings.paymentGateways?.squareLocationId || ''}
-                                onChange={(e) => {
-                                    if (!settings) return;
-                                    setSettings({
-                                        ...settings,
-                                        paymentGateways: { ...settings.paymentGateways!, squareLocationId: e.target.value }
-                                    });
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="L..."
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Skrill Merchant Email
-                            </label>
-                            <input
-                                type="text"
-                                value={settings.paymentGateways?.skrillMerchantEmail || ''}
-                                onChange={(e) => {
-                                    if (!settings) return;
-                                    setSettings({
-                                        ...settings,
-                                        paymentGateways: { ...settings.paymentGateways!, skrillMerchantEmail: e.target.value }
-                                    });
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="merchant@skrill.com"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Skrill Merchant Email
-                            </label>
-                            <input
-                                type="text"
-                                value={settings.paymentGateways?.skrillMerchantEmail || ''}
-                                onChange={(e) => {
-                                    if (!settings) return;
-                                    setSettings({
-                                        ...settings,
-                                        paymentGateways: { ...settings.paymentGateways!, skrillMerchantEmail: e.target.value }
-                                    });
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="merchant@skrill.com"
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                {/* Theme Section */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Theme Colors</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {Object.entries(settings.theme).map(([key, value]) => (
-                            <div key={key}>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 capitalize">
-                                    {key.replace(/([A-Z])/g, ' $1').trim()}
-                                </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="color"
-                                        value={value}
-                                        onChange={(e) => updateTheme(key as any, e.target.value)}
-                                        className="w-16 h-10 rounded cursor-pointer"
-                                    />
+                    {activeTab === 'seo' && (
+                        <div className="space-y-6 animate-in fade-in duration-300 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">SEO & Metadata</h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Site Title
+                                    </label>
                                     <input
                                         type="text"
-                                        value={value}
-                                        onChange={(e) => updateTheme(key as any, e.target.value)}
-                                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        value={settings.siteTitle || ""}
+                                        onChange={(e) => setSettings({ ...settings, siteTitle: e.target.value })}
+                                        placeholder={currentSite.name}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Site Description
+                                    </label>
+                                    <textarea
+                                        rows={3}
+                                        value={settings.siteDescription || ""}
+                                        onChange={(e) => setSettings({ ...settings, siteDescription: e.target.value })}
+                                        placeholder="Enter site description for search engines..."
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Keywords (comma separated)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.siteKeywords || ""}
+                                        onChange={(e) => setSettings({ ...settings, siteKeywords: e.target.value })}
+                                        placeholder="keyword1, keyword2, keyword3"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     />
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                </div>
+                        </div>
+                    )}
 
-                {/* Navigation Section */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Navigation Menu</h2>
-                        <Button onClick={addNavItem} variant="outline" size="sm">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Item
-                        </Button>
-                    </div>
+                    {activeTab === 'navigation' && (
+                        <div className="animate-in fade-in duration-300 space-y-6">
+                             {/* Navigation Section */}
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Navigation Menu</h2>
+                                    <Button onClick={addNavItem} variant="outline" size="sm">
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        Add Item
+                                    </Button>
+                                </div>
 
-                    <div className="space-y-4">
-                        {settings.navigation.map((item, index) => (
-                            <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                                <div className="flex items-start gap-3">
-                                    <div className="flex flex-col gap-1 mt-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => moveNavItem(index, 'up')}
-                                            disabled={index === 0}
-                                            className="p-1 hover:bg-gray-100 rounded disabled:opacity-30 disabled:hover:bg-transparent dark:hover:bg-gray-700 dark:text-gray-300"
-                                            title="Move Up"
-                                        >
-                                            <ArrowUp className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => moveNavItem(index, 'down')}
-                                            disabled={index === settings.navigation.length - 1}
-                                            className="p-1 hover:bg-gray-100 rounded disabled:opacity-30 disabled:hover:bg-transparent dark:hover:bg-gray-700 dark:text-gray-300"
-                                            title="Move Down"
-                                        >
-                                            <ArrowDown className="w-4 h-4" />
-                                        </button>
-                                    </div>
-                                    <div className="flex-1 space-y-3">
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                            <input
-                                                type="text"
-                                                value={item.name}
-                                                onChange={(e) => updateNavItem(item.id, { name: e.target.value })}
-                                                placeholder="Name"
-                                                className="px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            />
-                                            <input
-                                                type="text"
-                                                value={item.path}
-                                                onChange={(e) => updateNavItem(item.id, { path: e.target.value })}
-                                                placeholder="/path"
-                                                list="route-options"
-                                                className="px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            />
-                                            <div className="flex gap-2">
-                                                <label className="flex items-center gap-2 text-sm">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={item.isExternal || false}
-                                                        onChange={(e) => updateNavItem(item.id, { isExternal: e.target.checked })}
-                                                        className="rounded"
-                                                    />
-                                                    <ExternalLink className="w-4 h-4" />
-                                                    External
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        {/* Sub Items */}
-                                        {item.subItems && item.subItems.length > 0 && (
-                                            <div className="ml-6 space-y-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
-                                                {item.subItems.map((subItem) => (
-                                                    <div key={subItem.id} className="flex gap-2">
+                                <div className="space-y-4">
+                                    {settings.navigation.map((item, index) => (
+                                        <div key={item.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex flex-col gap-1 mt-1">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => moveNavItem(index, 'up')}
+                                                        disabled={index === 0}
+                                                        className="p-1 hover:bg-gray-100 rounded disabled:opacity-30 disabled:hover:bg-transparent dark:hover:bg-gray-700 dark:text-gray-300"
+                                                        title="Move Up"
+                                                    >
+                                                        <ArrowUp className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => moveNavItem(index, 'down')}
+                                                        disabled={index === settings.navigation.length - 1}
+                                                        className="p-1 hover:bg-gray-100 rounded disabled:opacity-30 disabled:hover:bg-transparent dark:hover:bg-gray-700 dark:text-gray-300"
+                                                        title="Move Down"
+                                                    >
+                                                        <ArrowDown className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <div className="flex-1 space-y-3">
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                                                         <input
                                                             type="text"
-                                                            value={subItem.name}
-                                                            onChange={(e) => updateSubItem(item.id, subItem.id, { name: e.target.value })}
-                                                            placeholder="Sub Item Name"
-                                                            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                            value={item.name}
+                                                            onChange={(e) => updateNavItem(item.id, { name: e.target.value })}
+                                                            placeholder="Name"
+                                                            className="px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                         />
                                                         <input
                                                             type="text"
-                                                            value={subItem.path}
-                                                            onChange={(e) => updateSubItem(item.id, subItem.id, { path: e.target.value })}
+                                                            value={item.path}
+                                                            onChange={(e) => updateNavItem(item.id, { path: e.target.value })}
                                                             placeholder="/path"
                                                             list="route-options"
-                                                            className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                            className="px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                         />
-                                                        <button
-                                                            onClick={() => deleteSubItem(item.id, subItem.id)}
-                                                            className="p-1.5 text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
-                                                        >
-                                                            <Trash2 className="w-4 h-4" />
-                                                        </button>
+                                                        <div className="flex gap-2">
+                                                            <label className="flex items-center gap-2 text-sm">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={item.isExternal || false}
+                                                                    onChange={(e) => updateNavItem(item.id, { isExternal: e.target.checked })}
+                                                                    className="rounded"
+                                                                />
+                                                                <ExternalLink className="w-4 h-4" />
+                                                                External
+                                                                <button
+                                                                    onClick={() => deleteNavItem(item.id)}
+                                                                    className="ml-auto p-1.5 text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
+                                                                >
+                                                                    <Trash2 className="w-4 h-4" />
+                                                                </button>
+                                                            </label>
+                                                        </div>
                                                     </div>
-                                                ))}
-                                            </div>
-                                        )}
 
-                                        <div className="flex gap-2">
-                                            <Button
-                                                onClick={() => addSubItem(item.id)}
-                                                variant="outline"
-                                                size="sm"
-                                            >
-                                                <Plus className="w-3 h-3 mr-1" />
-                                                Add Dropdown Item
-                                            </Button>
+                                                    {/* Sub Items */}
+                                                    {item.subItems && item.subItems.length > 0 && (
+                                                        <div className="ml-6 space-y-2 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+                                                            {item.subItems.map((subItem) => (
+                                                                <div key={subItem.id} className="flex gap-2">
+                                                                    <input
+                                                                        type="text"
+                                                                        value={subItem.name}
+                                                                        onChange={(e) => updateSubItem(item.id, subItem.id, { name: e.target.value })}
+                                                                        placeholder="Sub Item Name"
+                                                                        className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                                    />
+                                                                    <input
+                                                                        type="text"
+                                                                        value={subItem.path}
+                                                                        onChange={(e) => updateSubItem(item.id, subItem.id, { path: e.target.value })}
+                                                                        placeholder="/path"
+                                                                        list="route-options"
+                                                                        className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                                    />
+                                                                    <button
+                                                                        onClick={() => deleteSubItem(item.id, subItem.id)}
+                                                                        className="p-1.5 text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex gap-2">
+                                                        <Button
+                                                            onClick={() => addSubItem(item.id)}
+                                                            variant="outline"
+                                                            size="sm"
+                                                        >
+                                                            <Plus className="w-3 h-3 mr-1" />
+                                                            Add Sub Item
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <button
-                                        onClick={() => deleteNavItem(item.id)}
-                                        className="p-2 text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
-                                    >
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
+                                    ))}
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'theme' && (
+                        <div className="animate-in fade-in duration-300 space-y-6">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Branding</h2>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Site Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={settings.branding.siteName}
+                                            onChange={(e) => updateBranding('siteName', e.target.value)}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Logo URL
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={settings.branding.logo}
+                                                onChange={(e) => updateBranding('logo', e.target.value)}
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                placeholder="/logo.png"
+                                            />
+                                            <label className={`cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                <Upload className="w-4 h-4 mr-2" />
+                                                {uploading ? 'Uploading...' : 'Upload'}
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={handleLogoUpload}
+                                                    disabled={uploading}
+                                                />
+                                            </label>
+                                        </div>
+                                        {settings.branding.logo && (
+                                            <img
+                                                src={settings.branding.logo}
+                                                alt="Logo preview"
+                                                className="mt-2 h-16 object-contain border rounded p-2"
+                                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Theme Colors</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {Object.entries(settings.theme).map(([key, value]) => (
+                                        <div key={key}>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 capitalize">
+                                                {key.replace(/([A-Z])/g, ' $1').trim()}
+                                            </label>
+                                            <div className="flex gap-2">
+                                                <input
+                                                    type="color"
+                                                    value={value}
+                                                    onChange={(e) => updateTheme(key as any, e.target.value)}
+                                                    className="w-16 h-10 rounded cursor-pointer"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={value}
+                                                    onChange={(e) => updateTheme(key as any, e.target.value)}
+                                                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'payments' && (
+                        <div className="animate-in fade-in duration-300 bg-white dark:bg-gray-800 p-6 rounded-lg shadow space-y-6">
+                            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Payment Gateways</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 font-bold text-blue-600">
+                                        Currency
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.paymentGateways?.currency || 'CAD'}
+                                        onChange={(e) => {
+                                            if (!settings) return;
+                                            setSettings({
+                                                ...settings,
+                                                paymentGateways: { ...settings.paymentGateways!, currency: e.target.value }
+                                            });
+                                        }}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        placeholder="CAD"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Stripe Public Key
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.paymentGateways?.stripePublicKey || ''}
+                                        onChange={(e) => {
+                                            if (!settings) return;
+                                            setSettings({
+                                                ...settings,
+                                                paymentGateways: { ...settings.paymentGateways!, stripePublicKey: e.target.value }
+                                            });
+                                        }}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        placeholder="pk_test_..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Square App ID
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.paymentGateways?.squareAppId || ''}
+                                        onChange={(e) => {
+                                            if (!settings) return;
+                                            setSettings({
+                                                ...settings,
+                                                paymentGateways: { ...settings.paymentGateways!, squareAppId: e.target.value }
+                                            });
+                                        }}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        placeholder="sq0idp-..."
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Square Location ID
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={settings.paymentGateways?.squareLocationId || ''}
+                                        onChange={(e) => {
+                                            if (!settings) return;
+                                            setSettings({
+                                                ...settings,
+                                                paymentGateways: { ...settings.paymentGateways!, squareLocationId: e.target.value }
+                                            });
+                                        }}
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        placeholder="L..."
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'scripts' && (
+                        <div className="animate-in fade-in duration-300 bg-white dark:bg-gray-800 p-6 rounded-lg shadow space-y-6">
+                            <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Custom Script Injection</h2>
+                            <p className="text-sm text-gray-500 mb-4">Add tracking codes, chat widgets, or custom analytics here.</p>
+                            
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Header Scripts (e.g., GTM, Facebook Pixel)
+                                    </label>
+                                    <textarea
+                                        rows={6}
+                                        value={settings.headerScripts || ""}
+                                        onChange={(e) => setSettings({ ...settings, headerScripts: e.target.value })}
+                                        placeholder="<script>...</script>"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono text-xs focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-green-400"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Body Scripts (Appended to end of body)
+                                    </label>
+                                    <textarea
+                                        rows={6}
+                                        value={settings.bodyScripts || ""}
+                                        onChange={(e) => setSettings({ ...settings, bodyScripts: e.target.value })}
+                                        placeholder="<script>...</script>"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono text-xs focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-green-400"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </>

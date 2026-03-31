@@ -75,12 +75,46 @@ export default function ContentManager() {
         try {
             const data = await FirestoreService.getPageContent(id, currentSite.id);
             if (data) {
-                setContent(data);
+                /*
+                 * Special Handling: Services Gateway Logic
+                 * -------------------------------------------------------------
+                 * We ensure the 'navigator_cta' section always exists on the services page.
+                 * If it's the first time visiting this page in the backend, or it was manually deleted,
+                 * we seed it with smart defaults matching the original frontend design.
+                 */
+                if (id === 'services') {
+                    const sections = data.sections || {};
+                    if (!sections.navigator_cta) {
+                        sections.navigator_cta = {
+                            heading: "Need Personalized Guidance?",
+                            content: "Our system navigation and advocacy team is here to help you find the specific resources and support your family needs.",
+                            buttonText: "Talk to a Navigator",
+                            buttonUrl: "/contact",
+                            enabled: true,
+                            order: 99
+                        };
+                    }
+                    setContent({ ...data, sections });
+                } else {
+                    setContent(data);
+                }
             } else {
-                // Initialize with default structure if empty
+                // Initialize with default structure if empty (new page)
+                const initialSections: Record<string, any> = {};
+                // Pre-seed services content if it's completely new
+                if (id === 'services') {
+                    initialSections.navigator_cta = {
+                        heading: "Need Personalized Guidance?",
+                        content: "Our system navigation and advocacy team is here to help you find the specific resources and support your family needs.",
+                        buttonText: "Talk to a Navigator",
+                        buttonUrl: "/contact",
+                        enabled: true,
+                        order: 99
+                    };
+                }
                 setContent({
                     title: pageTitles[id] || "",
-                    sections: {}
+                    sections: initialSections
                 });
             }
         } catch (err: any) {
@@ -551,6 +585,165 @@ export default function ContentManager() {
         setSuccessMsg("Seeded Meet Our Team data!");
     };
 
+    const seedJoinUs = () => {
+        setContent({
+            title: "Join Us Gateway",
+            enabled: true,
+            sections: {
+                hero: {
+                    heading: "Join Us",
+                    content: "Get involved with KMFW through volunteering, partnering, or career opportunities. Together we can empower the Black community.",
+                    order: 0,
+                    enabled: true
+                },
+                ways_to_give: {
+                    heading: "Ways to Give",
+                    content: "Support our programs and services directly through a one-time or recurring contribution. Lend your skills and time to our events, workshops, and community outreach efforts. Join our network of organizations working to improve system navigation and advocacy.",
+                    order: 10,
+                    enabled: true
+                },
+                careers_cta: {
+                    heading: "Join Our Professional Team",
+                    content: "We are always looking for passionate researchers, counselors, and community advocates who share our commitment to culturally grounded care.",
+                    buttonText: "View Careers",
+                    buttonUrl: "/join/careers",
+                    order: 20,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded Join Us Gateway data! Click Save to persist.");
+    };
+
+    const seedCareers = () => {
+        setContent({
+            title: "Careers",
+            enabled: true,
+            sections: {
+                hero: {
+                    heading: "Career Services & Employment Support",
+                    content: "Empowering professionals through employment support, and opening our doors to those who want to join our team.",
+                    order: 0,
+                    enabled: true
+                },
+                quote: {
+                    heading: "If you want to go Fast, go Alone. If you want to go Far, go Together",
+                    subtitle: "- African Proverb",
+                    content: "We look forward to having you join our team, because we believe that we are stronger together as we move the much needed work forward!",
+                    order: 10,
+                    enabled: true
+                },
+                employment_support: {
+                    heading: "Employment Support",
+                    content: "We provide resources, resume building workshops, interview preparation, and vocational guidance tailored to help members of the Black community thrive in their careers and navigate workplace challenges.",
+                    buttonText: "Access Support Services",
+                    buttonUrl: "#",
+                    order: 20,
+                    enabled: true
+                },
+                join_our_team: {
+                    heading: "Join Our Team",
+                    content: "Looking to make an impact? We are always seeking passionate researchers, culturally-informed counselors, and community advocates. Check out our open roles below!",
+                    buttonText: "View Open Roles",
+                    buttonUrl: "#current-opportunities",
+                    order: 30,
+                    enabled: true
+                },
+                job_counselor: {
+                    heading: "OUR COUNSELING TEAM IS GROWING!",
+                    subtitle: "Mental Health Counsellor",
+                    content: "<p>We seek counsellors who self-identify as African Canadian (African, Caribbean, Black identifying) to join our counselling team.</p><br/><p>Our counselling is provided by trauma-informed professionals who are racially, culturally, and spiritually aligned in their work with Black persons. Well-attuned to African cultural resiliency, our culturally grounded counsellors are outstanding at ensuring that their chosen modalities are customized to address needs and foster well-being effectively.</p><br/><p><strong>**We currently seek candidates with early afternoon, evening, and weekend availabilities.</strong></p>",
+                    buttonText: "Apply via Email",
+                    buttonUrl: "mailto:services@kindmindsfamilywellness.org",
+                    order: 40,
+                    enabled: true
+                },
+                job_operations: {
+                    heading: "OPERATIONS SPECIALIST",
+                    subtitle: "Non-Profit Operations",
+                    content: "<ul><li>Have you worked with underserved or marginalized communities in the past?</li><li>Do you have a background in leadership, operations, or nonprofit work that aligns with this role?</li><li>Are you currently located in or willing to commute to the Cambridge, Kitchener, Waterloo region or surrounding Townships?</li></ul><br/><p>If you answered yes to all of these, then we'd love to hear from you!</p>",
+                    buttonText: "View Full Job Description",
+                    buttonUrl: "/pdfs/OPERATIONS-SPECIALIST-KMFW-Job-Description.pdf",
+                    order: 50,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded Careers data! Click Save to persist.");
+    };
+
+    const seedVolunteer = () => {
+        setContent({
+            title: "Volunteering",
+            enabled: true,
+            sections: {
+                hero: {
+                    heading: "Call for Volunteers 2025/2026",
+                    content: "We seek individuals and organizations that are committed to the work relating to Black identifying persons, aspire and embrace opportunities to give back to their community. We strive for individuals and organizations that will contribute to our needs within the organization and in the community.",
+                    order: 0,
+                    enabled: true
+                },
+                application_cta: {
+                    heading: "Volunteer Application",
+                    content: "Join our roster of dedicated volunteers making a difference across the Waterloo Region.",
+                    buttonText: "Open Application Form",
+                    buttonUrl: "https://forms.gle/y4qdiEKUWVkYnhT26",
+                    order: 10,
+                    enabled: true
+                },
+                quote_kalinda: {
+                    heading: "Wonderful Experience",
+                    subtitle: "Kalinda Yan-Tong Siu",
+                    content: "KMFW has welcomed me with open arms from Day 1 and has allowed me to learn while giving back to the community. I feel privileged to be a part of this wonderful organization!",
+                    order: 20,
+                    enabled: true
+                },
+                quote_cat: {
+                    heading: "Advice for New Volunteers",
+                    subtitle: "Cat",
+                    content: "Keep an open mind and listen to feedback. Not everything you try at first may be what your community needs- it is important to listen and adjust to provide the best service possible.",
+                    order: 30,
+                    enabled: true
+                },
+                quote_muskan: {
+                    heading: "Meaningful Impact",
+                    subtitle: "Muskan Arif",
+                    content: "You (supervisor) and the rest of the KMFW team have had a huge meaningful impact on me. You have taught me so so much and I hope to continue to be able to have the opportunity to keep learning from you (supervisor). Thank you",
+                    order: 40,
+                    enabled: true
+                },
+                volunteer_needs: {
+                    heading: "Current Volunteer Needs",
+                    content: "1. Youth Mentor (Min. 6month commitment)\n\n2. Employment Support\n\n3. Driver\n\n4. Cultural Group Support (Min. 6-Months commitment)\n\n5. Community Engagement Support (Min. 6-Months commitment)\n\n6. Administrative Assistant (Min. 12-Months commitment)\n\n7. Tutors and Tutoring Assistant/Support (Virtual)\n\n8. Cooking Class Instructors (Fall 2022 or Winter 2023)\n\n9. Research Coordinators\n\n10. Board of Directors",
+                    order: 50,
+                    enabled: true
+                },
+                board_call: {
+                    heading: "Call for Board Membership",
+                    content: "If you’re looking for opportunities to give back to your local community and are committed to working with Black-identifying individuals, we invite you to join the KMFW team as a Board Member. gain meaningful experience while also contributing to the needs of our organization and the greater community.",
+                    buttonText: "View Board PDF",
+                    buttonUrl: "/pdfs/Call-for-Board-Members-2024.pdf",
+                    order: 60,
+                    enabled: true
+                },
+                footer_quote: {
+                    heading: "Building a Better World",
+                    subtitle: "Kofi Annan - Former UN Secretary General",
+                    content: "If our hopes of building a better and safer world are to become more than wishful thinking, we will need the engagement of volunteers more than ever",
+                    order: 70,
+                    enabled: true
+                },
+                contact_info: {
+                    heading: "Get in Touch",
+                    content: "Don’t see where you can contribute listed? Not a problem; please send us an email at info@kindmindsfamilywellness.org OR complete the contact form below, as there is always room for you and what you bring to the table.",
+                    order: 80,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded Volunteer data! Click Save to persist.");
+    };
+
     const seedFooter = () => {
         setContent({
             title: "Footer Details",
@@ -671,6 +864,21 @@ export default function ContentManager() {
                                 Seed Partners
                             </Button>
                         )}
+                        {pageId === 'join-us' && (
+                            <Button variant="outline" onClick={seedJoinUs}>
+                                Seed Join Us
+                            </Button>
+                        )}
+                        {pageId === 'careers' && (
+                            <Button variant="outline" onClick={seedCareers}>
+                                Seed Careers
+                            </Button>
+                        )}
+                        {pageId === 'volunteer' && (
+                            <Button variant="outline" onClick={seedVolunteer}>
+                                Seed Volunteering
+                            </Button>
+                        )}
 
                         <Button variant="outline" onClick={() => setIsModalOpen(true)}>
                             + Add Section
@@ -787,6 +995,36 @@ export default function ContentManager() {
                                             onChange={(e) => handleSectionChange(key, "videoUrl", e.target.value)}
                                         />
                                     </div>
+
+                                    {key !== 'hero' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <Label>Subtitle / Badge (Optional)</Label>
+                                                <Input
+                                                    type="text"
+                                                    value={section.subtitle || ""}
+                                                    onChange={(e) => handleSectionChange(key, "subtitle", e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Button Text (Optional)</Label>
+                                                <Input
+                                                    type="text"
+                                                    value={section.buttonText || ""}
+                                                    onChange={(e) => handleSectionChange(key, "buttonText", e.target.value)}
+                                                />
+                                            </div>
+                                            <div className="md:col-span-2">
+                                                <Label>Button Action/URL (Optional Mailto, /pdfs/..., https://...)</Label>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="mailto:services@... OR /pdfs/... OR https://..."
+                                                    value={section.buttonUrl || ""}
+                                                    onChange={(e) => handleSectionChange(key, "buttonUrl", e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
 
                                     {key !== 'hero' && (
                                         <div className="flex flex-col gap-4 p-4 border rounded-xl bg-gray-50/50 dark:bg-gray-800/50 dark:border-gray-700">

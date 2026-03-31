@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { SidebarProvider, useSidebar } from "../context/SidebarContext";
 import { Outlet } from "react-router";
 import AppHeader from "./AppHeader";
@@ -6,14 +7,36 @@ import AppSidebar from "./AppSidebar";
 import { useAuth } from "../context/AuthContext";
 import { AlertTriangleIcon } from "lucide-react";
 import Button from "../components/ui/button/Button";
+import { FirestoreService } from "../services/firestore";
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();
   const { isImpersonating, profile, stopImpersonation } = useAuth();
+  const [sysConfig, setSysConfig] = useState<{ cmsName?: string, cmsVersion?: string }>({
+    cmsName: 'Digital Maples Labs CMS',
+    cmsVersion: '1.3.0'
+  });
+
+  useEffect(() => {
+    const fetchSysConfig = async () => {
+      try {
+        // Fetch CMS-wide settings (Version, Branding, etc.) 
+        // These are stored in a special global document rather than a per-site collection.
+        const data = await FirestoreService.getSettings('system_global', 'config');
+        if (data) {
+          setSysConfig(data);
+        }
+      } catch (err) {
+        console.error('Error fetching global config:', err);
+      }
+    };
+    fetchSysConfig();
+  }, []);
 
   return (
     <div className="min-h-screen xl:flex flex-col">
       {/* Global Impersonation Banner */}
+      {/* This banner provides a visual indicator and controls for admins impersonating users */}
       {isImpersonating && (
         <div className="sticky top-0 z-[60] bg-blue-600 text-white px-4 py-3 shadow-lg flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -61,7 +84,7 @@ const LayoutContent: React.FC = () => {
             <Outlet />
           </div>
           <footer className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-            &copy; {new Date().getFullYear()} Digital Maples Labs CMS 1.3.0
+            &copy; {new Date().getFullYear()} {sysConfig.cmsName} {sysConfig.cmsVersion}
           </footer>
         </div>
       </div>
