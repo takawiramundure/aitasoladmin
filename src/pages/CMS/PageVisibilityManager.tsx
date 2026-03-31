@@ -61,6 +61,46 @@ const KMFW_PAGE_MAP: Record<string, { label: string; sections: Record<string, st
             cta: 'Call to Action',
         }
     },
+    educational_programs: {
+        label: 'Educational Programs',
+        sections: {
+            hero: 'Programs Hero',
+            programs: 'Program List',
+            gallery: 'Photo Gallery',
+        }
+    },
+    grounded_counseling: {
+        label: 'Grounded Counseling',
+        sections: {
+            hero: 'Counseling Hero',
+            success_benefits: 'Success & Benefits',
+            referral_process: 'Referral Process',
+        }
+    },
+    advocacy_education: {
+        label: 'Advocacy & Education',
+        sections: {
+            hero: 'Hero Section',
+            main_content: 'Workshops & Training List',
+        }
+    },
+    community_support: {
+        label: 'Community Support',
+        sections: {
+            hero: 'Hero Section',
+            navigating_resources: 'Navigating Resources',
+            community_events: 'Community Events',
+            gallery: 'Photo Gallery',
+        }
+    },
+    system_navigation: {
+        label: 'System Navigation',
+        sections: {
+            hero: 'Hero Section',
+            main_content: 'Navigation Services List',
+            quote: 'Inspirational Quote',
+        }
+    },
     programs: {
         label: 'Programs & Services',
         sections: {
@@ -74,6 +114,34 @@ const KMFW_PAGE_MAP: Record<string, { label: string; sections: Record<string, st
             hero: 'Impact Hero',
             stats: 'Impact Statistics',
             stories: 'Success Stories',
+        }
+    },
+    newsletters: {
+        label: 'Newsletters & News',
+        sections: {
+            newsletters: 'Quarterly Newsletters',
+            news: 'Recent News & Features',
+            mailingList: 'Mailing List CTA',
+        }
+    },
+    success_stories: {
+        label: 'Success Stories',
+        sections: {
+            hero: 'Success Stories Hero',
+            stories: 'Client Success Stories',
+        }
+    },
+    research: {
+        label: 'Research & Consultancy',
+        sections: {
+            youthSurvey: 'Youth Survey Section',
+            overview: 'Research Overview',
+            quotes: 'Quotes & Visual Vision',
+            leadConsultant: 'Founder Profile',
+            additionalServices: 'Additional Services',
+            additionalServicesItems: 'Additional Services List',
+            activeProjects: 'Active Projects',
+            contactCTA: 'Contact CTA',
         }
     },
     gala: {
@@ -94,6 +162,40 @@ const KMFW_PAGE_MAP: Record<string, { label: string; sections: Record<string, st
         sections: {
             hero: 'Join Us Hero',
             ways: 'Ways to Join',
+        }
+    },
+    funders: {
+        label: 'Our Funders',
+        sections: {
+            hero: 'Funders Hero',
+            main_content: 'Funder Categories',
+        }
+    },
+    partners: {
+        label: 'Our Partners',
+        sections: {
+            hero: 'Partners Hero',
+            main_content: 'Partner Categories',
+        }
+    },
+    careers: {
+        label: 'Careers',
+        sections: {
+            hero: 'Careers Hero',
+            quote: 'Philosophy Quote',
+            employment_support: 'Employment Support',
+            join_our_team: 'Join Our Team CTA',
+            listings: 'Current Opportunities',
+        }
+    },
+    volunteer: {
+        label: 'Volunteer',
+        sections: {
+            hero: 'Volunteer Hero',
+            testimonials: 'Volunteer Testimonials',
+            application_cta: 'Application Form CTA',
+            board_call: 'Board Membership Call',
+            volunteer_needs: 'Current Needs List',
         }
     },
     blog: {
