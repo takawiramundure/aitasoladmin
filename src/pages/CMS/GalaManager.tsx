@@ -10,7 +10,7 @@ import Alert from "../../components/ui/alert/Alert";
 import ImagePicker from '../../components/form/ImagePicker';
 import LinkPicker from '../../components/form/LinkPicker';
 import { Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
-import { nominees as defaultNominees, agenda as defaultAgenda } from '../../data/fallbackNominees';
+import { nominees as defaultNominees, agenda as defaultAgenda, speakers as defaultSpeakers } from '../../data/fallbackNominees';
 
 interface GalaSection extends SectionContent {
     enabled?: boolean;
@@ -30,6 +30,8 @@ interface GalaSection extends SectionContent {
     link?: string;
     buttonText2?: string;
     link2?: string;
+    keynote?: any;
+    panelists?: any[];
     content: string; // Ensure compatibility with SectionContent
 }
 
@@ -40,6 +42,7 @@ interface GalaPageContent extends PageContent {
 const GALA_SECTIONS = [
     { id: 'hero', label: 'Gala Hero' },
     { id: 'mission', label: 'Gala Mission' },
+    { id: 'speakers', label: 'Keynote & Panelists' },
     { id: 'agenda', label: 'Event Agenda' },
     { id: 'awards', label: 'Award Categories' },
     { id: 'nominees', label: 'Nominees Directory' },
@@ -120,6 +123,16 @@ export default function GalaManager() {
                     updatedSections.agenda.items = defaultAgenda;
                 }
 
+                if (!updatedSections.speakers) {
+                    updatedSections.speakers = { 
+                        heading: defaultSpeakers.heading, 
+                        enabled: defaultSpeakers.enabled, 
+                        keynote: defaultSpeakers.keynote, 
+                        panelists: defaultSpeakers.panelists,
+                        content: '' 
+                    } as any;
+                }
+
                 setContent({ ...data, sections: updatedSections } as GalaPageContent);
             } else {
                 // Initialize with full defaults
@@ -139,6 +152,14 @@ export default function GalaManager() {
                 
                 initialSections.nominees.items = defaultNominees;
                 initialSections.agenda.items = defaultAgenda;
+                
+                initialSections.speakers = { 
+                    heading: defaultSpeakers.heading, 
+                    enabled: defaultSpeakers.enabled, 
+                    keynote: defaultSpeakers.keynote, 
+                    panelists: defaultSpeakers.panelists,
+                    content: '' 
+                } as any;
                 
                 setContent({ title: "Black Excellence Gala", sections: initialSections });
             }
@@ -237,6 +258,13 @@ export default function GalaManager() {
                         { time: "6:35 - 6:50 PM", title: "Keynote Address", details: [] }
                     ]
                 },
+                speakers: {
+                    heading: defaultSpeakers.heading,
+                    enabled: defaultSpeakers.enabled,
+                    keynote: defaultSpeakers.keynote,
+                    panelists: defaultSpeakers.panelists,
+                    content: ""
+                } as any,
                 awards: {
                     heading: "Award Categories",
                     subtitle: "Celebrating the ongoing excellence across various domains. Here are the categories for our inaugural celebration.",
@@ -493,6 +521,67 @@ export default function GalaManager() {
                                                         </div>
                                                     ))}
                                                     <Button variant="outline" size="sm" onClick={() => handleSectionChange('awards', 'items', [...(section.items || []), {name: '', icon: '', desc: ''}])}><Plus size={16} className="mr-2" /> Add Award Category</Button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {config.id === 'speakers' && (
+                                            <div className="space-y-6">
+                                                <Label>Section Heading</Label><Input value={section.heading} onChange={(e) => handleSectionChange('speakers', 'heading', e.target.value)} />
+                                                
+                                                <div className="p-4 border rounded-xl bg-gray-50/50">
+                                                    <h4 className="font-bold text-primary mb-4">Keynote Speaker</h4>
+                                                    <div className="grid gap-4 md:grid-cols-2">
+                                                        <div><Label>Name</Label><Input value={(section as any).keynote?.name || ''} onChange={(e) => handleSectionChange('speakers', 'keynote', { ...(section as any).keynote, name: e.target.value })} /></div>
+                                                        <div><Label>Role/Title</Label><Input value={(section as any).keynote?.role || ''} onChange={(e) => handleSectionChange('speakers', 'keynote', { ...(section as any).keynote, role: e.target.value })} /></div>
+                                                        <div className="md:col-span-2"><Label>Bio</Label><textarea className="w-full p-3 rounded-lg border dark:bg-gray-800" rows={4} value={(section as any).keynote?.bio || ''} onChange={(e) => handleSectionChange('speakers', 'keynote', { ...(section as any).keynote, bio: e.target.value })} /></div>
+                                                        <div className="md:col-span-2"><Label>Profile Image</Label><ImagePicker value={(section as any).keynote?.image || ''} onChange={(url) => handleSectionChange('speakers', 'keynote', { ...(section as any).keynote, image: url })} /></div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-4 pt-4">
+                                                    <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400">Panelists</h4>
+                                                    {((section as any).panelists || []).map((item: any, idx: number) => (
+                                                        <div key={idx} className="p-4 border rounded-xl bg-gray-50/50 space-y-3">
+                                                            <div className="flex justify-between items-start">
+                                                                <span className="text-xs font-bold text-gray-400">Panelist {idx + 1}</span>
+                                                                <button onClick={() => {
+                                                                    const newItems = ((section as any).panelists || []).filter((_: any, i: number) => i !== idx);
+                                                                    handleSectionChange('speakers', 'panelists', newItems);
+                                                                }} className="text-red-500 text-sm"><Trash2 size={16} /></button>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-4">
+                                                                <div><Label>Name</Label><Input value={item.name || ''} onChange={(e) => {
+                                                                    const newItems = [...((section as any).panelists || [])];
+                                                                    newItems[idx].name = e.target.value;
+                                                                    handleSectionChange('speakers', 'panelists', newItems);
+                                                                }} /></div>
+                                                                <div><Label>Role</Label><Input value={item.role || ''} onChange={(e) => {
+                                                                    const newItems = [...((section as any).panelists || [])];
+                                                                    newItems[idx].role = e.target.value;
+                                                                    handleSectionChange('speakers', 'panelists', newItems);
+                                                                }} /></div>
+                                                                <div className="col-span-2"><Label>Bio</Label>
+                                                                    <textarea 
+                                                                        className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800" 
+                                                                        rows={3} 
+                                                                        value={item.bio || ''} 
+                                                                        onChange={(e) => {
+                                                                            const newItems = [...((section as any).panelists || [])];
+                                                                            newItems[idx].bio = e.target.value;
+                                                                            handleSectionChange('speakers', 'panelists', newItems);
+                                                                        }} 
+                                                                    />
+                                                                </div>
+                                                                <div className="col-span-2"><Label>Profile Image</Label><ImagePicker value={item.image || ''} onChange={(url) => {
+                                                                    const newItems = [...((section as any).panelists || [])];
+                                                                    newItems[idx].image = url;
+                                                                    handleSectionChange('speakers', 'panelists', newItems);
+                                                                }} /></div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <Button variant="outline" size="sm" onClick={() => handleSectionChange('speakers', 'panelists', [...((section as any).panelists || []), {name: '', role: '', bio: '', image: ''}])}><Plus size={16} className="mr-2" /> Add Panelist</Button>
                                                 </div>
                                             </div>
                                         )}

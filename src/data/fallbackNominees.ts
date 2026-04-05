@@ -12,6 +12,22 @@ export interface AgendaItem {
     details: string[];
 }
 
+export interface Speaker {
+    id: string;
+    name: string;
+    role: string;
+    bio: string;
+    image?: string;
+    isKeynote?: boolean;
+}
+
+export interface SpeakersData {
+    heading: string;
+    enabled: boolean;
+    keynote: Speaker;
+    panelists: Speaker[];
+}
+
 export interface Testimonial {
     quote: string;
     author?: string;
@@ -64,6 +80,50 @@ export const agenda: AgendaItem[] = [
         ]
     }
 ];
+
+export const speakers: SpeakersData = {
+    heading: "Keynote & Panelists",
+    enabled: true,
+    keynote: {
+        id: "dr-gifty-parker-dejong",
+        name: "Dr. Gifty Parker-DeJong",
+        role: "Founder and CEO, Parker HR Solutions Inc",
+        bio: "Dr. Gifty Parker-DeJong is an educator, and community advocate whose life and work are rooted in advancing Black excellence across generations. As the founder of PARKER HR Solutions and a national and international voice in leadership and talent development, she has dedicated her career to amplifying underrepresented voices, and building systems where Black professionals and entrepreneurs can thrive, not merely participate.\n\nHer journey as a Black woman in leadership fuels her commitment to visibility, representation, and legacy building. She believes excellence within Black communities has always existed, and it simply must be recognized, elevated, and resourced.\n\nAs a keynote speaker for the inaugural Black Excellence Awards Gala 2026, she brings lived experience and leadership insight to this historic moment. Her message calls the community to action: to honor boldly, celebrate unapologetically, and move from early engagement to full participation, ensuring that Black brilliance is acknowledged, documented, and carried forward for the future.\n\nAs the keynote speaker for the inaugural Black Excellence Awards Gala 2026, Dr. Parker-DeJong brings lived experience and leadership insight, inspiring the community to honor boldly, celebrate unapologetically, and ensure Black brilliance is documented and carried forward for future generations.",
+        isKeynote: true
+    },
+    panelists: [
+        {
+            id: "dr-magnus-mfoafo-mcarthy",
+            name: "Dr. Magnus Mfoafo-M’Carthy",
+            role: "Moderator | Professor, Wilfrid Laurier University",
+            bio: "Dr. Magnus Mfoafo-M’Carthy is a Professor in the Faculty of Social Work at Wilfrid Laurier University and Director of the Manulife Centre for Community Health Research (MCCHR). A scholar and community-engaged researcher, Dr. Mfoafo-M’Carthy focuses on health equity, caregiving, and the wellbeing of Black communities. His work spans international research in the Global South and emphasizes knowledge mobilization that bridges scholarship, policy, and lived experience."
+        },
+        {
+            id: "maedith-radlein",
+            name: "Maedith Radlein",
+            role: "Chair, Board of Trustees, WRDSB",
+            bio: "Maedith Radlein immigrated to Waterloo Region 39 years ago and is a retired elementary school principal. Throughout her career and retirement, she has been actively involved in numerous community initiatives and is a passionate advocate for social justice, with a focus on equity, diversity, and inclusion. In 2022, she was elected as a public school board trustee for Kitchener and currently serves as Chair of the WRDSB Board of Trustees, bringing her experience in education and community leadership to every decision she makes.\n\nAs a panelist, Maedith reflects on the power of legacy, sharing insights from her years of leadership and community engagement, and highlighting how lasting contributions continue to shape and inspire the next generation."
+        },
+        {
+            id: "dr-trevor-charles",
+            name: "Dr. Trevor Charles",
+            role: "Professor, Scientist and Entrepreneur",
+            bio: "Dr. Trevor Charles is a Professor of Biology at the University of Waterloo and a microbiologist whose research spans bacterial molecular genetics, functional metagenomics, and pathogen surveillance. An active entrepreneur, he has co-founded companies including Metagenom Bio Life Science, Healthy Hydroponics, and Earth Microbial. As founder and Executive Director of the Lanterna Black Innovation Hub, he champions Black innovation and entrepreneurship in Waterloo Region and beyond.\n\nAs a panelist, Dr. Charles shares his perspective on living and leading in the present, highlighting how today’s actions and choices create meaningful impact and shape communities in real time."
+        },
+        {
+            id: "robyn-schwarz",
+            name: "Robyn E. Schwarz (she/her)",
+            role: "Principal Consultant & Co-Founder, Dumbo Octopus",
+            bio: "Robyn E. Schwarz (she/her) is the Principal Consultant and Co-Founder of Dumbo Octopus Consulting, a Waterloo Region–based social enterprise that supports nonprofits and grassroots leaders working for equity and community wellbeing. In the last two years, Dumbo Octopus Consulting has helped bring more than $4 million in additional funding to equity-driven organizations by working as a strategic partner and collaborator to ensure resources flow to groups that have historically been excluded from traditional funding systems. Robyn is known for asking critical questions about money, power, and the structures shaping the nonprofit sector, and for helping equity-seeking leaders navigate funding landscapes that were not designed with their communities in mind. She is also an accomplished historical researcher, feminist thinker, and activist whose writing and public speaking explore reproductive justice, disability, and the realities of navigating healthcare systems. Robyn writes candidly about her own experiences accessing reproductive healthcare and ADHD treatment, using her platform to advocate for more equitable and compassionate systems of care."
+        },
+        {
+            id: "melat-gebray",
+            name: "Melat Gebray",
+            role: "Youth Voice/Student",
+            bio: "Melat Gebray is a high school senior and a dedicated Youth Lead at Kind Minds Family Wellness. She began her journey in 2022 through the Black Youth Internship Program (BYIP), where she discovered her passion for leadership and supporting her peers.\n\nAs a panelist for “Igniting the Future”, Melat brings her unique youth perspective, lived experience, and dedication to creating safe, empowering spaces for young people. She represents the next generation of changemakers, inspiring others to imagine and build a more inclusive, equitable, and vibrant future."
+        }
+    ]
+};
 
 export const nominees: Nominee[] = [
     {
