@@ -10,12 +10,14 @@ import Alert from "../../components/ui/alert/Alert";
 import ImagePicker from '../../components/form/ImagePicker';
 import LinkPicker from '../../components/form/LinkPicker';
 import { Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import { nominees as defaultNominees, agenda as defaultAgenda } from '../../data/fallbackNominees';
 
 interface GalaSection extends SectionContent {
     enabled?: boolean;
     subheading?: string;
     subtitle?: string;
     date?: string;
+    countdownDate?: string;
     location?: string;
     images?: { url: string; alt: string }[];
     videoUrl?: string;
@@ -38,7 +40,9 @@ interface GalaPageContent extends PageContent {
 const GALA_SECTIONS = [
     { id: 'hero', label: 'Gala Hero' },
     { id: 'mission', label: 'Gala Mission' },
+    { id: 'agenda', label: 'Event Agenda' },
     { id: 'awards', label: 'Award Categories' },
+    { id: 'nominees', label: 'Nominees Directory' },
     { id: 'nominations', label: 'Nominations CTA' },
     { id: 'sponsors', label: 'Sponsors' },
     { id: 'network', label: 'Our Esteemed Network' },
@@ -106,6 +110,16 @@ export default function GalaManager() {
                     updatedSections.network.networkPartners = defaultNetworkPartners;
                 }
 
+                if (!updatedSections.nominees?.items || updatedSections.nominees.items.length === 0) {
+                    if (!updatedSections.nominees) updatedSections.nominees = { heading: 'Nominees Directory', enabled: true, content: '' };
+                    updatedSections.nominees.items = defaultNominees;
+                }
+
+                if (!updatedSections.agenda?.items || updatedSections.agenda.items.length === 0) {
+                    if (!updatedSections.agenda) updatedSections.agenda = { heading: 'The Gala Agenda', enabled: true, content: '' };
+                    updatedSections.agenda.items = defaultAgenda;
+                }
+
                 setContent({ ...data, sections: updatedSections } as GalaPageContent);
             } else {
                 // Initialize with full defaults
@@ -122,6 +136,9 @@ export default function GalaManager() {
                 
                 initialSections.network.networkPartners = defaultNetworkPartners;
                 initialSections.network.heading = "Our Esteemed Network";
+                
+                initialSections.nominees.items = defaultNominees;
+                initialSections.agenda.items = defaultAgenda;
                 
                 setContent({ title: "Black Excellence Gala", sections: initialSections });
             }
@@ -178,6 +195,7 @@ export default function GalaManager() {
                     heading: "Black *Excellence*<br />Awards Gala 2026",
                     subtitle: "Honouring the present, Building the future.",
                     date: "Saturday, April 11, 2026",
+                    countdownDate: "2026-04-11T17:30",
                     location: "St. George Banquet Hall",
                     images: [{ url: '/assets/illustrations/gala-hero-bg.jpg', alt: 'Gala Hero' }],
                     buttonText: "Get Early Bird Tickets",
@@ -206,6 +224,19 @@ export default function GalaManager() {
                         { label: "Seating", value: "Limited seating, early booking recommended" }
                     ]
                 },
+                agenda: {
+                    heading: "The Gala Agenda",
+                    enabled: true,
+                    content: "",
+                    items: [
+                        { time: "5:30 - 6:00 PM", title: "Doors Open & Networking", details: ["Guest check-in", "Vendor tables open", "DJ music & drumming"] },
+                        { time: "6:00 - 6:10 PM", title: "Welcome & Housekeeping", details: ["MC welcome", "Gala overview", "Introduction to the Libation Ceremony"] },
+                        { time: "6:10 - 6:15 PM", title: "Libation Ceremony", details: [] },
+                        { time: "6:15 - 6:25 PM", title: "Spoken Word Performance", details: [] },
+                        { time: "6:25 - 6:35 PM", title: "Welcome Remarks", details: ["Board President", "Founding Director", "Sponsors recognition"] },
+                        { time: "6:35 - 6:50 PM", title: "Keynote Address", details: [] }
+                    ]
+                },
                 awards: {
                     heading: "Award Categories",
                     subtitle: "Celebrating the ongoing excellence across various domains. Here are the categories for our inaugural celebration.",
@@ -224,6 +255,12 @@ export default function GalaManager() {
                     ],
                     content: "", // Added to satisfy GalaSection interface
                     enabled: true // Added to satisfy GalaSection interface
+                },
+                nominees: {
+                    heading: "Nominees Directory",
+                    enabled: true,
+                    content: "",
+                    items: defaultNominees
                 },
                 nominations: {
                     heading: "Nominations Close *February 6, 2026*",
@@ -331,7 +368,8 @@ export default function GalaManager() {
                                                 <div className="md:col-span-2"><Label>Main Heading</Label><Input value={section.heading} onChange={(e) => handleSectionChange('hero', 'heading', e.target.value)} /></div>
                                                 <div className="md:col-span-2"><Label>Subtitle</Label><Input value={section.subtitle} onChange={(e) => handleSectionChange('hero', 'subtitle', e.target.value)} /></div>
                                                 <div><Label>Date</Label><Input value={section.date} onChange={(e) => handleSectionChange('hero', 'date', e.target.value)} /></div>
-                                                <div><Label>Location</Label><Input value={section.location} onChange={(e) => handleSectionChange('hero', 'location', e.target.value)} /></div>
+                                                <div><Label>Countdown Target Date/Time</Label><Input type="datetime-local" value={section.countdownDate || ''} onChange={(e) => handleSectionChange('hero', 'countdownDate', e.target.value)} /></div>
+                                                <div className="md:col-span-2"><Label>Location</Label><Input value={section.location} onChange={(e) => handleSectionChange('hero', 'location', e.target.value)} /></div>
                                                 
                                                 <div className="md:col-span-1 border-t pt-4">
                                                     <Label>Button 1 Text (Tickets)</Label>
@@ -455,6 +493,51 @@ export default function GalaManager() {
                                                         </div>
                                                     ))}
                                                     <Button variant="outline" size="sm" onClick={() => handleSectionChange('awards', 'items', [...(section.items || []), {name: '', icon: '', desc: ''}])}><Plus size={16} className="mr-2" /> Add Award Category</Button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {config.id === 'agenda' && (
+                                            <div className="space-y-4">
+                                                <Label>Section Heading</Label><Input value={section.heading} onChange={(e) => handleSectionChange('agenda', 'heading', e.target.value)} />
+                                                <div className="space-y-4 pt-4">
+                                                    <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400">Agenda Items</h4>
+                                                    {(section.items || []).map((item: any, idx: number) => (
+                                                        <div key={idx} className="p-4 border rounded-xl bg-gray-50/50 space-y-3">
+                                                            <div className="flex justify-between items-start">
+                                                                <span className="text-xs font-bold text-gray-400">Session {idx + 1}</span>
+                                                                <button onClick={() => {
+                                                                    const newItems = (section.items || []).filter((_: any, i: number) => i !== idx);
+                                                                    handleSectionChange('agenda', 'items', newItems);
+                                                                }} className="text-red-500 text-sm"><Trash2 size={16} /></button>
+                                                            </div>
+                                                            <div className="grid grid-cols-2 gap-4">
+                                                                <div><Label>Time Range (e.g. 5:30 PM - 6:00 PM)</Label><Input value={item.time || ''} onChange={(e) => {
+                                                                    const newItems = [...(section.items || [])];
+                                                                    newItems[idx].time = e.target.value;
+                                                                    handleSectionChange('agenda', 'items', newItems);
+                                                                }} /></div>
+                                                                <div><Label>Title</Label><Input value={item.title || ''} onChange={(e) => {
+                                                                    const newItems = [...(section.items || [])];
+                                                                    newItems[idx].title = e.target.value;
+                                                                    handleSectionChange('agenda', 'items', newItems);
+                                                                }} /></div>
+                                                                <div className="col-span-2"><Label>Description details (Comma separated)</Label>
+                                                                    <textarea 
+                                                                        className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800" 
+                                                                        rows={2} 
+                                                                        value={(item.details || []).join(', ')} 
+                                                                        onChange={(e) => {
+                                                                            const newItems = [...(section.items || [])];
+                                                                            newItems[idx].details = e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean);
+                                                                            handleSectionChange('agenda', 'items', newItems);
+                                                                        }} 
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <Button variant="outline" size="sm" onClick={() => handleSectionChange('agenda', 'items', [...(section.items || []), {time: '', title: '', details: []}])}><Plus size={16} className="mr-2" /> Add Agenda Item</Button>
                                                 </div>
                                             </div>
                                         )}
@@ -584,12 +667,12 @@ export default function GalaManager() {
                                                             handleSectionChange('testimonials', 'items', newT);
                                                         }} />
                                                         <div className="grid grid-cols-2 gap-4">
-                                                            <div><Label>Author</Label><Input value={t.author} onChange={(e) => {
+                                                            <div><Label>Author</Label><Input value={t.author || ''} onChange={(e) => {
                                                                 const newT = [...(section.items || [])];
                                                                 newT[idx].author = e.target.value;
                                                                 handleSectionChange('testimonials', 'items', newT);
                                                             }} /></div>
-                                                            <div><Label>Role</Label><Input value={t.role} onChange={(e) => {
+                                                            <div><Label>Role</Label><Input value={t.role || ''} onChange={(e) => {
                                                                 const newT = [...(section.items || [])];
                                                                 newT[idx].role = e.target.value;
                                                                 handleSectionChange('testimonials', 'items', newT);
@@ -599,6 +682,108 @@ export default function GalaManager() {
                                                     </div>
                                                 ))}
                                                 <Button variant="outline" onClick={() => handleSectionChange('testimonials', 'items', [...(section.items || []), {quote: '', author: '', role: ''}])}>+ Testimonial</Button>
+                                            </div>
+                                        )}
+
+                                        {config.id === 'nominees' && (
+                                            <div className="space-y-4">
+                                                <Label>Section Heading</Label><Input value={section.heading} onChange={(e) => handleSectionChange('nominees', 'heading', e.target.value)} />
+                                                <div className="space-y-4 pt-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400">Nominee Profiles ({section.items?.length || 0})</h4>
+                                                        <Button variant="outline" size="sm" onClick={() => handleSectionChange('nominees', 'items', [{id: `nominee-${Date.now()}`, name: '', bio: '', categories: [], image: ''}, ...(section.items || [])])}>
+                                                            <Plus size={16} className="mr-2" /> Add Nominee
+                                                        </Button>
+                                                    </div>
+                                                    
+                                                    <div className="grid gap-4">
+                                                        {(section.items || []).map((nominee: any, idx: number) => (
+                                                            <details key={idx} className="border rounded-xl bg-gray-50/50 overflow-hidden group">
+                                                                <summary className="p-4 cursor-pointer font-bold flex justify-between items-center hover:bg-gray-100">
+                                                                    <span className="flex items-center gap-3">
+                                                                        {nominee.image ? (
+                                                                            <img src={nominee.image} alt={nominee.name} className="w-8 h-8 rounded-full object-cover" />
+                                                                        ) : (
+                                                                            <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs text-gray-500 uppercase">
+                                                                                {(nominee.name || "N")[0]}
+                                                                            </div>
+                                                                        )}
+                                                                        {nominee.name || `New Nominee ${idx + 1}`}
+                                                                    </span>
+                                                                    <ChevronDown size={18} className="text-gray-400 group-open:rotate-180 transition-transform" />
+                                                                </summary>
+                                                                <div className="p-4 border-t space-y-4 bg-white dark:bg-gray-900/40">
+                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                        <div className="space-y-4">
+                                                                            <div>
+                                                                                <Label>Name</Label>
+                                                                                <Input value={nominee.name || ''} onChange={(e) => {
+                                                                                    const newItems = [...(section.items || [])];
+                                                                                    newItems[idx].name = e.target.value;
+                                                                                    handleSectionChange('nominees', 'items', newItems);
+                                                                                }} />
+                                                                            </div>
+                                                                            <div>
+                                                                                <Label>ID (Slug - Keep unique, e.g. john-doe)</Label>
+                                                                                <div className="flex gap-2">
+                                                                                    <Input value={nominee.id || ''} onChange={(e) => {
+                                                                                        const newItems = [...(section.items || [])];
+                                                                                        newItems[idx].id = e.target.value;
+                                                                                        handleSectionChange('nominees', 'items', newItems);
+                                                                                    }} />
+                                                                                </div>
+                                                                            </div>
+                                                                            <div>
+                                                                                <Label>Categories (Comma separated)</Label>
+                                                                                <textarea 
+                                                                                    className="w-full p-2 border rounded-lg bg-white dark:bg-gray-800 text-sm" 
+                                                                                    rows={2} 
+                                                                                    value={(nominee.categories || []).join(', ')} 
+                                                                                    onChange={(e) => {
+                                                                                        const newItems = [...(section.items || [])];
+                                                                                        newItems[idx].categories = e.target.value.split(',').map((s: string) => s.trim()).filter(Boolean);
+                                                                                        handleSectionChange('nominees', 'items', newItems);
+                                                                                    }} 
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="space-y-4">
+                                                                            <Label>Profile Picture</Label>
+                                                                            <ImagePicker 
+                                                                                value={nominee.image || ''} 
+                                                                                onChange={(url) => {
+                                                                                    const newItems = [...(section.items || [])];
+                                                                                    newItems[idx].image = url;
+                                                                                    handleSectionChange('nominees', 'items', newItems);
+                                                                                }} 
+                                                                            />
+                                                                            <div className="pt-2">
+                                                                                <button onClick={() => {
+                                                                                    if (confirm("Remove this nominee?")) {
+                                                                                        const newItems = (section.items || []).filter((_: any, i: number) => i !== idx);
+                                                                                        handleSectionChange('nominees', 'items', newItems);
+                                                                                    }
+                                                                                }} className="text-red-500 text-sm flex items-center gap-2"><Trash2 size={16}/> Remove Nominee</button>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="col-span-1 md:col-span-2">
+                                                                            <Label>Bio</Label>
+                                                                            <textarea 
+                                                                                className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 min-h-[150px]" 
+                                                                                value={nominee.bio || ''} 
+                                                                                onChange={(e) => {
+                                                                                    const newItems = [...(section.items || [])];
+                                                                                    newItems[idx].bio = e.target.value;
+                                                                                    handleSectionChange('nominees', 'items', newItems);
+                                                                                }} 
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </details>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
                                         )}
 

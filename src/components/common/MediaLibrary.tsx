@@ -42,6 +42,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
     const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState("");
+    const [itemToDelete, setItemToDelete] = useState<FileItem | null>(null);
 
     useEffect(() => {
         loadMedia(currentPath);
@@ -169,7 +170,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
 
                 // Clean file name
                 const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-                const storageRef = ref(storage, `${currentPath}/${Date.now()}_${cleanName}`);
+                const storageRef = ref(storage, `${currentPath}/${cleanName}`);
                 await uploadBytes(storageRef, file);
             }));
 
@@ -220,17 +221,22 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
         }
     };
 
-    const handleDelete = async (fileItem: FileItem) => {
-        if (!confirm(`Are you sure you want to delete ${fileItem.name}?`)) return;
+    const confirmDelete = (fileItem: FileItem) => {
+        setItemToDelete(fileItem);
+    };
 
+    const executeDelete = async () => {
+        if (!itemToDelete) return;
         try {
-            await deleteObject(fileItem.ref);
-            setItems(items.filter(i => i.name !== fileItem.name));
-            setSuccessMsg("Deleted successfully.");
+            await deleteObject(itemToDelete.ref);
+            setItems(items.filter(i => i.name !== itemToDelete.name));
+            setSuccessMsg(`Deleted ${itemToDelete.name} successfully.`);
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err) {
             console.error(err);
             setError("Failed to delete item.");
+        } finally {
+            setItemToDelete(null);
         }
     };
 
@@ -441,7 +447,11 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
                                                 <CopyIcon className="w-4 h-4" />
                                             </button>
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); handleDelete(item); }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+                                                    confirmDelete(item);
+                                                }}
                                                 className="p-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
                                                 title="Delete"
                                             >
@@ -474,6 +484,33 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
                         <PlusIcon className="w-5 h-5" />
                         Insert {selectedUrls.length} Image{selectedUrls.length > 1 ? 's' : ''}
                     </button>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {itemToDelete && (
+                <div className="absolute inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 dark:border-gray-700 text-center animate-in fade-in zoom-in-95 duration-200">
+                        <TrashBinIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete File?</h3>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 max-h-24 overflow-auto">
+                            Are you sure you want to permanently delete <strong>{itemToDelete.name}</strong>? This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3 justify-center">
+                            <button
+                                onClick={() => setItemToDelete(null)}
+                                className="px-5 py-2.5 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={executeDelete}
+                                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+                            >
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
