@@ -127,10 +127,11 @@ const AppSidebar: React.FC = () => {
           name: "About KMFW",
           icon: <UserCircleIcon />,
           subItems: [
-            { name: "About Gateway", path: "/cms/about" },
+            { name: "About Us", path: "/cms/about" },
             { name: "Our Story", path: "/cms/our-story" },
             { name: "Meet Our Team", path: "/cms/meet-our-team" },
             { name: "Strategic Plan", path: "/cms/strategic-plan" },
+            { name: "Founder's Message", path: "/cms/founders-message" },
             { name: "Contact Us", path: "/cms/contact" },
             { name: "Inbound Messages", path: "/cms/messages" },
           ],
@@ -164,8 +165,10 @@ const AppSidebar: React.FC = () => {
             { name: "Impact Gateway", path: "/cms/impact" },
             { name: "Upcoming Events", path: "/cms/upcoming-events" },
             { name: "Black Excellence Gala", path: "/cms/black-excellence-gala" },
+            { name: "Event Hero (Homepage)", path: "/cms/event-hero", new: true },
             { name: "Newsletters", path: "/cms/newsletters" },
             { name: "Success Stories", path: "/cms/success-stories" },
+            { name: "Gallery", path: "/cms/gallery" },
           ]
         },
         {
@@ -237,28 +240,33 @@ const AppSidebar: React.FC = () => {
 
 
 
-  const othersItems: NavItem[] = [
-    {
-      icon: <UserCircleIcon />,
-      name: "Users",
-      path: "/users",
-    },
-    {
-      icon: <UserCircleIcon />,
-      name: "User Profile",
-      path: "/profile",
-    },
-    {
-      icon: <PlugInIcon />,
-      name: "Site Settings",
-      path: "/settings/site",
-    },
-    {
-      icon: <PlugInIcon />,
-      name: "System Settings",
-      path: "/settings",
-    },
-  ];
+    const othersItems: NavItem[] = [
+      {
+        icon: <UserCircleIcon />,
+        name: "Users",
+        path: "/users",
+      },
+      {
+        icon: <UserCircleIcon />,
+        name: "User Profile",
+        path: "/profile",
+      },
+      {
+        icon: <PlugInIcon />,
+        name: "Global Site Settings",
+        path: "/settings/site",
+      },
+      {
+        icon: <GridIcon />,
+        name: "Page SEO Manager",
+        path: "/settings/seo",
+      },
+      {
+        icon: <PlugInIcon />,
+        name: "System Settings",
+        path: "/settings",
+      },
+    ];
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";

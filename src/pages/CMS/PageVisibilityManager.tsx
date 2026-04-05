@@ -149,7 +149,10 @@ const KMFW_PAGE_MAP: Record<string, { label: string; sections: Record<string, st
         sections: {
             hero: 'Gala Hero',
             mission: 'Gala Mission',
+            speakers: 'Keynote & Panelists',
+            agenda: 'Event Agenda',
             awards: 'Award Categories',
+            nominees: 'Nominees Directory',
             nominations: 'Nominations CTA',
             sponsors: 'Sponsors',
             network: 'Network',

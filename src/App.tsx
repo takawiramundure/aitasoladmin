@@ -15,6 +15,7 @@ import Calendar from "./pages/Calendar";
 import BasicTables from "./pages/Tables/BasicTables";
 import SystemSettings from "./pages/Settings/SystemSettings";
 import SiteSettingsManager from "./pages/Settings/SiteSettingsManager";
+import SEOManager from "./pages/Settings/SEOManager";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
@@ -40,6 +41,9 @@ import FooterManager from "./pages/CMS/FooterManager";
 import SuicideFactsManager from "./pages/CMS/SuicideFactsManager";
 import NewslettersManager from "./pages/CMS/NewslettersManager";
 import GalaManager from "./pages/CMS/GalaManager";
+import EventHeroManager from "./pages/CMS/EventHeroManager";
+import FoundersMessageManager from "./pages/CMS/FoundersMessageManager";
+import GalleryManager from "./pages/CMS/GalleryManager";
 import MeetOurTeamManager from "./pages/CMS/MeetOurTeamManager";
 import StrategicPlanManager from "./pages/CMS/StrategicPlanManager";
 import ContactPageManager from "./pages/CMS/ContactPageManager";
@@ -89,6 +93,9 @@ export default function App() {
                     <Route path="/cms/suicide-facts" element={<SuicideFactsManager />} />
                     <Route path="/cms/newsletters" element={<NewslettersManager />} />
                     <Route path="/cms/black-excellence-gala" element={<GalaManager />} />
+                    <Route path="/cms/event-hero" element={<EventHeroManager />} />
+                    <Route path="/cms/founders-message" element={<FoundersMessageManager />} />
+                    <Route path="/cms/gallery" element={<GalleryManager />} />
                     <Route path="/cms/meet-our-team" element={<MeetOurTeamManager />} />
                     <Route path="/cms/strategic-plan" element={<StrategicPlanManager />} />
                     <Route path="/cms/contact" element={<ContactPageManager />} />
@@ -103,6 +110,7 @@ export default function App() {
                     <Route path="/profile" element={<UserProfiles />} />
                     <Route path="/settings" element={<SystemSettings />} />
                     <Route path="/settings/site" element={<SiteSettingsManager />} />
+                    <Route path="/settings/seo" element={<SEOManager />} />
                     <Route path="/calendar" element={<Calendar />} />
                     <Route path="/blank" element={<Blank />} />
 

@@ -51,12 +51,61 @@ export default function SiteSettingsManager() {
             setLoading(true);
             const data = await FirestoreService.getSiteSettings(currentSite.id);
             
+            const defaultNav = [
+                { id: 'nav-home', name: 'Home', path: '/', order: 1 },
+                { id: 'nav-about', name: 'About', path: '/about', order: 2, subItems: [
+                    { id: 'nav-about-story', name: 'Our Story', path: '/about/our-story', order: 1 },
+                    { id: 'nav-about-team', name: 'Meet Our Team', path: '/about/meet-our-team', order: 2 },
+                    { id: 'nav-about-plan', name: 'Our Strategic Plan', path: '/about/our-strategic-plan', order: 3 },
+                    { id: 'nav-about-founder', name: "Founder's Message", path: '/about/founders-message', order: 4 },
+                ] },
+                { id: 'nav-services', name: 'Services', path: '/services', order: 3, subItems: [
+                    { id: 'nav-serv-prog', name: 'Programs & Services', path: '/services', order: 1 },
+                    { id: 'nav-serv-ground', name: 'Grounded Counseling', path: '/services/grounded-counseling', order: 2 },
+                    { id: 'nav-serv-edu', name: 'Educational Programs & Groups', path: '/services/educational-programs', order: 3 },
+                    { id: 'nav-serv-advocacy', name: 'Advocacy, Training & Education', path: '/services/advocacy-education', order: 4 },
+                    { id: 'nav-serv-community', name: 'Community Support & Engagement', path: '/services/community-support', order: 5 },
+                    { id: 'nav-serv-system', name: 'System Navigation', path: '/services/system-navigation', order: 6 },
+                ] },
+                { id: 'nav-impact', name: 'Impact', path: '/impact', order: 4, subItems: [
+                    { id: 'nav-imp-gateway', name: 'Impact Gateway', path: '/impact', order: 1 },
+                    { id: 'nav-imp-events', name: 'Events', path: '/impact/events', order: 2 },
+                    { id: 'nav-imp-news', name: 'Newsletters', path: '/impact/newsletters', order: 3 },
+                    { id: 'nav-imp-success', name: 'Success Stories', path: '/impact/success-stories', order: 4 },
+                    { id: 'nav-imp-blog', name: 'Community Blog', path: '/impact/blog', order: 5 },
+                    { id: 'nav-imp-gallery', name: 'Gallery', path: '/impact/gallery', order: 6 },
+                ] },
+                { id: 'nav-gala', name: 'BEA Gala', path: '/impact/events/black-excellence-gala', order: 5 },
+                { id: 'nav-research', name: 'Research', path: '/research', order: 6, subItems: [
+                    { id: 'nav-res-gateway', name: 'Research Gateway', path: '/research', order: 1 },
+                    { id: 'nav-res-black', name: 'Black Wellness Project', path: '/research/black-wellness', order: 2 },
+                    { id: 'nav-res-phac', name: 'PHAC Child Welfare', path: '/research/phac-child-welfare', order: 3 },
+                    { id: 'nav-res-umoja', name: 'Umoja Neurodivergent Program', path: '/research/umoja-neurodivergent', order: 4 },
+                ] },
+                { id: 'nav-join', name: 'Join Us', path: '/join', order: 7, subItems: [
+                    { id: 'nav-join-inv', name: 'Get Involved', path: '/join', order: 1 },
+                    { id: 'nav-join-sponsors', name: 'Our Funders/Sponsors', path: '/join/funders', order: 2 },
+                    { id: 'nav-join-partners', name: 'Our Partners', path: '/join/partners', order: 3 },
+                    { id: 'nav-join-volunteers', name: 'Volunteering', path: '/join/volunteer', order: 4 },
+                    { id: 'nav-join-careers', name: 'Career Services & Employment Support', path: '/join/careers', order: 5 },
+                ] },
+                { id: 'nav-contact', name: 'Contact', path: '/contact', order: 8 },
+            ];
+
+            if (data && (!data.navigation || data.navigation.length <= 1)) {
+                data.navigation = defaultNav;
+            }
+
             // Auto-initialize if no data found
             const finalSettings: SiteSettings = data || {
                 siteId: currentSite.id,
                 siteTitle: currentSite.name,
-                siteDescription: '',
-                siteKeywords: '',
+                siteDescription: currentSite.id === 'kmfw'
+                    ? 'Kind Minds Family Wellness (KMFW) is a Black-led organization providing culturally grounded mental health, counseling, and wellness programs to the Black community in Waterloo Region, Ontario.'
+                    : '',
+                siteKeywords: currentSite.id === 'kmfw'
+                    ? 'Black mental health, KMFW, Kind Minds Family Wellness, Black wellness Waterloo, Black community support Ontario, culturally grounded counseling'
+                    : '',
                 branding: { 
                     siteName: currentSite.name, 
                     logo: '' 
@@ -73,9 +122,8 @@ export default function SiteSettingsManager() {
                     topBarBg: '#1C2434', 
                     headerBg: '#FFFFFF' 
                 },
-                navigation: [
-                    { id: '1', name: 'Home', path: '/', order: 1 }
-                ],
+                navigation: defaultNav,
+                maintenanceMode: false,
                 emergencyBar: {
                     enabled: false,
                     content: 'National Suicide Helpline available 24/7. Please call or text <a href="tel:988" style="color: white; font-weight: bold; text-decoration: underline;">9-8-8</a>.',
@@ -98,6 +146,16 @@ export default function SiteSettingsManager() {
                     updatedBy: 'system'
                 }
             };
+
+            // Auto-save to Firestore if this is the first time (config doc was null)
+            if (!data) {
+                try {
+                    await FirestoreService.saveSiteSettings(currentSite.id, finalSettings);
+                    console.log('[SiteSettingsManager] Auto-seeded default settings to Firestore.');
+                } catch (saveErr) {
+                    console.warn('[SiteSettingsManager] Could not auto-save defaults:', saveErr);
+                }
+            }
 
             setSettings(finalSettings);
         } catch (error) {
@@ -464,17 +522,23 @@ export default function SiteSettingsManager() {
                                             />
                                         </div>
                                         <div className="col-span-2">
-                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-                                                Maintenance Mode
-                                                <span className={`inline-block w-2 h-2 rounded-full ${settings.maintenanceMode ? 'bg-red-500' : 'bg-green-500'}`} />
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                                                Site Status
+                                                <span className={`inline-block w-2 h-2 rounded-full ${settings.maintenanceMode ? 'bg-red-500 animate-pulse' : 'bg-green-500'}`} />
+                                                <span className={`text-xs font-normal px-2 py-0.5 rounded-full ${settings.maintenanceMode ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                                    {settings.maintenanceMode ? 'OFFLINE' : 'LIVE'}
+                                                </span>
                                             </label>
+                                            <div className="mb-3 p-3 bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-700 rounded-lg text-sm text-amber-800 dark:text-amber-300">
+                                                <strong>⚠️ Entire Site:</strong> Switching to Maintenance Mode will replace <em>all pages</em> of the live website with a branded "We'll Be Right Back" splash screen showing the site logo. This affects every visitor. It does <strong>not</strong> affect individual sections — use <strong>Page Visibility</strong> for that.
+                                            </div>
                                             <select
                                                 value={settings.maintenanceMode ? "true" : "false"}
                                                 onChange={(e) => setSettings({ ...settings, maintenanceMode: e.target.value === "true" })}
                                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                             >
-                                                <option value="false">Live (Publicly Accessible)</option>
-                                                <option value="true">Maintenance Mode (Coming Soon Page)</option>
+                                                <option value="false">🟢 Live — Site is publicly accessible</option>
+                                                <option value="true">🔴 Maintenance Mode — Show branded splash page to all visitors</option>
                                             </select>
                                         </div>
                                     </div>
@@ -485,7 +549,18 @@ export default function SiteSettingsManager() {
 
                     {activeTab === 'seo' && (
                         <div className="space-y-6 animate-in fade-in duration-300 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">SEO & Metadata</h2>
+                            <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Global SEO Defaults</h2>
+                            
+                            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800 rounded-lg flex flex-col md:flex-row justify-between items-center gap-4">
+                                <div className="text-blue-800 dark:text-blue-300">
+                                    <h3 className="font-bold mb-1">Looking to edit SEO for a specific page?</h3>
+                                    <p className="text-sm">The fields below are your <strong>Global Fallbacks</strong>. They only apply if a specific page doesn't have custom metadata assigned to it. To edit SEO for an individual page (like the Homepage or Gala page), use the dedicated SEO Manager.</p>
+                                </div>
+                                <a href="/settings/seo" className="flex items-center justify-center whitespace-nowrap gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                                    Open Page SEO Manager <ExternalLink className="w-4 h-4" />
+                                </a>
+                            </div>
+
                             <div className="space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
