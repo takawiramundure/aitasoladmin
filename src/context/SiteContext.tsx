@@ -48,7 +48,7 @@ export function SiteProvider({ children }: { children: ReactNode }) {
         }
     }, [availableSites, currentSite]);
 
-    const switchSite = (siteId: string) => {
+    const switchSite = React.useCallback((siteId: string) => {
         // Validation check
         const isAllowed = availableSites.find(s => s.id === siteId);
         if (isAllowed) {
@@ -57,7 +57,7 @@ export function SiteProvider({ children }: { children: ReactNode }) {
         } else {
             console.warn("Attempted to switch to unauthorized site");
         }
-    };
+    }, [availableSites]);
 
     const value = React.useMemo(() => ({
         currentSite,

@@ -58,7 +58,14 @@ export default function ContentManager() {
         funders: "Our Funders & Sponsors",
         partners: "Our Partners",
         careers: "Careers",
-        volunteer: "Volunteering"
+        volunteer: "Volunteering",
+        // ELWG Pages
+        "elwg-home": "ELWG Home",
+        "elwg-about": "ELWG About Us",
+        "elwg-programs": "ELWG Programs",
+        "elwg-volunteers": "ELWG Volunteers",
+        "elwg-contact": "ELWG Contact",
+        "elwg-donate": "ELWG Donate"
     };
 
     const title = pageTitles[pageId || ""] || "Content Manager";
@@ -70,18 +77,15 @@ export default function ContentManager() {
     }, [pageId, currentSite?.id]);
 
     const loadContent = async (id: string) => {
-        setLoading(true);
+        // Only set hard loading if we don't have content for this page yet
+        if (!content || content.title !== pageTitles[id]) {
+            setLoading(true);
+        }
         setError("");
         try {
             const data = await FirestoreService.getPageContent(id, currentSite.id);
             if (data) {
-                /*
-                 * Special Handling: Services Gateway Logic
-                 * -------------------------------------------------------------
-                 * We ensure the 'navigator_cta' section always exists on the services page.
-                 * If it's the first time visiting this page in the backend, or it was manually deleted,
-                 * we seed it with smart defaults matching the original frontend design.
-                 */
+                // ... (Services gateway logic preserved)
                 if (id === 'services') {
                     const sections = data.sections || {};
                     if (!sections.navigator_cta) {
@@ -99,9 +103,8 @@ export default function ContentManager() {
                     setContent(data);
                 }
             } else {
-                // Initialize with default structure if empty (new page)
+                // Initialize with default structure
                 const initialSections: Record<string, any> = {};
-                // Pre-seed services content if it's completely new
                 if (id === 'services') {
                     initialSections.navigator_cta = {
                         heading: "Need Personalized Guidance?",
@@ -113,7 +116,7 @@ export default function ContentManager() {
                     };
                 }
                 setContent({
-                    title: pageTitles[id] || "",
+                    title: pageTitles[id] || "New Page",
                     sections: initialSections
                 });
             }
@@ -677,6 +680,7 @@ export default function ContentManager() {
             title: "Volunteering",
             enabled: true,
             sections: {
+                // ... (KMFW Volunteer seeding preserved)
                 hero: {
                     heading: "Call for Volunteers 2025/2026",
                     content: "We seek individuals and organizations that are committed to the work relating to Black identifying persons, aspire and embrace opportunities to give back to their community. We strive for individuals and organizations that will contribute to our needs within the organization and in the community.",
@@ -744,6 +748,170 @@ export default function ContentManager() {
         setSuccessMsg("Seeded Volunteer data! Click Save to persist.");
     };
 
+    // --- ELWG SEEDING FUNCTIONS ---
+
+    const seedElwgHome = () => {
+        setContent({
+            title: "ELWG Home",
+            sections: {
+                hero: {
+                    heading: "Compassion. Safety. Hope.",
+                    content: "Providing safe shelter and support for women and children in Elliot Lake and surrounding areas since 1982.",
+                    buttonText: "Get Help Now",
+                    buttonUrl: "/contact",
+                    images: [{ url: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=1000", alt: "Support" }],
+                    order: 0,
+                    enabled: true
+                },
+                about_teaser: {
+                    heading: "Who We Are",
+                    content: "The Elliot Lake Women's Group provides essential services including emergency shelter at Maplegate House and Larry's Place, outreach, and transitional support.",
+                    buttonText: "Learn More",
+                    buttonUrl: "/about",
+                    order: 10,
+                    enabled: true
+                },
+                impact_quote: {
+                    heading: "Our Commitment",
+                    content: "Breaking the cycle of abuse and fostering a community where everyone can live free from violence.",
+                    quote: "Every woman deserves a safe place to call home.",
+                    author_name: "ELWG Mission",
+                    order: 20,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded ELWG Home! Click Save.");
+    };
+
+    const seedElwgAbout = () => {
+        setContent({
+            title: "ELWG About Us",
+            sections: {
+                hero: {
+                    heading: "Elliot Lake Women's Group",
+                    subtitle: "Our Story & Mission",
+                    content: "Dedicated to providing safe shelter, supporting healing, and breaking cycles of abuse in the Algoma District since 1982.",
+                    images: [{ url: "https://images.unsplash.com/photo-1593113630400-ea4288922497?auto=format&fit=crop&q=80&w=1000", alt: "About" }],
+                    order: 0,
+                    enabled: true
+                },
+                mission: {
+                    heading: "Our Mission",
+                    content: "Our Mission is to Provide safe shelter, support healing, and break cycles of abuse. We are committed to advocating for and supporting women, men and children in their right to live free from abuse, violence, and oppression.",
+                    order: 10,
+                    enabled: true
+                },
+                history: {
+                    heading: "A Legacy of Care",
+                    content: "The Women’s Crisis Centre (now Maplegate House) was formed as a shelter for abused women in July of 1982. Prior to this, police would bring women and dependents to a volunteer’s home and drive them to the Sault Ste. Marie shelter.",
+                    order: 20,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded ELWG About! Click Save.");
+    };
+
+    const seedElwgPrograms = () => {
+        setContent({
+            title: "ELWG Programs",
+            sections: {
+                hero: {
+                    heading: "Our Programs",
+                    content: "We offer a comprehensive range of services designed to provide safety, healing, and independence for everyone in our community.",
+                    images: [{ url: "https://images.unsplash.com/photo-1509059852496-f3822ae057bf?auto=format&fit=crop&q=80&w=1000", alt: "Programs" }],
+                    order: 0,
+                    enabled: true
+                },
+                maplegate: {
+                    heading: "MapleGate House",
+                    subtitle: "Women's Crisis Centre",
+                    content: "Providing secure, emergency shelter for women and their children fleeing domestic violence. A place of healing and new beginnings.",
+                    order: 10,
+                    enabled: true
+                },
+                larrys: {
+                    heading: "Larry's Place",
+                    subtitle: "Emergency Shelter for Men",
+                    content: "A safe haven providing emergency shelter and support services specifically for men experiencing crisis or homelessness in the Algoma District.",
+                    order: 20,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded ELWG Programs! Click Save.");
+    };
+
+    const seedElwgVolunteers = () => {
+        setContent({
+            title: "ELWG Volunteers",
+            sections: {
+                hero: {
+                    heading: "Our Volunteers",
+                    subtitle: "The Heart of ELWG",
+                    content: "Our dedicated volunteers are the lifeblood of our organization. From event support to administrative help, every contribution counts.",
+                    images: [{ url: "https://images.unsplash.com/photo-1559027615-cd99713b8ac7?auto=format&fit=crop&q=80&w=1000", alt: "Volunteers" }],
+                    order: 0,
+                    enabled: true
+                },
+                why_join: {
+                    heading: "Why Join Us?",
+                    content: "Volunteering with the Elliot Lake Women's Group is more than just giving your time. It's about being part of a compassionate network that provides hope and safety to those who need it most.",
+                    order: 10,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded ELWG Volunteers! Click Save.");
+    };
+
+    const seedElwgContact = () => {
+        setContent({
+            title: "ELWG Contact",
+            sections: {
+                hero: {
+                    heading: "Get In Touch",
+                    subtitle: "We Are Here For You",
+                    content: "Whether you are in crisis, seeking information, or looking to support our mission, we welcome your connection.",
+                    images: [{ url: "https://images.unsplash.com/photo-1577563906417-45a18e000cb0?auto=format&fit=crop&q=80&w=1000", alt: "Contact" }],
+                    order: 0,
+                    enabled: true
+                },
+                crisis: {
+                    heading: "Crisis Support",
+                    content: "Available 24 hours a day, 7 days a week. Call (833) 461-4623",
+                    order: 10,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded ELWG Contact! Click Save.");
+    };
+
+    const seedElwgDonate = () => {
+        setContent({
+            title: "ELWG Donate",
+            sections: {
+                hero: {
+                    heading: "Support ELWG",
+                    subtitle: "Your Gift Matters",
+                    content: "Your generous donations directly support our mission of providing safe shelter and healing to those fleeing abuse. Every dollar makes a difference.",
+                    images: [{ url: "https://images.unsplash.com/photo-1544027993-37dbfe43552e?auto=format&fit=crop&q=80&w=1000", alt: "Donate" }],
+                    order: 0,
+                    enabled: true
+                },
+                impact: {
+                    heading: "How Your Gift Helps",
+                    content: "Your contribution provides essential resources for women, children, and men in our community who are seeking a safer future.",
+                    order: 10,
+                    enabled: true
+                }
+            }
+        });
+        setSuccessMsg("Seeded ELWG Donate! Click Save.");
+    };
+
     const seedFooter = () => {
         setContent({
             title: "Footer Details",
@@ -797,6 +965,16 @@ export default function ContentManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        {currentSite.id === 'elwg' && (
+                            <>
+                                {pageId === 'elwg-home' && <Button variant="outline" size="sm" onClick={seedElwgHome}>Seed Home</Button>}
+                                {pageId === 'elwg-about' && <Button variant="outline" size="sm" onClick={seedElwgAbout}>Seed About</Button>}
+                                {pageId === 'elwg-programs' && <Button variant="outline" size="sm" onClick={seedElwgPrograms}>Seed Programs</Button>}
+                                {pageId === 'elwg-volunteers' && <Button variant="outline" size="sm" onClick={seedElwgVolunteers}>Seed Volunteers</Button>}
+                                {pageId === 'elwg-contact' && <Button variant="outline" size="sm" onClick={seedElwgContact}>Seed Contact</Button>}
+                                {pageId === 'elwg-donate' && <Button variant="outline" size="sm" onClick={seedElwgDonate}>Seed Donate</Button>}
+                            </>
+                        )}
                         {pageId === 'footer' && (
                             <Button variant="outline" onClick={seedFooter}>
                                 Seed Footer

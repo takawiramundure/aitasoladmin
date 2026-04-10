@@ -85,6 +85,26 @@ export const getDeviceCategoryReport = async (propertyId: string) => {
     );
 };
 
+// 6. Source / Medium
+export const getSourceMediumReport = async (propertyId: string) => {
+    return runReport(propertyId,
+        [{ name: 'sessionSource' }, { name: 'sessionMedium' }],
+        [{ name: 'activeUsers' }, { name: 'sessions' }],
+        [{ metric: { metricName: 'activeUsers' }, desc: true }],
+        10
+    );
+};
+
+// 7. Browser / OS
+export const getBrowserReport = async (propertyId: string) => {
+    return runReport(propertyId,
+        [{ name: 'browser' }, { name: 'operatingSystem' }],
+        [{ name: 'activeUsers' }],
+        [{ metric: { metricName: 'activeUsers' }, desc: true }],
+        10
+    );
+};
+
 // 5. Engagement (Average Session Duration)
 // Note: 'userEngagementDuration' is total seconds. 'sessions' is count.
 // To get avg, we might need to calculate or use 'averageSessionDuration' if available in API, 

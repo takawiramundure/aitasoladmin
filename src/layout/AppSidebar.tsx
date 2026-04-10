@@ -8,11 +8,13 @@ import {
   GridIcon,
   HorizontaLDots,
   PageIcon,
+  PieChartIcon,
   PlugInIcon,
   UserCircleIcon,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useSite } from "../context/SiteContext";
+import { useAuth } from "../context/AuthContext";
 
 type NavItem = {
   name: string;
@@ -24,6 +26,7 @@ type NavItem = {
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const { currentSite } = useSite();
+  const { profile } = useAuth();
   const location = useLocation();
 
   const navItems = useMemo(() => {
@@ -200,6 +203,52 @@ const AppSidebar: React.FC = () => {
       ];
     }
 
+    if (currentSite.id === 'elwg') {
+      return [
+        ...commonItems,
+        {
+          icon: <BoxCubeIcon />,
+          name: "Hero Slider",
+          path: "/cms/hero",
+        },
+        {
+          name: "Home Page",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "About ELWG", path: "/cms/about" },
+            { name: "Key Causes", path: "/cms/causes" },
+            { name: "Volunteers", path: "/cms/volunteers" },
+            { name: "Why Choose Us", path: "/cms/why-us" },
+            { name: "Impact Quotes", path: "/cms/quotes" },
+          ],
+        },
+        {
+          name: "Programs",
+          icon: <PageIcon />,
+          path: "/cms/programs",
+        },
+        {
+          name: "Interactions",
+          icon: <HorizontaLDots />,
+          subItems: [
+            { name: "Donations", path: "/cms/donations" },
+            { name: "Newsletter", path: "/cms/newsletter" },
+            { name: "Contact Messages", path: "/cms/messages" },
+          ]
+        },
+        {
+          icon: <BoxCubeIcon />,
+          name: "Media Library",
+          path: "/cms/media",
+        },
+        {
+          icon: <PageIcon />,
+          name: "Footer Details",
+          path: "/cms/footer",
+        },
+      ];
+    }
+
     // Default NSPC Menu
     return [
       ...commonItems,
@@ -240,33 +289,54 @@ const AppSidebar: React.FC = () => {
 
 
 
-    const othersItems: NavItem[] = [
-      {
-        icon: <UserCircleIcon />,
-        name: "Users",
-        path: "/users",
-      },
+  const othersItems = useMemo(() => {
+    const isSuperAdmin = profile?.role === 'super_admin';
+    const hasAllowedSites = (profile?.allowedSites?.length || 0) > 0;
+    
+    const items: NavItem[] = [
       {
         icon: <UserCircleIcon />,
         name: "User Profile",
         path: "/profile",
-      },
-      {
-        icon: <PlugInIcon />,
-        name: "Global Site Settings",
-        path: "/settings/site",
-      },
-      {
-        icon: <GridIcon />,
-        name: "Page SEO Manager",
-        path: "/settings/seo",
-      },
-      {
-        icon: <PlugInIcon />,
-        name: "System Settings",
-        path: "/settings",
-      },
+      }
     ];
+
+    // Show Analytics to Super Admins OR Editors with at least one site
+    if (isSuperAdmin || hasAllowedSites) {
+      items.unshift({
+        icon: <PieChartIcon />,
+        name: "Internal Analytics",
+        path: "/analytics",
+      });
+    }
+
+    if (isSuperAdmin) {
+      items.unshift({
+        icon: <UserCircleIcon />,
+        name: "Users",
+        path: "/users",
+      });
+      
+      items.push(
+        {
+          icon: <PlugInIcon />,
+          name: "Global Site Settings",
+          path: "/settings/site",
+        },
+        {
+          icon: <GridIcon />,
+          name: "Page SEO Manager",
+          path: "/settings/seo",
+        },
+        {
+          icon: <PlugInIcon />,
+          name: "System Settings",
+          path: "/settings",
+        }
+      );
+    }
+    return items;
+  }, [profile]);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";

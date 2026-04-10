@@ -503,6 +503,188 @@ export const SEED_DATA = {
                 location: 'Canada'
             }
         }
+    },
+    elwg: {
+        "elwg-home": {
+            sections: {
+                hero: {
+                    heading: "Compassion. Safety. Hope.",
+                    content: "Providing safe shelter and support for women and children in Elliot Lake and surrounding areas since 1982.",
+                    buttonText: "Get Help Now",
+                    buttonUrl: "/contact",
+                    images: [{ url: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=1000", alt: "Support" }],
+                    order: 0,
+                    enabled: true
+                },
+                about_teaser: {
+                    heading: "Who We Are",
+                    content: "The Elliot Lake Women's Group (ELWG) is a non-profit organization that provides emergency shelter, outreach, and transitional support for women and children fleeing domestic violence.",
+                    buttonText: "Learn More",
+                    buttonUrl: "/about",
+                    order: 10,
+                    enabled: true
+                },
+                key_causes: {
+                    heading: "Our Key Causes",
+                    items: [
+                        { title: 'Emergency Shelter', description: 'Safe haven for women and children escaping domestic violence since 1982.', imageUrl: 'https://framerusercontent.com/images/S2szyDjZl6HVsTUqdEE52wFCY0.jpg' },
+                        { title: 'Crisis Counselling', description: '24/7 trauma-informed support and advocacy for those in need of immediate healing.', imageUrl: 'https://framerusercontent.com/images/S2szyDjZl6HVsTUqdEE52wFCY0.jpg' },
+                        { title: 'Transitional Housing', description: 'Helping survivors rebuild their lives with stable housing and empowerment.', imageUrl: 'https://framerusercontent.com/images/aMqMcWFD0W5muPkbDwu647to5o.jpg' },
+                        { title: 'Outreach Services', description: 'Engaging the community with education and hands-on support.', imageUrl: 'https://framerusercontent.com/images/8h67STcNSFwG8XPsCPbjmxeAy6o.jpg' }
+                    ],
+                    order: 20,
+                    enabled: true
+                },
+                volunteer_section: {
+                    heading: "Become a Volunteer",
+                    content: "Your time and skills can change lives. Join our network of passionate volunteers and be the force behind positive change.",
+                    buttonText: "Join us Today",
+                    buttonUrl: "/volunteers",
+                    videoUrl: "https://framerusercontent.com/images/NYkc1gtzZFisuhG1zuMYyeFHkmw.jpg", // Using as placeholder for background
+                    items: [
+                        { title: 'Program Assistants', description: 'Support our community programs by assisting with activities like gardening, baking, arts and crafts.' },
+                        { title: 'Fundraising Events', description: 'Play a vital role in organizing and running charity events, galas, and community fundraisers.' },
+                        { title: 'In-house Staff', description: 'Support daily operations by helping with administrative tasks, reception duties, and communications.' }
+                    ],
+                    order: 30,
+                    enabled: true
+                },
+                why_choose_us: {
+                    heading: "Why Choose Us?",
+                    items: [
+                        { number: '01', title: 'Making a real impact', description: 'Our services have helped transform thousands of lives with our programs & advocacy in our community.', icon: 'https://framerusercontent.com/images/Wkt9ioY1cbT5ELBbZBdTV81PTQ.png' },
+                        { number: '02', title: 'Transparency you can trust', description: 'Every donation is allocated directly to meaningful causes with complete accountability.', icon: 'https://framerusercontent.com/images/Tx1M0uBJjX9bhV0w1uVRkRxpU.png' },
+                        { number: '03', title: 'Strong community support', description: 'Our dedicated volunteers, donors, and partners work together to create change.', icon: 'https://framerusercontent.com/images/c15gn4GpZtSwREp39Mv6ZgNwo.png' }
+                    ],
+                    order: 40,
+                    enabled: true
+                },
+                impact_quote: {
+                    heading: "Our Commitment",
+                    content: "Elliot Lake Women's Group empowers women, men & children escaping abuse or crisis with shelter, support and hope 24/7",
+                    quote: "Every woman deserves a safe place to call home.",
+                    author_name: "Rhea Alert",
+                    author_role: "Program Supervisor",
+                    buttonText: "Donate Now",
+                    buttonUrl: "/donate",
+                    order: 50,
+                    enabled: true
+                }
+            }
+        },
+        "elwg-about": {
+            sections: {
+                hero: {
+                    heading: "Elliot Lake Women's Group",
+                    subtitle: "Our Story & Mission",
+                    content: "Dedicated to providing safe shelter, supporting healing, and breaking cycles of abuse in the Algoma District since 1982.",
+                    images: [{ url: "https://images.unsplash.com/photo-1593113630400-ea4288922497?auto=format&fit=crop&q=80&w=1000", alt: "About" }],
+                    order: 0,
+                    enabled: true
+                },
+                stats: {
+                    heading: "Our Impact",
+                    items: [
+                        { label: "Women Supported", value: "500+" },
+                        { label: "Years of Service", value: "40+" },
+                        { label: "Safe Beds", value: "100%" }
+                    ],
+                    order: 10,
+                    enabled: true
+                },
+                mission: {
+                    heading: "Our Mission",
+                    content: "Our Mission is to Provide safe shelter, support healing, and break cycles of abuse. We are committed to advocating for and supporting women, men and children in their right to live free from abuse, violence, and oppression.",
+                    order: 20,
+                    enabled: true
+                },
+                history: {
+                    heading: "A Legacy of Care",
+                    content: "The Women’s Crisis Centre (now Maplegate House) was formed as a shelter for abused women in July of 1982. Prior to this, police would bring women and dependents to a volunteer’s home and drive them to the Sault Ste. Marie shelter.",
+                    order: 30,
+                    enabled: true
+                }
+            }
+        },
+        "elwg-programs": {
+            sections: {
+                hero: {
+                    heading: "Our Programs",
+                    content: "We offer a comprehensive range of services designed to provide safety, healing, and independence for everyone in our community.",
+                    images: [{ url: "https://images.unsplash.com/photo-1509059852496-f3822ae057bf?auto=format&fit=crop&q=80&w=1000", alt: "Programs" }],
+                    order: 0,
+                    enabled: true
+                },
+                maplegate: {
+                    heading: "MapleGate House",
+                    subtitle: "Women's Crisis Centre",
+                    content: "Providing secure, emergency shelter for women and their children fleeing domestic violence. A place of healing and new beginnings.",
+                    order: 10,
+                    enabled: true
+                },
+                larrys: {
+                    heading: "Larry's Place",
+                    subtitle: "Emergency Shelter for Men",
+                    content: "A safe haven providing emergency shelter and support services specifically for men experiencing crisis or homelessness in the Algoma District.",
+                    order: 20,
+                    enabled: true
+                }
+            }
+        },
+        "elwg-volunteers": {
+            sections: {
+                hero: {
+                    heading: "Our Volunteers",
+                    subtitle: "The Heart of ELWG",
+                    content: "Our dedicated volunteers are the lifeblood of our organization. From event support to administrative help, every contribution counts.",
+                    images: [{ url: "https://images.unsplash.com/photo-1559027615-cd99713b8ac7?auto=format&fit=crop&q=80&w=1000", alt: "Volunteers" }],
+                    order: 0,
+                    enabled: true
+                },
+                why_join: {
+                    heading: "Why Join Us?",
+                    content: "Volunteering with the Elliot Lake Women's Group is more than just giving your time. It's about being part of a compassionate network that provides hope and safety to those who need it most.",
+                    order: 10,
+                    enabled: true
+                }
+            }
+        },
+        "elwg-contact": {
+            sections: {
+                hero: {
+                    heading: "Get In Touch",
+                    subtitle: "We Are Here For You",
+                    content: "Whether you are in crisis, seeking information, or looking to support our mission, we welcome your connection.",
+                    images: [{ url: "https://images.unsplash.com/photo-1577563906417-45a18e000cb0?auto=format&fit=crop&q=80&w=1000", alt: "Contact" }],
+                    order: 0,
+                    enabled: true
+                },
+                crisis: {
+                    heading: "Crisis Support",
+                    content: "Available 24 hours a day, 7 days a week. Call (833) 461-4623",
+                    order: 10,
+                    enabled: true
+                }
+            }
+        },
+        "elwg-donate": {
+            sections: {
+                hero: {
+                    heading: "Support ELWG",
+                    subtitle: "Your Gift Matters",
+                    content: "Your generous donations directly support our mission of providing safe shelter and healing to those fleeing abuse. Every dollar makes a difference.",
+                    images: [{ url: "https://images.unsplash.com/photo-1544027993-37dbfe43552e?auto=format&fit=crop&q=80&w=1000", alt: "Donate" }],
+                    order: 0,
+                    enabled: true
+                },
+                impact: {
+                    heading: "How Your Gift Helps",
+                    content: "Your contribution provides essential resources for women, children, and men in our community who are seeking a safer future.",
+                    order: 10,
+                    enabled: true
+                }
+            }
+        }
     }
 };
 

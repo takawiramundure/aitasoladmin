@@ -75,6 +75,15 @@ const kmfwNavigation: NavigationItem[] = [
     { id: 'nav-contact', name: 'Contact', path: '/contact', order: 6 }
 ];
 
+const elwgNavigation: NavigationItem[] = [
+    { id: 'nav-home', name: 'Home', path: '/', order: 1 },
+    { id: 'nav-about', name: 'About Us', path: '/about', order: 2 },
+    { id: 'nav-programs', name: 'Programs', path: '/programs', order: 3 },
+    { id: 'nav-volunteers', name: 'Volunteers', path: '/volunteers', order: 4 },
+    { id: 'nav-contact', name: 'Contact', path: '/contact', order: 5 },
+    { id: 'nav-donate', name: 'Donate', path: '/donate', order: 6 }
+];
+
 export const SETTINGS_SEED_DATA: Record<string, SiteSettings> = {
     nspc: {
         siteId: 'nspc',
@@ -146,6 +155,31 @@ export const SETTINGS_SEED_DATA: Record<string, SiteSettings> = {
             headerBg: '#FFFFFF'
         },
         navigation: kmfwNavigation,
+        metadata: {
+            lastUpdated: new Date().toISOString(),
+            updatedBy: 'system'
+        }
+    },
+    elwg: {
+        siteId: 'elwg',
+        branding: {
+            logo: '/logo.png', // Replace with actual logo path if known
+            siteName: 'Elliot Lake Women\'s Group',
+            favicon: '/favicon.ico'
+        },
+        theme: {
+            primary: '#71220B', // Burgundy
+            secondary: '#111827', // Gray-900
+            accent: '#D4AF37', // Gold
+            textDark: '#111827',
+            textLight: '#FFFFFF',
+            brandColor: '#71220B',
+            brandColorDark: '#5E1D09',
+            brandColorLight: '#8B2C0D',
+            topBarBg: '#71220B',
+            headerBg: '#FAF9F6' // Off-white
+        },
+        navigation: elwgNavigation,
         metadata: {
             lastUpdated: new Date().toISOString(),
             updatedBy: 'system'

@@ -12,13 +12,33 @@ export const firebaseConfig = {
 };
 
 import { getStorage } from 'firebase/storage';
+import { getSiteById } from './config/sites';
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Services
+// Initialize Auth and default Storage
 export const auth = getAuth(app);
-export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Memoized databases for multi-tenancy
+const dbCache: Record<string, any> = {};
+
+/**
+ * Gets the Firestore instance for a specific site.
+ * Supports multiple databases within a single Firebase project.
+ */
+export const getDb = (siteId: string) => {
+    const site = getSiteById(siteId);
+    const dbId = site?.databaseId || '(default)';
+
+    if (!dbCache[dbId]) {
+        dbCache[dbId] = getFirestore(app, dbId);
+    }
+    return dbCache[dbId];
+};
+
+// Default export for backward compatibility
+export const db = getFirestore(app);
 
 export default app;

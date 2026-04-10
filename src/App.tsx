@@ -21,6 +21,8 @@ import Blank from "./pages/Blank";
 import AppLayout from "./layout/AppLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
+import AnalyticsOverview from "./pages/Dashboard/AnalyticsOverview";
+import SharedAnalytics from "./pages/Dashboard/SharedAnalytics";
 import ContentManager from "./pages/CMS/ContentManager";
 import HomePageManager from "./pages/CMS/HomePageManager";
 import AboutPageManager from "./pages/CMS/AboutPageManager";
@@ -72,6 +74,8 @@ export default function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route element={<AppLayout />}>
                     <Route index path="/" element={<Home />} />
+                    <Route path="/analytics" element={<AnalyticsOverview />} />
+                    <Route path="/share/analytics/:snapshotId" element={<SharedAnalytics />} />
 
                     {/* CMS Routes */}
                     <Route path="/cms/home-settings" element={<HomePageManager />} />

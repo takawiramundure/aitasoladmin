@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { initGoogleClient, setAccessToken, getAnalyticsReport, getDemographicsReport, getTopPagesReport, getDeviceCategoryReport, getEngagementReport } from '../services/analyticsService';
+import { initGoogleClient, setAccessToken, getAnalyticsReport, getDemographicsReport, getTopPagesReport, getDeviceCategoryReport, getEngagementReport, getSourceMediumReport, getBrowserReport } from '../services/analyticsService';
 import { useGoogleLogin } from '@react-oauth/google';
 import { ANALYTICS_CONFIG } from '../config/analyticsConfig';
 
@@ -14,6 +14,8 @@ interface AnalyticsContextType {
     demographicsData: any | null;
     topPagesData: any | null;
     deviceData: any | null;
+    sourceMediumData: any | null;
+    browserData: any | null;
     engagementData: any | null;
     fetchData: () => Promise<void>;
     loadingData: boolean;
@@ -31,6 +33,8 @@ const AnalyticsContext = createContext<AnalyticsContextType>({
     demographicsData: null,
     topPagesData: null,
     deviceData: null,
+    sourceMediumData: null,
+    browserData: null,
     engagementData: null,
     fetchData: async () => { },
     loadingData: false,
@@ -45,6 +49,8 @@ export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) =
     const [demographicsData, setDemographicsData] = useState<any | null>(null);
     const [topPagesData, setTopPagesData] = useState<any | null>(null);
     const [deviceData, setDeviceData] = useState<any | null>(null);
+    const [sourceMediumData, setSourceMediumData] = useState<any | null>(null);
+    const [browserData, setBrowserData] = useState<any | null>(null);
     const [engagementData, setEngagementData] = useState<any | null>(null);
 
     const [loadingData, setLoadingData] = useState(false);
@@ -108,6 +114,8 @@ export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) =
         setDemographicsData(null);
         setTopPagesData(null);
         setDeviceData(null);
+        setSourceMediumData(null);
+        setBrowserData(null);
         setEngagementData(null);
     };
 
@@ -122,19 +130,23 @@ export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) =
             if (token) setAccessToken(token);
 
             // Fetch ALL reports in parallel
-            const [reportData, demoData, pagesData, devicesData, engageData] = await Promise.all([
+            const [reportData, demoData, pagesData, devicesData, engageData, sourceData, brData] = await Promise.all([
                 getAnalyticsReport(propertyId),
                 getDemographicsReport(propertyId),
                 getTopPagesReport(propertyId),
                 getDeviceCategoryReport(propertyId),
-                getEngagementReport(propertyId)
+                getEngagementReport(propertyId),
+                getSourceMediumReport(propertyId),
+                getBrowserReport(propertyId)
             ]);
-
+            
             setAnalyticsData(reportData);
             setDemographicsData(demoData);
             setTopPagesData(pagesData);
             setDeviceData(devicesData);
             setEngagementData(engageData);
+            setSourceMediumData(sourceData);
+            setBrowserData(brData);
 
         } catch (error: any) {
             console.error("Failed to fetch analytics data", error);
@@ -161,6 +173,8 @@ export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) =
             demographicsData,
             topPagesData,
             deviceData,
+            sourceMediumData,
+            browserData,
             engagementData,
             fetchData,
             loadingData,

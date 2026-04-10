@@ -1,4 +1,5 @@
-import { db } from "../firebaseConfig";
+import { getDb } from "../firebaseConfig";
+import { getSiteById } from "../config/sites";
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, deleteDoc } from "firebase/firestore";
 import { SiteSettings } from "../types/siteSettings";
 
@@ -72,9 +73,10 @@ export const FirestoreService = {
     // Fetch content for a specific page with siteId
     getPageContent: async (pageId: string, siteId: string): Promise<PageContent | null> => {
         try {
-            // Use site-specific collection for better organization (e.g., nspc_content, bweic_content)
-            const collectionName = `${siteId}_content`;
-            const docRef = doc(db, collectionName, pageId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
+            const docRef = doc(dbInstance, collectionName, pageId);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -88,12 +90,45 @@ export const FirestoreService = {
         }
     },
 
+    // Fetch comprehensive content across multiple collections (for SEO audit)
+    getComprehensiveSiteContent: async (siteId: string): Promise<any[]> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const contentPrefix = site?.usePrefix !== false ? siteId : '';
+            
+            const docs: any[] = [];
+
+            // 1. Pages (Content)
+            const contentRef = collection(dbInstance, contentPrefix ? `${contentPrefix}_content` : 'content');
+            const contentSnap = await getDocs(contentRef);
+            contentSnap.docs.forEach(doc => docs.push({ id: doc.id, collection: 'page', ...doc.data() }));
+
+            // 2. Events
+            const eventsRef = collection(dbInstance, contentPrefix ? `${contentPrefix}_events` : 'events');
+            const eventsSnap = await getDocs(eventsRef);
+            eventsSnap.docs.forEach(doc => docs.push({ id: doc.id, collection: 'event', ...doc.data() }));
+
+            // 3. Articles/Blog
+            const articlesRef = collection(dbInstance, contentPrefix ? `${contentPrefix}_articles` : 'articles');
+            const articlesSnap = await getDocs(articlesRef);
+            articlesSnap.docs.forEach(doc => docs.push({ id: doc.id, collection: 'article', ...doc.data() }));
+
+            return docs;
+        } catch (error) {
+            console.error("Error fetching comprehensive content:", error);
+            return [];
+        }
+    },
+
+
     // Update or Create content for a specific page with siteId
     savePageContent: async (pageId: string, data: PageContent, siteId: string) => {
         try {
-            // Use site-specific collection for better organization (e.g., nspc_content, bweic_content)
-            const collectionName = `${siteId}_content`;
-            const docRef = doc(db, collectionName, pageId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
+            const docRef = doc(dbInstance, collectionName, pageId);
             await setDoc(docRef, {
                 ...data,
                 siteId, // Store siteId for reference
@@ -107,7 +142,8 @@ export const FirestoreService = {
     // User Management
     getUsers: async (): Promise<any[]> => {
         try {
-            const usersRef = collection(db, "users");
+            const dbInstance = getDb('nspc'); // Use any site to get the shared project app, or getDb with no id if we modify it
+            const usersRef = collection(dbInstance, "users");
             const snapshot = await getDocs(usersRef);
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         } catch (error) {
@@ -118,7 +154,8 @@ export const FirestoreService = {
 
     updateUserRole: async (userId: string, role: 'super_admin' | 'editor') => {
         try {
-            const userRef = doc(db, "users", userId);
+            const dbInstance = getDb('nspc'); // Users are global to the project
+            const userRef = doc(dbInstance, "users", userId);
             await setDoc(userRef, { role }, { merge: true });
         } catch (error) {
             console.error("Error updating user role:", error);
@@ -129,8 +166,10 @@ export const FirestoreService = {
     // Site Settings Management
     getSiteSettings: async (siteId: string): Promise<SiteSettings | null> => {
         try {
-            const collectionName = `${siteId}_settings`;
-            const docRef = doc(db, collectionName, "config");
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+            const docRef = doc(dbInstance, collectionName, "config");
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
@@ -146,8 +185,10 @@ export const FirestoreService = {
 
     saveSiteSettings: async (siteId: string, settings: SiteSettings) => {
         try {
-            const collectionName = `${siteId}_settings`;
-            const docRef = doc(db, collectionName, "config");
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+            const docRef = doc(dbInstance, collectionName, "config");
             await setDoc(docRef, {
                 ...settings,
                 siteId,
@@ -165,9 +206,10 @@ export const FirestoreService = {
     // Event Management
     getEvents: async (siteId: string): Promise<any[]> => {
         try {
-
-            const collectionName = `${siteId}_events`;
-            const eventsRef = collection(db, collectionName);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_events` : 'events';
+            const eventsRef = collection(dbInstance, collectionName);
             // Default sort by date? For now getting all.
             const snapshot = await getDocs(eventsRef);
             return snapshot.docs.map(doc => {
@@ -182,14 +224,16 @@ export const FirestoreService = {
 
     saveEvent: async (siteId: string, event: any, eventId?: string) => {
         try {
-            const collectionName = `${siteId}_events`;
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_events` : 'events';
             if (eventId) {
                 // Update
-                const docRef = doc(db, collectionName, eventId);
+                const docRef = doc(dbInstance, collectionName, eventId);
                 await updateDoc(docRef, { ...event });
             } else {
                 // Add
-                const collectionRef = collection(db, collectionName);
+                const collectionRef = collection(dbInstance, collectionName);
                 await addDoc(collectionRef, {
                     ...event,
                     createdAt: new Date().toISOString()
@@ -203,8 +247,10 @@ export const FirestoreService = {
 
     deleteEvent: async (siteId: string, eventId: string) => {
         try {
-            const collectionName = `${siteId}_events`;
-            const docRef = doc(db, collectionName, eventId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_events` : 'events';
+            const docRef = doc(dbInstance, collectionName, eventId);
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting event:", error);
@@ -215,8 +261,10 @@ export const FirestoreService = {
     // Article Management
     getArticles: async (siteId: string): Promise<any[]> => {
         try {
-            const collectionName = `${siteId}_articles`;
-            const articlesRef = collection(db, collectionName);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_articles` : 'articles';
+            const articlesRef = collection(dbInstance, collectionName);
             const snapshot = await getDocs(articlesRef);
             return snapshot.docs.map(doc => {
                 const data = doc.data();
@@ -230,19 +278,21 @@ export const FirestoreService = {
 
     saveArticle: async (siteId: string, article: any, articleId?: string) => {
         try {
-            const collectionName = `${siteId}_articles`;
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_articles` : 'articles';
             const timestamp = new Date().toISOString();
 
             if (articleId) {
                 // Update
-                const docRef = doc(db, collectionName, articleId);
+                const docRef = doc(dbInstance, collectionName, articleId);
                 await updateDoc(docRef, {
                     ...article,
                     updatedAt: timestamp
                 });
             } else {
                 // Add
-                const collectionRef = collection(db, collectionName);
+                const collectionRef = collection(dbInstance, collectionName);
                 await addDoc(collectionRef, {
                     ...article,
                     createdAt: timestamp,
@@ -257,8 +307,10 @@ export const FirestoreService = {
 
     deleteArticle: async (siteId: string, articleId: string) => {
         try {
-            const collectionName = `${siteId}_articles`;
-            const docRef = doc(db, collectionName, articleId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_articles` : 'articles';
+            const docRef = doc(dbInstance, collectionName, articleId);
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting article:", error);
@@ -269,8 +321,10 @@ export const FirestoreService = {
     // Video Management
     getVideos: async (siteId: string): Promise<any[]> => {
         try {
-            const collectionName = `${siteId}_videos`;
-            const videosRef = collection(db, collectionName);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_videos` : 'videos';
+            const videosRef = collection(dbInstance, collectionName);
             const snapshot = await getDocs(videosRef);
             return snapshot.docs.map(doc => {
                 const data = doc.data();
@@ -284,19 +338,21 @@ export const FirestoreService = {
 
     saveVideo: async (siteId: string, video: any, videoId?: string) => {
         try {
-            const collectionName = `${siteId}_videos`;
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_videos` : 'videos';
             const timestamp = new Date().toISOString();
 
             if (videoId) {
                 // Update
-                const docRef = doc(db, collectionName, videoId);
+                const docRef = doc(dbInstance, collectionName, videoId);
                 await updateDoc(docRef, {
                     ...video,
                     updatedAt: timestamp
                 });
             } else {
                 // Add
-                const collectionRef = collection(db, collectionName);
+                const collectionRef = collection(dbInstance, collectionName);
                 await addDoc(collectionRef, {
                     ...video,
                     createdAt: timestamp,
@@ -311,8 +367,10 @@ export const FirestoreService = {
 
     deleteVideo: async (siteId: string, videoId: string) => {
         try {
-            const collectionName = `${siteId}_videos`;
-            const docRef = doc(db, collectionName, videoId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_videos` : 'videos';
+            const docRef = doc(dbInstance, collectionName, videoId);
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting video:", error);
@@ -323,8 +381,10 @@ export const FirestoreService = {
     // Partner Management
     getPartners: async (siteId: string): Promise<any[]> => {
         try {
-            const collectionName = `${siteId}_partners`;
-            const partnersRef = collection(db, collectionName);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_partners` : 'partners';
+            const partnersRef = collection(dbInstance, collectionName);
             const snapshot = await getDocs(partnersRef);
             return snapshot.docs.map(doc => {
                 const data = doc.data();
@@ -338,19 +398,21 @@ export const FirestoreService = {
 
     savePartner: async (siteId: string, partner: any, partnerId?: string) => {
         try {
-            const collectionName = `${siteId}_partners`;
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_partners` : 'partners';
             const timestamp = new Date().toISOString();
 
             if (partnerId) {
                 // Update
-                const docRef = doc(db, collectionName, partnerId);
+                const docRef = doc(dbInstance, collectionName, partnerId);
                 await updateDoc(docRef, {
                     ...partner,
                     updatedAt: timestamp
                 });
             } else {
                 // Add
-                const collectionRef = collection(db, collectionName);
+                const collectionRef = collection(dbInstance, collectionName);
                 await addDoc(collectionRef, {
                     ...partner,
                     createdAt: timestamp,
@@ -365,8 +427,10 @@ export const FirestoreService = {
 
     deletePartner: async (siteId: string, partnerId: string) => {
         try {
-            const collectionName = `${siteId}_partners`;
-            const docRef = doc(db, collectionName, partnerId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_partners` : 'partners';
+            const docRef = doc(dbInstance, collectionName, partnerId);
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting partner:", error);
@@ -377,8 +441,10 @@ export const FirestoreService = {
     // Product Management
     getProducts: async (siteId: string): Promise<any[]> => {
         try {
-            const collectionName = `${siteId}_products`;
-            const productsRef = collection(db, collectionName);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_products` : 'products';
+            const productsRef = collection(dbInstance, collectionName);
             const snapshot = await getDocs(productsRef);
             return snapshot.docs.map(doc => {
                 const data = doc.data();
@@ -392,19 +458,21 @@ export const FirestoreService = {
 
     saveProduct: async (siteId: string, product: any, productId?: string) => {
         try {
-            const collectionName = `${siteId}_products`;
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_products` : 'products';
             const timestamp = new Date().toISOString();
 
             if (productId) {
                 // Update
-                const docRef = doc(db, collectionName, productId);
+                const docRef = doc(dbInstance, collectionName, productId);
                 await updateDoc(docRef, {
                     ...product,
                     updatedAt: timestamp
                 });
             } else {
                 // Add
-                const collectionRef = collection(db, collectionName);
+                const collectionRef = collection(dbInstance, collectionName);
                 await addDoc(collectionRef, {
                     ...product,
                     createdAt: timestamp,
@@ -419,8 +487,10 @@ export const FirestoreService = {
 
     deleteProduct: async (siteId: string, productId: string) => {
         try {
-            const collectionName = `${siteId}_products`;
-            const docRef = doc(db, collectionName, productId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_products` : 'products';
+            const docRef = doc(dbInstance, collectionName, productId);
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting product:", error);
@@ -431,8 +501,10 @@ export const FirestoreService = {
     // SEO Management
     getSEOData: async (siteId: string): Promise<any | null> => {
         try {
-            const collectionName = `${siteId}_settings`;
-            const docRef = doc(db, collectionName, "seo");
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+            const docRef = doc(dbInstance, collectionName, "seo");
             const docSnap = await getDoc(docRef);
             return docSnap.exists() ? docSnap.data() : null;
         } catch (error) {
@@ -443,8 +515,10 @@ export const FirestoreService = {
 
     saveSEOData: async (siteId: string, seoData: any) => {
         try {
-            const collectionName = `${siteId}_settings`;
-            const docRef = doc(db, collectionName, "seo");
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+            const docRef = doc(dbInstance, collectionName, "seo");
             await setDoc(docRef, seoData);
         } catch (error) {
             console.error("Error saving SEO data:", error);
@@ -455,8 +529,10 @@ export const FirestoreService = {
     // Footer Management
     getFooterData: async (siteId: string): Promise<any | null> => {
         try {
-            const collectionName = `${siteId}_content`;
-            const docRef = doc(db, collectionName, "footer");
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
+            const docRef = doc(dbInstance, collectionName, "footer");
             const docSnap = await getDoc(docRef);
             return docSnap.exists() ? docSnap.data() : null;
         } catch (error) {
@@ -467,8 +543,10 @@ export const FirestoreService = {
 
     saveFooterData: async (data: any, siteId: string) => {
         try {
-            const collectionName = `${siteId}_content`;
-            const docRef = doc(db, collectionName, 'footer');
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
+            const docRef = doc(dbInstance, collectionName, 'footer');
             await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() });
         } catch (error) {
             console.error("Error saving footer data:", error);
@@ -479,8 +557,10 @@ export const FirestoreService = {
     // Theme Settings
     getThemeSettings: async (siteId: string): Promise<ThemeSettings | null> => {
         try {
-            const collectionName = `${siteId}_settings`;
-            const docRef = doc(db, collectionName, 'theme');
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+            const docRef = doc(dbInstance, collectionName, 'theme');
             const docSnap = await getDoc(docRef);
             return docSnap.exists() ? docSnap.data() as ThemeSettings : null;
         } catch (error) {
@@ -491,8 +571,10 @@ export const FirestoreService = {
 
     saveThemeSettings: async (data: ThemeSettings, siteId: string) => {
         try {
-            const collectionName = `${siteId}_settings`;
-            const docRef = doc(db, collectionName, 'theme');
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+            const docRef = doc(dbInstance, collectionName, 'theme');
             await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() });
         } catch (error) {
             console.error("Error saving theme settings:", error);
@@ -503,8 +585,10 @@ export const FirestoreService = {
     // Generic Settings Management
     getSettings: async (siteId: string, docId: string): Promise<any | null> => {
         try {
-            const collectionName = `${siteId}_settings`;
-            const docRef = doc(db, collectionName, docId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+            const docRef = doc(dbInstance, collectionName, docId);
             const docSnap = await getDoc(docRef);
             return docSnap.exists() ? docSnap.data() : null;
         } catch (error) {
@@ -515,8 +599,10 @@ export const FirestoreService = {
 
     saveSettings: async (siteId: string, docId: string, data: any) => {
         try {
-            const collectionName = `${siteId}_settings`;
-            const docRef = doc(db, collectionName, docId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+            const docRef = doc(dbInstance, collectionName, docId);
             await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() }, { merge: true });
         } catch (error) {
             console.error(`Error saving ${docId} settings:`, error);
@@ -527,8 +613,10 @@ export const FirestoreService = {
     // Message Management
     getMessages: async (siteId: string): Promise<any[]> => {
         try {
-            const collectionName = `${siteId}_messages`;
-            const messagesRef = collection(db, collectionName);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_messages` : 'messages';
+            const messagesRef = collection(dbInstance, collectionName);
             const snapshot = await getDocs(messagesRef);
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
                 .sort((a: any, b: any) => {
@@ -544,12 +632,88 @@ export const FirestoreService = {
 
     deleteMessage: async (siteId: string, messageId: string) => {
         try {
-            const collectionName = `${siteId}_messages`;
-            const docRef = doc(db, collectionName, messageId);
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_messages` : 'messages';
+            const docRef = doc(dbInstance, collectionName, messageId);
             await deleteDoc(docRef);
         } catch (error) {
             console.error("Error deleting message:", error);
             throw error;
+        }
+    },
+
+    // Analytics Management
+    getAnalyticsEvents: async (siteId: string, limitCount: number = 100): Promise<any[]> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const eventsRef = collection(dbInstance, "analytics_events");
+            // In a real app we'd add sorting and limiting here
+            const snapshot = await getDocs(eventsRef);
+            return snapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter((ev: any) => ev.siteId === siteId)
+                .slice(0, limitCount);
+        } catch (error) {
+            console.error("Error fetching analytics events:", error);
+            return [];
+        }
+    },
+
+    getAnalyticsAggregates: async (siteId: string, type: 'daily' | 'monthly'): Promise<any[]> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const aggregatesRef = collection(dbInstance, "analytics_aggregates");
+            const snapshot = await getDocs(aggregatesRef);
+            return snapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter((agg: any) => agg.siteId === siteId && (type === 'daily' ? !!agg.date : !!agg.month));
+        } catch (error) {
+            console.error("Error fetching analytics aggregates:", error);
+            return [];
+        }
+    },
+
+    getAnalyticsPages: async (siteId: string): Promise<any[]> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const pagesRef = collection(dbInstance, "analytics_pages");
+            const snapshot = await getDocs(pagesRef);
+            return snapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter((p: any) => p.siteId === siteId);
+        } catch (error) {
+            console.error("Error fetching analytics pages:", error);
+            return [];
+        }
+    },
+
+    // Sharing Snapshots
+    saveAnalyticsSnapshot: async (siteId: string, data: any): Promise<string> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const snapshotsRef = collection(dbInstance, "shared_analytics");
+            const docRef = await addDoc(snapshotsRef, {
+                ...data,
+                id: '', // Will be updated
+            });
+            await updateDoc(docRef, { id: docRef.id });
+            return docRef.id;
+        } catch (error) {
+            console.error("Error saving analytics snapshot:", error);
+            throw error;
+        }
+    },
+
+    getAnalyticsSnapshot: async (snapshotId: string, siteId: string): Promise<any | null> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const docRef = doc(dbInstance, "shared_analytics", snapshotId);
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists() ? docSnap.data() : null;
+        } catch (error) {
+            console.error("Error fetching analytics snapshot:", error);
+            return null;
         }
     }
 };
