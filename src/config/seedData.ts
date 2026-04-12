@@ -1,4 +1,4 @@
-export const SEED_DATA = {
+export const SEED_DATA: any = {
     nspc: {
         hero_slider: {
             slides: [

@@ -54,6 +54,7 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
         return {
             galaPromo: {
                 heading: "Gala Promo Banner",
+                content: "",
                 enabled: true
             },
             coreFoundations: {
@@ -169,11 +170,13 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
             projects: {
                 heading: "Featured Craftsmanship",
                 subtitle: "RECENT PROJECTS",
+                content: "",
                 enabled: true
             },
             reviews: {
                 heading: "What Our Clients Say",
                 subtitle: "TESTIMONIALS",
+                content: "",
                 enabled: true
             }
         };

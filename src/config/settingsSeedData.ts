@@ -95,13 +95,13 @@ const noelNavigation: NavigationItem[] = [
 
 export const SETTINGS_SEED_DATA: Record<string, SiteSettings> = {
     nspc: {
-// ... existing nspc ...
+        siteId: 'nspc', branding: { logo: '', siteName: 'NSPC', favicon: '' }, theme: { primary: '#000', secondary: '#000', accent: '#000', textDark: '#000', textLight: '#fff', brandColor: '#000', brandColorDark: '#000', brandColorLight: '#000', topBarBg: '#000', headerBg: '#fff' }, navigation: nspcNavigation, metadata: { lastUpdated: '', updatedBy: '' }
     },
     bweic: {
-// ... existing bweic ...
+        siteId: 'bweic', branding: { logo: '', siteName: 'BWEIC', favicon: '' }, theme: { primary: '#000', secondary: '#000', accent: '#000', textDark: '#000', textLight: '#fff', brandColor: '#000', brandColorDark: '#000', brandColorLight: '#000', topBarBg: '#000', headerBg: '#fff' }, navigation: bweicNavigation, metadata: { lastUpdated: '', updatedBy: '' }
     },
     kmfw: {
-// ... existing kmfw ...
+        siteId: 'kmfw', branding: { logo: '', siteName: 'KMFW', favicon: '' }, theme: { primary: '#000', secondary: '#000', accent: '#000', textDark: '#000', textLight: '#fff', brandColor: '#000', brandColorDark: '#000', brandColorLight: '#000', topBarBg: '#000', headerBg: '#fff' }, navigation: kmfwNavigation, metadata: { lastUpdated: '', updatedBy: '' }
     },
     elwg: {
         siteId: 'elwg',
