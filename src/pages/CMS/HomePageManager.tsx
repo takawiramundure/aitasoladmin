@@ -22,7 +22,6 @@ interface HomePageContent extends PageContent {
 const getSectionsConfig = (siteId: string) => {
     if (siteId === 'kmfw') {
         return [
-            { id: 'galaPromo', label: 'Gala Promo Banner (Below Hero)' },
             { id: 'coreFoundations', label: 'Core Foundations' },
             { id: 'mindfulness', label: 'Mindfulness Section' },
             { id: 'mission', label: 'Mission / Objectives' },
@@ -52,11 +51,6 @@ const getSectionsConfig = (siteId: string) => {
 const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
     if (siteId === 'kmfw') {
         return {
-            galaPromo: {
-                heading: "Gala Promo Banner",
-                content: "",
-                enabled: true
-            },
             coreFoundations: {
                 heading: "Our Core Foundations",
                 subtitle: "Comprehensive culturally-grounded support tailored to the unique needs of our community.",
