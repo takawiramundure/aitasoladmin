@@ -117,6 +117,11 @@ const AppSidebar: React.FC = () => {
           path: "/cms/hero",
         },
         {
+          icon: <BoxCubeIcon />,
+          name: "Event Hero (Homepage)",
+          path: "/cms/event-hero",
+        },
+        {
           name: "Home Page Settings",
           icon: <PageIcon />,
           path: "/cms/home-settings",
@@ -168,7 +173,6 @@ const AppSidebar: React.FC = () => {
             { name: "Impact Gateway", path: "/cms/impact" },
             { name: "Upcoming Events", path: "/cms/upcoming-events" },
             { name: "Black Excellence Gala", path: "/cms/black-excellence-gala" },
-            { name: "Event Hero (Homepage)", path: "/cms/event-hero", new: true },
             { name: "Newsletters", path: "/cms/newsletters" },
             { name: "Success Stories", path: "/cms/success-stories" },
             { name: "Gallery", path: "/cms/gallery" },
