@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { initGoogleClient, setAccessToken, getAnalyticsReport, getDemographicsReport, getTopPagesReport, getDeviceCategoryReport, getEngagementReport, getSourceMediumReport, getBrowserReport } from '../services/analyticsService';
 import { useGoogleLogin } from '@react-oauth/google';
 import { ANALYTICS_CONFIG } from '../config/analyticsConfig';
+import { useSite } from './SiteContext';
 
 interface AnalyticsContextType {
     isConnected: boolean;
@@ -42,9 +43,17 @@ const AnalyticsContext = createContext<AnalyticsContextType>({
 });
 
 export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) => {
+    const { currentSite } = useSite();
     const [isConnected, setIsConnected] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
-    const [propertyId, setPropertyId] = useState(localStorage.getItem('ga4_property_id') || ANALYTICS_CONFIG.DEFAULT_PROPERTY_ID);
+    
+    // Use site-specific property ID or fallback to the one in localStorage/global default
+    const getInitialPropertyId = () => {
+        if (currentSite?.ga4PropertyId) return currentSite.ga4PropertyId;
+        return localStorage.getItem('ga4_property_id') || ANALYTICS_CONFIG.DEFAULT_PROPERTY_ID;
+    };
+
+    const [propertyId, setPropertyId] = useState(getInitialPropertyId());
     const [analyticsData, setAnalyticsData] = useState<any | null>(null);
     const [demographicsData, setDemographicsData] = useState<any | null>(null);
     const [topPagesData, setTopPagesData] = useState<any | null>(null);
@@ -81,6 +90,23 @@ export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) =
             localStorage.setItem('ga4_property_id', propertyId);
         }
     }, [propertyId]);
+
+    // Sync property ID when site changes
+    useEffect(() => {
+        if (currentSite?.ga4PropertyId) {
+            setPropertyId(currentSite.ga4PropertyId);
+            // Clear existing data so we don't show old site info while loading
+            setAnalyticsData(null);
+            setEngagementData(null);
+            setTopPagesData(null);
+            setDeviceData(null);
+            setDemographicsData(null);
+        } else if (currentSite && !currentSite.ga4PropertyId) {
+            // If no GA4 for this site, clear it
+            setPropertyId('');
+            setAnalyticsData(null);
+        }
+    }, [currentSite]);
 
     const login = useGoogleLogin({
         onSuccess: (tokenResponse) => {

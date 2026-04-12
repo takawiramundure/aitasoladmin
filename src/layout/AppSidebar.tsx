@@ -249,6 +249,43 @@ const AppSidebar: React.FC = () => {
       ];
     }
 
+    if (currentSite.id === 'noel') {
+      return [
+        ...commonItems,
+        {
+          icon: <BoxCubeIcon />,
+          name: "Hero Slider",
+          path: "/cms/hero",
+        },
+        {
+          name: "Page Sections",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "Home Details", path: "/cms/home-settings" },
+            { name: "Services", path: "/cms/noel-services" },
+            { name: "Portfolio / Projects", path: "/cms/portfolio" },
+            { name: "Reviews", path: "/cms/reviews" },
+            { name: "Before & After", path: "/cms/gallery" },
+            { name: "Footer Details", path: "/cms/footer" },
+          ],
+        },
+        {
+          name: "Media Center",
+          icon: <BoxCubeIcon />,
+          subItems: [
+            { name: "Videos", path: "/cms/videos" },
+            { name: "Partners", path: "/cms/partners" },
+            { name: "Media Library", path: "/cms/media" },
+          ]
+        },
+        {
+          icon: <BoxCubeIcon />,
+          name: "Media Library",
+          path: "/cms/media",
+        },
+      ];
+    }
+
     // Default NSPC Menu
     return [
       ...commonItems,

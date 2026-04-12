@@ -32,6 +32,14 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'testimonials', label: 'Testimonials' }
         ];
     }
+    if (siteId === 'noel') {
+        return [
+            { id: 'services', label: 'Specialized Services' },
+            { id: 'our_story', label: 'Our Story (Home Section)' },
+            { id: 'projects', label: 'Recent Projects (Toggle)' },
+            { id: 'reviews', label: 'Testimonials (Toggle)' }
+        ];
+    }
     return [
         { id: 'founder', label: 'Message from Founder' },
         { id: 'mission', label: 'Why Choose BWEIC' },
@@ -129,6 +137,39 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                 items: [
                     { quote: "Finding Kind Minds felt like exhaling after holding my breath for months. They truly listened to our family.", author: "Sarah", role: "Parent of two" }
                 ]
+            }
+        };
+    }
+
+    if (siteId === 'noel') {
+        return {
+            services: {
+                heading: "Our Specialized Services",
+                subtitle: "WHAT WE DO",
+                content: "Providing high-end craftsmanship and professional construction services for your home and business.",
+                enabled: true,
+                items: [
+                    { title: 'Exterior Work', desc: 'From roofing to custom siding, we ensure your home makes a lasting impression.' },
+                    { title: 'Woodworking', desc: 'Bespoke cabinetry and custom millwork tailored to your unique style.' },
+                    { title: 'Renovations', desc: 'Full-scale interior transformations that blend functionality with elegance.' }
+                ]
+            },
+            our_story: {
+                heading: "A Legacy of Craftsmanship",
+                subtitle: "OUR STORY",
+                content: "<p>At Noel Construction, we believe that every home tells a story. Our journey began with a simple passion for building things that last—not just structures, but legacies.</p><p>With decades of experience in high-end residential and commercial projects, our team brings a meticulous eye for detail to every renovation and custom build. We don't just follow blueprints; we realize visions.</p>",
+                enabled: true,
+                images: [{ url: "https://images.unsplash.com/photo-1541915059797-bc5cb677749a?w=1200&q=80", alt: "Craftsmanship" }]
+            },
+            projects: {
+                heading: "Featured Craftsmanship",
+                subtitle: "RECENT PROJECTS",
+                enabled: true
+            },
+            reviews: {
+                heading: "What Our Clients Say",
+                subtitle: "TESTIMONIALS",
+                enabled: true
             }
         };
     }
@@ -369,6 +410,31 @@ export default function HomePageManager() {
                                                         label=""
                                                         value={section.content || ""}
                                                         onChange={(newContent: string) => handleSectionChange(config.id, "content", newContent)}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Subtitle logic for Noel */}
+                                            {currentSite.id === 'noel' && ['services', 'our_story', 'projects', 'reviews'].includes(config.id) && (
+                                                <div>
+                                                    <Label>Section Subtitle (Overhead Label)</Label>
+                                                    <Input
+                                                        type="text"
+                                                        value={section.subtitle || ""}
+                                                        onChange={(e) => handleSectionChange(config.id, "subtitle", e.target.value)}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Specialized Content for Noel Services */}
+                                            {config.id === 'services' && currentSite.id === 'noel' && (
+                                                <div className="mt-4">
+                                                    <Label>Services Description (Brief)</Label>
+                                                    <textarea
+                                                        className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white text-theme-sm"
+                                                        rows={2}
+                                                        value={section.content || ""}
+                                                        onChange={(e) => handleSectionChange(config.id, "content", e.target.value)}
                                                     />
                                                 </div>
                                             )}

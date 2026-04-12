@@ -26,6 +26,8 @@ interface GalaSection extends SectionContent {
     networkPartners?: { name: string; imageUrl: string; link: string }[];
     platinum?: any[];
     gold?: any[];
+    autoShowAt?: string;
+    hidePreEvent?: boolean;
     buttonText?: string;
     link?: string;
     buttonText2?: string;
@@ -46,6 +48,7 @@ const GALA_SECTIONS = [
     { id: 'agenda', label: 'Event Agenda' },
     { id: 'awards', label: 'Award Categories' },
     { id: 'nominees', label: 'Nominees Directory' },
+    { id: 'winners', label: 'Award Winners (Post-Event)' },
     { id: 'nominations', label: 'Nominations CTA' },
     { id: 'sponsors', label: 'Sponsors' },
     { id: 'network', label: 'Our Esteemed Network' },
@@ -133,6 +136,17 @@ export default function GalaManager() {
                     } as any;
                 }
 
+                if (!updatedSections.winners) {
+                    updatedSections.winners = { 
+                        heading: 'Award Winners', 
+                        subtitle: 'Celebrating excellence and achievement in our community.',
+                        enabled: false, 
+                        items: [],
+                        hidePreEvent: false,
+                        content: '' 
+                    };
+                }
+
                 setContent({ ...data, sections: updatedSections } as GalaPageContent);
             } else {
                 // Initialize with full defaults
@@ -141,6 +155,9 @@ export default function GalaManager() {
                     initialSections[sec.id] = { heading: sec.label, enabled: true, content: "" };
                 });
                 
+                initialSections.winners.enabled = false;
+                initialSections.winners.items = [];
+                initialSections.winners.hidePreEvent = false;
                 initialSections.mission.details = defaultMissionDetails;
                 initialSections.hero.buttonText = defaultHeroButtons.buttonText;
                 initialSections.hero.link = defaultHeroButtons.link;
@@ -837,6 +854,60 @@ export default function GalaManager() {
                                                                             </div>
                                                                         </div>
                                                                         <div className="space-y-4">
+                                                                            <div className="p-3 border rounded-lg bg-primary/5 border-primary/20">
+                                                                                <div className="flex items-center justify-between mb-3">
+                                                                                    <span className="text-sm font-bold text-primary">Award Winner?</span>
+                                                                                    <button 
+                                                                                        onClick={() => {
+                                                                                            const newItems = [...(section.items || [])];
+                                                                                            newItems[idx].isWinner = !newItems[idx].isWinner;
+                                                                                            if (newItems[idx].isWinner && !newItems[idx].winnerType) {
+                                                                                                newItems[idx].winnerType = 'community';
+                                                                                            }
+                                                                                            handleSectionChange('nominees', 'items', newItems);
+                                                                                        }}
+                                                                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${nominee.isWinner ? 'bg-primary' : 'bg-gray-200'}`}
+                                                                                    >
+                                                                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${nominee.isWinner ? 'translate-x-6' : 'translate-x-1'}`} />
+                                                                                    </button>
+                                                                                </div>
+                                                                                {nominee.isWinner && (
+                                                                                    <div className="space-y-3">
+                                                                                        <div>
+                                                                                            <Label className="text-xs">Winner Type</Label>
+                                                                                            <select 
+                                                                                                className="w-full text-xs p-2 border rounded-md dark:bg-gray-800"
+                                                                                                value={nominee.winnerType || 'community'}
+                                                                                                onChange={(e) => {
+                                                                                                    const newItems = [...(section.items || [])];
+                                                                                                    newItems[idx].winnerType = e.target.value;
+                                                                                                    handleSectionChange('nominees', 'items', newItems);
+                                                                                                }}
+                                                                                            >
+                                                                                                <option value="community">Community Award</option>
+                                                                                                <option value="honorary">Honorary Award</option>
+                                                                                            </select>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <Label className="text-xs">Winning Category (Required if multi-category)</Label>
+                                                                                            <select 
+                                                                                                className="w-full text-xs p-2 border rounded-md dark:bg-gray-800"
+                                                                                                value={nominee.winningCategory || ''}
+                                                                                                onChange={(e) => {
+                                                                                                    const newItems = [...(section.items || [])];
+                                                                                                    newItems[idx].winningCategory = e.target.value;
+                                                                                                    handleSectionChange('nominees', 'items', newItems);
+                                                                                                }}
+                                                                                            >
+                                                                                                <option value="">Select Winning Category</option>
+                                                                                                {(nominee.categories || []).map((cat: string) => (
+                                                                                                    <option key={cat} value={cat}>{cat}</option>
+                                                                                                ))}
+                                                                                            </select>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
                                                                             <Label>Profile Picture</Label>
                                                                             <ImagePicker 
                                                                                 value={nominee.image || ''} 
@@ -870,6 +941,134 @@ export default function GalaManager() {
                                                                     </div>
                                                                 </div>
                                                             </details>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {config.id === 'winners' && (
+                                            <div className="space-y-6">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6 border-b">
+                                                    <div>
+                                                        <Label>Auto-Show At (Optional)</Label>
+                                                        <Input 
+                                                            type="datetime-local" 
+                                                            value={section.autoShowAt || ''} 
+                                                            onChange={(e) => handleSectionChange('winners', 'autoShowAt', e.target.value)} 
+                                                        />
+                                                        <p className="text-xs text-gray-400 mt-1 italic">If set, winners will show automatically after this time.</p>
+                                                    </div>
+                                                    <div className="flex items-center justify-between p-4 border rounded-xl bg-primary/5">
+                                                        <div>
+                                                            <h4 className="font-bold text-primary">Post-Event Mode</h4>
+                                                            <p className="text-xs text-gray-500">Hide Nominations CTA and recruitment sections when winners are shown.</p>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => handleSectionChange('winners', 'hidePreEvent', !section.hidePreEvent)}
+                                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${section.hidePreEvent ? 'bg-primary' : 'bg-gray-200'}`}
+                                                        >
+                                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${section.hidePreEvent ? 'translate-x-6' : 'translate-x-1'}`} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400">Additional Winners (Not in Nominees)</h4>
+                                                        <Button variant="outline" size="sm" onClick={() => handleSectionChange('winners', 'items', [...(section.items || []), {id: `winner-${Date.now()}`, name: '', bio: '', winnerType: 'community', winnerAward: '', winnerCategory: '', image: ''}])}>
+                                                            <Plus size={16} className="mr-2" /> Add Manual Winner
+                                                        </Button>
+                                                    </div>
+                                                    
+                                                    <div className="grid gap-4">
+                                                        {(section.items || []).map((winner: any, idx: number) => (
+                                                            <div key={idx} className="p-4 border rounded-xl bg-gray-50/50 space-y-4">
+                                                                <div className="flex justify-between items-start">
+                                                                    <div className="flex-1 grid grid-cols-2 gap-4">
+                                                                        <div>
+                                                                            <Label>Name</Label>
+                                                                            <Input value={winner.name || ''} onChange={(e) => {
+                                                                                const newItems = [...(section.items || [])];
+                                                                                newItems[idx].name = e.target.value;
+                                                                                handleSectionChange('winners', 'items', newItems);
+                                                                            }} />
+                                                                        </div>
+                                                                        <div>
+                                                                            <Label>Winner Type</Label>
+                                                                            <select 
+                                                                                className="w-full p-3 border rounded-md dark:bg-gray-800"
+                                                                                value={winner.winnerType || 'community'}
+                                                                                onChange={(e) => {
+                                                                                    const newItems = [...(section.items || [])];
+                                                                                    newItems[idx].winnerType = e.target.value;
+                                                                                    handleSectionChange('winners', 'items', newItems);
+                                                                                }}
+                                                                            >
+                                                                                <option value="community">Community Award</option>
+                                                                                <option value="honorary">Honorary Award</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div className="col-span-2">
+                                                                            <Label>Award Title</Label>
+                                                                            <Input value={winner.winnerAward || ''} onChange={(e) => {
+                                                                                const newItems = [...(section.items || [])];
+                                                                                newItems[idx].winnerAward = e.target.value;
+                                                                                handleSectionChange('winners', 'items', newItems);
+                                                                            }} />
+                                                                        </div>
+                                                                        <div className="col-span-2">
+                                                                            <Label>Award Category (For Integrated Community Awards)</Label>
+                                                                            <select 
+                                                                                className="w-full p-3 border rounded-md dark:bg-gray-800"
+                                                                                value={winner.winnerCategory || ''}
+                                                                                onChange={(e) => {
+                                                                                    const newItems = [...(section.items || [])];
+                                                                                    newItems[idx].winnerCategory = e.target.value;
+                                                                                    handleSectionChange('winners', 'items', newItems);
+                                                                                }}
+                                                                            >
+                                                                                <option value="">None (Display in Honorary/General Section)</option>
+                                                                                <option value="COMMUNITY LEADERSHIP & SERVICE">COMMUNITY LEADERSHIP & SERVICE</option>
+                                                                                <option value="SOCIAL JUSTICE & ADVOCACY">SOCIAL JUSTICE & ADVOCACY</option>
+                                                                                <option value="EDUCATION & MENTORSHIP">EDUCATION & MENTORSHIP</option>
+                                                                                <option value="BUSINESS & ENTREPRENEURSHIP">BUSINESS & ENTREPRENEURSHIP</option>
+                                                                                <option value="ARTS & CULTURE">ARTS & CULTURE</option>
+                                                                                <option value="LIFETIME ACHIEVEMENT & LEGACY">LIFETIME ACHIEVEMENT & LEGACY</option>
+                                                                                <option value="HEALTH & WELLNESS">HEALTH & WELLNESS</option>
+                                                                                <option value="YOUTH LEADERSHIP & INNOVATION">YOUTH LEADERSHIP & INNOVATION</option>
+                                                                                <option value="COMMUNITY ALLYSHIP & SOLIDARITY">COMMUNITY ALLYSHIP & SOLIDARITY</option>
+                                                                                <option value="EQUITY IN ACTION">EQUITY IN ACTION</option>
+                                                                            </select>
+                                                                        </div>
+                                                                        <div className="col-span-2">
+                                                                            <Label>Bio</Label>
+                                                                            <textarea 
+                                                                                className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 min-h-[100px]" 
+                                                                                value={winner.bio || ''} 
+                                                                                onChange={(e) => {
+                                                                                    const newItems = [...(section.items || [])];
+                                                                                    newItems[idx].bio = e.target.value;
+                                                                                    handleSectionChange('winners', 'items', newItems);
+                                                                                }} 
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                    <button onClick={() => {
+                                                                        const newItems = (section.items || []).filter((_: any, i: number) => i !== idx);
+                                                                        handleSectionChange('winners', 'items', newItems);
+                                                                    }} className="text-red-500 p-2"><Trash2 size={20}/></button>
+                                                                </div>
+                                                                <Label>Profile Picture</Label>
+                                                                <ImagePicker 
+                                                                    value={winner.image || ''} 
+                                                                    onChange={(url) => {
+                                                                        const newItems = [...(section.items || [])];
+                                                                        newItems[idx].image = url;
+                                                                        handleSectionChange('winners', 'items', newItems);
+                                                                    }} 
+                                                                />
+                                                            </div>
                                                         ))}
                                                     </div>
                                                 </div>

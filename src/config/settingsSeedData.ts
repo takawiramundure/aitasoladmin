@@ -84,81 +84,24 @@ const elwgNavigation: NavigationItem[] = [
     { id: 'nav-donate', name: 'Donate', path: '/donate', order: 6 }
 ];
 
+const noelNavigation: NavigationItem[] = [
+    { id: 'nav-home', name: 'Home', path: '/', order: 1 },
+    { id: 'nav-services', name: 'Services', path: '/services', order: 2 },
+    { id: 'nav-portfolio', name: 'Portfolio', path: '/portfolio', order: 3 },
+    { id: 'nav-before-after', name: 'Before & After', path: '/before-after', order: 4 },
+    { id: 'nav-reviews', name: 'Reviews', path: '/reviews', order: 5 },
+    { id: 'nav-contact', name: 'Contact', path: '/contact', order: 6 }
+];
+
 export const SETTINGS_SEED_DATA: Record<string, SiteSettings> = {
     nspc: {
-        siteId: 'nspc',
-        branding: {
-            logo: '/nspc-logo.png',
-            siteName: 'Niagara Suicide Prevention Coalition',
-            favicon: '/favicon.ico'
-        },
-        theme: {
-            primary: '#00A8B4',
-            secondary: '#2C3E50',
-            accent: '#A5C93F',
-            textDark: '#1A1A1A',
-            textLight: '#FFFFFF',
-            brandColor: '#00A8B4',
-            brandColorDark: '#008C96',
-            brandColorLight: '#46C3CC',
-            topBarBg: '#00A8B4',
-            headerBg: '#FFFFFF'
-        },
-        navigation: nspcNavigation,
-        metadata: {
-            lastUpdated: new Date().toISOString(),
-            updatedBy: 'system'
-        }
+// ... existing nspc ...
     },
     bweic: {
-        siteId: 'bweic',
-        branding: {
-            logo: '/logo.png',
-            siteName: 'Black Women Empowerment Initiative Canada',
-            favicon: '/favicon.ico'
-        },
-        theme: {
-            primary: '#BA9731',
-            secondary: '#0D0D0D',
-            accent: '#DACE84',
-            textDark: '#0D0D0D',
-            textLight: '#FEFEFE',
-            brandColor: '#BA9731',
-            brandColorDark: '#8E7324',
-            brandColorLight: '#DACE84',
-            topBarBg: '#0D0D0D',
-            headerBg: '#FEFEFE'
-        },
-        navigation: bweicNavigation,
-        metadata: {
-            lastUpdated: new Date().toISOString(),
-            updatedBy: 'system'
-        }
+// ... existing bweic ...
     },
     kmfw: {
-        siteId: 'kmfw',
-        branding: {
-            logo: '/logo-dark.png',
-            siteName: 'Kind Minds Family Wellness',
-            favicon: '/favicon.ico'
-        },
-        theme: {
-            primary: '#0D9488',
-            secondary: '#1C1917',
-            accent: '#D97706',
-            textDark: '#1C1917',
-            textLight: '#FFFFFF',
-            brandColor: '#0D9488',
-            brandColorDark: '#0a7a70',
-            brandColorLight: '#0f9f92',
-            topBarBg: '#0D9488',
-            headerBg: '#FFFFFF'
-        },
-        navigation: kmfwNavigation,
-        metadata: {
-            lastUpdated: new Date().toISOString(),
-            updatedBy: 'system'
-        }
+// ... existing kmfw ...
     },
     elwg: {
         siteId: 'elwg',
@@ -180,6 +123,31 @@ export const SETTINGS_SEED_DATA: Record<string, SiteSettings> = {
             headerBg: '#FAF9F6' // Off-white
         },
         navigation: elwgNavigation,
+        metadata: {
+            lastUpdated: new Date().toISOString(),
+            updatedBy: 'system'
+        }
+    },
+    noel: {
+        siteId: 'noel',
+        branding: {
+            logo: '/logo.png',
+            siteName: 'Noel Construction',
+            favicon: '/favicon.ico'
+        },
+        theme: {
+            primary: '#2E7D32', // Forest Green
+            secondary: '#1C1C1C', // Charcoal
+            accent: '#A5D6A7', // Sage
+            textDark: '#1C1C1C',
+            textLight: '#FFFFFF',
+            brandColor: '#2E7D32',
+            brandColorDark: '#1B5E20',
+            brandColorLight: '#4CAF50',
+            topBarBg: '#2E7D32',
+            headerBg: '#F9F6F1' // Off-white
+        },
+        navigation: noelNavigation,
         metadata: {
             lastUpdated: new Date().toISOString(),
             updatedBy: 'system'

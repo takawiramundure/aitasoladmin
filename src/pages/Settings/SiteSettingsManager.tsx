@@ -8,6 +8,7 @@ import { Plus, Trash2, GripVertical, Save, Upload, ExternalLink, ArrowUp, ArrowD
 import { storage } from '../../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { availableRoutes } from '../../utils/routes';
+import { GET_DEFAULT_NAV, GET_SITE_DEFAULTS } from '../../config/navigationDefaults';
 
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
@@ -51,46 +52,8 @@ export default function SiteSettingsManager() {
             setLoading(true);
             const data = await FirestoreService.getSiteSettings(currentSite.id);
             
-            const defaultNav = [
-                { id: 'nav-home', name: 'Home', path: '/', order: 1 },
-                { id: 'nav-about', name: 'About', path: '/about', order: 2, subItems: [
-                    { id: 'nav-about-story', name: 'Our Story', path: '/about/our-story', order: 1 },
-                    { id: 'nav-about-team', name: 'Meet Our Team', path: '/about/meet-our-team', order: 2 },
-                    { id: 'nav-about-plan', name: 'Our Strategic Plan', path: '/about/our-strategic-plan', order: 3 },
-                    { id: 'nav-about-founder', name: "Founder's Message", path: '/about/founders-message', order: 4 },
-                ] },
-                { id: 'nav-services', name: 'Services', path: '/services', order: 3, subItems: [
-                    { id: 'nav-serv-prog', name: 'Programs & Services', path: '/services', order: 1 },
-                    { id: 'nav-serv-ground', name: 'Grounded Counseling', path: '/services/grounded-counseling', order: 2 },
-                    { id: 'nav-serv-edu', name: 'Educational Programs & Groups', path: '/services/educational-programs', order: 3 },
-                    { id: 'nav-serv-advocacy', name: 'Advocacy, Training & Education', path: '/services/advocacy-education', order: 4 },
-                    { id: 'nav-serv-community', name: 'Community Support & Engagement', path: '/services/community-support', order: 5 },
-                    { id: 'nav-serv-system', name: 'System Navigation', path: '/services/system-navigation', order: 6 },
-                ] },
-                { id: 'nav-impact', name: 'Impact', path: '/impact', order: 4, subItems: [
-                    { id: 'nav-imp-gateway', name: 'Impact Gateway', path: '/impact', order: 1 },
-                    { id: 'nav-imp-events', name: 'Events', path: '/impact/events', order: 2 },
-                    { id: 'nav-imp-news', name: 'Newsletters', path: '/impact/newsletters', order: 3 },
-                    { id: 'nav-imp-success', name: 'Success Stories', path: '/impact/success-stories', order: 4 },
-                    { id: 'nav-imp-blog', name: 'Community Blog', path: '/impact/blog', order: 5 },
-                    { id: 'nav-imp-gallery', name: 'Gallery', path: '/impact/gallery', order: 6 },
-                ] },
-                { id: 'nav-gala', name: 'BEA Gala', path: '/impact/events/black-excellence-gala', order: 5 },
-                { id: 'nav-research', name: 'Research', path: '/research', order: 6, subItems: [
-                    { id: 'nav-res-gateway', name: 'Research Gateway', path: '/research', order: 1 },
-                    { id: 'nav-res-black', name: 'Black Wellness Project', path: '/research/black-wellness', order: 2 },
-                    { id: 'nav-res-phac', name: 'PHAC Child Welfare', path: '/research/phac-child-welfare', order: 3 },
-                    { id: 'nav-res-umoja', name: 'Umoja Neurodivergent Program', path: '/research/umoja-neurodivergent', order: 4 },
-                ] },
-                { id: 'nav-join', name: 'Join Us', path: '/join', order: 7, subItems: [
-                    { id: 'nav-join-inv', name: 'Get Involved', path: '/join', order: 1 },
-                    { id: 'nav-join-sponsors', name: 'Our Funders/Sponsors', path: '/join/funders', order: 2 },
-                    { id: 'nav-join-partners', name: 'Our Partners', path: '/join/partners', order: 3 },
-                    { id: 'nav-join-volunteers', name: 'Volunteering', path: '/join/volunteer', order: 4 },
-                    { id: 'nav-join-careers', name: 'Career Services & Employment Support', path: '/join/careers', order: 5 },
-                ] },
-                { id: 'nav-contact', name: 'Contact', path: '/contact', order: 8 },
-            ];
+            const defaultNav = GET_DEFAULT_NAV(currentSite.id);
+            const siteDefaults = GET_SITE_DEFAULTS(currentSite.id, currentSite.name);
 
             if (data && (!data.navigation || data.navigation.length <= 1)) {
                 data.navigation = defaultNav;
@@ -100,12 +63,8 @@ export default function SiteSettingsManager() {
             const finalSettings: SiteSettings = data || {
                 siteId: currentSite.id,
                 siteTitle: currentSite.name,
-                siteDescription: currentSite.id === 'kmfw'
-                    ? 'Kind Minds Family Wellness (KMFW) is a Black-led organization providing culturally grounded mental health, counseling, and wellness programs to the Black community in Waterloo Region, Ontario.'
-                    : '',
-                siteKeywords: currentSite.id === 'kmfw'
-                    ? 'Black mental health, KMFW, Kind Minds Family Wellness, Black wellness Waterloo, Black community support Ontario, culturally grounded counseling'
-                    : '',
+                siteDescription: siteDefaults.description,
+                siteKeywords: siteDefaults.keywords,
                 branding: { 
                     siteName: currentSite.name, 
                     logo: '' 
@@ -126,7 +85,7 @@ export default function SiteSettingsManager() {
                 maintenanceMode: false,
                 emergencyBar: {
                     enabled: false,
-                    content: 'National Suicide Helpline available 24/7. Please call or text <a href="tel:988" style="color: white; font-weight: bold; text-decoration: underline;">9-8-8</a>.',
+                    content: 'Important update regarding our services.',
                     bgColor: '#84cc16'
                 },
                 topBar: {

@@ -4,6 +4,7 @@ export interface Site {
   domain: string;
   description?: string;
   databaseId?: string; // Optional: specify a custom Firestore database ID
+  ga4PropertyId?: string; // Google Analytics 4 Property ID
   usePrefix?: boolean; // Default true: whether to use `${siteId}_` prefixes for collections
 }
 
@@ -13,6 +14,7 @@ export const SITES: Site[] = [
     name: 'NSPC',
     domain: 'niagarasuicidepreventioncoalition.ca',
     description: 'Niagara Suicide Prevention Coalition',
+    ga4PropertyId: '509768055',
     usePrefix: true
   },
   {
@@ -36,6 +38,14 @@ export const SITES: Site[] = [
     description: 'Elliot Lake Womens Group',
     databaseId: 'elwg-web', // The user specified this database name
     usePrefix: false // New sites should have clean collection names
+  },
+  {
+    id: 'noel',
+    name: 'Noel Construction',
+    domain: 'noelconstruction.web.app',
+    description: 'High-End Renovation & Woodworking',
+    databaseId: 'noel-web',
+    usePrefix: false
   }
 ];
 

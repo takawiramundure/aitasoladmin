@@ -4,6 +4,9 @@ export interface Nominee {
     bio: string;
     categories: string[];
     image?: string;
+    isWinner?: boolean;
+    winnerType?: string;
+    winnerAward?: string;
 }
 
 export interface AgendaItem {

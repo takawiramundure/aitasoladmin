@@ -7,8 +7,28 @@ import Alert from '../../components/ui/alert/Alert';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import PageMeta from '../../components/common/PageMeta';
 
-// All KMFW routes with descriptive labels
-const KMFW_PAGES = [
+interface PageDef {
+    path: string;
+    label: string;
+    key: string;
+}
+
+interface PageSEO {
+    title: string;
+    description: string;
+    keywords: string;
+    ogTitle: string;
+    ogDescription: string;
+    ogImage: string;
+    twitterTitle: string;
+    twitterDescription: string;
+    noIndex: boolean;
+}
+
+type SEOData = Record<string, PageSEO>;
+
+// All KMFW routes
+const KMFW_PAGES: PageDef[] = [
     { path: '/', label: 'Home', key: 'home' },
     { path: '/about', label: 'About Us', key: 'about' },
     { path: '/our-story', label: 'Our Story', key: 'our-story' },
@@ -37,309 +57,142 @@ const KMFW_PAGES = [
     { path: '/donate', label: 'Donate', key: 'donate' },
 ];
 
-// Professional SEO seed data for all KMFW pages
-const SEO_SEED_DATA: Record<string, PageSEO> = {
+// Noel Construction Pages
+const NOEL_PAGES: PageDef[] = [
+    { path: '/', label: 'Home', key: 'home' },
+    { path: '/services', label: 'Services (Overview)', key: 'services' },
+    { path: '/services/exterior-work', label: 'Exterior Work', key: 'exterior' },
+    { path: '/services/sustainability', label: 'Sustainability', key: 'sustainability' },
+    { path: '/services/decks-patios', label: 'Decks & Patios', key: 'decks' },
+    { path: '/services/stairs-railings', label: 'Stairs & Railings', key: 'stairs' },
+    { path: '/services/renovations', label: 'Renovations', key: 'renovations' },
+    { path: '/services/eco-solutions', label: 'Eco-Solutions', key: 'eco' },
+    { path: '/get-quote', label: 'Get Quote', key: 'quote' },
+    { path: '/portfolio', label: 'Portfolio', key: 'portfolio' },
+    { path: '/before-after', label: 'Before & After', key: 'before-after' },
+    { path: '/reviews', label: 'Reviews', key: 'reviews' },
+    { path: '/contact', label: 'Contact', key: 'contact' },
+];
+
+const SITE_PAGES: Record<string, PageDef[]> = {
+    kmfw: KMFW_PAGES,
+    noel: NOEL_PAGES,
+    elwg: [
+        { path: '/', label: 'Home', key: 'home' },
+        { path: '/about', label: 'About Us', key: 'about' },
+        { path: '/programs', label: 'Programs', key: 'programs' },
+        { path: '/volunteers', label: 'Volunteers', key: 'volunteers' },
+        { path: '/contact', label: 'Contact', key: 'contact' },
+        { path: '/donate', label: 'Donate', key: 'donate' },
+    ]
+};
+
+const NOEL_SEO_SEED: SEOData = {
     'home': {
-        title: 'Kind Minds Family Wellness | Black Mental Health & Wellness in Waterloo Region',
-        description: 'Kind Minds Family Wellness (KMFW) is a Black-led organization providing culturally grounded mental health, counseling, and wellness programs to the Black community in Waterloo Region, Ontario.',
-        keywords: 'Black mental health, KMFW, Kind Minds Family Wellness, Black wellness Waterloo, Black community support Ontario, culturally grounded counseling, Black family wellness',
-        ogTitle: 'Kind Minds Family Wellness – Healing, Growth & Community',
-        ogDescription: 'Culturally grounded mental health and wellness programs for the Black community in Waterloo Region. Join us in building a healthier, more empowered community.',
+        title: 'Master Craftsmanship | Noel Construction KW',
+        description: 'Noel Construction specializes in luxury renovations, custom woodworking, and sustainable garden solutions in the Kitchener-Waterloo region. 35+ years of experience.',
+        keywords: 'Noel Construction, KW renovations, luxury woodworking Kitchener, custom decks Waterloo, sustainable gardening, home additions KW',
+        ogTitle: 'Noel Construction – High-End Renovation & Woodworking',
+        ogDescription: 'From ground-up builds to intricate residential renovations, we bring your vision to life with precision and safety.',
         ogImage: '',
-        twitterTitle: 'Kind Minds Family Wellness | Black-Led Wellness in Ontario',
-        twitterDescription: 'Mental health, counseling, and community support for the Black community in Waterloo Region. Certified, compassionate, and culturally grounded.',
-        noIndex: false,
-    },
-    'about': {
-        title: 'About KMFW | Our Mission, Vision & Values',
-        description: 'Learn about Kind Minds Family Wellness — a Black-led non-profit dedicated to the holistic well-being of Black individuals and families in the Waterloo Region through culturally safe services.',
-        keywords: 'KMFW about, Black mental health nonprofit, Black-led organization Waterloo, Kind Minds mission, culturally safe mental health care, Black wellness Ontario',
-        ogTitle: 'About Kind Minds Family Wellness',
-        ogDescription: 'A Black-led organization rooted in community, culture, and care. Discover our mission to transform Black wellness in Waterloo Region.',
-        ogImage: '',
-        twitterTitle: 'About KMFW | Black-Led Mental Health Organization',
-        twitterDescription: 'Discover the mission, vision, and values driving Kind Minds Family Wellness — serving the Black community in Waterloo Region, Ontario.',
-        noIndex: false,
-    },
-    'our-story': {
-        title: 'Our Story | Kind Minds Family Wellness',
-        description: 'Discover the founding story of Kind Minds Family Wellness — born from community need, cultural strength, and a vision for Black wellness in Waterloo Region.',
-        keywords: 'KMFW origin, Black nonprofit story, community wellness Waterloo, Kind Minds history, Black-founded organization Ontario',
-        ogTitle: 'The Story Behind Kind Minds Family Wellness',
-        ogDescription: 'From community conversations to a thriving organization. Read the story of how KMFW was born and why it matters.',
-        ogImage: '',
-        twitterTitle: 'Our Story | KMFW',
-        twitterDescription: 'How Kind Minds Family Wellness grew from a community need into a movement for Black wellness and mental health in Ontario.',
-        noIndex: false,
-    },
-    'meet-our-team': {
-        title: 'Meet Our Team | Kind Minds Family Wellness',
-        description: 'Meet the passionate team of counselors, advocates, and community leaders behind Kind Minds Family Wellness, dedicated to transforming Black health and wellness.',
-        keywords: 'KMFW team, Black counselors Waterloo, mental health staff, Black wellness professionals Ontario, Kind Minds leadership',
-        ogTitle: 'Meet the KMFW Team',
-        ogDescription: 'Our team of culturally grounded counselors, educators, and advocates are here to serve and empower the Black community.',
-        ogImage: '',
-        twitterTitle: 'Meet Our Team | KMFW',
-        twitterDescription: 'Get to know the dedicated professionals behind Kind Minds Family Wellness and our commitment to Black community health.',
-        noIndex: false,
-    },
-    'strategic-plan': {
-        title: 'Strategic Plan | Kind Minds Family Wellness',
-        description: 'Explore the strategic direction of KMFW — our long-term goals for expanding culturally safe mental health services, community partnerships, and systemic advocacy.',
-        keywords: 'KMFW strategic plan, Black nonprofit strategy, mental health goals Waterloo, KMFW 2025 2026, Kind Minds planning, Black wellness initiatives',
-        ogTitle: 'KMFW Strategic Plan',
-        ogDescription: 'See how Kind Minds Family Wellness is building for the future of Black wellness in Waterloo Region with a clear, community-driven strategic plan.',
-        ogImage: '',
-        twitterTitle: 'Strategic Plan | KMFW',
-        twitterDescription: "Kind Minds Family Wellness's roadmap for expanding culturally grounded care and systemic advocacy for Black communities in Ontario.",
+        twitterTitle: 'Noel Construction | Legacy of Craftsmanship',
+        twitterDescription: 'Professional construction services specializing in custom woodworking and premium home transformations.',
         noIndex: false,
     },
     'services': {
-        title: 'Programs & Services | Kind Minds Family Wellness',
-        description: "Explore KMFW's full range of culturally grounded programs and services — including counseling, advocacy, community support, and educational workshops for the Black community.",
-        keywords: 'KMFW services, Black mental health programs, counseling Waterloo, community support Black families, educational programs Ontario, advocacy Black community',
-        ogTitle: 'KMFW Programs & Services',
-        ogDescription: 'From counseling to advocacy, KMFW offers a comprehensive range of culturally safe services for Black individuals and families in Waterloo Region.',
+        title: 'Our Specialized Services | Custom Renovations & Woodworking',
+        description: 'Explore our range of high-end services: from fine finish carpentry and architectural staircases to vegetable garden setups and water management.',
+        keywords: 'construction services KW, garden beds installation, basement upgrades Waterloo, master woodworking, food security gardens',
+        ogTitle: 'Specialized Construction Services by Noel',
+        ogDescription: 'Quality over quantity. We deliver specialized construction services tailored to your lifestyle and needs.',
         ogImage: '',
-        twitterTitle: 'Programs & Services | KMFW',
-        twitterDescription: 'Discover culturally safe counseling, community support, and educational programs tailored for the Black community in Waterloo Region.',
+        twitterTitle: 'Specialized Services | Noel Construction',
+        twitterDescription: 'Explore our master-crafted woodworking and modern renovation services.',
         noIndex: false,
     },
-    'grounded-counseling': {
-        title: 'Grounded Counseling | Kind Minds Family Wellness',
-        description: "KMFW's Grounded Counseling service offers culturally safe, trauma-informed therapy for Black individuals and families navigating mental health, relationships, and personal growth.",
-        keywords: 'Black counseling Waterloo, culturally safe therapy, trauma-informed counseling Ontario, Black therapist Waterloo, KMFW grounded counseling, mental health Black community',
-        ogTitle: 'Grounded Counseling at KMFW',
-        ogDescription: 'Culturally grounded, trauma-informed counseling for Black individuals and families. You deserve support that truly understands your experience.',
+    'exterior': {
+        title: 'Exterior Construction & Curb Appeal | Noel Construction',
+        description: 'Professional exterior renovations, siding, and structural improvements designed to enhance your home’s character and longevity.',
+        keywords: 'exterior renovations KW, home siding Waterloo, curb appeal improvements, structural construction',
+        ogTitle: 'Exterior Construction Excellence',
+        ogDescription: 'Enhance your home’s exterior with our expert craftsmanship and durable solutions.',
         ogImage: '',
-        twitterTitle: 'Grounded Counseling | KMFW',
-        twitterDescription: 'Trauma-informed, culturally safe counseling for the Black community at Kind Minds Family Wellness in Waterloo Region.',
+        twitterTitle: 'Exterior Work | Noel Construction',
+        twitterDescription: 'Premium exterior renovations for modern homes.',
         noIndex: false,
     },
-    'educational-programs': {
-        title: 'Educational Programs | Kind Minds Family Wellness',
-        description: 'KMFW offers culturally enriched educational workshops, seminars, and programs designed to uplift and empower Black youth, families, and community members.',
-        keywords: 'KMFW educational programs, Black youth workshops, community education Waterloo, Black empowerment programs, wellness education Ontario',
-        ogTitle: 'KMFW Educational Programs',
-        ogDescription: "Empowering Black communities through knowledge. Explore KMFW's workshops, seminars, and educational initiatives.",
+    'sustainability': {
+        title: 'Sustainable Building & Green Solutions | Noel Construction',
+        description: 'Eco-conscious construction practices focusing on energy efficiency, sustainable materials, and long-term environmental value.',
+        keywords: 'sustainable building KW, green construction Waterloo, eco-friendly renovations, energy efficient home',
+        ogTitle: 'Sustainable Construction Solutions',
+        ogDescription: 'Building for the future with eco-friendly materials and sustainable building practices.',
         ogImage: '',
-        twitterTitle: 'Educational Programs | KMFW',
-        twitterDescription: 'Culturally enriched educational workshops and programs for Black youth and families in Waterloo Region.',
+        twitterTitle: 'Sustainability | Noel Construction',
+        twitterDescription: 'Building a greener future through sustainable construction.',
         noIndex: false,
     },
-    'advocacy-education': {
-        title: 'Advocacy & Education | Kind Minds Family Wellness',
-        description: 'KMFW advocates for systemic change and equity in mental health for Black communities in Ontario. Learn about our advocacy work, public education initiatives, and policy engagement.',
-        keywords: 'Black advocacy Ontario, mental health equity, systemic change Black community, KMFW advocacy, anti-Black racism education, community advocacy Waterloo',
-        ogTitle: 'Advocacy & Education at KMFW',
-        ogDescription: 'Standing up for Black mental health equity. KMFW fights systemic barriers and educates communities toward a more just future.',
+    'decks': {
+        title: 'Custom Decks & Premium Patios | Noel Construction',
+        description: 'High-end outdoor living spaces, custom cedar decks, and perfectly leveled stone patios in Kitchener-Waterloo.',
+        keywords: 'custom decks KW, patio installation Waterloo, cedar decks, outdoor living spaces',
+        ogTitle: 'Luxury Decks & Patios',
+        ogDescription: 'Master-crafted outdoor spaces designed for relaxation and longevity.',
         ogImage: '',
-        twitterTitle: 'Advocacy & Education | KMFW',
-        twitterDescription: 'KMFW advocates for mental health equity and systemic change for Black communities in Ontario and beyond.',
+        twitterTitle: 'Custom Decks | Noel Construction',
+        twitterDescription: 'Premium outdoor spaces for your home.',
         noIndex: false,
     },
-    'community-support': {
-        title: 'Community Support | Kind Minds Family Wellness',
-        description: 'Connecting Black individuals and families to essential community resources, peer support networks, and wraparound services in the Waterloo Region.',
-        keywords: 'Black community support, wraparound services Waterloo, peer support Black families, KMFW community programs, social services Black Ontario',
-        ogTitle: 'Community Support Services at KMFW',
-        ogDescription: 'You are not alone. KMFW connects Black individuals and families to resources, peer networks, and essential supports in their community.',
+    'stairs': {
+        title: 'Architectural Stairs & Custom Railings | Noel Construction',
+        description: 'Specialized finish carpentry for custom staircases, modern railings, and architectural wood details.',
+        keywords: 'custom stairs KW, modern railings Waterloo, architectural woodworking, finish carpentry stairs',
+        ogTitle: 'Architectural Stairs & Railings',
+        ogDescription: 'Transform your interior with custom staircases and precision railing installations.',
         ogImage: '',
-        twitterTitle: 'Community Support | KMFW',
-        twitterDescription: 'Essential community resources and peer support for Black individuals and families in Waterloo Region, Ontario.',
+        twitterTitle: 'Stairs & Railings | Noel Construction',
+        twitterDescription: 'Precision finish carpentry for high-end staircases.',
         noIndex: false,
     },
-    'system-navigation': {
-        title: 'System Navigation | Kind Minds Family Wellness',
-        description: 'KMFW helps Black individuals and families navigate complex health, social, and government systems — ensuring they access the services and support they deserve.',
-        keywords: 'system navigation Black community, social services support Waterloo, navigating healthcare Ontario, KMFW navigation service, health equity navigation',
-        ogTitle: 'System Navigation at KMFW',
-        ogDescription: "Confused by the system? KMFW's system navigators help Black individuals and families access the right services with culturally informed guidance.",
+    'renovations': {
+        title: 'High-End Home Renovations | Noel Construction',
+        description: 'Complete home transformations, basement finishing, and master-suite renovations with a focus on quality and building code compliance.',
+        keywords: 'home renovations KW, basement finishing Waterloo, luxury home updates, construction master',
+        ogTitle: 'High-End Renovations & Extensions',
+        ogDescription: 'Ground-up renovations that redefine your living space.',
         ogImage: '',
-        twitterTitle: 'System Navigation | KMFW',
-        twitterDescription: 'Helping Black families navigate health care and social systems in Ontario with culturally grounded support.',
+        twitterTitle: 'Premium Renovations | Noel Construction',
+        twitterDescription: 'Expert home transformations with 35+ years of experience.',
         noIndex: false,
     },
-    'events': {
-        title: 'Community Events | Kind Minds Family Wellness',
-        description: 'Join KMFW at our upcoming community events, workshops, galas, and gatherings celebrating Black culture, wellness, and excellence in the Waterloo Region.',
-        keywords: 'KMFW events, Black community events Waterloo, Black wellness workshops, Kind Minds events Ontario, Black Excellence Gala events',
-        ogTitle: 'KMFW Community Events',
-        ogDescription: 'From wellness workshops to celebratory galas — connect, grow, and thrive with the KMFW community at our upcoming events.',
+    'eco': {
+        title: 'Eco-Solutions & Food Security Gardens | Noel Construction',
+        description: 'Specialized garden setups, raised beds, and local food security solutions designed for urban and residential spaces.',
+        keywords: 'food security gardens KW, raised beds Waterloo, eco-solutions gardening, vegetable gardens',
+        ogTitle: 'Eco-Solutions & Garden Systems',
+        ogDescription: 'Secure your food future with our custom garden setups and eco-friendly outdoor solutions.',
         ogImage: '',
-        twitterTitle: 'Community Events | KMFW',
-        twitterDescription: 'Stay connected and inspired. Explore upcoming KMFW community events, workshops, and gatherings in Waterloo Region.',
+        twitterTitle: 'Eco-Solutions | Noel Construction',
+        twitterDescription: 'Building sustainable food systems in your own backyard.',
         noIndex: false,
     },
-    'impact': {
-        title: 'Our Impact | Kind Minds Family Wellness',
-        description: 'Discover the measurable impact of Kind Minds Family Wellness through our community stories, newsletters, and documented achievements in Black wellness and advocacy.',
-        keywords: 'KMFW impact, Black community change, wellness outcomes Ontario, Kind Minds results, Black nonprofit impact Waterloo',
-        ogTitle: 'The Impact of Kind Minds Family Wellness',
-        ogDescription: 'Real stories, real change. See how KMFW is transforming mental health and wellbeing for Black communities in Waterloo Region.',
+    'quote': {
+        title: 'Get a Professional Quote | Noel Construction KW',
+        description: 'Start your high-end renovation project today. Request a professional estimate for custom woodworking, decks, or structural renovations.',
+        keywords: 'construction quote KW, renovation estimate Waterloo, request construction services',
+        ogTitle: 'Contact Noel Construction for a Quote',
+        ogDescription: 'Let’s bring your vision to life. Request a professional consultation and quote.',
         ogImage: '',
-        twitterTitle: 'Our Impact | KMFW',
-        twitterDescription: 'Documented results and community stories showing the difference Kind Minds Family Wellness is making for Black families in Ontario.',
+        twitterTitle: 'Request a Quote | Noel Construction',
+        twitterDescription: 'Start your next project with a master builder.',
         noIndex: false,
-    },
-    'newsletters': {
-        title: 'Newsletters & Media | Kind Minds Family Wellness',
-        description: "Stay informed with KMFW's newsletters, media features, and community updates — covering Black wellness news, event recaps, and organizational announcements.",
-        keywords: 'KMFW newsletter, Black wellness news, Kind Minds updates, community newsletter Waterloo, Black organization announcements Ontario',
-        ogTitle: 'KMFW Newsletters & Community Updates',
-        ogDescription: 'Stay in the loop with the latest news, resources, and stories from Kind Minds Family Wellness.',
-        ogImage: '',
-        twitterTitle: 'Newsletters | KMFW',
-        twitterDescription: 'Community updates, announcements, and wellness resources from Kind Minds Family Wellness.',
-        noIndex: false,
-    },
-    'success-stories': {
-        title: 'Success Stories | Kind Minds Family Wellness',
-        description: 'Be inspired by the real stories of resilience, growth, and transformation from members of the Black community who have been supported by Kind Minds Family Wellness.',
-        keywords: 'KMFW success stories, Black wellness testimonials, mental health recovery stories, community transformation Ontario, Black resilience stories',
-        ogTitle: 'Success Stories from the KMFW Community',
-        ogDescription: "Inspiring stories of healing, strength, and community from individuals who have been touched by KMFW's programs and services.",
-        ogImage: '',
-        twitterTitle: 'Success Stories | KMFW',
-        twitterDescription: 'Stories of resilience and transformation from the Black community served by Kind Minds Family Wellness.',
-        noIndex: false,
-    },
-    'join-us': {
-        title: 'Join Us | Kind Minds Family Wellness',
-        description: 'Get involved with KMFW — volunteer, partner, donate, or apply for a career opportunity. Together we can empower the Black community and build healthier futures.',
-        keywords: 'join KMFW, volunteer Black organization, partner with KMFW, donate Black wellness, support Black nonprofit Waterloo Ontario',
-        ogTitle: 'Join the KMFW Movement',
-        ogDescription: 'There are many ways to contribute to our mission. Volunteer, donate, partner, or build a career with KMFW.',
-        ogImage: '',
-        twitterTitle: 'Join Us | KMFW',
-        twitterDescription: 'Join Kind Minds Family Wellness as a volunteer, partner, or supporter. Empower the Black community in Waterloo Region.',
-        noIndex: false,
-    },
-    'careers': {
-        title: 'Careers at KMFW | Kind Minds Family Wellness',
-        description: 'Explore career opportunities at Kind Minds Family Wellness and join a team passionate about Black community health, mental wellness, and cultural advocacy.',
-        keywords: 'KMFW careers, Black organization jobs, mental health jobs Waterloo, nonprofit careers Ontario, Black wellness careers',
-        ogTitle: 'Work With KMFW — Careers',
-        ogDescription: 'Join a team making a real difference. Explore career openings at Kind Minds Family Wellness in Waterloo Region, Ontario.',
-        ogImage: '',
-        twitterTitle: 'Careers | KMFW',
-        twitterDescription: 'Make a meaningful impact. View open positions at Kind Minds Family Wellness in Waterloo Region.',
-        noIndex: false,
-    },
-    'volunteer': {
-        title: 'Volunteer With Us | Kind Minds Family Wellness',
-        description: 'Give back to the Black community by volunteering with KMFW. We welcome dedicated individuals who are passionate about wellness, equity, and community empowerment.',
-        keywords: 'volunteer KMFW, Black organization volunteering Waterloo, community volunteer Ontario, mental health volunteering, wellness volunteer',
-        ogTitle: 'Volunteer at KMFW',
-        ogDescription: 'Your time and skills can change lives. Volunteer with Kind Minds Family Wellness and be part of the movement.',
-        ogImage: '',
-        twitterTitle: 'Volunteer | KMFW',
-        twitterDescription: 'Volunteer your time and talents at Kind Minds Family Wellness to uplift the Black community in Waterloo Region.',
-        noIndex: false,
-    },
-    'funders': {
-        title: 'Our Funders | Kind Minds Family Wellness',
-        description: "Recognizing the foundations, corporations, and government partners who fund KMFW's mission and make our Black wellness programs possible in Waterloo Region.",
-        keywords: 'KMFW funders, Black nonprofit funding, charitable funders Ontario, mental health funding Waterloo, Kind Minds supporters',
-        ogTitle: 'Our Funders | Kind Minds Family Wellness',
-        ogDescription: 'We are deeply grateful to the funders and investors who make Black community wellness possible through KMFW.',
-        ogImage: '',
-        twitterTitle: 'Our Funders | KMFW',
-        twitterDescription: 'Meet the organizations and funders who support Kind Minds Family Wellness and our mission for Black wellness.',
-        noIndex: false,
-    },
-    'partners': {
-        title: 'Our Community Partners | Kind Minds Family Wellness',
-        description: 'KMFW collaborates with a diverse network of community organizations, healthcare providers, and equity advocates to expand culturally safe care across Waterloo Region.',
-        keywords: 'KMFW partners, Black organization partnerships Waterloo, community collaboration Ontario, healthcare partnerships, equity partners',
-        ogTitle: 'Community Partners of KMFW',
-        ogDescription: "A strong network of community organizations and healthcare providers stands behind Kind Minds Family Wellness's mission.",
-        ogImage: '',
-        twitterTitle: 'Our Partners | KMFW',
-        twitterDescription: 'KMFW collaborates with community organizations and advocates to expand culturally safe care for Black families in Ontario.',
-        noIndex: false,
-    },
-    'research': {
-        title: 'Research & Consultancy | Kind Minds Family Wellness',
-        description: 'KMFW provides culturally informed research and organizational consultancy services to help institutions better understand and serve Black communities across Canada.',
-        keywords: 'KMFW research, Black community research Ontario, cultural consultancy, mental health research Black, organizational consulting diversity equity',
-        ogTitle: 'Research & Consultancy at KMFW',
-        ogDescription: 'Informed by community, driven by data. KMFW offers culturally grounded research and consultancy services for organizations.',
-        ogImage: '',
-        twitterTitle: 'Research & Consultancy | KMFW',
-        twitterDescription: 'Culturally grounded research and consultancy from Kind Minds Family Wellness to help organizations better serve Black communities.',
-        noIndex: false,
-    },
-    'neuro-divergent': {
-        title: 'Neuro-Divergent Project | Kind Minds Family Wellness',
-        description: 'The KMFW Neuro-Divergent Project investigates the intersectionality of neurodivergence and race, exploring how ADHD, autism, and related conditions are experienced within Black communities.',
-        keywords: 'Black neurodivergent, ADHD Black community, autism Black children, neurodivergence race Ontario, KMFW neuro project, intersectionality mental health',
-        ogTitle: 'The Neuro-Divergent Project at KMFW',
-        ogDescription: 'Exploring how neurodivergence intersects with race and culture in Black communities — research-driven, community-centred.',
-        ogImage: '',
-        twitterTitle: 'Neuro-Divergent Project | KMFW',
-        twitterDescription: "Research on neurodivergence in the Black community — ADHD, autism, and the intersection of race from Kind Minds Family Wellness's research arm.",
-        noIndex: false,
-    },
-    'gala': {
-        title: 'Black Excellence Gala | Kind Minds Family Wellness',
-        description: 'The KMFW Black Excellence Gala is an annual celebration honoring the legacy and achievements of Black individuals and families in Canada. Join us for an unforgettable evening.',
-        keywords: 'Black Excellence Gala, KMFW gala, Black awards gala Ontario, Black excellence celebration Waterloo, Kind Minds Gala, Black community event',
-        ogTitle: 'Black Excellence Gala — Honouring Our Legacy',
-        ogDescription: 'An evening of celebration, recognition, and inspiration. Join us at the KMFW Black Excellence Gala honouring Black achievement in Canada.',
-        ogImage: '',
-        twitterTitle: 'Black Excellence Gala | KMFW',
-        twitterDescription: 'A premier celebration of Black excellence and achievement in Ontario. Join KMFW for an unforgettable annual gala.',
-        noIndex: false,
-    },
-    'blog': {
-        title: 'Blog | Kind Minds Family Wellness',
-        description: 'Read insights, reflections, community stories, and updates from the Kind Minds Family Wellness team on topics including Black mental health, advocacy, and community empowerment.',
-        keywords: 'KMFW blog, Black mental health articles, Black wellness stories, community empowerment blog, Black advocacy Ontario',
-        ogTitle: 'The KMFW Blog',
-        ogDescription: 'Stories, insights, and reflections on Black wellness, mental health, and community from the Kind Minds Family Wellness team.',
-        ogImage: '',
-        twitterTitle: 'KMFW Blog',
-        twitterDescription: 'Insights and stories on Black mental health, advocacy, and community from Kind Minds Family Wellness.',
-        noIndex: false,
-    },
-    'contact': {
-        title: 'Contact Us | Kind Minds Family Wellness',
-        description: 'Get in touch with Kind Minds Family Wellness. Reach out for program inquiries, partnership opportunities, media requests, or to access mental health support in Waterloo Region.',
-        keywords: 'contact KMFW, Kind Minds contact, Waterloo mental health contact, reach KMFW, Black wellness contact Ontario',
-        ogTitle: 'Contact Kind Minds Family Wellness',
-        ogDescription: 'We are here for you. Contact KMFW for inquiries, support access, media, or partnership opportunities.',
-        ogImage: '',
-        twitterTitle: 'Contact KMFW',
-        twitterDescription: 'Get in touch with Kind Minds Family Wellness for program inquiries or support in Waterloo Region, Ontario.',
-        noIndex: false,
-    },
-    'donate': {
-        title: 'Donate | Kind Minds Family Wellness',
-        description: "Support KMFW's mission to empower the Black community by making a donation today. Your contribution directly funds culturally grounded wellness programs, counseling, and advocacy.",
-        keywords: 'donate KMFW, support Black nonprofit, mental health donation Ontario, charitable donation Waterloo, fund Black wellness, KMFW fundraising',
-        ogTitle: 'Donate to Kind Minds Family Wellness',
-        ogDescription: 'Your generosity makes Black wellness possible. Donate to KMFW and help fund life-changing programs for our community.',
-        ogImage: '',
-        twitterTitle: 'Donate to KMFW',
-        twitterDescription: 'Support Black community wellness with a donation to Kind Minds Family Wellness. Every dollar makes a difference.',
-        noIndex: false,
-    },
+    }
 };
 
-interface PageSEO {
-    title: string;
-    description: string;
-    keywords: string;
-    ogTitle: string;
-    ogDescription: string;
-    ogImage: string;
-    twitterTitle: string;
-    twitterDescription: string;
-    noIndex: boolean;
-}
-
-type SEOData = Record<string, PageSEO>;
+const SITE_SEED_DATA: Record<string, SEOData> = {
+    noel: NOEL_SEO_SEED
+    // Add others as needed
+};
 
 const defaultPageSEO = (label: string): PageSEO => ({
     title: label,
@@ -355,16 +208,23 @@ const defaultPageSEO = (label: string): PageSEO => ({
 
 export default function SEOManager() {
     const { currentSite } = useSite();
+    const siteId = currentSite?.id || 'kmfw';
+    
+    // Get pages for the current site
+    const pages = SITE_PAGES[siteId] || [{ path: '/', label: 'Home', key: 'home' }];
+    
     const [seoData, setSeoData] = useState<SEOData>({});
-    const [selectedPage, setSelectedPage] = useState<string>(KMFW_PAGES[0].key);
+    const [selectedPage, setSelectedPage] = useState<string>(pages[0].key);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [seeding, setSeeding] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
-    const siteId = currentSite?.id || 'kmfw';
-
+    // Reset selection when site changes
     useEffect(() => {
+        if (pages.length > 0) {
+            setSelectedPage(pages[0].key);
+        }
         loadSEO();
     }, [currentSite]);
 
@@ -375,9 +235,8 @@ export default function SEOManager() {
             if (data) {
                 setSeoData(data);
             } else {
-                // Start with empty data — prompt user to seed
                 const defaults: SEOData = {};
-                KMFW_PAGES.forEach(p => { defaults[p.key] = defaultPageSEO(p.label); });
+                pages.forEach(p => { defaults[p.key] = defaultPageSEO(p.label); });
                 setSeoData(defaults);
             }
         } catch (e) {
@@ -403,12 +262,18 @@ export default function SEOManager() {
     };
 
     const handleSeedAll = async () => {
+        const seedData = SITE_SEED_DATA[siteId];
+        if (!seedData) {
+            setStatus({ type: 'error', msg: `No professional seed data available yet for ${currentSite?.name || siteId}.` });
+            return;
+        }
+
         setSeeding(true);
         setStatus(null);
         try {
-            await FirestoreService.saveSEOData(siteId, SEO_SEED_DATA);
-            setSeoData(SEO_SEED_DATA);
-            setStatus({ type: 'success', msg: 'All 26 pages seeded with professional SEO metadata!' });
+            await FirestoreService.saveSEOData(siteId, seedData);
+            setSeoData(seedData);
+            setStatus({ type: 'success', msg: `Seeded with professional metadata for ${siteId}!` });
         } catch (e) {
             console.error('Error seeding SEO:', e);
             setStatus({ type: 'error', msg: 'Failed to seed SEO data. Please try again.' });
@@ -417,7 +282,7 @@ export default function SEOManager() {
         }
     };
 
-    const currentPage = KMFW_PAGES.find(p => p.key === selectedPage) || KMFW_PAGES[0];
+    const currentPage = pages.find(p => p.key === selectedPage) || pages[0];
     const pageSEO: PageSEO = seoData[selectedPage] || defaultPageSEO(currentPage.label);
 
     const update = (field: keyof PageSEO, value: string | boolean) => {
@@ -450,7 +315,7 @@ export default function SEOManager() {
     return (
         <>
             <PageMeta
-                title="SEO Manager | KMFW Admin"
+                title={`SEO Manager | ${currentSite?.name || 'Admin'}`}
                 description="Manage per-page SEO metadata and Open Graph tags"
             />
             <PageBreadcrumb pageTitle="SEO Manager" />
@@ -464,13 +329,13 @@ export default function SEOManager() {
                             SEO & Metadata Manager
                         </h1>
                         <p className="text-sm text-gray-500 mt-1">
-                            {seededCount}/{KMFW_PAGES.length} pages have SEO configured.
+                            {seededCount}/{pages.length} pages have SEO configured for {currentSite?.name}.
                         </p>
                     </div>
                     <div className="flex gap-3">
                         <button
                             onClick={handleSeedAll}
-                            disabled={seeding}
+                            disabled={seeding || !SITE_SEED_DATA[siteId]}
                             className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                         >
                             <Zap className="w-4 h-4" />
@@ -486,7 +351,7 @@ export default function SEOManager() {
                 {status && (
                     <Alert
                         variant={status.type}
-                        title={status.type === 'success' ? 'Saved!' : 'Error'}
+                        title={status.type === 'success' ? 'Saved!' : 'Notice'}
                         message={status.msg}
                     />
                 )}
@@ -496,10 +361,10 @@ export default function SEOManager() {
                     <div className="lg:col-span-1">
                         <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
                             <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider mb-3">
-                                Pages
+                                {currentSite?.name} Pages
                             </h2>
                             <nav className="space-y-1 max-h-[70vh] overflow-y-auto">
-                                {KMFW_PAGES.map(page => {
+                                {pages.map(page => {
                                     const hasSEO = seoData[page.key]?.description?.length > 0;
                                     return (
                                         <button
@@ -550,7 +415,7 @@ export default function SEOManager() {
                                     type="text"
                                     value={pageSEO.title}
                                     onChange={e => update('title', e.target.value)}
-                                    placeholder={`${currentPage.label} | Kind Minds Family Wellness`}
+                                    placeholder={`${currentPage.label} | ${currentSite?.name}`}
                                     className={inputClass}
                                     maxLength={70}
                                 />
@@ -584,7 +449,7 @@ export default function SEOManager() {
                                     type="text"
                                     value={pageSEO.keywords}
                                     onChange={e => update('keywords', e.target.value)}
-                                    placeholder="e.g. KMFW, Black wellness, mental health, Waterloo"
+                                    placeholder="e.g. Construction, Renovation, Woodworking"
                                     className={inputClass}
                                 />
                             </div>
@@ -619,7 +484,7 @@ export default function SEOManager() {
                                 </button>
                             </div>
                             <p className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                                These fields control how the page appears when shared on Facebook, LinkedIn, Twitter/X, and WhatsApp.
+                                These fields control how the page appears when shared on social media platforms.
                             </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -655,24 +520,6 @@ export default function SEOManager() {
                             </div>
                         </div>
 
-                        {/* Google Preview */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                            <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-4">
-                                Google Search Preview
-                            </h2>
-                            <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-5 max-w-xl">
-                                <div className="text-sm text-green-700 dark:text-green-400 mb-1">
-                                    https://kindmindsfamilywellness.org{currentPage.path}
-                                </div>
-                                <div className="text-lg text-blue-800 dark:text-blue-300 font-medium hover:underline cursor-pointer leading-snug mb-1">
-                                    {pageSEO.title || `${currentPage.label} | KMFW`}
-                                </div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                    {pageSEO.description || 'No description set. Add a meta description to improve search visibility.'}
-                                </div>
-                            </div>
-                        </div>
-
                         {/* Save Button */}
                         <div className="flex justify-end">
                             <Button onClick={handleSave} disabled={saving}>
@@ -686,3 +533,20 @@ export default function SEOManager() {
         </>
     );
 }
+
+// Re-add KMFW seed data at the end for reference or move to constants file
+const KMFW_SEO_SEED: SEOData = {
+    'home': {
+        title: 'Kind Minds Family Wellness | Black Mental Health & Wellness in Waterloo Region',
+        description: 'Kind Minds Family Wellness (KMFW) is a Black-led organization providing culturally grounded mental health, counseling, and wellness programs to the Black community in Waterloo Region, Ontario.',
+        keywords: 'Black mental health, KMFW, Kind Minds Family Wellness, Black wellness Waterloo, Black community support Ontario, culturally grounded counseling, Black family wellness',
+        ogTitle: 'Kind Minds Family Wellness – Healing, Growth & Community',
+        ogDescription: 'Culturally grounded mental health and wellness programs for the Black community in Waterloo Region. Join us in building a healthier, more empowered community.',
+        ogImage: '',
+        twitterTitle: 'Kind Minds Family Wellness | Black-Led Wellness in Ontario',
+        twitterDescription: 'Mental health, counseling, and community support for the Black community in Waterloo Region. Certified, compassionate, and culturally grounded.',
+        noIndex: false,
+    }
+};
+
+SITE_SEED_DATA.kmfw = KMFW_SEO_SEED;

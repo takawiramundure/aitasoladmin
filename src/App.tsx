@@ -53,6 +53,9 @@ import MessagesManager from "./pages/CMS/MessagesManager";
 import PageVisibilityManager from "./pages/CMS/PageVisibilityManager";
 import ResearchPageManager from "./pages/CMS/ResearchPageManager";
 import ProjectPageManager from "./pages/CMS/ProjectPageManager";
+import PortfolioManager from "./pages/CMS/PortfolioManager";
+import ServicesManager from "./pages/CMS/ServicesManager";
+import ReviewsManager from "./pages/CMS/ReviewsManager";
 import UserManagement from "./pages/Users/UserManagement";
 import { AuthProvider } from "./context/AuthContext";
 import { AnalyticsProvider } from "./context/AnalyticsContext";
@@ -107,6 +110,9 @@ export default function App() {
                     <Route path="/cms/page-visibility" element={<PageVisibilityManager />} />
                     <Route path="/cms/research" element={<ResearchPageManager />} />
                     <Route path="/cms/project-:projectId" element={<ProjectPageManager />} />
+                    <Route path="/cms/portfolio" element={<PortfolioManager />} />
+                    <Route path="/cms/reviews" element={<ReviewsManager />} />
+                    <Route path="/cms/noel-services" element={<ServicesManager />} />
                     <Route path="/cms/:pageId" element={<ContentManager />} />
                     <Route path="/users" element={<UserManagement />} />
 

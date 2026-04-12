@@ -223,6 +223,40 @@ export default function HeroManager() {
         setSuccessMsg("KMFW Hero content seeded! Remember to click Save Changes.");
     };
 
+    const seedNoelHero = () => {
+        const noelSlides: HeroSlide[] = [
+            {
+                id: 'n1-' + Date.now(),
+                title: 'Mastering the Art of Woodworking',
+                subtitle: 'Custom cabinetry and fine carpentry that transforms your home.',
+                cta: 'View Our Gallery',
+                link: '/portfolio',
+                imageUrl: '/hero-bg.png',
+                isActive: true
+            },
+            {
+                id: 'n2-' + Date.now(),
+                title: 'High-End Renovations',
+                subtitle: 'Meticulous attention to detail for residential and commercial transformations.',
+                cta: 'Our Services',
+                link: '/services',
+                imageUrl: '/project-stairs.png',
+                isActive: true
+            },
+            {
+                id: 'n3-' + Date.now(),
+                title: 'Luxury Outdoor Living',
+                subtitle: 'Architectural decks and patios built to last a lifetime.',
+                cta: 'Get a Quote',
+                link: '/contact',
+                imageUrl: '/service-decks.png',
+                isActive: true
+            }
+        ];
+        setSlides(noelSlides);
+        setSuccessMsg("Noel Construction Hero content seeded! Remember to click Save Changes.");
+    };
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (active.id !== over?.id) {
@@ -254,6 +288,11 @@ export default function HeroManager() {
                         {currentSite.id === 'kmfw' && (
                             <Button variant="outline" onClick={seedKMFWHero}>
                                 Seed KMFW Hero Content
+                            </Button>
+                        )}
+                        {currentSite.id === 'noel' && (
+                            <Button variant="outline" onClick={seedNoelHero}>
+                                Seed Noel Hero Content
                             </Button>
                         )}
                         <Button variant="outline" onClick={migrateImages} disabled={migrating}>

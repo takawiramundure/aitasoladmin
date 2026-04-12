@@ -797,5 +797,128 @@ export const SETTINGS_SEED = {
             lastUpdated: new Date().toISOString(),
             updatedBy: 'system'
         }
+    },
+    noel: {
+        hero_slider: {
+            slides: [
+                {
+                    id: 'n1',
+                    title: 'Mastering the Art of Woodworking',
+                    subtitle: 'Custom cabinetry and fine carpentry that transforms your home.',
+                    cta: 'View Our Gallery',
+                    link: '/portfolio',
+                    imageUrl: '/hero-bg.png',
+                    isActive: true
+                },
+                {
+                    id: 'n2',
+                    title: 'High-End Renovations',
+                    subtitle: 'Meticulous attention to detail for residential and commercial transformations.',
+                    cta: 'Our Services',
+                    link: '/services',
+                    imageUrl: '/project-stairs.png',
+                    isActive: true
+                },
+                {
+                    id: 'n3',
+                    title: 'Luxury Outdoor Living',
+                    subtitle: 'Architectural decks and patios built to last a lifetime.',
+                    cta: 'Get a Quote',
+                    link: '/contact',
+                    imageUrl: '/service-decks.png',
+                    isActive: true
+                }
+            ]
+        },
+        services: {
+            items: [
+                {
+                    category: 'Exterior Work',
+                    title: 'Precision Exterior Solutions',
+                    description: 'Protect and beautify your home with our high-end exterior services, including premium siding, windows, and structural enhancements.',
+                    image: '/project-exterior.png',
+                    order: 1
+                },
+                {
+                    category: 'Sustainability',
+                    title: 'Food Security & Gardens',
+                    description: 'Specialized vegetable garden layouts, garden beds, and custom yard setups to help you enjoy fresh seasonal produce and food sovereignty.',
+                    image: '/service-gardens.png',
+                    order: 2
+                },
+                {
+                    category: 'Decks & Patios',
+                    title: 'Outdoor Luxury Living',
+                    description: 'Custom-designed decks and patios using the finest materials, built to withstand the elements while providing a stunning space for relaxation.',
+                    image: '/service-decks.png',
+                    order: 3
+                },
+                {
+                    category: 'Stairs & Railings',
+                    title: 'Architectural Staircases',
+                    description: 'Custom-built stairs and railings that serve as the centerpieces of your home, blending structural integrity with artistic design.',
+                    image: '/project-stairs.png',
+                    order: 4
+                },
+                {
+                    category: 'Renovations',
+                    title: 'Whole-Home Modernization',
+                    description: 'Comprehensive renovation services including basement upgrades and interior remodels that transform your entire living space.',
+                    image: '/service-renovations.png',
+                    order: 5
+                },
+                {
+                    category: 'Eco-Solutions',
+                    title: 'Water Management',
+                    description: 'Water harvesting projects and drainage solutions designed to conserve resources and protect your property’s foundation.',
+                    image: '/service-woodworking.png',
+                    order: 6
+                }
+            ]
+        },
+        projects: {
+            items: [
+                {
+                    title: 'Modern Lakeside Deck',
+                    category: 'Decks & Patios',
+                    description: 'A multi-level cedar deck with integrated lighting and architectural glass railings.',
+                    coverImage: '/service-decks.png',
+                    client: 'Private Residence',
+                    year: '2023',
+                    location: 'Kitchener, ON',
+                    featured: true,
+                    order: 1
+                },
+                {
+                    title: 'Custom Walnut Kitchen',
+                    category: 'Woodworking',
+                    description: 'Solid walnut cabinetry with dovetail joinery and handmade hardware.',
+                    coverImage: '/service-woodworking.png',
+                    client: 'Gourmet Chef',
+                    year: '2024',
+                    location: 'Waterloo, ON',
+                    featured: true,
+                    order: 2
+                }
+            ]
+        },
+        reviews: {
+            items: [
+                {
+                    clientName: 'James Wilson',
+                    projectType: 'Full Renovation',
+                    rating: 5,
+                    quote: 'Noel and his team transformed our outdated kitchen into a modern masterpiece. Their attention to detail is unmatched.',
+                    date: '2023-11-15'
+                },
+                {
+                    clientName: 'Sarah Miller',
+                    projectType: 'Custom Decking',
+                    rating: 5,
+                    quote: 'Professional, punctual, and highly skilled. The new deck is exactly what we wanted for our summer hosting.',
+                    date: '2024-02-10'
+                }
+            ]
+        }
     }
 };
