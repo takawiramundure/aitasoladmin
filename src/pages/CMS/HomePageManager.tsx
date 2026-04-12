@@ -22,6 +22,7 @@ interface HomePageContent extends PageContent {
 const getSectionsConfig = (siteId: string) => {
     if (siteId === 'kmfw') {
         return [
+            { id: 'galaPromo', label: 'Gala Promo Banner (Below Hero)' },
             { id: 'coreFoundations', label: 'Core Foundations' },
             { id: 'mindfulness', label: 'Mindfulness Section' },
             { id: 'mission', label: 'Mission / Objectives' },
@@ -51,6 +52,10 @@ const getSectionsConfig = (siteId: string) => {
 const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
     if (siteId === 'kmfw') {
         return {
+            galaPromo: {
+                heading: "Gala Promo Banner",
+                enabled: true
+            },
             coreFoundations: {
                 heading: "Our Core Foundations",
                 subtitle: "Comprehensive culturally-grounded support tailored to the unique needs of our community.",
@@ -58,8 +63,8 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                 enabled: true,
                 items: [
                     { title: 'About Our Mission', desc: 'Rooted in community, we provide research-backed, culturally informed support.', icon: 'Users', link: '/about' },
-                    { title: 'Programs & Services', desc: 'From counseling to system navigation, discover how we can help you today.', icon: 'Heart', link: '/services' },
-                    { title: 'Community Events', desc: 'Join us for our Black Excellence Gala and other local community gatherings.', icon: 'Calendar', link: '/impact/events' }
+                    { title: 'Meet The Team', desc: 'Discover the passionate individuals driving transformative change.', icon: 'UserCircle', link: '/about/meet-our-team' },
+                    { title: 'The KMFW Impact', desc: 'Learn how our dedication is making a real difference in the Waterloo region.', icon: 'Target', link: '/impact' }
                 ]
             },
             mindfulness: {
