@@ -1039,6 +1039,7 @@ export default function GalaManager() {
                                                                                 <option value="YOUTH LEADERSHIP & INNOVATION">YOUTH LEADERSHIP & INNOVATION</option>
                                                                                 <option value="COMMUNITY ALLYSHIP & SOLIDARITY">COMMUNITY ALLYSHIP & SOLIDARITY</option>
                                                                                 <option value="EQUITY IN ACTION">EQUITY IN ACTION</option>
+                                                                                <option value="DIGITAL INNOVATION AND COMMUNITY">DIGITAL INNOVATION AND COMMUNITY</option>
                                                                             </select>
                                                                         </div>
                                                                         <div className="col-span-2">
