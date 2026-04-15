@@ -74,9 +74,20 @@ const NOEL_PAGES: PageDef[] = [
     { path: '/contact', label: 'Contact', key: 'contact' },
 ];
 
+// Digital Maples Labs Pages
+const DMLABS_PAGES: PageDef[] = [
+    { path: '/', label: 'Home', key: 'home' },
+    { path: '/about', label: 'Who We Are', key: 'about' },
+    { path: '/services', label: 'What We Do', key: 'services' },
+    { path: '/portfolio', label: 'Our Work', key: 'portfolio' },
+    { path: '/blog', label: 'Just Opinions (Blog)', key: 'blog' },
+    { path: '/contact', label: 'Get in Touch', key: 'contact' },
+];
+
 const SITE_PAGES: Record<string, PageDef[]> = {
     kmfw: KMFW_PAGES,
     noel: NOEL_PAGES,
+    dmlabs: DMLABS_PAGES,
     elwg: [
         { path: '/', label: 'Home', key: 'home' },
         { path: '/about', label: 'About Us', key: 'about' },
@@ -189,9 +200,91 @@ const NOEL_SEO_SEED: SEOData = {
     }
 };
 
+const DMLABS_SEO_SEED: SEOData = {
+    'home': {
+        title: 'Digital Maples Labs | Innovating Tech for Social Impact',
+        description: 'Digital Maples Labs empowers nonprofits with human-centric AI governance, responsible tech design, and strategic web innovation to scale social impact.',
+        keywords: 'Digital Maples Labs, Nonprofit Tech, AI Governance, Responsible AI, Social Impact Marketing, Ethical Web Development, Trauma-Informed Design',
+        ogTitle: 'Digital Maples Labs – Innovating Tech for Social Impact',
+        ogDescription: 'We build digital solutions that prioritize ethics and accessibility. Discover how we help mission-driven organizations thrive in the age of AI.',
+        ogImage: '/images/og-home.jpg',
+        twitterTitle: 'Digital Maples Labs | Responsible Tech Innovation',
+        twitterDescription: 'From AI audits to high-performance web platforms, we make technology work for social good.',
+        noIndex: false,
+    },
+    'about': {
+        title: 'Who We Are | Our Mission & Values | Digital Maples Labs',
+        description: 'Meet the team behind DMLabs. We are dedicated to bridging the gap between cutting-edge technology and social responsibility.',
+        keywords: 'DMLabs Team, About Digital Maples, Tech for Good, Nonprofit Consultants, AI Ethics Experts',
+        ogTitle: 'Our Mission: Responsible Innovation',
+        ogDescription: 'Learn about our journey, our values, and why we believe technology must be human-centric.',
+        ogImage: '',
+        twitterTitle: 'Who We Are | Digital Maples Labs',
+        twitterDescription: 'Dedicated to ethical innovation and social impact.',
+        noIndex: false,
+    },
+    'services': {
+        title: 'Our Services | AI Governance, Design & Development',
+        description: 'Explore our specialized services including AI alignment audits, responsible tech strategy, and custom web development for nonprofits.',
+        keywords: 'AI Alignment Audit, Nonprofit Web Design, Strategy for Social Impact, Responsible AI Consulting',
+        ogTitle: 'Specialized Services for Mission-Driven Teams',
+        ogDescription: 'Empower your organization with technology that aligns with your values.',
+        ogImage: '',
+        twitterTitle: 'DMLabs Services | AI & Web Innovation',
+        twitterDescription: 'Custom solutions for the nonprofit sector.',
+        noIndex: false,
+    },
+    'portfolio': {
+        title: 'Our Work | Impact-Driven Portfolio | Digital Maples Labs',
+        description: 'See how we have helped nonprofits and mission-driven organizations reach their goals through strategic technology and design.',
+        keywords: 'Nonprofit Case Studies, Social Impact Projects, DMLabs Portfolio, Web Development Success',
+        ogTitle: 'Case Studies: Technology for Social Good',
+        ogDescription: 'Browse our latest projects and see the impact of responsible technology.',
+        ogImage: '',
+        twitterTitle: 'Our Work | Digital Maples Labs Portfolio',
+        twitterDescription: 'Transforming mission into impact through technology.',
+        noIndex: false,
+    },
+    'blog': {
+        title: 'Just Opinions | Insights on AI & Social Impact | DMLabs Blog',
+        description: 'Thought leadership and latest opinions on the intersection of artificial intelligence, ethics, and social change.',
+        keywords: 'AI Ethics Blog, Social Impact Insights, Responsible Tech News, DMLabs Opinions',
+        ogTitle: 'Just Opinions: The DMLabs Blog',
+        ogDescription: 'Join the conversation on ethics, tech, and the future of social impact.',
+        ogImage: '',
+        twitterTitle: 'Just Opinions | The DMLabs Blog',
+        twitterDescription: 'Insights on AI, ethics, and social change.',
+        noIndex: false,
+    },
+    'contact': {
+        title: 'Get in Touch | Contact Digital Maples Labs',
+        description: 'Ready to innovate responsibly? Contact Digital Maples Labs today to discuss your next project or AI audit.',
+        keywords: 'Contact DMLabs, Reach Out, Project Inquiry, AI Audit Request',
+        ogTitle: 'Contact Us – Let’s Build Something Meaningful',
+        ogDescription: 'Get in touch to start your journey toward responsible digital transformation.',
+        ogImage: '',
+        twitterTitle: 'Contact Digital Maples Labs',
+        twitterDescription: 'Starting the conversation on responsible innovation.',
+        noIndex: false,
+    }
+};
+
 const SITE_SEED_DATA: Record<string, SEOData> = {
-    noel: NOEL_SEO_SEED
-    // Add others as needed
+    noel: NOEL_SEO_SEED,
+    dmlabs: DMLABS_SEO_SEED,
+    kmfw: {
+        'home': {
+            title: 'Kind Minds Family Wellness | Black Mental Health & Wellness in Waterloo Region',
+            description: 'Kind Minds Family Wellness (KMFW) is a Black-led organization providing culturally grounded mental health, counseling, and wellness programs to the Black community in Waterloo Region, Ontario.',
+            keywords: 'Black mental health, KMFW, Kind Minds Family Wellness, Black wellness Waterloo, Black community support Ontario, culturally grounded counseling, Black family wellness',
+            ogTitle: 'Kind Minds Family Wellness – Healing, Growth & Community',
+            ogDescription: 'Culturally grounded mental health and wellness programs for the Black community in Waterloo Region. Join us in building a healthier, more empowered community.',
+            ogImage: '',
+            twitterTitle: 'Kind Minds Family Wellness | Black-Led Wellness in Ontario',
+            twitterDescription: 'Mental health, counseling, and community support for the Black community in Waterloo Region. Certified, compassionate, and culturally grounded.',
+            noIndex: false,
+        }
+    }
 };
 
 const defaultPageSEO = (label: string): PageSEO => ({

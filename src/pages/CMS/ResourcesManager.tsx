@@ -15,6 +15,8 @@ import RichTextEditor from "../../components/form/RichTextEditor";
 import MediaPickerModal from "../../components/common/MediaPickerModal";
 import { GridIcon } from "../../icons";
 import { SEED_DATA } from "../../config/seedData";
+import SEOEditor from "../../components/form/SEOEditor";
+import { Search } from 'lucide-react';
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -68,6 +70,8 @@ export default function ResourcesManager() {
         return siteData?.resources?.resources || [];
     };
 
+    const [content, setContent] = useState<any>(null);
+
     useEffect(() => {
         loadResources();
     }, [currentSite]);
@@ -76,10 +80,17 @@ export default function ResourcesManager() {
         setLoading(true);
         try {
             const data: any = await FirestoreService.getPageContent("resources", currentSite.id);
-            if (data && data.resources && data.resources.length > 0) {
-                setResources(data.resources);
+            if (data) {
+                setContent(data);
+                setResources(data.resources || []);
             } else {
-                setResources(getDefaultResources());
+                const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+                const resourcesData = siteSeed?.resources;
+                setContent({
+                    seo: resourcesData?.seo || {},
+                    resources: resourcesData?.resources || []
+                });
+                setResources(resourcesData?.resources || []);
             }
         } catch (err) {
             console.error(err);
@@ -89,12 +100,24 @@ export default function ResourcesManager() {
         }
     };
 
+    const handleSEOChange = (field: string, value: string) => {
+        setContent((prev: any) => ({
+            ...prev,
+            seo: { ...prev?.seo, [field]: value }
+        }));
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("resources", { resources } as any, currentSite.id);
+            const dataToSave = {
+                ...content,
+                resources
+            };
+            await FirestoreService.savePageContent("resources", dataToSave, currentSite.id);
+            setContent(dataToSave);
             setSuccessMsg("Changes saved successfully!");
         } catch (err) {
             console.error(err);
@@ -163,7 +186,7 @@ export default function ResourcesManager() {
 
     return (
         <>
-            <PageMeta title="Resources Manager | NSPC Admin" description="Manage Helpful Resources" />
+            <PageMeta title={`Resources Manager | ${currentSite.name}`} description="Manage Helpful Resources" />
 
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
@@ -195,6 +218,18 @@ export default function ResourcesManager() {
 
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
+
+                {/* SEO Settings Section */}
+                <div className="mb-8 p-6 border border-indigo-500/20 bg-indigo-500/5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Search size={20} className="text-indigo-500" />
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Page Search SEO</h3>
+                    </div>
+                    <SEOEditor 
+                        data={content?.seo || {}} 
+                        onChange={handleSEOChange}
+                    />
+                </div>
 
                 <DndContext
                     collisionDetection={closestCenter}

@@ -5,6 +5,11 @@ import { SiteSettings } from "../types/siteSettings";
 
 export interface PageContent {
     title?: string;
+    seo?: {
+        title?: string;
+        description?: string;
+        image?: string;
+    };
     sections?: Record<string, SectionContent>;
     lastUpdated?: string;
     updatedBy?: string;
@@ -284,14 +289,14 @@ export const FirestoreService = {
             const timestamp = new Date().toISOString();
 
             if (articleId) {
-                // Update
+                // Upsert with a specific ID — setDoc creates if missing, merges if exists
                 const docRef = doc(dbInstance, collectionName, articleId);
-                await updateDoc(docRef, {
+                await setDoc(docRef, {
                     ...article,
                     updatedAt: timestamp
-                });
+                }, { merge: true });
             } else {
-                // Add
+                // Auto-ID — add new document
                 const collectionRef = collection(dbInstance, collectionName);
                 await addDoc(collectionRef, {
                     ...article,

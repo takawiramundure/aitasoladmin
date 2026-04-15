@@ -46,6 +46,14 @@ export const SITES: Site[] = [
     description: 'High-End Renovation & Woodworking',
     databaseId: 'noel-web',
     usePrefix: false
+  },
+  {
+    id: 'dmlabs',
+    name: 'Digital Maples Labs',
+    domain: 'dmlabs.framer.website',
+    description: 'Digital Innovation & AI Safety',
+    databaseId: 'dmlabs-web',
+    usePrefix: false
   }
 ];
 

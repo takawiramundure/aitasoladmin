@@ -9,6 +9,8 @@ import { useSite } from "../../context/SiteContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Search } from 'lucide-react';
+import SEOEditor from "../../components/form/SEOEditor";
 import { SEED_DATA } from "../../config/seedData";
 
 interface ReviewItem {
@@ -38,13 +40,20 @@ function SortableReviewItem({ id, children }: { id: string; children: React.Reac
 
 export default function ReviewsManager() {
     const { currentSite } = useSite();
+    const [content, setContent] = useState<any>(null);
     const [reviews, setReviews] = useState<ReviewItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
 
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: {
+                distance: 8,
+            },
+        })
+    );
 
     useEffect(() => {
         loadReviews();
@@ -54,17 +63,19 @@ export default function ReviewsManager() {
         setLoading(true);
         try {
             const data: any = await FirestoreService.getPageContent("reviews", currentSite.id);
-            if (data && data.reviews) {
-                setReviews(data.reviews);
+            if (data) {
+                setContent(data);
+                setReviews(data.reviews || []);
             } else {
                 const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
-                // @ts-ignore
-                if (siteSeed?.reviews) {
-                    // @ts-ignore
-                    setReviews(siteSeed.reviews);
-                } else {
-                    setReviews([]);
-                }
+                const reviewsData = (siteSeed as any)?.reviews;
+                const seedArray = reviewsData?.items || reviewsData || [];
+                
+                setContent({
+                    reviews: Array.isArray(seedArray) ? seedArray : [],
+                    seo: reviewsData?.seo || {}
+                });
+                setReviews(Array.isArray(seedArray) ? seedArray : []);
             }
         } catch (err) {
             console.error(err);
@@ -74,12 +85,57 @@ export default function ReviewsManager() {
         }
     };
 
+    const handleSeedData = async () => {
+        const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+        const reviewsData = (siteSeed as any)?.reviews;
+        const defaultReviews = reviewsData?.items || reviewsData || [];
+        
+        if (!Array.isArray(defaultReviews) || defaultReviews.length === 0) {
+            setError("No seed data found for this site.");
+            return;
+        }
+
+        if (!confirm(`This will overwrite the current reviews list for "${currentSite.name}" with ${defaultReviews.length} seed reviews. Continue?`)) return;
+        
+        setSaving(true);
+        setError("");
+        setSuccessMsg("");
+        try {
+            const newContent = {
+                ...content,
+                reviews: defaultReviews,
+                seo: reviewsData?.seo || content?.seo || {}
+            };
+            await FirestoreService.savePageContent("reviews", newContent as any, currentSite.id);
+            setContent(newContent);
+            setReviews(defaultReviews);
+            setSuccessMsg(`✅ Seeded ${defaultReviews.length} reviews successfully!`);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to seed data: " + (err instanceof Error ? err.message : String(err)));
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSEOChange = (field: string, value: string) => {
+        setContent((prev: any) => ({
+            ...prev,
+            seo: { ...prev?.seo, [field]: value }
+        }));
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("reviews", { reviews } as any, currentSite.id);
+            const dataToSave = {
+                ...content,
+                reviews
+            };
+            await FirestoreService.savePageContent("reviews", dataToSave, currentSite.id);
+            setContent(dataToSave);
             setSuccessMsg("Reviews updated successfully!");
         } catch (err) {
             console.error(err);
@@ -123,11 +179,11 @@ export default function ReviewsManager() {
         }
     };
 
-    if (loading) return <div className="p-6">Loading Reviews...</div>;
+    if (loading) return <div className="p-6 text-gray-400">Loading Reviews...</div>;
 
     return (
         <>
-            <PageMeta title="Reviews Manager | Noel Construction" description="Manage Client Testimonials" />
+            <PageMeta title={`Reviews Manager | ${currentSite.name}`} description="Manage Client Testimonials" />
 
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
@@ -143,6 +199,18 @@ export default function ReviewsManager() {
 
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
+
+                {/* SEO Settings Section */}
+                <div className="mb-8 p-6 border border-indigo-500/20 bg-indigo-500/5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Search size={20} className="text-indigo-500" />
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Reviews Search SEO</h3>
+                    </div>
+                    <SEOEditor 
+                        data={content?.seo || {}} 
+                        onChange={handleSEOChange}
+                    />
+                </div>
 
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
                     <SortableContext items={reviews.map(r => r.id)} strategy={verticalListSortingStrategy}>

@@ -11,8 +11,9 @@ import ImagePicker from "../../components/form/ImagePicker";
 
 import { Modal } from "../../components/ui/modal";
 import Alert from "../../components/ui/alert/Alert";
-import { Trash2, ArrowUp, ArrowDown } from "lucide-react";
+import { Trash2, ArrowUp, ArrowDown, Leaf } from "lucide-react";
 import MediaLibrary from "../../components/common/MediaLibrary";
+import { SEED_DATA } from "../../config/seedData";
 
 export default function ContentManager() {
     const { pageId } = useParams();
@@ -675,6 +676,33 @@ export default function ContentManager() {
         setSuccessMsg("Seeded Careers data! Click Save to persist.");
     };
 
+    const seedFromConfig = () => {
+        if (!pageId || !currentSite?.id) return;
+        
+        const siteDefaults = (SEED_DATA as any)[currentSite.id];
+        if (!siteDefaults) {
+            setError(`No default settings found in seedData.ts for site: ${currentSite.id}`);
+            return;
+        }
+
+        const pageDefaults = siteDefaults[pageId];
+        if (!pageDefaults) {
+            setError(`No default data found for page: "${pageId}" in site: ${currentSite.id}`);
+            return;
+        }
+
+        // Deep copy to avoid reference issues
+        const newSections = JSON.parse(JSON.stringify(pageDefaults.sections || {}));
+
+        setContent({
+            title: pageTitles[pageId] || pageDefaults.title || "New Page",
+            sections: newSections,
+            seo: pageDefaults.seo ? JSON.parse(JSON.stringify(pageDefaults.seo)) : undefined
+        });
+        
+        setSuccessMsg(`Succesfully pulled defaults for "${pageId}" from config. Click Save Changes to apply to live site.`);
+    };
+
     const seedVolunteer = () => {
         setContent({
             title: "Volunteering",
@@ -980,6 +1008,15 @@ export default function ContentManager() {
                                 Seed Footer
                             </Button>
                         )}
+                        
+                        {/* Generic Seed from config button for modern sites */}
+                        {(currentSite.id === 'dmlabs' || currentSite.id === 'noel' || currentSite.id === 'nspc') && (
+                            <Button variant="outline" size="sm" onClick={seedFromConfig} className="gap-2">
+                                <Leaf size={14} className="text-green-600" />
+                                Seed Defaults
+                            </Button>
+                        )}
+
                         {pageId === 'about' && (
                             <Button variant="outline" onClick={seedAboutUs}>
                                 Seed About Us

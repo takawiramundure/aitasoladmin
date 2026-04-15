@@ -4,7 +4,9 @@ import { SiteSettings, NavigationItem } from '../../types/siteSettings';
 import { useSite } from '../../context/SiteContext';
 import Button from '../../components/ui/button/Button';
 import Alert from '../../components/ui/alert/Alert';
-import { Plus, Trash2, GripVertical, Save, Upload, ExternalLink, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Save, Upload, ExternalLink, ArrowUp, ArrowDown, Image as ImageIcon, Search, Crop } from 'lucide-react';
+import MediaPickerModal from '../../components/common/MediaPickerModal';
+import ImageCropperModal from '../../components/common/ImageCropperModal';
 import { storage } from '../../firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { availableRoutes } from '../../utils/routes';
@@ -13,7 +15,7 @@ import { GET_DEFAULT_NAV, GET_SITE_DEFAULTS } from '../../config/navigationDefau
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
 
-type TabType = 'general' | 'navigation' | 'theme' | 'seo' | 'scripts' | 'payments';
+type TabType = 'general' | 'navigation' | 'theme' | 'seo' | 'scripts' | 'payments' | 'retell';
 
 export default function SiteSettingsManager() {
     const { currentSite } = useSite();
@@ -22,6 +24,9 @@ export default function SiteSettingsManager() {
     const [activeTab, setActiveTab] = useState<TabType>('general');
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+    const [isCropperOpen, setIsCropperOpen] = useState(false);
+    const [isAiLogoUploading, setIsAiLogoUploading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
     // ... (rest of the component state and callbacks)
@@ -161,12 +166,66 @@ export default function SiteSettingsManager() {
         }
     };
 
-    const updateTheme = (key: keyof import('../../types/siteSettings').SiteTheme, value: string) => {
+    const handleAiLogoUpload = async (file: File) => {
+        if (!settings || !currentSite) return;
+        setIsAiLogoUploading(true);
+        try {
+            const storageRef = ref(storage, `${currentSite.id}/ai-chat/logo/${Date.now()}_${file.name}`);
+            const snapshot = await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+
+            setSettings({
+                ...settings,
+                retellAi: { ...settings.retellAi!, logoUrl: downloadURL }
+            });
+            setStatus({ type: 'success', msg: 'AI Logo uploaded successfully!' });
+        } catch (error) {
+            console.error('AI Logo upload error:', error);
+            setStatus({ type: 'error', msg: 'Failed to upload AI logo. Please try again.' });
+        } finally {
+            setIsAiLogoUploading(false);
+        }
+    };
+
+    const handleAiLogoSelect = (url: string) => {
         if (!settings) return;
         setSettings({
-            ...settings!,
-            theme: { ...settings!.theme, [key]: value }
+            ...settings,
+            retellAi: { ...settings.retellAi!, logoUrl: url }
         });
+        setStatus({ type: 'success', msg: 'AI Logo selected from library!' });
+        setIsMediaPickerOpen(false);
+    };
+
+    const updateTheme = (key: keyof SiteTheme, value: string) => {
+        if (!settings) return;
+        setSettings({
+            ...settings,
+            theme: { ...settings.theme, [key]: value }
+        });
+    };
+
+    const handleCropComplete = async (croppedBlob: Blob) => {
+        if (!currentSite || !settings) return;
+        
+        try {
+            setUploading(true);
+            setIsCropperOpen(false);
+            
+            const fileName = `logo_${Date.now()}.png`;
+            const logoRef = ref(storage, `sites/${currentSite.id}/branding/${fileName}`);
+            
+            await uploadBytes(logoRef, croppedBlob);
+            const downloadURL = await getDownloadURL(logoRef);
+            
+            updateBranding('logo', downloadURL);
+            setStatus({ type: 'success', msg: 'Logo cropped and uploaded successfully!' });
+        } catch (error) {
+            console.error('Error uploading cropped logo:', error);
+            setStatus({ type: 'error', msg: 'Failed to upload cropped logo.' });
+        } finally {
+            setUploading(false);
+        }
     };
 
     const updateBranding = (key: keyof import('../../types/siteSettings').SiteBranding, value: string) => {
@@ -301,6 +360,7 @@ export default function SiteSettingsManager() {
         { id: 'navigation', label: 'Navigation' },
         { id: 'theme', label: 'Branding & Theme' },
         { id: 'payments', label: 'Payments' },
+        { id: 'retell', label: 'AI & Chat' },
         { id: 'scripts', label: 'Global Scripts' },
     ];
 
@@ -725,12 +785,41 @@ export default function SiteSettingsManager() {
                                             </label>
                                         </div>
                                         {settings.branding.logo && (
-                                            <img
-                                                src={settings.branding.logo}
-                                                alt="Logo preview"
-                                                className="mt-2 h-16 object-contain border rounded p-2"
-                                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                                            />
+                                            <div className="mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50">
+                                                <div className="flex items-center gap-4 mb-4">
+                                                    <img
+                                                        src={settings.branding.logo}
+                                                        alt="Logo preview"
+                                                        style={{ height: `${settings.branding.logoHeight || 64}px` }}
+                                                        className="object-contain border rounded p-2 bg-white max-w-[200px]"
+                                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                                    />
+                                                    <div className="flex-1">
+                                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex justify-between">
+                                                            Logo Height
+                                                            <span className="text-blue-600 dark:text-blue-400 font-bold">{settings.branding.logoHeight || 64}px</span>
+                                                        </label>
+                                                        <div className="flex items-center gap-4">
+                                                            <span className="text-xs text-gray-400">20px</span>
+                                                            <input 
+                                                                type="range"
+                                                                min="20"
+                                                                max="800"
+                                                                value={settings.branding.logoHeight || 64}
+                                                                onChange={(e) => updateBranding('logoHeight', parseInt(e.target.value))}
+                                                                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600"
+                                                            />
+                                                            <span className="text-xs text-gray-400">800px</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <Button variant="outline" size="sm" onClick={() => setIsCropperOpen(true)}>
+                                                        <Search className="w-4 h-4 mr-2" />
+                                                        Crop Image
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -845,6 +934,222 @@ export default function SiteSettingsManager() {
                         </div>
                     )}
 
+                    {activeTab === 'retell' && (
+                        <div className="animate-in fade-in duration-300 space-y-6">
+                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border-l-4 border-rose-500">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Retell AI Integration</h2>
+                                    <label className="flex items-center cursor-pointer">
+                                        <div className="relative">
+                                            <input
+                                                type="checkbox"
+                                                className="sr-only"
+                                                checked={settings.retellAi?.enabled || false}
+                                                onChange={(e) => {
+                                                    setSettings({
+                                                        ...settings,
+                                                        retellAi: { 
+                                                            ...(settings.retellAi || { publicKey: '', agentId: '', widgetType: 'chat' }), 
+                                                            enabled: e.target.checked 
+                                                        }
+                                                    });
+                                                }}
+                                            />
+                                            <div className={`block w-10 h-6 rounded-full transition-colors ${settings.retellAi?.enabled ? 'bg-rose-500' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
+                                            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${settings.retellAi?.enabled ? 'transform translate-x-4' : ''}`}></div>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div className={`space-y-4 ${!settings.retellAi?.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Public Key (data-public-key)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={settings.retellAi?.publicKey || ""}
+                                                onChange={(e) => setSettings({
+                                                    ...settings,
+                                                    retellAi: { ...settings.retellAi!, publicKey: e.target.value }
+                                                })}
+                                                placeholder="pk_..."
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Agent ID (data-agent-id)
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={settings.retellAi?.agentId || ""}
+                                                onChange={(e) => setSettings({
+                                                    ...settings,
+                                                    retellAi: { ...settings.retellAi!, agentId: e.target.value }
+                                                })}
+                                                placeholder="agent_..."
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Chat Title
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={settings.retellAi?.title || ""}
+                                                onChange={(e) => setSettings({
+                                                    ...settings,
+                                                    retellAi: { ...settings.retellAi!, title: e.target.value }
+                                                })}
+                                                placeholder="Digital Maples AI"
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                Bot Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={settings.retellAi?.botName || ""}
+                                                onChange={(e) => setSettings({
+                                                    ...settings,
+                                                    retellAi: { ...settings.retellAi!, botName: e.target.value }
+                                                })}
+                                                placeholder="Gilfoy"
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                AI Bot Avatar/Logo
+                                            </label>
+                                            <div className="flex flex-col md:flex-row items-center gap-6 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                                                {/* Preview */}
+                                                <div className="relative w-24 h-24 rounded-2xl bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex-shrink-0 group">
+                                                    {settings.retellAi?.logoUrl ? (
+                                                        <img src={settings.retellAi.logoUrl} alt="AI Logo" className="w-full h-full object-contain" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                                                            <ImageIcon size={24} />
+                                                        </div>
+                                                    )}
+                                                    {isAiLogoUploading && (
+                                                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                                                            <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="flex-grow flex flex-col gap-3">
+                                                    <div className="flex flex-wrap gap-2">
+                                                        <label className="cursor-pointer">
+                                                            <input 
+                                                                type="file" 
+                                                                className="hidden" 
+                                                                accept="image/*"
+                                                                onChange={(e) => e.target.files?.[0] && handleAiLogoUpload(e.target.files[0])}
+                                                            />
+                                                            <div className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition-all">
+                                                                <Upload size={16} />
+                                                                Upload New
+                                                            </div>
+                                                        </label>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => setIsMediaPickerOpen(true)}
+                                                            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold transition-all"
+                                                        >
+                                                            <Search size={16} />
+                                                            Select from Library
+                                                        </button>
+                                                    </div>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                                        Recommended size: 256x256px. Supports PNG, JPG, or SVG.
+                                                    </p>
+                                                    <input
+                                                        type="text"
+                                                        value={settings.retellAi?.logoUrl || ""}
+                                                        onChange={(e) => setSettings({
+                                                            ...settings,
+                                                            retellAi: { ...settings.retellAi!, logoUrl: e.target.value }
+                                                        })}
+                                                        placeholder="Or paste external URL here..."
+                                                        className="w-full mt-2 px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white text-xs"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <MediaPickerModal 
+                                        isOpen={isMediaPickerOpen}
+                                        onClose={() => setIsMediaPickerOpen(false)}
+                                        onSelect={handleAiLogoSelect}
+                                    />
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Widget Type
+                                        </label>
+                                        <select
+                                            value={settings.retellAi?.widgetType || 'chat'}
+                                            onChange={(e) => setSettings({
+                                                ...settings,
+                                                retellAi: { ...settings.retellAi!, widgetType: e.target.value as 'chat' | 'callback' }
+                                            })}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        >
+                                            <option value="chat">Standard AI Chat Bubble</option>
+                                            <option value="callback">Callback / Request a Call (data-widget="callback")</option>
+                                        </select>
+                                    </div>
+
+                                    {settings.retellAi?.widgetType === 'callback' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-dashed border-gray-300">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    Outbound Phone Number
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={settings.retellAi?.phoneNumber || ""}
+                                                    onChange={(e) => setSettings({
+                                                        ...settings,
+                                                        retellAi: { ...settings.retellAi!, phoneNumber: e.target.value }
+                                                    })}
+                                                    placeholder="+15489000027"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                                    Terms & Conditions URL
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={settings.retellAi?.termsUrl || ""}
+                                                    onChange={(e) => setSettings({
+                                                        ...settings,
+                                                        retellAi: { ...settings.retellAi!, termsUrl: e.target.value }
+                                                    })}
+                                                    placeholder="https://example.com/terms"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {activeTab === 'scripts' && (
                         <div className="animate-in fade-in duration-300 bg-white dark:bg-gray-800 p-6 rounded-lg shadow space-y-6">
                             <h2 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Custom Script Injection</h2>
@@ -880,6 +1185,16 @@ export default function SiteSettingsManager() {
                     )}
                 </div>
             </div>
+
+            {isCropperOpen && settings?.branding?.logo && (
+                <ImageCropperModal
+                    isOpen={isCropperOpen}
+                    image={settings.branding.logo}
+                    onClose={() => setIsCropperOpen(false)}
+                    onCropComplete={handleCropComplete}
+                    aspect={null} // Default to 'Free Form' in our new enhanced modal
+                />
+            )}
         </>
     );
 }

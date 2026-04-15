@@ -1,6 +1,10 @@
 export const SEED_DATA: any = {
     nspc: {
         hero_slider: {
+            seo: {
+                title: 'Niagara Suicide Prevention Coalition | From Hope to Action',
+                description: 'We work together to prevent suicide in Niagara by providing resources, education, and community support.'
+            },
             slides: [
                 {
                     id: '1',
@@ -42,6 +46,10 @@ export const SEED_DATA: any = {
         },
 
         programs: {
+            seo: {
+                title: 'Programs & Training | NSPC',
+                description: 'Suicide awareness training and life promotion programs available in the Niagara region.'
+            },
             programs: [
                 {
                     id: '1',
@@ -70,6 +78,10 @@ export const SEED_DATA: any = {
             ]
         },
         resources: {
+            seo: {
+                title: 'Helpful Resources | NSPC',
+                description: 'Educational guides, toolkits, and resources for those struggling with suicide or impacted by loss.'
+            },
             resources: [
                 {
                     id: '1',
@@ -680,10 +692,565 @@ export const SEED_DATA: any = {
                 impact: {
                     heading: "How Your Gift Helps",
                     content: "Your contribution provides essential resources for women, children, and men in our community who are seeking a safer future.",
-                    order: 10,
                     enabled: true
                 }
             }
+        }
+    },
+
+    noel: {
+        home: {
+            title: 'Home',
+            sections: {
+                hero: {
+                    heading: 'Mastering the Art of Woodworking',
+                    subtitle: 'Custom cabinetry and fine carpentry that transforms your home.',
+                    cta: 'View Our Gallery',
+                    link: '/portfolio',
+                    imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=2940&auto=format&fit=crop',
+                    enabled: true,
+                    order: 1
+                },
+                services: {
+                    heading: 'Our Specialized Services',
+                    subtitle: 'WHAT WE DO',
+                    items: [
+                        { title: "High-End Woodworking", desc: "Custom cabinetry, built-in units, and fine finish carpentry that adds timeless value to your home.", image: "/service-woodworking.png" },
+                        { title: "Decks & Patios", desc: "Expertly crafted outdoor living spaces designed for relaxation and longevity using premium materials.", image: "/service-decks.png" },
+                        { title: "Full Renovations", desc: "Complete home transformations, modernization, and modifications tailored to your lifestyle.", image: "/service-renovations.png" }
+                    ],
+                    enabled: true,
+                    order: 2
+                },
+                our_story: {
+                    heading: 'A Legacy of Craftsmanship',
+                    subtitle: 'OUR STORY',
+                    content: `<p>Noel’s journey in woodworking began at the age of 15, mastering traditional hand tools in his home country of El Salvador. Twenty-two years ago, he brought that passion to the Kitchener-Waterloo region, establishing a reputation for excellence in the local construction industry.</p><p>With a deep foundation in cabinetmaking and general construction, Noel completed his formal apprenticeship at Conestoga College in 2008. Today, with over 35 years of experience, he combines old-world craftsmanship with modern building standards to deliver results that are both budget-friendly and uncompromising in quality.</p>`,
+                    enabled: true,
+                    order: 3
+                },
+                projects: {
+                    heading: 'Featured Craftsmanship',
+                    subtitle: 'RECENT PROJECTS',
+                    enabled: true,
+                    order: 4
+                },
+                reviews: {
+                    heading: 'What Our Clients Say',
+                    subtitle: 'TESTIMONIALS',
+                    enabled: true,
+                    order: 5
+                }
+            }
+        },
+        services: {
+            items: [
+                {
+                    category: 'Exterior Work',
+                    title: 'Precision Exterior Solutions',
+                    description: 'Protect and beautify your home with our high-end exterior services, including premium siding, windows, and structural enhancements.',
+                    image: '/project-exterior.png',
+                    order: 1
+                },
+                {
+                    category: 'Sustainability',
+                    title: 'Food Security & Gardens',
+                    description: 'Specialized vegetable garden layouts, garden beds, and custom yard setups to help you enjoy fresh seasonal produce and food sovereignty.',
+                    image: '/service-gardens.png',
+                    order: 2
+                },
+                {
+                    category: 'Decks & Patios',
+                    title: 'Outdoor Luxury Living',
+                    description: 'Custom-designed decks and patios using the finest materials, built to withstand the elements while providing a stunning space for relaxation.',
+                    image: '/service-decks.png',
+                    order: 3
+                },
+                {
+                    category: 'Stairs & Railings',
+                    title: 'Architectural Staircases',
+                    description: 'Custom-built stairs and railings that serve as the centerpieces of your home, blending structural integrity with artistic design.',
+                    image: '/project-stairs.png',
+                    order: 4
+                },
+                {
+                    category: 'Renovations',
+                    title: 'Whole-Home Modernization',
+                    description: 'Comprehensive renovation services including basement upgrades and interior remodels that transform your entire living space.',
+                    image: '/service-renovations.png',
+                    order: 5
+                },
+                {
+                    category: 'Eco-Solutions',
+                    title: 'Water Management',
+                    description: 'Water harvesting projects and drainage solutions designed to conserve resources and protect your property’s foundation.',
+                    image: '/service-woodworking.png',
+                    order: 6
+                }
+            ]
+        },
+        projects: {
+            items: [
+                {
+                    title: 'Modern Lakeside Deck',
+                    category: 'Decks & Patios',
+                    description: 'A multi-level cedar deck with integrated lighting and architectural glass railings.',
+                    coverImage: '/service-decks.png',
+                    client: 'Private Residence',
+                    year: '2023',
+                    location: 'Kitchener, ON',
+                    featured: true,
+                    order: 1
+                },
+                {
+                    title: 'Custom Walnut Kitchen',
+                    category: 'Woodworking',
+                    description: 'Solid walnut cabinetry with dovetail joinery and handmade hardware.',
+                    coverImage: '/service-woodworking.png',
+                    client: 'Gourmet Chef',
+                    year: '2024',
+                    location: 'Waterloo, ON',
+                    featured: true,
+                    order: 2
+                }
+            ]
+        },
+        reviews: {
+            items: [
+                {
+                    clientName: 'James Wilson',
+                    projectType: 'Full Renovation',
+                    rating: 5,
+                    quote: 'Noel and his team transformed our outdated kitchen into a modern masterpiece. Their attention to detail is unmatched.',
+                    date: '2023-11-15'
+                },
+                {
+                    clientName: 'Sarah Miller',
+                    projectType: 'Custom Decking',
+                    rating: 5,
+                    quote: 'Professional, punctual, and highly skilled. The new deck is exactly what we wanted for our summer hosting.',
+                    date: '2024-02-10'
+                }
+            ]
+        }
+    },
+
+    dmlabs: {
+        // v1.0.1 - Force Sync
+        home: {
+            title: 'Home',
+            seo: {
+                title: 'Digital Maples Labs | Empowering Nonprofits through Tech & AI',
+                description: 'We help nonprofits amplify their impact with custom web development, digital marketing, and responsible AI governance.'
+            },
+            sections: {
+                hero: {
+                    heading: 'Home',
+                    title: 'Empowering You Through Digital Innovation.',
+                    subtitle: 'We help small businesses and nonprofits grow online with custom websites, strategic marketing, and powerful software solutions—while also making sure their AI plays nice. From crafting ethical AI policies and auditing for hidden biases to aligning AI with your mission and training teams on responsible AI use, we ensure technology works for you, not against you.',
+                    content: '',
+                    enabled: true,
+                    order: 1
+                },
+                ticker: {
+                    items: [
+                        { text: "Websites" },
+                        { text: "AI Safety" },
+                        { text: "Graphics" },
+                        { text: "Cyber Sec" }
+                    ],
+                    enabled: true,
+                    order: 2
+                },
+                trusted_by: {
+                    items: [
+                        { name: "Global Health" },
+                        { name: "Tech For Good" },
+                        { name: "Algoma Foundation" },
+                        { name: "Savannah Ridge" },
+                        { name: "ONLINE" },
+                        { name: "Harboring Greatness" },
+                        { name: "Niagara Hope" },
+                        { name: "Impact Canada" },
+                        { name: "Community First" },
+                        { name: "Vision 2030" },
+                        { name: "Unity Network" },
+                        { name: "Green Earth" }
+                    ],
+                    enabled: true,
+                    order: 3
+                },
+                who_we_are: {
+                    heading: 'Whether you\'re a Startup or budget-driven Non-Profit, we\'re here to help you reach new heights online.',
+                    subtitle: '[ WHO WE ARE ]',
+                    content: 'At Digital Maples Labs Inc., we specialize in helping nonprofits amplify their impact through modern web development, powerful digital marketing, and smart software solutions. We believe even the smallest organizations can create big change with the right digital tools. With our background in AI Governance, AI Auditing, and AI Alignment, we will be a great partner to companies and non-profits that need to use AI responsibly.',
+                    images: [{ url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2940&auto=format&fit=crop', alt: 'Team collaboration' }],
+                    missionHeading: 'Our Mission',
+                    missionContent: 'At Digital Maples Labs Inc, we believe every nonprofit deserves the right technology to thrive—tech that\'s not only smart but also ethical. Our mission is to bridge the gap between social impact and digital innovation by empowering organizations with custom websites, strategic tools, and responsible AI solutions.',
+                    approachHeading: 'Our Approach',
+                    approachContent: 'We help nonprofits grow online with custom websites, smart marketing strategies, and powerful software solutions that make an impact. But we don\'t stop there—we also make sure your AI behaves responsibly. Whether it\'s building ethical systems, auditing algorithms for bias, or training your team to use AI wisely.',
+                    moreAboutLink: '/about',
+                    enabled: true,
+                    order: 4
+                },
+                pricing: {
+                    heading: 'Transparent Pricing for Nonprofits',
+                    subtitle: 'PRICING PLANS',
+                    items: [
+                        { name: 'Foundation', price: { monthly: 99, yearly: 79 }, features: ['5-Page Professional Website', 'Trauma-Informed Design', 'Monthly SEO Audit', 'Basic AI Consultation'], cta: 'Get Started', link: '/contact' },
+                        { name: 'Acceleration', price: { monthly: 249, yearly: 199 }, isPopular: true, features: ['12-Page Dynamic Website', 'Full AI Governance Audit', 'Algorithm Bias Testing', 'Social Impact Marketing'], cta: 'Most Popular', link: '/contact' },
+                        { name: 'Innovation', price: { monthly: 499, yearly: 399 }, features: ['Unlimited Pages', 'Custom AI Software', '24/7 Priority Support', 'Dedicated Success Manager'], cta: 'Contact Us', link: '/contact' }
+                    ],
+                    enabled: true,
+                    order: 5
+                },
+                final_cta: {
+                    heading: 'Get in touch with us to start your nonprofit\'s digital transformation today.',
+                    buttonText: 'GET IN TOUCH ↗',
+                    buttonLink: '/contact',
+                    secondaryText: 'SEE MORE PROJECTS →',
+                    secondaryLink: '/portfolio',
+                    content: '',
+                    enabled: true,
+                    order: 6
+                }
+            }
+        },
+        about: {
+            title: 'About Us',
+            seo: {
+                title: 'About | Digital Maples Labs Inc.',
+                description: 'Learn about our mission to bridge the gap between social impact and digital innovation through ethical tech.'
+            },
+            sections: {
+                hero: {
+                    heading: 'About Us',
+                    content: 'At Digital Maples Labs, we specialize in helping nonprofits amplify their impact through modern web development, powerful digital marketing, and smart software solutions. We believe even the smallest organizations can create big change with the right digital tools.',
+                    enabled: true,
+                    order: 1
+                },
+                mission: {
+                    heading: 'Our Mission',
+                    content: 'At Digital Maples Labs Inc, we believe every nonprofit deserves the right technology to thrive—tech that\'s not only smart but also ethical. Our mission is to bridge the gap between social impact and digital innovation by empowering organizations with custom websites, strategic tools, and responsible AI solutions.',
+                    enabled: true,
+                    order: 2
+                },
+                approach: {
+                    heading: 'Our Approach',
+                    content: 'We help nonprofits grow online with custom websites, smart marketing strategies, and powerful software solutions that make an impact. But we don\'t stop there—we also make sure your AI behaves responsibly.',
+                    enabled: true,
+                    order: 3
+                },
+                stats: {
+                    heading: 'By the Numbers',
+                    content: '',
+                    list: [
+                        { label: 'PROJECTS COMPLETED', value: '24+' },
+                        { label: 'YEARS OF EXPERIENCE', value: '05+' },
+                        { label: 'CLIENT SATISFACTION', value: '99%' }
+                    ],
+                    enabled: true,
+                    order: 4
+                },
+                values: {
+                    heading: 'The principles that drive every pixel we build.',
+                    subtitle: 'Our Core Values',
+                    items: [
+                        { title: 'Impact First', desc: 'We measure our success by the success of your mission. Every line of code is written to amplify your social footprint.', icon: '🎯' },
+                        { title: 'Radical Excellence', desc: 'Nonprofits shouldn\'t settle for "good enough". We bring enterprise-grade quality to every budget-driven project.', icon: '💎' },
+                        { title: 'Ethical Partnership', desc: 'We don\'t just build for you; we build with you. Transparency and mission-alignment are at the heart of our work.', icon: '🤝' }
+                    ],
+                    enabled: true,
+                    order: 5
+                },
+                ai_for_good: {
+                    heading: 'Responsible AI for Nonprofit Success',
+                    subtitle: '[ AI FOR GOOD ]',
+                    content: 'AI is changing the world, but it must be handled with care. We help nonprofits implement AI responsibly—auditing for bias, ensuring mission alignment, and training teams to use these powerful tools ethically.',
+                    enabled: true,
+                    order: 6
+                }
+            }
+        },
+        blog: {
+            title: 'Just Opinions | Digital Maples Labs Inc.',
+            seo: {
+                title: 'Just Opinions | Blog | Digital Maples Labs',
+                description: 'Expert insights on technology, innovation, and the future of social impact from Digital Maples Labs.'
+            },
+            sections: {
+                hero: {
+                    heading: 'Just <span class="text-brand-accent italic">Opinions</span>',
+                    content: 'Our expert insights on technology, innovation, and the future of social impact.',
+                    enabled: true,
+                    order: 1
+                }
+            }
+        },
+        services: {
+            title: 'What We Do | Digital Maples Labs Inc.',
+            seo: {
+                title: 'Services | What We Do | Digital Maples Labs',
+                description: 'Custom web design, AI governance, and software solutions tailored for nonprofit success.'
+            },
+            sections: {
+                hero: {
+                    heading: 'We amplify impact through <span class="text-brand-accent italic">smart tech</span> & ethical innovation.',
+                    enabled: true,
+                    order: 1
+                },
+                stats: {
+                    list: [
+                        { label: 'PROJECTS COMPLETED', value: '24+' },
+                        { label: 'YEARS OF EXPERIENCE', value: '05+' },
+                        { label: 'CLIENT SATISFACTION', value: '99%' }
+                    ],
+                    enabled: true,
+                    order: 2
+                },
+                awards: {
+                    heading: 'Committed to industry protocols & excellence.',
+                    subtitle: '[ RECOGNITIONS ]',
+                    items: [
+                        { year: "2024", title: "Top AI Safety Partner", body: "Nonprofit Innovation Awards" },
+                        { year: "2023", title: "Best Web development Agency", body: "Digital Excellence Awards" },
+                        { year: "2023", title: "Social Impact Champion", body: "Community Tech Summit" },
+                        { year: "2022", title: "Excellence in UI/UX", body: "Design Forward Awards" }
+                    ],
+                    enabled: true,
+                    order: 3
+                }
+            },
+            services: [
+                {
+                    id: 'web-design',
+                    title: 'Strategic Web Design',
+                    description: 'We create professional, accessible, and high-performing websites tailored to your mission\'s specific needs.',
+                    features: ['Trauma-Informed UI/UX', 'Accessibility (WCAG 2.1)', 'Enterprise Performance'],
+                    imageUrl: 'https://images.unsplash.com/photo-1581291518655-05204481358b?q=80&w=2940&auto=format&fit=crop',
+                    icon: '🌐',
+                    isFeatured: true,
+                    isActive: true,
+                    order: 1
+                },
+                {
+                    id: 'ai-governance',
+                    title: 'Responsible AI Governance',
+                    description: 'Ensure your AI behaves responsibly—auditing for bias, mission alignment, and ethical algorithm design.',
+                    features: ['Algorithmic Auditing', 'AI Policy Development', 'Bias Mitigation'],
+                    imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2940&auto=format&fit=crop',
+                    icon: '🤖',
+                    isFeatured: true,
+                    isActive: true,
+                    order: 2
+                },
+                {
+                    id: 'social-impact',
+                    title: 'Social Impact Marketing',
+                    description: 'Powerful digital marketing strategies designed to amplify your organization\'s voice and reach.',
+                    features: ['Campaign Strategy', 'Audience Engagement', 'Data Analytics'],
+                    imageUrl: 'https://images.unsplash.com/photo-1557821552-17105176677c?q=80&w=2978&auto=format&fit=crop',
+                    icon: '📣',
+                    isFeatured: true,
+                    isActive: true,
+                    order: 3
+                },
+                {
+                    id: 'software-solutions',
+                    title: 'Custom Software Solutions',
+                    description: 'Intelligent software built from the ground up to solve your nonprofit\'s most complex operational challenges.',
+                    features: ['Scalable Architecture', 'API Integration', 'Secure Data Hubs'],
+                    imageUrl: 'https://images.unsplash.com/photo-1551288049-bbdac8626ad1?q=80&w=2940&auto=format&fit=crop',
+                    icon: '💻',
+                    isFeatured: true,
+                    isActive: true,
+                    order: 4
+                }
+            ],
+            awards: [
+                { year: '2024', title: 'Top AI Safety Partner', body: 'Nonprofit Innovation Awards' },
+                { year: '2023', title: 'Best Web Development Agency', body: 'Digital Excellence Awards' },
+                { year: '2023', title: 'Social Impact Champion', body: 'Community Tech Summit' },
+                { year: '2022', title: 'Excellence in UI/UX', body: 'Design Forward Awards' }
+            ],
+            stats: [
+                { label: 'PROJECTS COMPLETED', value: '24+' },
+                { label: 'YEARS OF EXPERIENCE', value: '05+' },
+                { label: 'CLIENT SATISFACTION', value: '99%' }
+            ]
+        },
+
+        projects: {
+            projects: [
+                {
+                    id: 'eliot-lake',
+                    title: "Elliot Lake Women's Group",
+                    category: 'Web Dev',
+                    description: 'A secure, accessible platform empowering women through digital resources and community support.',
+                    fullDescription: 'The Elliot Lake Women\'s Group required a visual and structural overhaul that prioritized both psychological safety and functional efficiency. We built a platform that enables survivors and advocates to connect securely while navigating high-stakes resources with ease.',
+                    objectives: '• Create a trauma-informed UI/UX experience\n• Implement enterprise-grade security for sensitive data\n• Streamline donation and resource management',
+                    results: '• 45% increase in resource engagement\n• 2x faster access to emergency contact tools\n• Fully accessible WCAG 2.1 compliant interface',
+                    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2940&auto=format&fit=crop',
+                    liveUrl: 'https://elwg.ca',
+                    isFeatured: true,
+                    isActive: true,
+                    order: 1
+                },
+                {
+                    id: 'nuvra',
+                    title: 'Nuvra',
+                    category: 'Web Dev',
+                    description: 'A minimal, SEO-friendly Framer template built for furniture studios, interior brands, and design-driven shops.',
+                    fullDescription: 'Nuvra is a bespoke e-commerce experience designed for curated furniture brands. We focused on high-fidelity visual storytelling and a frictionless checkout flow.',
+                    objectives: '• High-fidelity 3D product previews\n• Performance-first architecture\n• Custom checkout experience',
+                    results: '• 30% reduction in cart abandonment\n• 99.9 Lighthouse performance score\n• 2x increase in mobile sales',
+                    imageUrl: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2940&auto=format&fit=crop',
+                    isFeatured: true,
+                    isActive: true,
+                    order: 2
+                },
+                {
+                    id: 'savannah',
+                    title: 'Savannah',
+                    category: 'Digital Strategy',
+                    description: 'Harboring Greatness is an author\'s promotional website designed to showcase published works.',
+                    fullDescription: 'Savannah Ridge hospitality group needed a digital transformation that reflected their luxury positioning. We redefined their brand identity and booking journey.',
+                    objectives: '• Modernize brand visual identity\n• Integrate real-time booking systems\n• Mobile-first customer portal',
+                    results: '• 40% growth in direct bookings\n• Revitalized brand perception\n• 50%+ mobile traffic increase',
+                    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop',
+                    isFeatured: false,
+                    isActive: true,
+                    order: 3
+                },
+                {
+                    id: 'ultraview',
+                    title: 'UltraView',
+                    category: 'AI Solutions',
+                    description: 'A high-performance dashboard for data visualization specialists. Designed to handle large datasets.',
+                    fullDescription: 'UltraView is the next generation of data ergonomics. We built a platform that translates raw enterprise data into actionable, visual stories using mission-aligned algorithms.',
+                    objectives: '• Lower cognitive load for analysts\n• Real-time data synchronization\n• Ethical AI bias auditing',
+                    results: '• 60% faster insight generation\n• Reduced operational overhead\n• Zero detected algorithmic bias',
+                    imageUrl: 'https://images.unsplash.com/photo-1551288049-bbdac8626ad1?q=80&w=2940&auto=format&fit=crop',
+                    isFeatured: true,
+                    isActive: true,
+                    order: 4
+                },
+                {
+                    id: 'jekesa',
+                    title: 'Jekesa Pfungwa',
+                    category: 'Digital Strategy',
+                    description: 'Empowering grassroots organizations with networking tools and educational resources.',
+                    fullDescription: 'Jekesa Pfungwa Vulingqondo needed a way to coordinate nationwide community efforts. We built a scalable platform rooted in accessibility and community-first design.',
+                    objectives: '• Coordinate 50+ local chapters\n• Language-inclusive resource hubs\n• Offline-first data capabilities',
+                    results: '• 10k+ active community members\n• Streamlined chapter reporting\n• Significant increase in grassroots funding',
+                    imageUrl: 'https://images.unsplash.com/photo-1531206715517-5c0ba140ec2b?q=80&w=2940&auto=format&fit=crop',
+                    isFeatured: false,
+                    isActive: true,
+                    order: 5
+                },
+                {
+                    id: 'cibc',
+                    title: 'CIBC / Vista Travels',
+                    category: 'AI Solutions',
+                    description: 'An enterprise-grade mobility application for corporate travel management.',
+                    fullDescription: 'We partnered with CIBC to redefine corporate mobility. This solution integrates AI travel planning with fintech-grade security for the modern business traveler.',
+                    objectives: '• Seamless multi-currency accounting\n• Predictive travel optimization\n• SOC2 compliant security layer',
+                    results: '• 25% average travel cost saving\n• 95% user satisfaction rate\n• Reduced expense processing time',
+                    imageUrl: 'https://images.unsplash.com/photo-1512428559083-a4979b2b51ff?q=80&w=2940&auto=format&fit=crop',
+                    isFeatured: false,
+                    isActive: true,
+                    order: 6
+                },
+                {
+                    id: 'gourmet',
+                    title: 'Gourmet Bites',
+                    category: 'E-commerce',
+                    description: 'A premium food delivery experience for curated culinary brands.',
+                    fullDescription: 'Gourmet Bites is where food-tech meets luxury. We built a bespoke e-commerce platform that handles high-volume orders while maintaining a white-glove aesthetic.',
+                    objectives: '• Dynamic real-time order tracking\n• Curated culinary catalog system\n• High-conversion checkout flow',
+                    results: '• 3x increase in recurring customers\n• 4.9 average customer rating\n• Efficient multi-vendor logistics',
+                    imageUrl: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=2940&auto=format&fit=crop',
+                    isFeatured: false,
+                    isActive: true,
+                    order: 7
+                }
+            ]
+        },
+        articles: {
+            articles: [
+                {
+                    id: 'future-of-ai',
+                    title: 'The Future of AI: Opportunities and Challenges',
+                    slug: 'the-future-of-ai-opportunities-and-challenges',
+                    category: 'Inspiration',
+                    date: '2024-04-01',
+                    imageUrl: 'https://images.unsplash.com/photo-1677442135703-3ee67f47e3e5?q=80&w=2940&auto=format&fit=crop',
+                    excerpt: 'Exploring the transformative potential of artificial intelligence and the ethical considerations that come with it.',
+                    content: '<h2>The AI Revolution</h2><p>Artificial intelligence is no longer a futuristic concept; it is reshaping every industry at an unprecedented pace. From healthcare diagnostics to personalized education, the opportunities for innovation are vast. However, with great power comes the substantial responsibility of ethical deployment.</p><h3>Defining Human-Centric AI</h3><p>At Digital Maples Labs, we believe that technology should serve humanity. Human-centric AI focuses on systems that amplify human capabilities rather than replace them. This involves designing interfaces that are intuitive and ensuring that the underlying algorithms prioritized transparency and fairness.</p><h3>The Ethical Imperative</h3><p>The key is not to fear AI, but to understand it deeply enough to deploy it responsibly. This means auditing for algorithmic bias, ensuring data privacy, and maintaining clear accountability for AI-driven decisions. As we move forward, the most successful organizations will be those that align their technological advancement with core human values.</p><p>Ultimately, the future of AI depends on our collective ability to foster trust through transparency and to use these tools to solve the world\'s most pressing challenges.</p>',
+                    published: true,
+                    order: 1
+                },
+                {
+                    id: 'resilient-business',
+                    title: 'Strategies for Building a Resilient Business',
+                    slug: 'strategies-for-building-a-resilient-business',
+                    category: 'Creative',
+                    date: '2024-03-15',
+                    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2940&auto=format&fit=crop',
+                    excerpt: 'How to navigate uncertainty and build a business that can withstand and thrive in changing times.',
+                    content: '<h2>Building for Tomorrow</h2><p>Business resilience is more than just surviving hard times—it\'s about architecting your organization to adapt, pivot, and thrive regardless of external shocks. In an era of constant change, the ability to respond to disruption is a critical competitive advantage.</p><h3>Digital Agility as a Foundation</h3><p>The most resilient companies we\'ve worked with share one common trait: they invested in digital infrastructure before they actually needed it. Digital agility allows for rapid shifts in operational models, enabling businesses to reach customers through new channels almost overnight. This involves cloud-based collaboration tools, robust data analytics, and scalable e-commerce platforms.</p><h3>The Human Element</h3><p>Resilience is not just about technology; it\'s about culture. A resilient business fosters an environment where employees feel empowered to innovate and take calculated risks. Strategic communication and transparent leadership are essential for maintaining morale during uncertain periods.</p><p>By combining technological maturity with a flexible, supportive internal culture, businesses can transform challenges into opportunities for growth and long-term sustainability.</p>',
+                    published: true,
+                    order: 2
+                },
+                {
+                    id: 'effective-communication',
+                    title: 'The Art of Effective Communication in the Workplace',
+                    slug: 'the-art-of-effective-communication-in-the-workplace',
+                    category: 'Innovation',
+                    date: '2024-02-28',
+                    imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2940&auto=format&fit=crop',
+                    excerpt: 'Mastering the interpersonal skills necessary for clear, impactful, and collaborative professional environments.',
+                    content: '<h2>Communication as a Core Competency</h2><p>In the digital age, how we communicate defines how we succeed. Clear, empathetic, and intentional communication is no longer a soft skill—it\'s a strategic capability that separates high-performing teams from the rest. As workplaces become increasingly distributed, the quality of our interactions becomes even more paramount.</p><h3>Active Listening and Empathy</h3><p>True communication is a two-way street. It begins with active listening—the practice of fully concentrating, understanding, and responding to what is being said. Empathy allows leaders and team members to navigate conflicting perspectives and build a foundation of mutual respect and trust.</p><h3>Digital Literacy in Communication</h3><p>Mastering the art of workplace communication also means understanding the nuances of different digital platforms. Knowing when to send a quick message versus scheduling a video call can significantly impact team efficiency and relationship building. Clarity in written communication is particularly crucial in preventing misunderstandings.</p><p>By prioritizing intentionality and empathy in every interaction, organizations can foster a collaborative culture that drives innovation and employee satisfaction.</p>',
+                    published: true,
+                    order: 3
+                },
+                {
+                    id: 'digital-transformation',
+                    title: 'Digital Transformation: Navigating the New Normal',
+                    slug: 'digital-transformation-navigating-the-new-normal',
+                    category: 'Innovation',
+                    date: '2024-02-01',
+                    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2944&auto=format&fit=crop',
+                    excerpt: 'Adapting to the digital age requires more than just new tech—it requires a fundamental shift in strategy.',
+                    content: '<h2>Beyond the Tech Stack</h2><p>Digital transformation is often misunderstood as a simple technology project. In reality, it\'s a fundamental cultural shift that technology merely enables. Organizations that succeed don\'t just adopt new software—they rethink how they create value for the people they serve in a digital-first world.</p><h3>Strategic Alignment</h3><p>The journey begins with strategic alignment. Every technological investment should directly support the organization\'s core mission and goals. This requires a deep understanding of customer journeys and operational bottlenecks that can be solved through innovation. It\'s about being "digital-ready" at every level of the organization.</p><h3>Overcoming Resistance to Change</h3><p>Transformation is often met with resistance. Successful leaders prioritize change management, ensuring that every team member understands the "why" behind the shift and receives the necessary training to thrive in the new environment. Continuous learning and adaptation are the hallmarks of a digitally mature organization.</p><p>Ultimately, digital transformation is a continuous process of evolution that allows organizations to remain relevant and impactful in an ever-changing landscape.</p>',
+                    published: true,
+                    order: 4
+                },
+                {
+                    id: 'remote-teams',
+                    title: 'Unlocking the Secrets of Successful Remote Teams',
+                    slug: 'unlocking-the-secrets-of-successful-remote-teams',
+                    category: 'Inspiration',
+                    date: '2024-01-15',
+                    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2940&auto=format&fit=crop',
+                    excerpt: 'Key principles for managing distributed teams effectively in a globalized workforce.',
+                    content: '<h2>The Remote-First Mindset</h2><p>Remote work is not a compromise—it\'s a massive competitive advantage when executed correctly. The teams we\'ve seen succeed in distributed environments share common practices: asynchronous-first communication, radical documentation, and deep trust in process over presence.</p><h3>Trust and Accountability</h3><p>In a remote setting, visibility into "hours worked" is replaced by visibility into "outcomes achieved." This transition requires a high level of trust and clear accountability frameworks. Managers must shift from monitoring tasks to supporting the growth and productivity of their team members.</p><h3>Building Culture Across Distances</h3><p>Creating a sense of belonging in a remote team requires intentionality. Regular virtual huddles, informal digital social spaces, and clear shared values help maintain a cohesive culture. Using the right collaboration tools—from project management platforms to instant messaging—is essential for keeping everyone aligned and engaged.</p><p>When done right, remote work allows organizations to tap into global talent and offers employees the flexibility to build lives and careers that truly integrate.</p>',
+                    published: true,
+                    order: 5
+                },
+                {
+                    id: 'emotional-intelligence',
+                    title: 'The Power of Emotional Intelligence in Leadership',
+                    slug: 'the-power-of-emotional-intelligence-in-leadership',
+                    category: 'Creative',
+                    date: '2024-01-02',
+                    imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2940&auto=format&fit=crop',
+                    excerpt: 'Why EQ is becoming the most critical asset for leaders in today\'s high-pressure environments.',
+                    content: '<h2>Leading with Empathy</h2><p>Technical skills might get you hired, but emotional intelligence (EQ) is what gets you promoted—and keeps your team truly engaged. In an era of increasing automation, the uniquely human capacity to understand, motivate, and connect with others is becoming the ultimate leadership differentiator.</p><h3>The Components of EQ</h3><p>Emotional intelligence consists of self-awareness, self-regulation, motivation, empathy, and social skills. A leader who can recognize their own emotional triggers and understand those of their team members is far better equipped to navigate high-pressure situations and resolve conflicts effectively.</p><h3>Fostering Psychological Safety</h3><p>Leaders with high EQ prioritize psychological safety—the belief that one will not be punished for making a mistake or speaking up. This environment encourages innovation, as team members feel safe to share diverse ideas and challenge the status quo. It leads to higher levels of collaboration and a more resilient, committed workforce.</p><p>By investing in the emotional growth of their leaders, organizations can create a culture of empathy and excellence that drives long-term success.</p>',
+                    published: true,
+                    order: 6
+                }
+            ]
         }
     }
 };
@@ -798,127 +1365,4 @@ export const SETTINGS_SEED = {
             updatedBy: 'system'
         }
     },
-    noel: {
-        hero_slider: {
-            slides: [
-                {
-                    id: 'n1',
-                    title: 'Mastering the Art of Woodworking',
-                    subtitle: 'Custom cabinetry and fine carpentry that transforms your home.',
-                    cta: 'View Our Gallery',
-                    link: '/portfolio',
-                    imageUrl: '/hero-bg.png',
-                    isActive: true
-                },
-                {
-                    id: 'n2',
-                    title: 'High-End Renovations',
-                    subtitle: 'Meticulous attention to detail for residential and commercial transformations.',
-                    cta: 'Our Services',
-                    link: '/services',
-                    imageUrl: '/project-stairs.png',
-                    isActive: true
-                },
-                {
-                    id: 'n3',
-                    title: 'Luxury Outdoor Living',
-                    subtitle: 'Architectural decks and patios built to last a lifetime.',
-                    cta: 'Get a Quote',
-                    link: '/contact',
-                    imageUrl: '/service-decks.png',
-                    isActive: true
-                }
-            ]
-        },
-        services: {
-            items: [
-                {
-                    category: 'Exterior Work',
-                    title: 'Precision Exterior Solutions',
-                    description: 'Protect and beautify your home with our high-end exterior services, including premium siding, windows, and structural enhancements.',
-                    image: '/project-exterior.png',
-                    order: 1
-                },
-                {
-                    category: 'Sustainability',
-                    title: 'Food Security & Gardens',
-                    description: 'Specialized vegetable garden layouts, garden beds, and custom yard setups to help you enjoy fresh seasonal produce and food sovereignty.',
-                    image: '/service-gardens.png',
-                    order: 2
-                },
-                {
-                    category: 'Decks & Patios',
-                    title: 'Outdoor Luxury Living',
-                    description: 'Custom-designed decks and patios using the finest materials, built to withstand the elements while providing a stunning space for relaxation.',
-                    image: '/service-decks.png',
-                    order: 3
-                },
-                {
-                    category: 'Stairs & Railings',
-                    title: 'Architectural Staircases',
-                    description: 'Custom-built stairs and railings that serve as the centerpieces of your home, blending structural integrity with artistic design.',
-                    image: '/project-stairs.png',
-                    order: 4
-                },
-                {
-                    category: 'Renovations',
-                    title: 'Whole-Home Modernization',
-                    description: 'Comprehensive renovation services including basement upgrades and interior remodels that transform your entire living space.',
-                    image: '/service-renovations.png',
-                    order: 5
-                },
-                {
-                    category: 'Eco-Solutions',
-                    title: 'Water Management',
-                    description: 'Water harvesting projects and drainage solutions designed to conserve resources and protect your property’s foundation.',
-                    image: '/service-woodworking.png',
-                    order: 6
-                }
-            ]
-        },
-        projects: {
-            items: [
-                {
-                    title: 'Modern Lakeside Deck',
-                    category: 'Decks & Patios',
-                    description: 'A multi-level cedar deck with integrated lighting and architectural glass railings.',
-                    coverImage: '/service-decks.png',
-                    client: 'Private Residence',
-                    year: '2023',
-                    location: 'Kitchener, ON',
-                    featured: true,
-                    order: 1
-                },
-                {
-                    title: 'Custom Walnut Kitchen',
-                    category: 'Woodworking',
-                    description: 'Solid walnut cabinetry with dovetail joinery and handmade hardware.',
-                    coverImage: '/service-woodworking.png',
-                    client: 'Gourmet Chef',
-                    year: '2024',
-                    location: 'Waterloo, ON',
-                    featured: true,
-                    order: 2
-                }
-            ]
-        },
-        reviews: {
-            items: [
-                {
-                    clientName: 'James Wilson',
-                    projectType: 'Full Renovation',
-                    rating: 5,
-                    quote: 'Noel and his team transformed our outdated kitchen into a modern masterpiece. Their attention to detail is unmatched.',
-                    date: '2023-11-15'
-                },
-                {
-                    clientName: 'Sarah Miller',
-                    projectType: 'Custom Decking',
-                    rating: 5,
-                    quote: 'Professional, punctual, and highly skilled. The new deck is exactly what we wanted for our summer hosting.',
-                    date: '2024-02-10'
-                }
-            ]
-        }
-    }
 };

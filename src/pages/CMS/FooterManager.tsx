@@ -85,6 +85,50 @@ const DEFAULT_FOOTER: FooterContent = {
     developer_url: 'https://digitalmaples.ca',
 };
 
+const DMLABS_FOOTER_DEFAULT: FooterContent = {
+    logo_url: 'https://framerusercontent.com/images/WNXCQwxTt2Dmjz4hPcX5bcoDw.svg',
+    tagline: 'Empowering nonprofits through ethical tech & human-centric AI.',
+    crisis_banner_enabled: false,
+    crisis_banner_text: '',
+    crisis_banner_number: '',
+    crisis_banner_label: '',
+    email: 'hello@dmlabs.ca',
+    phone: '',
+    address_line1: 'Ontario, Canada',
+    address_line2: '',
+    appointment_only: false,
+    social_instagram: 'https://instagram.com/dmlabs',
+    social_twitter: 'https://twitter.com/dmlabs',
+    social_facebook: '',
+    social_linkedin: 'https://linkedin.com/company/digitalmaples',
+    social_youtube: '',
+    nav_columns: [
+        {
+            heading: 'Explore',
+            links: [
+                { label: 'Who We Are', url: '/about' },
+                { label: 'What We Do', url: '/services' },
+                { label: 'Our Work', url: '/portfolio' },
+                { label: 'Just Opinions', url: '/blog' },
+            ]
+        },
+        {
+            heading: 'Connect',
+            links: [
+                { label: 'Get in Touch', url: '/contact' },
+                { label: 'Project Inquiry', url: '/contact' },
+            ]
+        },
+    ],
+    policy_links: [
+        { label: 'Privacy Policy', url: '/privacy' },
+        { label: 'Terms of Use', url: '/terms' },
+    ],
+    copyright_text: `© ${new Date().getFullYear()} Digital Maples Labs Inc.`,
+    developer_text: 'Designed by Digital Maples Labs',
+    developer_url: 'https://digitalmaples.ca',
+};
+
 const SECTION_LABELS: Record<string, string> = {
     brand: 'Brand & Logo',
     crisis: 'Crisis Banner',
@@ -157,12 +201,13 @@ export default function FooterManager() {
     };
 
     const handleSeedDefault = async () => {
+        const seedData = siteId === 'dmlabs' ? DMLABS_FOOTER_DEFAULT : DEFAULT_FOOTER;
         setSeeding(true);
         setStatus(null);
         try {
-            await FirestoreService.saveFooterData(DEFAULT_FOOTER, siteId);
-            setContent(DEFAULT_FOOTER);
-            setStatus({ type: 'success', msg: 'Footer seeded with KMFW default content!' });
+            await FirestoreService.saveFooterData(seedData, siteId);
+            setContent(seedData);
+            setStatus({ type: 'success', msg: `Footer seeded with ${siteId.toUpperCase()} default content!` });
         } catch (err) {
             console.error(err);
             setStatus({ type: 'error', msg: 'Failed to seed.' });

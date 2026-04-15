@@ -12,6 +12,8 @@ import { CSS } from "@dnd-kit/utilities";
 import MediaPickerModal from "../../components/common/MediaPickerModal";
 import { SEED_DATA } from "../../config/seedData";
 import { GridIcon } from "../../icons";
+import { Search } from 'lucide-react';
+import SEOEditor from "../../components/form/SEOEditor";
 
 interface ServiceItem {
     id: string;
@@ -19,7 +21,18 @@ interface ServiceItem {
     description: string;
     imageUrl: string;
     icon: string;
+    isFeatured?: boolean;
     isActive: boolean;
+}
+
+interface ServicesPageContent {
+    services: ServiceItem[];
+    seo?: {
+        title?: string;
+        description?: string;
+        image?: string;
+    };
+    [key: string]: any;
 }
 
 function SortableServiceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -39,7 +52,7 @@ function SortableServiceItem({ id, children }: { id: string; children: React.Rea
 
 export default function ServicesManager() {
     const { currentSite } = useSite();
-    const [services, setServices] = useState<ServiceItem[]>([]);
+    const [content, setContent] = useState<ServicesPageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -49,6 +62,8 @@ export default function ServicesManager() {
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
+    const [services, setServices] = useState<ServiceItem[]>([]);
+
     useEffect(() => {
         loadServices();
     }, [currentSite]);
@@ -57,18 +72,19 @@ export default function ServicesManager() {
         setLoading(true);
         try {
             const data: any = await FirestoreService.getPageContent("services", currentSite.id);
-            if (data && data.services) {
-                setServices(data.services);
+            if (data) {
+                setContent(data);
+                setServices(data.services || []);
             } else {
-                // Fallback to seed data
                 const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
-                // @ts-ignore
-                if (siteSeed?.services) {
-                    // @ts-ignore
-                    setServices(siteSeed.services);
-                } else {
-                    setServices([]);
-                }
+                const servicesData = (siteSeed as any)?.services;
+                const seedArray = servicesData?.services || servicesData || [];
+                
+                setContent({
+                    services: Array.isArray(seedArray) ? seedArray : [],
+                    seo: servicesData?.seo || {}
+                });
+                setServices(Array.isArray(seedArray) ? seedArray : []);
             }
         } catch (err) {
             console.error(err);
@@ -78,16 +94,62 @@ export default function ServicesManager() {
         }
     };
 
+    const handleSeedData = async () => {
+        const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+        const servicesData = (siteSeed as any)?.services;
+        const defaultServices = servicesData?.services || servicesData || [];
+        
+        if (!Array.isArray(defaultServices) || defaultServices.length === 0) {
+            setError("No seed data found for this site.");
+            return;
+        }
+
+        if (!confirm(`This will overwrite the current services list for "${currentSite.name}" with ${defaultServices.length} seed services. Continue?`)) return;
+        
+        setSaving(true);
+        setError("");
+        setSuccessMsg("");
+        try {
+            const newContent = {
+                ...content,
+                services: defaultServices,
+                seo: servicesData?.seo || content?.seo || {}
+            };
+            await FirestoreService.savePageContent("services", newContent as any, currentSite.id);
+            setContent(newContent);
+            setServices(defaultServices);
+            setSuccessMsg(`✅ Seeded ${defaultServices.length} services successfully!`);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to seed data: " + (err instanceof Error ? err.message : String(err)));
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSEOChange = (field: string, value: string) => {
+        setContent(prev => ({
+            ...prev!,
+            seo: { ...prev?.seo, [field]: value }
+        }));
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("services", { services } as any, currentSite.id);
-            setSuccessMsg("Services saved successfully!");
+            const updatedContent = {
+                ...content,
+                services,
+                seo: content?.seo || {}
+            };
+            await FirestoreService.savePageContent("services", updatedContent as any, currentSite.id);
+            setContent(updatedContent);
+            setSuccessMsg("Services updated successfully!");
         } catch (err) {
             console.error(err);
-            setError("Failed to save changes.");
+            setError("Failed to save services.");
         } finally {
             setSaving(false);
         }
@@ -130,7 +192,7 @@ export default function ServicesManager() {
 
     return (
         <>
-            <PageMeta title="Services Manager | Noel Construction" description="Manage High-End Services" />
+            <PageMeta title={`Services Manager | ${currentSite.name}`} description="Manage High-End Services" />
 
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
@@ -138,7 +200,10 @@ export default function ServicesManager() {
                         <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">Construction & Woodworking Services</h2>
                         <p className="text-sm text-gray-500 mt-1">Manage the core offerings displayed on the website.</p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 flex-wrap">
+                        <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                            🌱 Seed Default Data
+                        </Button>
                         <Button variant="outline" onClick={addService}>+ Add Service</Button>
                         <Button onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</Button>
                     </div>
@@ -147,6 +212,18 @@ export default function ServicesManager() {
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
 
+                {/* SEO Settings Section */}
+                <div className="mb-8 p-6 border border-indigo-500/20 bg-indigo-500/5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Search size={20} className="text-indigo-500" />
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Services Search SEO</h3>
+                    </div>
+                    <SEOEditor 
+                        data={content?.seo || {}} 
+                        onChange={handleSEOChange}
+                    />
+                </div>
+
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
                     <SortableContext items={services.map(s => s.id)} strategy={verticalListSortingStrategy}>
                         <div className="space-y-4">
@@ -154,9 +231,12 @@ export default function ServicesManager() {
                                 <SortableServiceItem key={service.id} id={service.id}>
                                     <div className="p-5 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700 relative group">
                                         <div className="absolute top-4 right-4 flex gap-2">
-                                            <button onClick={() => updateService(service.id, 'isActive', !service.isActive)} className={`text-xs px-2 py-1 rounded border ${service.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`} onPointerDown={(e) => e.stopPropagation()}>
-                                                {service.isActive ? 'Active' : 'Hidden'}
-                                            </button>
+                                             <button onClick={() => updateService(service.id, 'isFeatured', !service.isFeatured)} className={`text-xs px-2 py-1 rounded border ${service.isFeatured ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`} onPointerDown={(e) => e.stopPropagation()}>
+                                                 {service.isFeatured ? '★ Featured' : 'Featured?'}
+                                             </button>
+                                             <button onClick={() => updateService(service.id, 'isActive', !service.isActive)} className={`text-xs px-2 py-1 rounded border ${service.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`} onPointerDown={(e) => e.stopPropagation()}>
+                                                 {service.isActive ? 'Published' : 'Draft'}
+                                             </button>
                                             <button onClick={() => removeService(service.id)} className="text-xs px-2 py-1 rounded bg-red-100 text-red-700" onPointerDown={(e) => e.stopPropagation()}>Delete</button>
                                         </div>
 

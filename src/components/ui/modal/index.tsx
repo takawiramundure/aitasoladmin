@@ -8,7 +8,7 @@ interface ModalProps {
   title?: string; // Added title prop
   showCloseButton?: boolean;
   isFullscreen?: boolean;
-  size?: "sm" | "md" | "lg" | "xl" | "2xl"; // Added size prop as VideoManager passes it too sometimes
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "7xl" | "full" | "none";
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -55,7 +55,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   const contentClasses = isFullscreen
     ? "w-full h-full"
-    : "relative w-full rounded-2xl bg-white dark:bg-gray-900"; // Changed to rounded-2xl for slightly less aggressive corners
+    : "relative w-full rounded-2xl bg-white dark:bg-gray-900 max-h-[90vh]"; 
 
   const sizeClasses = {
     sm: "max-w-sm",
@@ -63,6 +63,9 @@ export const Modal: React.FC<ModalProps> = ({
     lg: "max-w-lg",
     xl: "max-w-xl",
     "2xl": "max-w-2xl",
+    "7xl": "max-w-7xl",
+    full: "max-w-[95vw]",
+    none: ""
   };
 
   return (
@@ -73,7 +76,7 @@ export const Modal: React.FC<ModalProps> = ({
 
       <div
         ref={modalRef}
-        className={`${contentClasses} ${!isFullscreen ? sizeClasses[size] : ''} ${className} flex flex-col max-h-[90vh] shadow-2xl ring-1 ring-black/5`}
+        className={`${contentClasses} ${!isFullscreen ? sizeClasses[size as keyof typeof sizeClasses] : ''} ${className} flex flex-col shadow-2xl ring-1 ring-black/5`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

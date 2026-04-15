@@ -6,8 +6,9 @@ import Button from "../../components/ui/button/Button";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Alert from "../../components/ui/alert/Alert";
-import { Eye, EyeOff, Save, Clock, MapPin, Trash2, Plus, Mail } from 'lucide-react';
+import { Eye, EyeOff, Save, Clock, MapPin, Trash2, Plus, Mail, Search } from 'lucide-react';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
+import SEOEditor from "../../components/form/SEOEditor";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -24,7 +25,59 @@ const DEFAULT_DATA = {
             { label: "Saturday", value: "10 am to 2 pm", note: "(By Appointment Only)" }
         ],
         disclaimer: "Please note: Scheduled programs, consultations, training, counseling and outreach support may happen outside these office hours and at a different location. If you have any questions, please email or call us."
-    }
+    },
+    form_fields: [
+        { id: 'name', label: 'Name', type: 'text', required: true },
+        { id: 'email', label: 'Email', type: 'email', required: true },
+        { id: 'phone', label: 'Phone Number', type: 'tel', required: false },
+        { id: 'message', label: 'Message', type: 'textarea', required: true }
+    ]
+};
+
+const DMLABS_CONTACT_DEFAULT = {
+    enabled: true,
+    hero: {
+        title: "Contact Digital Maples Labs",
+        subtitle: "Let’s Build Something Meaningful",
+        description: "Whether you have a question about our services, AI governance, or want to discuss a new project, we'd love to hear from you."
+    },
+    info: {
+        address: "Ontario, Canada (Remote-First Agency)",
+        appointment_only: false,
+        hours: [
+            { label: "Monday to Friday", value: "9 am to 5 pm", note: "(EST)" }
+        ],
+        disclaimer: "Our team operates remotely and across various time zones to support our global mission-driven partners."
+    },
+    form_fields: [
+        { id: 'name', label: 'Full Name', type: 'text', required: true },
+        { id: 'email', label: 'Work Email', type: 'email', required: true },
+        { id: 'phone', label: 'Phone Number', type: 'tel', required: false },
+        { 
+            id: 'projectType', 
+            label: 'Project/Service Type', 
+            type: 'select', 
+            required: true,
+            options: ['AI Automations', 'Web Development', 'SEO & Performance', 'Digital Strategy', 'App Maintenance']
+        },
+        {
+            id: 'timeline',
+            label: 'When do you need this by?',
+            type: 'select',
+            required: true,
+            options: ['1 - 3 Weeks', '1 Month', '3 Months', 'Flexible']
+        },
+        { id: 'website', label: 'Current Website (if any)', type: 'text', required: false },
+        { id: 'company', label: 'Company/Organization Name', type: 'text', required: false },
+        { id: 'message', label: 'Any Additional information', type: 'textarea', required: true },
+        {
+            id: 'subject',
+            label: 'Subject',
+            type: 'radio',
+            required: true,
+            options: ['feedback', 'complaint', 'inquiry']
+        }
+    ]
 };
 
 export default function ContactPageManager() {
@@ -49,18 +102,19 @@ export default function ContactPageManager() {
                 if (settings.sendgrid_api_key) setSendgridApiKey(settings.sendgrid_api_key);
             }
 
+            const siteDefaults = currentSite.id === 'dmlabs' ? DMLABS_CONTACT_DEFAULT : DEFAULT_DATA;
             const data = await FirestoreService.getPageContent('contact', currentSite.id);
 
             setContent(data ? {
-                ...DEFAULT_DATA,
+                ...siteDefaults,
                 ...data,
-                hero: { ...DEFAULT_DATA.hero, ...(data.hero || {}) },
+                hero: { ...siteDefaults.hero, ...(data.hero || {}) },
                 info: {
-                    ...DEFAULT_DATA.info,
+                    ...siteDefaults.info,
                     ...(data.info || {}),
-                    hours: data.info?.hours ?? DEFAULT_DATA.info.hours,
+                    hours: data.info?.hours ?? siteDefaults.info.hours,
                 }
-            } : DEFAULT_DATA);
+            } : siteDefaults);
         } catch (err: any) {
             console.error(err);
             setError("Failed to load content.");
@@ -112,6 +166,36 @@ export default function ContactPageManager() {
         setInfo('hours', content.info.hours.filter((_: any, i: number) => i !== index));
     };
 
+    const handleSEOChange = (seoData: any) => {
+        if (!content) return;
+        setContent((prev: any) => ({ ...prev, seo: seoData }));
+    };
+
+    const addField = () => {
+        const newField = { 
+            id: `field_${Date.now()}`, 
+            label: 'New Field', 
+            type: 'text', 
+            required: false,
+            options: [] 
+        };
+        setContent((prev: any) => ({ ...prev, form_fields: [...(prev.form_fields || []), newField] }));
+    };
+
+    const updateField = (id: string, updates: any) => {
+        setContent((prev: any) => ({
+            ...prev,
+            form_fields: prev.form_fields.map((f: any) => f.id === id ? { ...f, ...updates } : f)
+        }));
+    };
+
+    const removeField = (id: string) => {
+        setContent((prev: any) => ({
+            ...prev,
+            form_fields: prev.form_fields.filter((f: any) => f.id !== id)
+        }));
+    };
+
     if (loading) return <div className="p-6 text-gray-500">Loading contact settings...</div>;
 
     return (
@@ -131,7 +215,7 @@ export default function ContactPageManager() {
                         </Button>
                         <Button onClick={handleSave} disabled={saving}>
                             <Save className="w-4 h-4 mr-2" />
-                            {saving ? "Saving..." : "Save Changes"}
+                            {saving ? "Saving..." : "Save Content"}
                         </Button>
                     </div>
                 </div>
@@ -140,6 +224,16 @@ export default function ContactPageManager() {
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Saved!" message={successMsg} /></div>}
 
                 <div className="space-y-6">
+                    {/* SEO Section */}
+                    <div className="rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-6 flex items-center gap-2">
+                            <Search className="w-5 h-5 text-indigo-500" /> Search Engine Optimization
+                        </h3>
+                        <SEOEditor 
+                            data={content?.seo || {}} 
+                            onChange={handleSEOChange}
+                        />
+                    </div>
                     {/* Hero Section */}
                     <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                         <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
@@ -225,7 +319,7 @@ export default function ContactPageManager() {
                                 ))}
                             </div>
 
-                            <div className="pt-4">
+                             <div className="pt-4">
                                 <Label>Hours Disclaimer / Footer Note</Label>
                                 <textarea
                                     className="w-full px-4 py-2 border rounded-xl dark:bg-gray-800 dark:border-gray-700 text-sm italic"
@@ -235,6 +329,72 @@ export default function ContactPageManager() {
                                 />
                                 <p className="text-[10px] text-gray-400 mt-1">This note appears below the office hours.</p>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Dynamic Form Builder */}
+                    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Plus className="w-5 h-5 text-green-500" /> Contact Form Builder
+                            </div>
+                            <Button size="sm" variant="outline" onClick={addField}>
+                                <Plus className="w-4 h-4 mr-1" /> Add Field
+                            </Button>
+                        </h3>
+                        <div className="space-y-4">
+                            {content.form_fields?.map((field: any, index: number) => (
+                                <div key={field.id} className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 space-y-4">
+                                    <div className="flex items-start justify-between">
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+                                            <div>
+                                                <Label className="text-[10px] uppercase">Label / Placeholder</Label>
+                                                <Input value={field.label} onChange={e => updateField(field.id, { label: e.target.value })} />
+                                            </div>
+                                            <div>
+                                                <Label className="text-[10px] uppercase">Field Type</Label>
+                                                <select 
+                                                    value={field.type} 
+                                                    onChange={e => updateField(field.id, { type: e.target.value })}
+                                                    className="w-full px-4 py-2 border rounded-xl dark:bg-gray-800 dark:border-gray-700 text-sm"
+                                                >
+                                                    <option value="text">Short Text</option>
+                                                    <option value="email">Email Address</option>
+                                                    <option value="tel">Phone Number</option>
+                                                    <option value="textarea">Large Textarea</option>
+                                                    <option value="select">Dropdown Select</option>
+                                                    <option value="radio">Radio Options</option>
+                                                </select>
+                                            </div>
+                                            <div className="flex items-center gap-4 h-full pt-6">
+                                                <label className="flex items-center gap-2 cursor-pointer">
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={field.required} 
+                                                        onChange={e => updateField(field.id, { required: e.target.checked })}
+                                                        className="w-4 h-4 text-blue-600 rounded"
+                                                    />
+                                                    <span className="text-xs font-bold text-gray-500 uppercase">Required</span>
+                                                </label>
+                                                <button onClick={() => removeField(field.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {(field.type === 'select' || field.type === 'radio') && (
+                                        <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                                            <Label className="text-[10px] uppercase">Options (Comma separated)</Label>
+                                            <Input 
+                                                value={field.options?.join(', ') || ''} 
+                                                onChange={e => updateField(field.id, { options: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+                                                placeholder="Option 1, Option 2, Option 3"
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
                         </div>
                     </div>
                     

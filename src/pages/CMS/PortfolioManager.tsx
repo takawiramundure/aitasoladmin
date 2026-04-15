@@ -11,16 +11,33 @@ import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } 
 import { CSS } from "@dnd-kit/utilities";
 import MediaPickerModal from "../../components/common/MediaPickerModal";
 import { SEED_DATA } from "../../config/seedData";
+import { Search } from 'lucide-react';
+import SEOEditor from "../../components/form/SEOEditor";
 
 interface ProjectItem {
     id: string;
     title: string;
     category: string;
     description: string;
+    fullDescription?: string;
+    objectives?: string;
+    results?: string;
     imageUrl: string;
     beforeImage?: string;
     afterImage?: string;
+    liveUrl?: string;
+    isFeatured?: boolean;
     isActive: boolean;
+}
+
+interface PortfolioPageContent {
+    projects: ProjectItem[];
+    seo?: {
+        title?: string;
+        description?: string;
+        image?: string;
+    };
+    [key: string]: any;
 }
 
 function SortableProjectItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -40,7 +57,7 @@ function SortableProjectItem({ id, children }: { id: string; children: React.Rea
 
 export default function PortfolioManager() {
     const { currentSite } = useSite();
-    const [projects, setProjects] = useState<ProjectItem[]>([]);
+    const [content, setContent] = useState<PortfolioPageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -50,6 +67,8 @@ export default function PortfolioManager() {
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
+    const [projects, setProjects] = useState<ProjectItem[]>([]);
+
     useEffect(() => {
         loadProjects();
     }, [currentSite]);
@@ -58,17 +77,19 @@ export default function PortfolioManager() {
         setLoading(true);
         try {
             const data: any = await FirestoreService.getPageContent("projects", currentSite.id);
-            if (data && data.projects) {
-                setProjects(data.projects);
+            if (data) {
+                setContent(data);
+                setProjects(data.projects || []);
             } else {
                 const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
-                // @ts-ignore
-                if (siteSeed?.projects) {
-                    // @ts-ignore
-                    setProjects(siteSeed.projects);
-                } else {
-                    setProjects([]);
-                }
+                const projectsData = (siteSeed as any)?.projects;
+                const seedArray = projectsData?.projects || projectsData || [];
+                
+                setContent({
+                    projects: Array.isArray(seedArray) ? seedArray : [],
+                    seo: projectsData?.seo || {}
+                });
+                setProjects(Array.isArray(seedArray) ? seedArray : []);
             }
         } catch (err) {
             console.error(err);
@@ -78,12 +99,58 @@ export default function PortfolioManager() {
         }
     };
 
+    const handleSeedData = async () => {
+        const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+        const projectsData = (siteSeed as any)?.projects;
+        const defaultProjects = projectsData?.projects || projectsData || [];
+        
+        if (!Array.isArray(defaultProjects) || defaultProjects.length === 0) {
+            setError("No seed data found for this site.");
+            return;
+        }
+
+        if (!confirm(`This will overwrite the current project list for "${currentSite.name}" with ${defaultProjects.length} seed projects. Continue?`)) return;
+        
+        setSaving(true);
+        setError("");
+        setSuccessMsg("");
+        try {
+            const newContent = {
+                ...content,
+                projects: defaultProjects,
+                seo: projectsData?.seo || content?.seo || {}
+            };
+            await FirestoreService.savePageContent("projects", newContent as any, currentSite.id);
+            setContent(newContent);
+            setProjects(defaultProjects);
+            setSuccessMsg(`✅ Seeded ${defaultProjects.length} projects successfully!`);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to seed data: " + (err instanceof Error ? err.message : String(err)));
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSEOChange = (field: string, value: string) => {
+        setContent(prev => ({
+            ...prev!,
+            seo: { ...prev?.seo, [field]: value }
+        }));
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("projects", { projects } as any, currentSite.id);
+            const updatedContent = {
+                ...content,
+                projects,
+                seo: content?.seo || {}
+            };
+            await FirestoreService.savePageContent("projects", updatedContent as any, currentSite.id);
+            setContent(updatedContent);
             setSuccessMsg("Portfolio updated successfully!");
         } catch (err) {
             console.error(err);
@@ -97,7 +164,7 @@ export default function PortfolioManager() {
         const newProject: ProjectItem = {
             id: Date.now().toString(),
             title: "New Project",
-            category: "Renovation",
+            category: currentSite.id === 'dmlabs' ? "Web Dev" : "Renovation",
             description: "Detailed project description...",
             imageUrl: "",
             isActive: true
@@ -138,7 +205,10 @@ export default function PortfolioManager() {
                         <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">Portfolio & Projects Showcase</h2>
                         <p className="text-sm text-gray-500 mt-1">Showcase your high-end renovations with before/after comparisons.</p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 flex-wrap">
+                        <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                            🌱 Seed Default Data
+                        </Button>
                         <Button variant="outline" onClick={addProject}>+ Add Project</Button>
                         <Button onClick={handleSave} disabled={saving}>{saving ? "Updating..." : "Save Changes"}</Button>
                     </div>
@@ -147,6 +217,18 @@ export default function PortfolioManager() {
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
 
+                {/* SEO Settings Section */}
+                <div className="mb-8 p-6 border border-indigo-500/20 bg-indigo-500/5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Search size={20} className="text-indigo-500" />
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Portfolio Search SEO</h3>
+                    </div>
+                    <SEOEditor 
+                        data={content?.seo || {}} 
+                        onChange={handleSEOChange}
+                    />
+                </div>
+
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
                     <SortableContext items={projects.map(p => p.id)} strategy={verticalListSortingStrategy}>
                         <div className="space-y-6">
@@ -154,9 +236,12 @@ export default function PortfolioManager() {
                                 <SortableProjectItem key={project.id} id={project.id}>
                                     <div className="p-6 border border-gray-200 rounded-2xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700 relative group">
                                         <div className="absolute top-4 right-4 flex gap-2">
-                                            <button onClick={() => updateProject(project.id, 'isActive', !project.isActive)} className={`text-xs px-2 py-1 rounded border ${project.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`} onPointerDown={(e) => e.stopPropagation()}>
-                                                {project.isActive ? 'Published' : 'Draft'}
-                                            </button>
+                                             <button onClick={() => updateProject(project.id, 'isFeatured', !project.isFeatured)} className={`text-xs px-2 py-1 rounded border ${project.isFeatured ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`} onPointerDown={(e) => e.stopPropagation()}>
+                                                 {project.isFeatured ? '★ Featured' : 'Featured?'}
+                                             </button>
+                                             <button onClick={() => updateProject(project.id, 'isActive', !project.isActive)} className={`text-xs px-2 py-1 rounded border ${project.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`} onPointerDown={(e) => e.stopPropagation()}>
+                                                 {project.isActive ? 'Published' : 'Draft'}
+                                             </button>
                                             <button onClick={() => removeProject(project.id)} className="text-xs px-2 py-1 rounded bg-red-100 text-red-700" onPointerDown={(e) => e.stopPropagation()}>Delete</button>
                                         </div>
 
@@ -169,11 +254,42 @@ export default function PortfolioManager() {
                                                 </div>
                                                 <div>
                                                     <Label>Category</Label>
-                                                    <Input type="text" value={project.category} onChange={(e) => updateProject(project.id, 'category', e.target.value)} />
+                                                    {currentSite.id === 'dmlabs' ? (
+                                                        <select 
+                                                            className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm"
+                                                            value={project.category} 
+                                                            onChange={(e) => updateProject(project.id, 'category', e.target.value)}
+                                                        >
+                                                            <option value="Web Dev">Web Dev</option>
+                                                            <option value="AI Solutions">AI Solutions</option>
+                                                            <option value="Digital Strategy">Digital Strategy</option>
+                                                            <option value="E-commerce">E-commerce</option>
+                                                        </select>
+                                                    ) : (
+                                                        <Input type="text" value={project.category} onChange={(e) => updateProject(project.id, 'category', e.target.value)} />
+                                                    )}
                                                 </div>
                                                 <div>
-                                                    <Label>Description</Label>
-                                                    <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32" value={project.description} onChange={(e) => updateProject(project.id, 'description', e.target.value)} />
+                                                    <Label>Description (Short)</Label>
+                                                    <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-24" value={project.description} onChange={(e) => updateProject(project.id, 'description', e.target.value)} />
+                                                </div>
+                                                <div>
+                                                    <Label>Case Study - Full Background</Label>
+                                                    <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32" value={project.fullDescription || ""} onChange={(e) => updateProject(project.id, 'fullDescription', e.target.value)} />
+                                                </div>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label>Objectives (one per line)</Label>
+                                                        <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32" value={project.objectives || ""} onChange={(e) => updateProject(project.id, 'objectives', e.target.value)} placeholder="• High performing UI\n• AI-driven strategy" />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Results (one per line)</Label>
+                                                        <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32" value={project.results || ""} onChange={(e) => updateProject(project.id, 'results', e.target.value)} placeholder="• 40% Increase in leads\n• 2x Conversion rate" />
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <Label>Live Website URL</Label>
+                                                    <Input type="text" value={project.liveUrl || ""} onChange={(e) => updateProject(project.id, 'liveUrl', e.target.value)} placeholder="https://..." />
                                                 </div>
                                             </div>
 

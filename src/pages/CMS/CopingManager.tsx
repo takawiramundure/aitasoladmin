@@ -11,6 +11,8 @@ import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } 
 import { CSS } from "@dnd-kit/utilities";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import { SEED_DATA } from "../../config/seedData";
+import SEOEditor from "../../components/form/SEOEditor";
+import { Search } from 'lucide-react';
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -42,6 +44,7 @@ interface CopingResource {
 
 export default function CopingManager() {
     const { currentSite } = useSite();
+    const [content, setContent] = useState<any>(null);
     const [resources, setResources] = useState<CopingResource[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -56,12 +59,6 @@ export default function CopingManager() {
         })
     );
 
-    // Default data
-    const getDefaultResources = (): CopingResource[] => {
-        const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
-        return siteData?.coping?.resources || [];
-    };
-
     useEffect(() => {
         loadResources();
     }, [currentSite]);
@@ -70,10 +67,17 @@ export default function CopingManager() {
         setLoading(true);
         try {
             const data: any = await FirestoreService.getPageContent("coping", currentSite.id);
-            if (data && data.resources && data.resources.length > 0) {
-                setResources(data.resources);
+            if (data) {
+                setContent(data);
+                setResources(data.resources || []);
             } else {
-                setResources(getDefaultResources());
+                const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
+                const copingData = siteSeed?.coping;
+                setContent({
+                    seo: copingData?.seo || {},
+                    resources: copingData?.resources || []
+                });
+                setResources(copingData?.resources || []);
             }
         } catch (err) {
             console.error(err);
@@ -83,12 +87,24 @@ export default function CopingManager() {
         }
     };
 
+    const handleSEOChange = (field: string, value: string) => {
+        setContent((prev: any) => ({
+            ...prev,
+            seo: { ...prev?.seo, [field]: value }
+        }));
+    };
+
     const handleSave = async () => {
         setSaving(true);
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("coping", { resources } as any, currentSite.id);
+            const dataToSave = {
+                ...content,
+                resources
+            };
+            await FirestoreService.savePageContent("coping", dataToSave, currentSite.id);
+            setContent(dataToSave);
             setSuccessMsg("Changes saved successfully!");
         } catch (err) {
             console.error(err);
@@ -138,7 +154,7 @@ export default function CopingManager() {
 
     return (
         <>
-            <PageMeta title="Coping with Loss Manager | NSPC Admin" description="Manage Coping Section Resources" />
+            <PageMeta title={`Coping with Loss Manager | ${currentSite.name}`} description="Manage Coping Section Resources" />
 
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
                 <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
@@ -154,10 +170,15 @@ export default function CopingManager() {
                         <Button variant="outline" onClick={() => {
                             if (confirm("This will overwrite current changes with default data. Are you sure?")) {
                                 const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
-                                if (siteData?.coping?.resources) {
-                                    setResources(siteData.coping.resources);
-                                    // Auto-save after seeding
-                                    FirestoreService.savePageContent("coping", { resources: siteData.coping.resources } as any, currentSite.id)
+                                if (siteData?.coping) {
+                                    const newData = {
+                                        ...content,
+                                        resources: siteData.coping.resources || [],
+                                        seo: siteData.coping.seo || content?.seo || {}
+                                    };
+                                    setResources(newData.resources);
+                                    setContent(newData);
+                                    FirestoreService.savePageContent("coping", newData as any, currentSite.id)
                                         .then(() => setSuccessMsg("Default data seeded and saved!"))
                                         .catch(() => setError("Failed to save seeded data."));
                                 }
@@ -174,6 +195,18 @@ export default function CopingManager() {
 
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
+
+                {/* SEO Settings Section */}
+                <div className="mb-8 p-6 border border-indigo-500/20 bg-indigo-500/5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Search size={20} className="text-indigo-500" />
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Page Search SEO</h3>
+                    </div>
+                    <SEOEditor 
+                        data={content?.seo || {}} 
+                        onChange={handleSEOChange}
+                    />
+                </div>
 
                 <div className="mb-6 p-4 bg-gray-50 text-gray-700 rounded-lg text-sm border border-gray-200">
                     <p><strong>Note on Icons:</strong> Use valid <a href="https://ionic.io/ionicons" target="_blank" rel="noreferrer" className="text-blue-600 underline">Ionicons names</a> (e.g., 'heart-outline', 'call-outline', 'people-outline').</p>

@@ -9,7 +9,10 @@ import RichTextEditor from "../../components/form/RichTextEditor";
 import Alert from "../../components/ui/alert/Alert";
 import ImagePicker from '../../components/form/ImagePicker';
 import VideoPicker from '../../components/form/VideoPicker';
-import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
+import { Eye, EyeOff, ChevronDown, ChevronUp, Search, Trash2 } from 'lucide-react';
+import { SEED_DATA } from '../../config/seedData';
+
+import SEOEditor from '../../components/form/SEOEditor';
 
 interface HomeSection extends SectionContent {
     enabled?: boolean;
@@ -17,6 +20,11 @@ interface HomeSection extends SectionContent {
 
 interface HomePageContent extends PageContent {
     sections: Record<string, HomeSection>;
+    seo?: {
+        title?: string;
+        description?: string;
+        image?: string;
+    };
 }
 
 const getSectionsConfig = (siteId: string) => {
@@ -32,8 +40,19 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'testimonials', label: 'Testimonials' }
         ];
     }
+    if (siteId === 'dmlabs') {
+        return [
+            { id: 'hero', label: 'Hero Section' },
+            { id: 'ticker', label: 'Ticker Section' },
+            { id: 'trusted_by', label: 'Trusted By Section' },
+            { id: 'who_we_are', label: 'Who We Are' },
+            { id: 'pricing', label: 'Pricing Section' },
+            { id: 'final_cta', label: 'Final Call to Action' }
+        ];
+    }
     if (siteId === 'noel') {
         return [
+            { id: 'hero', label: 'Hero Section' },
             { id: 'services', label: 'Specialized Services' },
             { id: 'our_story', label: 'Our Story (Home Section)' },
             { id: 'projects', label: 'Recent Projects (Toggle)' },
@@ -141,6 +160,62 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
         };
     }
 
+    if (siteId === 'dmlabs') {
+        return {
+            hero: {
+                heading: "Hero Section",
+                title: "Empowering You Through <br /> Digital Innovation.",
+                subtitle: "We help small businesses and nonprofits grow online with custom websites, strategic marketing, and powerful software solutions—while also making sure their AI plays nice. From crafting ethical AI policies and auditing for hidden biases to aligning AI with your mission and training teams on responsible AI use, we ensure technology works for you, not against you.",
+                enabled: true
+            },
+            ticker: {
+                items: [
+                    { text: "Websites" },
+                    { text: "AI Safety" },
+                    { text: "Graphics" },
+                    { text: "Cyber Sec" }
+                ],
+                enabled: true
+            },
+            trusted_by: {
+                items: [
+                    { name: "Global Health" },
+                    { name: "Tech For Good" },
+                    { name: "Algoma Foundation" }
+                ],
+                enabled: true
+            },
+            who_we_are: {
+                heading: "Whether you’re a Startup or budget-driven Non-Profit, we’re here to help you reach new heights online.",
+                subtitle: "[ WHO WE ARE ]",
+                content: "At Digital Maples Labs Inc., we specialize in helping nonprofits amplify their impact through modern web development, powerful digital marketing, and smart software solutions. We believe even the smallest organizations can create big change with the right digital tools.",
+                enabled: true,
+                images: [{ url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2940&auto=format&fit=crop", alt: "Digital Maples Team" }],
+                missionHeading: "Our Mission",
+                missionContent: "At Digital Maples Labs Inc, we believe every nonprofit deserves the right technology to thrive—tech that’s not only smart but also ethical. Our mission is to bridge the gap between social impact and digital innovation by empowering organizations with custom websites, strategic tools, and responsible AI solutions.",
+                approachHeading: "Our Approach",
+                approachContent: "We help nonprofits grow online with custom websites, smart marketing strategies, and powerful software solutions that make an impact. But we don’t stop there—we also make sure your AI behaves responsibly. Whether it's building ethical systems, auditing algorithms for bias, or training your team to use AI wisely.",
+                moreAboutLink: "/about"
+            },
+            pricing: {
+                heading: "Transparent Pricing for Nonprofits",
+                subtitle: "PRICING PLANS",
+                enabled: true,
+                items: [
+                    { name: "Foundation", price: { monthly: 99, yearly: 79 }, period: "/mo", features: ["5-Page Professional Website", "Trauma-Informed Design"], cta: "Get Started", link: "/contact" },
+                ]
+            },
+            final_cta: {
+                heading: "Get in touch with us to start your nonprofit’s digital transformation today.",
+                enabled: true,
+                buttonText: "GET IN TOUCH ↗",
+                buttonLink: "/contact",
+                secondaryText: "SEE MORE PROJECTS →",
+                secondaryLink: "/project"
+            }
+        };
+    }
+
     if (siteId === 'noel') {
         return {
             services: {
@@ -244,33 +319,26 @@ export default function HomePageManager() {
                 mergedSections[key] = { ...defaultContentForSite[key] };
             });
 
-            if (data && data.sections) {
-                // Override with existing data from DB
-                const sections = data.sections;
-                Object.keys(sections).forEach(key => {
+            if (data) {
+                // Determine if data is nested under 'sections' (Modern site structure)
+                const sourceData = data.sections ? data.sections : data;
+                
+                Object.keys(sourceData).forEach(key => {
                     if (mergedSections[key]) {
-                        mergedSections[key] = { ...mergedSections[key], ...sections[key] };
-                    } else {
-                        mergedSections[key] = sections[key];
+                        mergedSections[key] = { ...mergedSections[key], ...(sourceData[key] as any) };
+                    } else if (key !== 'title' && key !== 'seo' && key !== 'id' && key !== 'sections') {
+                        mergedSections[key] = sourceData[key] as any;
                     }
                 });
-                setContent({ ...data, sections: mergedSections } as HomePageContent);
-            } else {
-                // Initialize with default structure
-                const initialSections: Record<string, HomeSection> = {};
-                sectionsConfig.forEach(sec => {
-                    const defaults = defaultContentForSite[sec.id] || {};
-                    initialSections[sec.id] = {
-                        ...defaults,
-                        heading: defaults.heading || sec.label,
-                        content: defaults.content || "",
-                        enabled: defaults.enabled ?? true,
-                    };
-                });
+                
+                // Preserve non-section fields (title, seo)
                 setContent({
-                    title: "Home Page",
-                    sections: initialSections
-                });
+                    ...mergedSections,
+                    title: data.title || "Home",
+                    seo: data.seo || {}
+                } as any);
+            } else {
+                setContent(defaultContentForSite as any);
             }
         } catch (err: any) {
             console.error(err);
@@ -286,8 +354,21 @@ export default function HomePageManager() {
         setSuccessMsg("");
         setError("");
         try {
-            await FirestoreService.savePageContent('home', content, currentSite.id);
-            setSuccessMsg("Home page settings saved successfully!");
+            // For modern sites, wrap the content in 'sections' for the dynamic frontend loader
+            const modernSites = ['dmlabs', 'noel', 'nspc'];
+            let dataToSave: any = { ...content };
+            
+            if (modernSites.includes(currentSite.id)) {
+                const { title, seo, ...sections } = content as any;
+                dataToSave = {
+                    title: title || "Home",
+                    seo: seo || {},
+                    sections: sections
+                };
+            }
+
+            await FirestoreService.savePageContent("home", dataToSave, currentSite.id);
+            setSuccessMsg("Home page content updated successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err: any) {
             console.error(err);
@@ -301,25 +382,86 @@ export default function HomePageManager() {
         if (!content) return;
         setContent({
             ...content,
-            sections: {
-                ...content.sections,
-                [sectionId]: {
-                    ...content.sections[sectionId],
-                    [field]: value
-                }
+            [sectionId]: {
+                ...(content as any)[sectionId],
+                [field]: value
             }
         });
     };
 
     const updateItem = (sectionId: string, idx: number, field: string, value: string) => {
         if (!content) return;
-        const newItems = [...(content.sections[sectionId].items || [])];
+        const newItems = [...((content as any)[sectionId].items || [])];
         newItems[idx] = { ...newItems[idx], [field]: value };
-        handleSectionChange(sectionId, "items", newItems);
+        handleSectionChange(sectionId, "items" as any, newItems);
     };
 
-    const toggleSection = (sectionId: string) => {
-        setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
+    const handleSeedData = async () => {
+        if (!confirm(`This will overwrite the current home page sections for "${currentSite.name}" with professional seed data. Continue?`)) return;
+        setSaving(true);
+        setError("");
+        setSuccessMsg("");
+        try {
+            const seed = (SEED_DATA as any)[currentSite.id]?.home;
+            if (!seed) {
+                throw new Error("No seed data found for this site's home page.");
+            }
+            
+            // Flatten seed for the editor if it's nested
+            const flattenedContent = seed.sections ? { ...seed.sections, title: seed.title, seo: seed.seo } : seed;
+            
+            // Save in the correctly nested format for the database
+            await FirestoreService.savePageContent("home", seed, currentSite.id);
+            
+            // 2. Seed related collections if data exists (for modern sites like DMLabs)
+            const fullSeed = (SEED_DATA as any)[currentSite.id];
+            
+            // Seed Services
+            if (fullSeed.services) {
+                let servicesData = fullSeed.services;
+                // If it's just an array, wrap it for the useCollection hook
+                if (Array.isArray(servicesData)) {
+                    servicesData = { services: servicesData };
+                }
+                // If it's already an object (e.g. { sections, services: [...] }), save it as is
+                await FirestoreService.savePageContent("services", servicesData, currentSite.id);
+            }
+            
+            // Seed Projects
+            if (fullSeed.projects) {
+                let projectsData = fullSeed.projects;
+                // Standardize to { projects: [...] } format if it's just an array or using 'items'
+                if (Array.isArray(projectsData)) {
+                    projectsData = { projects: projectsData };
+                } else if (!projectsData.projects && projectsData.items) {
+                    projectsData = { ...projectsData, projects: projectsData.items };
+                }
+                await FirestoreService.savePageContent("projects", projectsData, currentSite.id);
+            }
+
+            setContent(flattenedContent);
+            setSuccessMsg("Default content seeded successfully!");
+        } catch (err) {
+            console.error(err);
+            setError("Failed to seed data: " + (err instanceof Error ? err.message : String(err)));
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleSEOChange = (seoData: any) => {
+        if (!content) return;
+        setContent({
+            ...content,
+            seo: seoData
+        });
+    };
+
+    const toggleSection = (id: string) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [id]: !prev[id]
+        }));
     };
 
     if (loading) return <div className="p-6">Loading...</div>;
@@ -341,17 +483,36 @@ export default function HomePageManager() {
                             Toggle visibility and edit content for {currentSite.name} home page sections.
                         </p>
                     </div>
-                    <Button onClick={handleSave} disabled={saving}>
-                        {saving ? "Saving..." : "Save Changes"}
-                    </Button>
+                    <div className="flex gap-3 flex-wrap">
+                        {['dmlabs', 'noel'].includes(currentSite.id) && (
+                            <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                                🌱 Seed Default Data
+                            </Button>
+                        )}
+                        <Button onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving..." : "Save Changes"}
+                        </Button>
+                    </div>
                 </div>
 
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
 
+                {/* SEO Settings Section */}
+                <div className="mb-8 p-6 border border-indigo-500/20 bg-indigo-500/5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Search size={20} className="text-indigo-500" />
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Search Engine Optimization</h3>
+                    </div>
+                    <SEOEditor 
+                        data={content?.seo || {}} 
+                        onChange={handleSEOChange}
+                    />
+                </div>
+
                 <div className="space-y-4">
                     {sectionsConfig.map((config) => {
-                        const section = content?.sections[config.id] || { heading: config.label, content: "", enabled: true };
+                        const section = (content as any)?.[config.id] || { heading: config.label, content: "", enabled: true };
                         const isExpanded = expandedSections[config.id];
 
                         return (
@@ -381,23 +542,37 @@ export default function HomePageManager() {
                                 {isExpanded && (
                                     <div className="p-4 pt-0 border-t border-gray-200 dark:border-gray-700 mt-2">
                                         <div className="grid gap-5">
-                                            <div>
-                                                <Label>Heading</Label>
-                                                <Input
-                                                    type="text"
-                                                    value={section.heading || ""}
-                                                    onChange={(e) => handleSectionChange(config.id, "heading", e.target.value)}
-                                                />
-                                            </div>
+                                            {/* Standard Heading - Hidden for DMLabs Hero Section as it's redundant */}
+                                            {!(config.id === 'hero' && currentSite.id === 'dmlabs') && (
+                                                <div>
+                                                    <Label>Heading</Label>
+                                                    <Input
+                                                        type="text"
+                                                        value={section.heading || ""}
+                                                        onChange={(e) => handleSectionChange(config.id, "heading", e.target.value)}
+                                                    />
+                                                </div>
+                                            )}
 
                                             {/* Optional Subtitle */}
-                                            {(config.id === 'coreFoundations' || config.id === 'howItWorks' || config.id === 'testimonials') && (
+                                            {(config.id === 'coreFoundations' || config.id === 'howItWorks' || config.id === 'testimonials' || config.id === 'who_we_are') && (
                                                 <div>
                                                     <Label>Subtitle</Label>
                                                     <Input
                                                         type="text"
                                                         value={section.subtitle || ""}
                                                         onChange={(e) => handleSectionChange(config.id, "subtitle", e.target.value)}
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {config.id === 'hero' && (
+                                                <div>
+                                                    <Label>Hero Title (HTML/Break tags allowed)</Label>
+                                                    <Input
+                                                        type="text"
+                                                        value={(section as any).title || ""}
+                                                        onChange={(e) => handleSectionChange(config.id, "title" as any, e.target.value)}
                                                     />
                                                 </div>
                                             )}
@@ -416,15 +591,133 @@ export default function HomePageManager() {
                                                 </div>
                                             )}
 
-                                            {/* Subtitle logic for Noel */}
-                                            {currentSite.id === 'noel' && ['services', 'our_story', 'projects', 'reviews'].includes(config.id) && (
+                                            {/* Subtitle logic for Noel & DMLabs */}
+                                            {(currentSite.id === 'noel' || currentSite.id === 'dmlabs') && ['services', 'our_story', 'projects', 'reviews', 'who_we_are', 'final_cta'].includes(config.id) && (
                                                 <div>
-                                                    <Label>Section Subtitle (Overhead Label)</Label>
+                                                    <Label>{currentSite.id === 'dmlabs' ? 'Subheading / Label' : 'Section Subtitle (Overhead Label)'}</Label>
                                                     <Input
                                                         type="text"
                                                         value={section.subtitle || ""}
                                                         onChange={(e) => handleSectionChange(config.id, "subtitle", e.target.value)}
                                                     />
+                                                </div>
+                                            )}
+
+                                            {/* Specialized Content for DMLabs Who We Are */}
+                                            {config.id === 'who_we_are' && currentSite.id === 'dmlabs' && (
+                                                <div className="space-y-4 pt-2">
+                                                    <div>
+                                                        <Label>Intro Paragraph</Label>
+                                                        <RichTextEditor
+                                                            label=""
+                                                            value={section.content || ""}
+                                                            onChange={(newContent: string) => handleSectionChange(config.id, "content", newContent)}
+                                                        />
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4 border-gray-100 dark:border-gray-800">
+                                                        <div className="space-y-4">
+                                                            <div className="font-bold text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wider">Mission Column</div>
+                                                            <div><Label>Heading</Label><Input value={section.missionHeading || ""} onChange={(e) => handleSectionChange(config.id, "missionHeading", e.target.value)} /></div>
+                                                            <div><Label>Description</Label><RichTextEditor label="" value={section.missionContent || ""} onChange={(v) => handleSectionChange(config.id, "missionContent", v)} /></div>
+                                                        </div>
+                                                        <div className="space-y-4">
+                                                            <div className="font-bold text-xs text-blue-600 dark:text-blue-400 uppercase tracking-wider">Approach Column</div>
+                                                            <div><Label>Heading</Label><Input value={section.approachHeading || ""} onChange={(e) => handleSectionChange(config.id, "approachHeading", e.target.value)} /></div>
+                                                            <div><Label>Description</Label><RichTextEditor label="" value={section.approachContent || ""} onChange={(v) => handleSectionChange(config.id, "approachContent", v)} /></div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                                                        <Label>"More About" Button/Link Path</Label>
+                                                        <Input value={section.moreAboutLink || ""} onChange={(e) => handleSectionChange(config.id, "moreAboutLink", e.target.value)} placeholder="/about" />
+                                                    </div>
+                                                    <div>
+                                                        <ImagePicker 
+                                                            label="Section Image"
+                                                            value={section.images?.[0]?.url || section.imageUrl || ""}
+                                                            onChange={(url) => {
+                                                                const newImages = [...(section.images || [])];
+                                                                if (!newImages[0]) newImages[0] = { url: "", alt: "" };
+                                                                newImages[0].url = url;
+                                                                handleSectionChange(config.id, "images", newImages);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Hero Subtitle for DMLabs */}
+                                            {config.id === 'hero' && currentSite.id === 'dmlabs' && (
+                                                <div className="mt-2">
+                                                    <Label>Hero Subtitle / Description</Label>
+                                                    <textarea 
+                                                        className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white text-theme-sm"
+                                                        rows={4}
+                                                        value={section.subtitle || ""}
+                                                        onChange={(e) => handleSectionChange(config.id, "subtitle", e.target.value)}
+                                                        placeholder="Small intro text under the title..."
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {/* Ticker Items for DMLabs */}
+                                            {config.id === 'ticker' && currentSite.id === 'dmlabs' && (
+                                                <div className="mt-4 space-y-4">
+                                                    <div className="flex items-center justify-between">
+                                                        <Label>Scrolling Services (Ticker Items)</Label>
+                                                        <Button 
+                                                            variant="outline" 
+                                                            size="sm"
+                                                            onClick={() => {
+                                                                const items = [...(section.items || []), { text: "" }];
+                                                                handleSectionChange(config.id, "items", items);
+                                                            }}
+                                                        >
+                                                            + Add Service
+                                                        </Button>
+                                                    </div>
+                                                    <div className="space-y-3">
+                                                        {(section.items || []).map((item: any, idx: number) => (
+                                                            <div key={idx} className="flex gap-2 items-center">
+                                                                <Input 
+                                                                    value={item.text} 
+                                                                    onChange={(e) => {
+                                                                        const items = [...(section.items || [])];
+                                                                        items[idx] = { ...items[idx], text: e.target.value };
+                                                                        handleSectionChange(config.id, "items", items);
+                                                                    }}
+                                                                    placeholder="e.g. Web Design"
+                                                                />
+                                                                <button 
+                                                                    onClick={() => {
+                                                                        const items = (section.items || []).filter((_: any, i: number) => i !== idx);
+                                                                        handleSectionChange(config.id, "items", items);
+                                                                    }}
+                                                                    className="p-2 text-red-500 hover:bg-red-50 rounded"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                        {(section.items || []).length === 0 && (
+                                                            <div className="text-sm text-gray-400 italic py-2">No services added yet.</div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Final CTA Buttons for DMLabs */}
+                                            {config.id === 'final_cta' && currentSite.id === 'dmlabs' && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-lg mt-2">
+                                                    <div className="space-y-4">
+                                                        <div className="font-bold text-xs uppercase text-gray-400">Primary Button</div>
+                                                        <div><Label>Label</Label><Input value={section.buttonText || ""} onChange={(e) => handleSectionChange(config.id, "buttonText", e.target.value)} /></div>
+                                                        <div><Label>Link Path</Label><Input value={section.buttonLink || ""} onChange={(e) => handleSectionChange(config.id, "buttonLink", e.target.value)} /></div>
+                                                    </div>
+                                                    <div className="space-y-4">
+                                                        <div className="font-bold text-xs uppercase text-gray-400">Secondary Link</div>
+                                                        <div><Label>Label</Label><Input value={section.secondaryText || ""} onChange={(e) => handleSectionChange(config.id, "secondaryText", e.target.value)} /></div>
+                                                        <div><Label>Link Path</Label><Input value={section.secondaryLink || ""} onChange={(e) => handleSectionChange(config.id, "secondaryLink", e.target.value)} /></div>
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -442,7 +735,7 @@ export default function HomePageManager() {
                                             )}
 
                                             {/* ITEMS EDITOR BLOCKS */}
-                                            {['coreFoundations', 'howItWorks', 'testimonials', 'mindfulness'].includes(config.id) && (
+                                            {['coreFoundations', 'howItWorks', 'testimonials', 'mindfulness', 'pricing', 'trusted_by', 'services'].includes(config.id) && (
                                                 <div className="mt-4">
                                                     <Label>List Items</Label>
                                                     <div className="space-y-3">
@@ -490,6 +783,120 @@ export default function HomePageManager() {
                                                                 {config.id === 'mindfulness' && (
                                                                     <div className="grid grid-cols-1 gap-4">
                                                                         <div><Label className="text-xs mb-1">Bullet Point Text</Label><Input value={item.text || ''} onChange={(e) => updateItem(config.id, idx, 'text', e.target.value)} /></div>
+                                                                    </div>
+                                                                )}
+
+                                                                {config.id === 'ticker' && (
+                                                                    <div className="grid grid-cols-1 gap-4">
+                                                                        <div><Label className="text-xs mb-1">Service/Keyword</Label><Input value={item.text || ''} onChange={(e) => updateItem(config.id, idx, 'text', e.target.value)} /></div>
+                                                                    </div>
+                                                                )}
+
+                                                                {config.id === 'trusted_by' && (
+                                                                    <div className="grid grid-cols-1 gap-4">
+                                                                        <div><Label className="text-xs mb-1">Partner/Client Name (Logo text)</Label><Input value={item.name || ''} onChange={(e) => updateItem(config.id, idx, 'name', e.target.value)} /></div>
+                                                                    </div>
+                                                                )}
+
+                                                                 {config.id === "services" && (
+                                                                     <div className="space-y-4">
+                                                                         <div className="grid grid-cols-2 gap-4">
+                                                                             <div><Label className="text-xs mb-1">Service Title</Label><Input value={item.title || ""} onChange={(e) => updateItem(config.id, idx, "title", e.target.value)} /></div>
+                                                                             <div><Label className="text-xs mb-1">Link (Optional)</Label><Input value={item.link || ""} onChange={(e) => updateItem(config.id, idx, "link", e.target.value)} /></div>
+                                                                         </div>
+                                                                         <div><Label className="text-xs mb-1">Description</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={2} value={item.desc || ""} onChange={(e) => updateItem(config.id, idx, "desc", e.target.value)} /></div>
+                                                                         <div>
+                                                                             <ImagePicker 
+                                                                                label="Service Image" 
+                                                                                value={item.image || ""} 
+                                                                                onChange={(url) => updateItem(config.id, idx, "image", url)} 
+                                                                             />
+                                                                         </div>
+                                                                     </div>
+                                                                 )}
+
+                                                                 {config.id === 'pricing' && (
+                                                                    <div className="space-y-4">
+                                                                        <div className="grid grid-cols-2 gap-4">
+                                                                            <div>
+                                                                                <Label className="text-xs mb-1">Plan Name</Label>
+                                                                                <Input value={item.name || item.title || ''} onChange={(e) => updateItem(config.id, idx, 'name', e.target.value)} />
+                                                                            </div>
+                                                                            <div className="flex items-center gap-2 pt-6">
+                                                                                <input 
+                                                                                    type="checkbox" 
+                                                                                    checked={item.highlighted || item.isPopular || false} 
+                                                                                    onChange={(e) => updateItem(config.id, idx, 'isPopular', e.target.checked as any)}
+                                                                                    className="w-4 h-4 text-brand-500 rounded focus:ring-brand-500"
+                                                                                />
+                                                                                <Label className="text-xs">Highlighted / Popular</Label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="grid grid-cols-2 gap-4">
+                                                                             {typeof item.price === 'object' && item.price !== null ? (
+                                                                                <div className="flex gap-2 items-end">
+                                                                                    <div className="flex-1">
+                                                                                        <Label className="text-[10px] mb-1 text-blue-500 uppercase font-bold">Monthly $</Label>
+                                                                                        <Input 
+                                                                                            value={item.price?.monthly || ''} 
+                                                                                            onChange={(e) => {
+                                                                                                const newVal = e.target.value.replace(/[^0-9.]/g, '');
+                                                                                                updateItem(config.id, idx, 'price', { ...item.price, monthly: newVal });
+                                                                                            }} 
+                                                                                        />
+                                                                                    </div>
+                                                                                    <div className="flex-1">
+                                                                                        <Label className="text-[10px] mb-1 text-green-500 uppercase font-bold">Yearly $</Label>
+                                                                                        <Input 
+                                                                                            value={item.price?.yearly || ''} 
+                                                                                            onChange={(e) => {
+                                                                                                const newVal = e.target.value.replace(/[^0-9.]/g, '');
+                                                                                                updateItem(config.id, idx, 'price', { ...item.price, yearly: newVal });
+                                                                                            }} 
+                                                                                        />
+                                                                                    </div>
+                                                                                </div>
+                                                                             ) : (
+                                                                                <div>
+                                                                                    <Label className="text-xs mb-1">Price (e.g. 999)</Label>
+                                                                                    <Input 
+                                                                                        value={item.price || ''} 
+                                                                                        onChange={(e) => {
+                                                                                            const newVal = e.target.value.replace(/[^0-9.]/g, '');
+                                                                                            // Initialize as object on first edit if possible
+                                                                                            updateItem(config.id, idx, 'price', { monthly: newVal, yearly: newVal });
+                                                                                        }} 
+                                                                                    />
+                                                                                </div>
+                                                                             )}
+                                                                             <div>
+                                                                                 <Label className="text-xs mb-1">Period (e.g. one-time, /mo)</Label>
+                                                                                 <Input value={item.period || ''} onChange={(e) => updateItem(config.id, idx, 'period', e.target.value)} />
+                                                                             </div>
+                                                                         </div>
+                                                                        <div className="grid grid-cols-2 gap-4">
+                                                                            <div>
+                                                                                <Label className="text-xs mb-1">CTA Text</Label>
+                                                                                <Input value={item.cta || ''} onChange={(e) => updateItem(config.id, idx, 'cta', e.target.value)} />
+                                                                            </div>
+                                                                            <div>
+                                                                                <Label className="text-xs mb-1">CTA Link</Label>
+                                                                                <Input value={item.link || ''} onChange={(e) => updateItem(config.id, idx, 'link', e.target.value)} />
+                                                                            </div>
+                                                                        </div>
+                                                                        <div>
+                                                                            <Label className="text-xs mb-1">Features (One per line)</Label>
+                                                                            <textarea 
+                                                                                className="w-full px-4 py-2 border rounded-lg text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                                                rows={4}
+                                                                                value={Array.isArray(item.features) ? item.features.join('\n') : (item.features || '')}
+                                                                                onChange={(e) => {
+                                                                                    const features = e.target.value.split('\n').filter(f => f.trim() !== '');
+                                                                                    updateItem(config.id, idx, 'features', features as any);
+                                                                                }}
+                                                                                placeholder="Feature 1&#10;Feature 2&#10;Feature 3"
+                                                                            />
+                                                                        </div>
                                                                     </div>
                                                                 )}
                                                             </div>

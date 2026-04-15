@@ -253,6 +253,67 @@ const AppSidebar: React.FC = () => {
       ];
     }
 
+    if (currentSite.id === 'dmlabs') {
+      return [
+        ...commonItems,
+        {
+          name: 'Home Page',
+          icon: <PageIcon />,
+          path: '/cms/home-settings',
+        },
+        {
+          name: 'About Page',
+          icon: <PageIcon />,
+          path: '/cms/about',
+        },
+        {
+          name: 'Portfolio / Projects',
+          icon: <PageIcon />,
+          path: '/cms/portfolio',
+        },
+        {
+          name: 'Services',
+          icon: <PageIcon />,
+          path: '/cms/services',
+        },
+        {
+          name: 'Just Opinions (Blog)',
+          icon: <GridIcon />,
+          path: '/cms/blog',
+        },
+        {
+          name: 'Contact Page',
+          icon: <PageIcon />,
+          path: '/cms/contact',
+        },
+        {
+          name: 'Inbound Messages',
+          icon: <HorizontaLDots />,
+          path: '/cms/messages',
+        },
+        {
+          icon: <BoxCubeIcon />,
+          name: 'Media Library',
+          path: '/cms/media',
+        },
+        {
+          icon: <PageIcon />,
+          name: 'Footer Details',
+          path: '/cms/footer',
+        },
+        {
+          icon: <GridIcon />,
+          name: 'Page SEO Manager',
+          path: '/settings/seo',
+        },
+        {
+          icon: <PlugInIcon />,
+          name: 'Site Settings',
+          path: '/settings/site',
+        },
+      ];
+    }
+
     if (currentSite.id === 'noel') {
       return [
         ...commonItems,

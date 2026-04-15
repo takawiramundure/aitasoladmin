@@ -7,7 +7,8 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Alert from "../../components/ui/alert/Alert";
 import ImagePicker from '../../components/form/ImagePicker';
-import { Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import SEOEditor from "../../components/form/SEOEditor";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -113,6 +114,14 @@ export default function StrategicPlanManager() {
         });
     };
 
+    const handleSEOChange = (seoData: any) => {
+        if (!content) return;
+        setContent((prev: any) => ({
+            ...prev,
+            seo: seoData
+        }));
+    };
+
     const toggle = (id: string) => setExpanded(p => ({ ...p, [id]: !p[id] }));
 
     if (loading) return <div className="p-6">Loading...</div>;
@@ -139,6 +148,18 @@ export default function StrategicPlanManager() {
 
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Saved!" message={successMsg} /></div>}
+
+                {/* SEO Settings Section */}
+                <div className="mb-8 p-6 border border-indigo-500/20 bg-indigo-500/5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Search size={20} className="text-indigo-500" />
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Search Engine Optimization</h3>
+                    </div>
+                    <SEOEditor 
+                        data={content?.seo || {}} 
+                        onChange={handleSEOChange}
+                    />
+                </div>
 
                 <div className="space-y-4">
                     {/* Page Toggle */}

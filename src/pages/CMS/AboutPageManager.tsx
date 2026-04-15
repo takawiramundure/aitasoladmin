@@ -8,7 +8,9 @@ import Input from "../../components/form/input/InputField";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import Alert from "../../components/ui/alert/Alert";
 import ImagePicker from '../../components/form/ImagePicker';
-import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
+import { Eye, EyeOff, ChevronDown, ChevronUp, Trash2, Search } from 'lucide-react';
+import { SEED_DATA } from '../../config/seedData';
+import SEOEditor from '../../components/form/SEOEditor';
 
 interface AboutSection extends SectionContent {
     enabled?: boolean;
@@ -16,6 +18,11 @@ interface AboutSection extends SectionContent {
 
 interface AboutPageContent extends PageContent {
     sections: Record<string, AboutSection>;
+    seo?: {
+        title?: string;
+        description?: string;
+        image?: string;
+    };
 }
 
 const getSectionsConfig = (siteId: string) => {
@@ -24,6 +31,17 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'header', label: 'Header & Philosophy' },
             { id: 'strategicPlan', label: 'Strategic Plan Summary' },
             { id: 'coreValues', label: 'Core Values' }
+        ];
+    }
+    if (siteId === 'dmlabs') {
+        return [
+            { id: 'hero', label: 'Hero Section' },
+            { id: 'mission', label: 'Mission Section' },
+            { id: 'approach', label: 'Approach Section' },
+            { id: 'stats', label: 'Stats Section' },
+            { id: 'values', label: 'Core Values Section' },
+            { id: 'ai_for_good', label: 'AI For Good Section' },
+            { id: 'team', label: 'Team Section' }
         ];
     }
     // Fallback BWEIC config
@@ -69,6 +87,62 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                     { title: 'Advocacy', desc: 'Standing up for our community and navigating complex systems.', icon: 'Shield' },
                     { title: 'Community', desc: 'Growing together through shared experiences and support.', icon: 'Users' }
                 ]
+            }
+        };
+    }
+    
+    if (siteId === 'dmlabs') {
+        return {
+            hero: {
+                heading: "About Us",
+                content: "At Digital Maples Labs, we specialize in helping nonprofits amplify their impact through modern web development, powerful digital marketing, and smart software solutions. We believe even the smallest organizations can create big change with the right digital tools.",
+                enabled: true
+            },
+            mission: {
+                heading: "Our Mission",
+                content: "At Digital Maples Labs Inc, we believe every nonprofit deserves the right technology to thrive—tech that’s not only smart but also ethical. Our mission is to bridge the gap between social impact and digital innovation by empowering organizations with custom websites, strategic tools, and responsible AI solutions.",
+                enabled: true
+            },
+            approach: {
+                heading: "Our Approach",
+                content: "We help nonprofits grow online with custom websites, smart marketing strategies, and powerful software solutions that make an impact. But we don’t stop there—we also make sure your AI behaves responsibly.",
+                enabled: true
+            },
+            values: {
+                heading: "The principles that drive every pixel we build.",
+                subtitle: "Our Core Values",
+                enabled: true,
+                items: [
+                    { title: "Impact First", desc: "We measure our success by the success of your mission. Every line of code is written to amplify your social footprint.", icon: "🎯" },
+                    { title: "Radical Excellence", desc: "Nonprofits shouldn't settle for 'good enough'. We bring enterprise-grade quality to every budget-driven project.", icon: "💎" },
+                    { title: "Ethical Partnership", desc: "We don't just build for you; we build with you. Transparency and mission-alignment are at the heart of our work.", icon: "🤝" }
+                ]
+            },
+            ai_for_good: {
+                heading: "Responsible AI for Nonprofit Success",
+                subtitle: "[ AI FOR GOOD ]",
+                content: "AI is changing the world, but it must be handled with care. We help nonprofits implement AI responsibly—auditing for bias, ensuring mission alignment, and training teams to use these powerful tools ethically.",
+                enabled: true,
+                items: [
+                    { text: "Ethical AI Audits & Governance" },
+                    { text: "AI Policy Development for Nonprofits" },
+                    { text: "Mission-Aligned Algorithm Design" },
+                    { text: "Responsible AI Training & Workshops" }
+                ],
+                images: [{ url: "https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2940&auto=format&fit=crop", alt: "Responsible AI" }]
+            },
+            stats: {
+                list: [
+                    { label: 'PROJECTS COMPLETED', value: '24+' },
+                    { label: 'YEARS OF EXPERIENCE', value: '05+' },
+                    { label: 'CLIENT SATISFACTION', value: '99%' }
+                ],
+                enabled: true
+            },
+            team: {
+                heading: "Meet the Team",
+                content: "Our diverse team of designers, engineers, and strategists are united by one mission: helping good organizations do more good in the world.",
+                enabled: true
             }
         };
     }
@@ -160,6 +234,25 @@ export default function AboutPageManager() {
         }
     };
 
+    const handleSeedData = async () => {
+        if (!confirm(`Initialize "${currentSite.name}" About Page with professional seed data?`)) return;
+        setSaving(true);
+        try {
+            const seed = (SEED_DATA as any)[currentSite.id]?.about;
+            if (!seed) {
+                throw new Error("No seed data found for this site's about page.");
+            }
+            await FirestoreService.savePageContent("about", seed, currentSite.id);
+            setContent(seed);
+            setSuccessMsg("🌱 Seeded about page defaults successfully!");
+        } catch (err) {
+            console.error(err);
+            setError("Failed to seed data: " + (err instanceof Error ? err.message : String(err)));
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const handleSectionChange = (sectionId: string, field: keyof AboutSection, value: any) => {
         if (!content) return;
         setContent({
@@ -185,13 +278,21 @@ export default function AboutPageManager() {
         setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
     };
 
+    const handleSEOChange = (seoData: any) => {
+        if (!content) return;
+        setContent({
+            ...content,
+            seo: seoData
+        });
+    };
+
     if (loading) return <div className="p-6">Loading...</div>;
 
     return (
         <>
             <PageMeta
                 title={`About Page Manager - ${currentSite.name} | Admin Portal`}
-                description="Manage About Page sections and visibility"
+                description="Manage About Page sections and content"
             />
 
             <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
@@ -201,16 +302,35 @@ export default function AboutPageManager() {
                             About Page Manager
                         </h2>
                         <p className="text-sm text-gray-500">
-                            Configure content for the {currentSite.name} about page sections.
+                            Manage content for the {currentSite.name} about page.
                         </p>
                     </div>
-                    <Button onClick={handleSave} disabled={saving}>
-                        {saving ? "Saving..." : "Save Changes"}
-                    </Button>
+                    <div className="flex gap-3 flex-wrap">
+                        {['dmlabs', 'noel'].includes(currentSite.id) && (
+                            <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                                🌱 Seed Default Data
+                            </Button>
+                        )}
+                        <Button onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving..." : "Save Changes"}
+                        </Button>
+                    </div>
                 </div>
 
                 {error && <div className="mb-4"><Alert variant="error" title="Error" message={error} /></div>}
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
+
+                {/* SEO Settings Section */}
+                <div className="mb-8 p-6 border border-indigo-500/20 bg-indigo-500/5 rounded-xl">
+                    <div className="flex items-center gap-3 mb-6">
+                        <Search size={20} className="text-indigo-500" />
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white">Search Engine Optimization</h3>
+                    </div>
+                    <SEOEditor 
+                        data={content?.seo || {}} 
+                        onChange={handleSEOChange}
+                    />
+                </div>
 
                 <div className="space-y-4">
                     {sectionsConfig.map((config) => {
@@ -263,7 +383,7 @@ export default function AboutPageManager() {
                                                 </div>
                                             )}
 
-                                            {['header', 'strategicPlan', 'mission'].includes(config.id) && (
+                                            {['header', 'strategicPlan', 'mission', 'approach', 'hero', 'team', 'values', 'ai_for_good'].includes(config.id) && (
                                                 <div>
                                                     <div className="mb-2"><Label>Body Content</Label></div>
                                                     <RichTextEditor
@@ -275,7 +395,7 @@ export default function AboutPageManager() {
                                             )}
 
                                             {/* Generic Array Items */}
-                                            {['header', 'strategicPlan', 'coreValues'].includes(config.id) && (
+                                            {['header', 'strategicPlan', 'coreValues', 'values'].includes(config.id) && (
                                                 <div className="mt-4">
                                                     <Label>List Items</Label>
                                                     <div className="space-y-3">
@@ -291,8 +411,8 @@ export default function AboutPageManager() {
                                                                 </div>
 
                                                                 <div className="grid grid-cols-2 gap-4">
-                                                                    <div><Label>Title</Label><Input value={item.title || ''} onChange={(e) => updateItem(config.id, idx, 'title', e.target.value)} /></div>
-                                                                    <div><Label>Icon Name (e.g. Heart, Sun, Award, Shield)</Label><Input value={item.icon || ''} onChange={(e) => updateItem(config.id, idx, 'icon', e.target.value)} /></div>
+                                                                    <div><Label>Title/Icon Label</Label><Input value={item.title || ''} onChange={(e) => updateItem(config.id, idx, 'title', e.target.value)} /></div>
+                                                                    <div><Label>Icon/Emoji (e.g. 🎯)</Label><Input value={item.icon || ''} onChange={(e) => updateItem(config.id, idx, 'icon', e.target.value)} /></div>
                                                                     {config.id !== 'strategicPlan' && <div className="col-span-2"><Label>Description</Label><Input value={item.desc || ''} onChange={(e) => updateItem(config.id, idx, 'desc', e.target.value)} /></div>}
                                                                 </div>
                                                             </div>
@@ -305,8 +425,36 @@ export default function AboutPageManager() {
                                                 </div>
                                             )}
 
+                                            {config.id === 'ai_for_good' && (
+                                                <div className="mt-4">
+                                                    <Label>Feature Points</Label>
+                                                    <div className="space-y-3">
+                                                        {(section.items || []).map((item: any, idx: number) => (
+                                                            <div key={idx} className="flex gap-4 items-center bg-white p-3 border rounded shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                                                                <div className="flex-1">
+                                                                    <Input 
+                                                                        value={item.text} 
+                                                                        onChange={(e) => updateItem(config.id, idx, 'text', e.target.value)} 
+                                                                        placeholder="Point text"
+                                                                    />
+                                                                </div>
+                                                                <Button variant="outline" size="sm" className="text-red-500" onClick={() => {
+                                                                    const newItems = [...(section.items || [])];
+                                                                    newItems.splice(idx, 1);
+                                                                    handleSectionChange(config.id, "items", newItems);
+                                                                }}>Remove</Button>
+                                                            </div>
+                                                        ))}
+                                                        <Button variant="outline" size="sm" onClick={() => {
+                                                            const newItems = [...(section.items || []), { text: "" }];
+                                                            handleSectionChange(config.id, "items", newItems);
+                                                        }}>+ Add Point</Button>
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {/* Feature Images */}
-                                            {config.id === 'header' && (
+                                            {(config.id === 'header' || config.id === 'ai_for_good') && (
                                                 <div className="mt-4">
                                                     <ImagePicker
                                                         label="Main Feature Image"
@@ -321,7 +469,7 @@ export default function AboutPageManager() {
                                                 </div>
                                             )}
 
-                                            {/* Emphasized Stats / Badges */}
+                                            {/* Emphasized Stats / Badges (Legacy/Header) */}
                                             {['header', 'strategicPlan'].includes(config.id) && (
                                                 <div className="mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
                                                     <h4 className="font-bold mb-3 text-sm text-gray-700 dark:text-gray-300">Feature Badge / Statistic</h4>
@@ -351,6 +499,49 @@ export default function AboutPageManager() {
                                                             />
                                                         </div>
                                                     </div>
+                                                </div>
+                                            )}
+
+                                            {/* Specialized Stats List for DMLabs */}
+                                            {config.id === 'stats' && currentSite.id === 'dmlabs' && (
+                                                <div className="mt-4 space-y-4">
+                                                    <Label>Impact Metrics List</Label>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {(section.list || []).map((item: any, idx: number) => (
+                                                            <div key={idx} className="bg-white dark:bg-gray-900/50 p-4 border rounded-lg space-y-3 relative">
+                                                                <button 
+                                                                    className="absolute top-2 right-2 text-red-500 hover:bg-red-50 p-1 rounded transition-colors"
+                                                                    onClick={() => {
+                                                                        const newList = [...(section.list || [])];
+                                                                        newList.splice(idx, 1);
+                                                                        handleSectionChange(config.id, "list", newList);
+                                                                    }}
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                                <div>
+                                                                    <Label className="text-xs mb-1">Value (e.g. 50+)</Label>
+                                                                    <Input value={item.value || ''} onChange={(e) => {
+                                                                        const newList = [...(section.list || [])];
+                                                                        newList[idx] = { ...newList[idx], value: e.target.value };
+                                                                        handleSectionChange(config.id, "list", newList);
+                                                                    }} />
+                                                                </div>
+                                                                <div>
+                                                                    <Label className="text-xs mb-1">Label (e.g. Projects Done)</Label>
+                                                                    <Input value={item.label || ''} onChange={(e) => {
+                                                                        const newList = [...(section.list || [])];
+                                                                        newList[idx] = { ...newList[idx], label: e.target.value };
+                                                                        handleSectionChange(config.id, "list", newList);
+                                                                    }} />
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                    <Button variant="outline" size="sm" onClick={() => {
+                                                        const newList = [...(section.list || []), { value: '', label: '' }];
+                                                        handleSectionChange(config.id, "list", newList);
+                                                    }}>+ Add Impact Metric</Button>
                                                 </div>
                                             )}
 

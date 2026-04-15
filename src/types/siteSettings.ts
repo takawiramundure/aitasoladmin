@@ -9,6 +9,7 @@ export interface NavigationItem {
 
 export interface SiteBranding {
     logo: string; // URL to uploaded logo
+    logoHeight?: number; // Custom height in pixels
     siteName: string;
     favicon?: string;
 }
@@ -70,4 +71,15 @@ export interface SiteSettings {
     supportEmail?: string;
     supportTicketLink?: string;
     maintenanceMode?: boolean;
+    retellAi?: {
+        enabled: boolean;
+        publicKey: string;
+        agentId: string;
+        widgetType: 'chat' | 'callback';
+        phoneNumber?: string;
+        termsUrl?: string;
+        title?: string;
+        botName?: string;
+        logoUrl?: string;
+    };
 }
