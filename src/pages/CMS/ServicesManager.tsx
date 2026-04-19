@@ -35,7 +35,7 @@ interface ServicesPageContent {
     [key: string]: any;
 }
 
-function SortableServiceItem({ id, children }: { id: string; children: React.ReactNode }) {
+function SortableServiceItem({ id, children, dragHandle }: { id: string; children: React.ReactNode; dragHandle: React.ReactNode }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -44,8 +44,15 @@ function SortableServiceItem({ id, children }: { id: string; children: React.Rea
         zIndex: isDragging ? 1000 : 'auto',
     };
     return (
-        <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="mb-4">
-            {children}
+        <div ref={setNodeRef} style={style} className="mb-4">
+            <div className="flex gap-4 p-5 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700 relative group">
+                <div {...attributes} {...listeners} className="mt-1 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 transition-colors">
+                    {dragHandle}
+                </div>
+                <div className="flex-1">
+                    {children}
+                </div>
+            </div>
         </div>
     );
 }
@@ -73,18 +80,26 @@ export default function ServicesManager() {
         try {
             const data: any = await FirestoreService.getPageContent("services", currentSite.id);
             if (data) {
-                setContent(data);
-                setServices(data.services || []);
+                const sanitizedServices = (data.services || []).map((s: any) => ({
+                    ...s,
+                    id: s.id || `svc-${Math.random().toString(36).substr(2, 9)}`
+                }));
+                setContent({ ...data, services: sanitizedServices });
+                setServices(sanitizedServices);
             } else {
                 const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
                 const servicesData = (siteSeed as any)?.services;
                 const seedArray = servicesData?.services || servicesData || [];
+                const initializedServices = (Array.isArray(seedArray) ? seedArray : []).map((s: any, idx: number) => ({
+                    ...s,
+                    id: `seed-${idx}-${Date.now()}`
+                }));
                 
                 setContent({
-                    services: Array.isArray(seedArray) ? seedArray : [],
+                    services: initializedServices,
                     seo: servicesData?.seo || {}
                 });
-                setServices(Array.isArray(seedArray) ? seedArray : []);
+                setServices(initializedServices);
             }
         } catch (err) {
             console.error(err);
@@ -110,15 +125,19 @@ export default function ServicesManager() {
         setError("");
         setSuccessMsg("");
         try {
+            const initializedServices = defaultServices.map((s: any, idx: number) => ({
+                ...s,
+                id: `seed-${idx}-${Date.now()}`
+            }));
             const newContent = {
                 ...content,
-                services: defaultServices,
+                services: initializedServices,
                 seo: servicesData?.seo || content?.seo || {}
             };
             await FirestoreService.savePageContent("services", newContent as any, currentSite.id);
             setContent(newContent);
-            setServices(defaultServices);
-            setSuccessMsg(`✅ Seeded ${defaultServices.length} services successfully!`);
+            setServices(initializedServices);
+            setSuccessMsg(`✅ Seeded ${initializedServices.length} services successfully!`);
         } catch (err) {
             console.error(err);
             setError("Failed to seed data: " + (err instanceof Error ? err.message : String(err)));
@@ -228,20 +247,20 @@ export default function ServicesManager() {
                     <SortableContext items={services.map(s => s.id)} strategy={verticalListSortingStrategy}>
                         <div className="space-y-4">
                             {services.map((service, index) => (
-                                <SortableServiceItem key={service.id} id={service.id}>
-                                    <div className="p-5 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700 relative group">
-                                        <div className="absolute top-4 right-4 flex gap-2">
-                                             <button onClick={() => updateService(service.id, 'isFeatured', !service.isFeatured)} className={`text-xs px-2 py-1 rounded border ${service.isFeatured ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`} onPointerDown={(e) => e.stopPropagation()}>
+                                <SortableServiceItem key={service.id} id={service.id} dragHandle={<GridIcon />}>
+                                    <div className="relative">
+                                        <div className="absolute top-0 right-0 flex gap-2">
+                                             <button onClick={() => updateService(service.id, 'isFeatured', !service.isFeatured)} className={`text-xs px-2 py-1 rounded border ${service.isFeatured ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
                                                  {service.isFeatured ? '★ Featured' : 'Featured?'}
                                              </button>
-                                             <button onClick={() => updateService(service.id, 'isActive', !service.isActive)} className={`text-xs px-2 py-1 rounded border ${service.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`} onPointerDown={(e) => e.stopPropagation()}>
+                                             <button onClick={() => updateService(service.id, 'isActive', !service.isActive)} className={`text-xs px-2 py-1 rounded border ${service.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'}`}>
                                                  {service.isActive ? 'Published' : 'Draft'}
                                              </button>
-                                            <button onClick={() => removeService(service.id)} className="text-xs px-2 py-1 rounded bg-red-100 text-red-700" onPointerDown={(e) => e.stopPropagation()}>Delete</button>
+                                            <button onClick={() => removeService(service.id)} className="text-xs px-2 py-1 rounded bg-red-100 text-red-700">Delete</button>
                                         </div>
-
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                                            <div className="space-y-4" onPointerDown={(e) => e.stopPropagation()}>
+ 
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            <div className="space-y-4">
                                                 <div>
                                                     <Label>Service Title</Label>
                                                     <Input type="text" value={service.title} onChange={(e) => updateService(service.id, 'title', e.target.value)} />
@@ -255,8 +274,8 @@ export default function ServicesManager() {
                                                     <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32" value={service.description} onChange={(e) => updateService(service.id, 'description', e.target.value)} />
                                                 </div>
                                             </div>
-
-                                            <div className="space-y-4" onPointerDown={(e) => e.stopPropagation()}>
+ 
+                                            <div className="space-y-4">
                                                 <Label>Service Illustration / Image</Label>
                                                 <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center">
                                                     {service.imageUrl ? <img src={service.imageUrl} className="w-full h-full object-cover" /> : <span className="text-gray-400">No Image Selected</span>}
