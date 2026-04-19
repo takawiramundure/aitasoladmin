@@ -44,8 +44,7 @@ export const SITES: Site[] = [
     name: 'Noel Construction',
     domain: 'noelconstruction.web.app',
     description: 'High-End Renovation & Woodworking',
-    databaseId: 'noel-web',
-    usePrefix: false
+    usePrefix: true
   },
   {
     id: 'dmlabs',

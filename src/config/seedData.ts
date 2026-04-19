@@ -744,7 +744,7 @@ export const SEED_DATA: any = {
             }
         },
         services: {
-            items: [
+            services: [
                 {
                     category: 'Exterior Work',
                     title: 'Precision Exterior Solutions',
@@ -790,7 +790,7 @@ export const SEED_DATA: any = {
             ]
         },
         projects: {
-            items: [
+            projects: [
                 {
                     title: 'Modern Lakeside Deck',
                     category: 'Decks & Patios',
@@ -832,6 +832,28 @@ export const SEED_DATA: any = {
                     date: '2024-02-10'
                 }
             ]
+        },
+        about: {
+            sections: {
+                hero: {
+                    heading: 'Over 35 Years of Woodworking Excellence',
+                    content: 'Noel Construction specializes in high-end renovation, custom cabinetry, and fine carpentry across the Kitchener-Waterloo region.',
+                    enabled: true,
+                    order: 1
+                },
+                our_story: {
+                    heading: 'A Journey of Craftsmanship',
+                    content: '<p>Our founder, Noel, began his woodworking journey at age 15. For over three decades, he has been dedicated to delivering quality that lasts.</p>',
+                    enabled: true,
+                    order: 2
+                },
+                mission: {
+                    heading: 'Our Mission',
+                    content: 'To provide high-end, budget-friendly construction solutions without compromising on old-world quality or modern standards.',
+                    enabled: true,
+                    order: 3
+                }
+            }
         }
     },
 
@@ -1359,6 +1381,44 @@ export const SETTINGS_SEED = {
             },
             { id: 'b1', name: 'BLOG', path: '/blogs', order: 5 },
             { id: 's1', name: 'SHOP', path: '/shop', order: 6 }
+        ],
+        metadata: {
+            lastUpdated: new Date().toISOString(),
+            updatedBy: 'system'
+        }
+    },
+    noel: {
+        siteId: 'noel',
+        branding: {
+            logo: '/logo.png',
+            siteName: 'Noel Construction',
+            favicon: '/favicon.ico'
+        },
+        topBar: {
+            enabled: true,
+            message: 'Custom Cabinetry & High-End Renovation',
+            phone: '+1 (519) 123 4567',
+            email: 'noel@construction.ca'
+        },
+        theme: {
+            primary: '#2C3E50',
+            secondary: '#E67E22',
+            accent: '#BDC3C7',
+            textDark: '#1A1A1A',
+            textLight: '#FFFFFF',
+            brandColor: '#2C3E50',
+            brandColorDark: '#1A252F',
+            brandColorLight: '#E67E22',
+            topBarBg: '#2C3E50',
+            headerBg: '#FFFFFF'
+        },
+        navigation: [
+            { id: 'n1', name: 'Home', path: '/', order: 1 },
+            { id: 'n2', name: 'Services', path: '/services', order: 2 },
+            { id: 'n3', name: 'Portfolio', path: '/portfolio', order: 3 },
+            { id: 'n4', name: 'Testimonials', path: '/reviews', order: 4 },
+            { id: 'n5', name: 'About', path: '/about', order: 5 },
+            { id: 'n6', name: 'Contact', path: '/contact', order: 6 }
         ],
         metadata: {
             lastUpdated: new Date().toISOString(),
