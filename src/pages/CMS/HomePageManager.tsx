@@ -578,7 +578,7 @@ export default function HomePageManager() {
                                             )}
 
                                             {/* Content only for certain sections like mission, mindfulness, founder */}
-                                            {['mission', 'founder', 'mindfulness'].includes(config.id) && (
+                                            {['mission', 'founder', 'mindfulness', 'our_story'].includes(config.id) && (
                                                 <div>
                                                     <div className="mb-2">
                                                         <Label>Body Content</Label>
@@ -734,8 +734,24 @@ export default function HomePageManager() {
                                                 </div>
                                             )}
 
+                                            {/* Specialized Stats for Noel Our Story */}
+                                            {config.id === 'our_story' && currentSite.id === 'noel' && (
+                                                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 dark:bg-white/[0.03] p-4 rounded-xl border border-gray-100 dark:border-gray-800">
+                                                    <div className="space-y-4">
+                                                        <div className="text-xs font-bold text-brand-500 uppercase tracking-widest">Stat 1 (Experience)</div>
+                                                        <div><Label>Value (e.g. 35+)</Label><Input value={(section as any).stat1Value || ""} onChange={(e) => handleSectionChange(config.id, "stat1Value" as any, e.target.value)} /></div>
+                                                        <div><Label>Label</Label><Input value={(section as any).stat1Label || ""} onChange={(e) => handleSectionChange(config.id, "stat1Label" as any, e.target.value)} /></div>
+                                                    </div>
+                                                    <div className="space-y-4">
+                                                        <div className="text-xs font-bold text-brand-500 uppercase tracking-widest">Stat 2 (Certification)</div>
+                                                        <div><Label>Value (e.g. 2008)</Label><Input value={(section as any).stat2Value || ""} onChange={(e) => handleSectionChange(config.id, "stat2Value" as any, e.target.value)} /></div>
+                                                        <div><Label>Label</Label><Input value={(section as any).stat2Label || ""} onChange={(e) => handleSectionChange(config.id, "stat2Label" as any, e.target.value)} /></div>
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {/* ITEMS EDITOR BLOCKS */}
-                                            {['coreFoundations', 'howItWorks', 'testimonials', 'mindfulness', 'pricing', 'trusted_by', 'services'].includes(config.id) && (
+                                            {['coreFoundations', 'howItWorks', 'testimonials', 'mindfulness', 'pricing', 'trusted_by'].includes(config.id) && (
                                                 <div className="mt-4">
                                                     <Label>List Items</Label>
                                                     <div className="space-y-3">
@@ -798,22 +814,6 @@ export default function HomePageManager() {
                                                                     </div>
                                                                 )}
 
-                                                                 {config.id === "services" && (
-                                                                     <div className="space-y-4">
-                                                                         <div className="grid grid-cols-2 gap-4">
-                                                                             <div><Label className="text-xs mb-1">Service Title</Label><Input value={item.title || ""} onChange={(e) => updateItem(config.id, idx, "title", e.target.value)} /></div>
-                                                                             <div><Label className="text-xs mb-1">Link (Optional)</Label><Input value={item.link || ""} onChange={(e) => updateItem(config.id, idx, "link", e.target.value)} /></div>
-                                                                         </div>
-                                                                         <div><Label className="text-xs mb-1">Description</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={2} value={item.desc || ""} onChange={(e) => updateItem(config.id, idx, "desc", e.target.value)} /></div>
-                                                                         <div>
-                                                                             <ImagePicker 
-                                                                                label="Service Image" 
-                                                                                value={item.image || ""} 
-                                                                                onChange={(url) => updateItem(config.id, idx, "image", url)} 
-                                                                             />
-                                                                         </div>
-                                                                     </div>
-                                                                 )}
 
                                                                  {config.id === 'pricing' && (
                                                                     <div className="space-y-4">
