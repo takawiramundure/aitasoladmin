@@ -28,7 +28,7 @@ const AuthContext = createContext<AuthContextType>({
     stopImpersonation: () => { }
 });
 
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -36,6 +36,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [realProfile, setRealProfile] = useState<UserProfile | null>(null);
     const [impersonatedProfile, setImpersonatedProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+
+    const logAction = async (action: string, details: any) => {
+        if (!user) return;
+        try {
+            await addDoc(collection(db, 'audit_logs'), {
+                timestamp: serverTimestamp(),
+                userId: user.uid,
+                userEmail: user.email,
+                realRole: realProfile?.role,
+                action,
+                details,
+                activeRole: impersonatedProfile?.role || realProfile?.role
+            });
+        } catch (e) {
+            console.error("Failed to log action", e);
+        }
+    };
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -91,13 +108,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const impersonate = async (userId: string) => {
+        if (realProfile?.role !== 'super_admin') {
+            console.warn("Security Alert: Non-admin attempted impersonation");
+            return;
+        }
+
         setLoading(true);
         try {
             const userRef = doc(db, 'users', userId);
             const userSnap = await getDoc(userRef);
             if (userSnap.exists()) {
-                setImpersonatedProfile({ ...userSnap.data(), uid: userId } as UserProfile);
+                const targetProfile = { ...userSnap.data(), uid: userId } as UserProfile;
+                setImpersonatedProfile(targetProfile);
                 localStorage.setItem('impersonatedUserId', userId);
+                await logAction('impersonation_start', { targetUserId: userId, targetEmail: targetProfile.email });
             } else {
                 alert("User not found");
             }
@@ -110,6 +134,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     const stopImpersonation = () => {
+        if (impersonatedProfile) {
+            logAction('impersonation_stop', { targetUserId: impersonatedProfile.uid, targetEmail: impersonatedProfile.email });
+        }
         setImpersonatedProfile(null);
         localStorage.removeItem('impersonatedUserId');
     };

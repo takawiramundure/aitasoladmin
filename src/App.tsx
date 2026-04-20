@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
+import Unauthorized from "./pages/OtherPage/Unauthorized";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
 import Videos from "./pages/UiElements/Videos";
@@ -113,14 +114,18 @@ export default function App() {
                     <Route path="/cms/portfolio" element={<PortfolioManager />} />
                     <Route path="/cms/reviews" element={<ReviewsManager />} />
                     <Route path="/cms/noel-services" element={<ServicesManager />} />
-                    <Route path="/cms/:pageId" element={<ContentManager />} />
-                    <Route path="/users" element={<UserManagement />} />
-
-                    {/* Others Page */}
-                    <Route path="/profile" element={<UserProfiles />} />
-                    <Route path="/settings" element={<SystemSettings />} />
-                    <Route path="/settings/site" element={<SiteSettingsManager />} />
-                    <Route path="/settings/seo" element={<SEOManager />} />
+                    {/* Protected Management Routes */}
+                    <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
+                      <Route path="/users" element={<UserManagement />} />
+                      <Route path="/settings" element={<SystemSettings />} />
+                      <Route path="/cms/page-visibility" element={<PageVisibilityManager />} />
+                    </Route>
+                    {/* General Protected Routes */}
+                    <Route element={<ProtectedRoute allowedRoles={['super_admin', 'editor']} />}>
+                      <Route path="/profile" element={<UserProfiles />} />
+                      <Route path="/settings/site" element={<SiteSettingsManager />} />
+                      <Route path="/settings/seo" element={<SEOManager />} />
+                    </Route>
                     <Route path="/calendar" element={<Calendar />} />
                     <Route path="/blank" element={<Blank />} />
 
@@ -148,7 +153,9 @@ export default function App() {
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/signup" element={<SignUp />} />
 
-                {/* Fallback Route */}
+                {/* Status Pages */}
+                <Route path="/unauthorized" element={<Unauthorized />} />
+                <Route path="/not-found" element={<NotFound />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Router>

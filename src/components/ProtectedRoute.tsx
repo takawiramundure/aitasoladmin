@@ -1,10 +1,20 @@
 import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 
-export default function ProtectedRoute() {
-    const { user, loading } = useAuth();
+interface ProtectedRouteProps {
+    allowedRoles?: ('super_admin' | 'editor')[];
+}
+
+export default function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
+    const { user, profile, loading } = useAuth();
 
     if (loading) return <div className="flex h-screen items-center justify-center">Loading...</div>;
 
-    return user ? <Outlet /> : <Navigate to="/signin" />;
+    if (!user) return <Navigate to="/signin" />;
+
+    if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
+        return <Navigate to="/unauthorized" />;
+    }
+
+    return <Outlet />;
 }

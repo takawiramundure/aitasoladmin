@@ -4,15 +4,18 @@ import { getStorage, ref, uploadBytes } from 'firebase/storage';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
-// Mocking some process.env for the config
+// Load environment variables from admin-portal/.env
+dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../.env') });
+
 const firebaseConfig = {
-    apiKey: "AIzaSyBf1CBPOW3UrqfEledkEOSjUCoH31a0tTE",
-    authDomain: "nspc-web.firebaseapp.com",
-    projectId: "nspc-web",
-    storageBucket: "nspc-web.firebasestorage.app",
-    messagingSenderId: "272421073172",
-    appId: "1:272421073172:web:7250912c8b371828ff1201"
+    apiKey: process.env.VITE_FIREBASE_API_KEY,
+    authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);

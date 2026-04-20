@@ -746,46 +746,76 @@ export const SEED_DATA: any = {
         services: {
             services: [
                 {
+                    id: 'svc-exterior',
                     category: 'Exterior Work',
                     title: 'Precision Exterior Solutions',
-                    description: 'Protect and beautify your home with our high-end exterior services, including premium siding, windows, and structural enhancements.',
+                    description: 'Protect and beautify your home with premium siding, windows, and structural enhancements.',
+                    fullDescription: 'Beyond mere aesthetics, our exterior solutions focus on building a resilient envelope for your home. We specialize in high-performance siding installations, energy-efficient window replacements, and structural enhancements that protect against the harsh Canadian seasons. Our approach combines modern materials with architectural integrity, ensure your home stays maintenance-free for decades while significantly boosting its curb appeal.',
                     image: '/project-exterior.png',
-                    order: 1
+                    beforeImage: 'https://images.unsplash.com/photo-1590060419632-68c37ed55f26?q=80&w=800&auto=format&fit=crop', // Dated exterior
+                    afterImage: 'https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?q=80&w=800&auto=format&fit=crop', // Modern exterior
+                    order: 1,
+                    isActive: true
                 },
                 {
+                    id: 'svc-gardens',
                     category: 'Sustainability',
                     title: 'Food Security & Gardens',
-                    description: 'Specialized vegetable garden layouts, garden beds, and custom yard setups to help you enjoy fresh seasonal produce and food sovereignty.',
+                    description: 'Specialized vegetable gardens and custom yard setups for fresh seasonal produce.',
+                    fullDescription: 'Embrace self-sufficiency with a custom-designed edible landscape. We build high-yield cedar garden beds, integrated irrigation systems, and optimized greenhouse structures. Our designs consider soil health, sun orientation, and ease of maintenance, allowing you to harvest fresh, organic produce right in your backyard. We bridge the gap between traditional gardening and expert construction to help you achieve true food sovereignty.',
                     image: '/service-gardens.png',
-                    order: 2
+                    beforeImage: 'https://images.unsplash.com/photo-1558905619-172542012737?q=80&w=800&auto=format&fit=crop', // Empty yard
+                    afterImage: 'https://images.unsplash.com/photo-1592150621344-22d7688860bc?q=80&w=800&auto=format&fit=crop', // Garden beds
+                    order: 2,
+                    isActive: true
                 },
                 {
+                    id: 'svc-decks',
                     category: 'Decks & Patios',
                     title: 'Outdoor Luxury Living',
-                    description: 'Custom-designed decks and patios using the finest materials, built to withstand the elements while providing a stunning space for relaxation.',
+                    description: 'Custom-designed decks using the finest materials, built to withstand the elements.',
+                    fullDescription: 'A Noel Construction deck is an extension of your primary living space. We use premium cedar and sustainable composite materials to craft multi-level outdoor oasis spaces. Our signature includes hidden fastenting systems, custom-built stairs, and integrated ambient lighting. Every joint is precision-cut to ensure your outdoor sanctuary remains structural and stunning through generations of seasonal changes.',
                     image: '/service-decks.png',
-                    order: 3
+                    beforeImage: 'https://images.unsplash.com/photo-1591825729269-caeb344f6df2?q=80&w=800&auto=format&fit=crop', // Old deck
+                    afterImage: 'https://images.unsplash.com/photo-1590060419632-68c37ed55f26?q=80&w=800&auto=format&fit=crop', // New deck
+                    order: 3,
+                    isActive: true
                 },
                 {
+                    id: 'svc-stairs',
                     category: 'Stairs & Railings',
                     title: 'Architectural Staircases',
-                    description: 'Custom-built stairs and railings that serve as the centerpieces of your home, blending structural integrity with artistic design.',
+                    description: 'Custom-built stairs and railings that blend structural integrity with artistic design.',
+                    fullDescription: 'Bespoke staircases are the centerpieces of any high-end interior. We specialize in grand architectural stairs and precision railings that combine solid hardwood with modern glass or steel elements. Our process involves detailed structural engineering and traditional joinery techniques, resulting in a safe, silent, and visually arresting transition between the levels of your home.',
                     image: '/project-stairs.png',
-                    order: 4
+                    beforeImage: 'https://images.unsplash.com/photo-1581850518616-bcb81881443e?q=80&w=800&auto=format&fit=crop', // Carpeted stairs
+                    afterImage: 'https://images.unsplash.com/photo-1506974210746-9b43936660dc?q=80&w=800&auto=format&fit=crop', // Modern oak stairs
+                    order: 4,
+                    isActive: true
                 },
                 {
+                    id: 'svc-reno',
                     category: 'Renovations',
                     title: 'Whole-Home Modernization',
-                    description: 'Comprehensive renovation services including basement upgrades and interior remodels that transform your entire living space.',
+                    description: 'Comprehensive renovation services including basement upgrades and interior remodels.',
+                    fullDescription: 'Our full-home renovations are holistic transformations. We manage the entire lifecycle from structural modifications to fine interior finishes. Whether it\'s expanding a basement into a luxury executive suite or modernizing a heritage home, we maintain the integrity of the original structure while introducing contemporary efficiencies, high-end materials, and premium aesthetics tailored to your lifestyle.',
                     image: '/service-renovations.png',
-                    order: 5
+                    beforeImage: 'https://images.unsplash.com/photo-1581850518616-bcb81881443e?q=80&w=800&auto=format&fit=crop', // Gutted room
+                    afterImage: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800&auto=format&fit=crop', // Finished kitchen
+                    order: 5,
+                    isActive: true
                 },
                 {
-                    category: 'Eco-Solutions',
-                    title: 'Water Management',
-                    description: 'Water harvesting projects and drainage solutions designed to conserve resources and protect your property’s foundation.',
+                    id: 'svc-woodworking',
+                    category: 'Sustainability',
+                    title: 'Traditional Woodworking',
+                    description: 'Custom cabinetry and built-in units that add timeless value to your home.',
+                    fullDescription: 'True custom cabinetry is about more than just storage; it\'s about defining the soul of a residence. We specialize in traditional dovetail joinery, hand-turned details, and bespoke finishes that highlight the natural grain of premium timbers. From heirloom-quality libraries to modern minimalist kitchens, our woodwork is tailored to the exact dimensions of your life and home.',
                     image: '/service-woodworking.png',
-                    order: 6
+                    beforeImage: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=800&auto=format&fit=crop', // Raw lumber
+                    afterImage: 'https://images.unsplash.com/photo-1505691938895-1758d7eaa511?q=80&w=800&auto=format&fit=crop', // Finished library
+                    order: 6,
+                    isActive: true
                 }
             ]
         },

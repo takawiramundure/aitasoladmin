@@ -1,16 +1,20 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
 import { SETTINGS_SEED } from '../src/config/seedData';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Firebase configuration - should match your firebaseConfig.ts
+// Load environment variables
+dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../.env') });
+
 const firebaseConfig = {
-    apiKey: "AIzaSyDN8oix4JRr04KYF0gx_gCh5WE9gH2a_lU",
-    authDomain: "digital-maples-agency.firebaseapp.com",
-    projectId: "digital-maples-agency",
-    storageBucket: "digital-maples-agency.firebasestorage.app",
-    messagingSenderId: "251751498453",
-    appId: "1:251751498453:web:c64b5dd8f02c3be99b3f8a",
-    measurementId: "G-HDKPBXMFV6"
+    apiKey: process.env.VITE_FIREBASE_API_KEY,
+    authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase

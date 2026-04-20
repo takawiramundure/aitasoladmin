@@ -19,7 +19,10 @@ interface ServiceItem {
     id: string;
     title: string;
     description: string;
+    fullDescription?: string;
     imageUrl: string;
+    beforeImage?: string;
+    afterImage?: string;
     icon: string;
     isFeatured?: boolean;
     isActive: boolean;
@@ -66,6 +69,7 @@ export default function ServicesManager() {
     const [successMsg, setSuccessMsg] = useState("");
     const [showMediaPicker, setShowMediaPicker] = useState(false);
     const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
+    const [activeField, setActiveField] = useState<keyof ServiceItem | null>(null);
 
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
@@ -262,25 +266,53 @@ export default function ServicesManager() {
                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                             <div className="space-y-4">
                                                 <div>
-                                                    <Label>Service Title</Label>
-                                                    <Input type="text" value={service.title} onChange={(e) => updateService(service.id, 'title', e.target.value)} />
+                                                    <Label>Short Description (Card view)</Label>
+                                                    <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-24" value={service.description} onChange={(e) => updateService(service.id, 'description', e.target.value)} />
                                                 </div>
                                                 <div>
-                                                    <Label>Icon Name (e.g., home, hammer, brush)</Label>
-                                                    <Input type="text" value={service.icon} onChange={(e) => updateService(service.id, 'icon', e.target.value)} />
-                                                </div>
-                                                <div>
-                                                    <Label>Description</Label>
-                                                    <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32" value={service.description} onChange={(e) => updateService(service.id, 'description', e.target.value)} />
+                                                    <Label>Detailed Professional Narrative (Service page content)</Label>
+                                                    <textarea className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-48" value={service.fullDescription || ""} onChange={(e) => updateService(service.id, 'fullDescription', e.target.value)} placeholder="Simulated content for dynamic pages..." />
                                                 </div>
                                             </div>
  
                                             <div className="space-y-4">
-                                                <Label>Service Illustration / Image</Label>
-                                                <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center">
-                                                    {service.imageUrl ? <img src={service.imageUrl} className="w-full h-full object-cover" /> : <span className="text-gray-400">No Image Selected</span>}
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2">
+                                                        <Label className="block text-center text-xs">Main Illustration</Label>
+                                                        <div 
+                                                            className="w-full h-32 bg-gray-100 rounded-lg overflow-hidden border border-gray-200 flex items-center justify-center cursor-pointer"
+                                                            onClick={() => { setActiveServiceId(service.id); setActiveField('imageUrl'); setShowMediaPicker(true); }}
+                                                        >
+                                                            {service.imageUrl ? <img src={service.imageUrl} className="w-full h-full object-cover" /> : <span className="text-gray-400 text-xs">Select Main Image</span>}
+                                                        </div>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label className="block text-center text-xs">Icon/Symbol (e.g. hammer)</Label>
+                                                        <Input type="text" value={service.icon} onChange={(e) => updateService(service.id, 'icon', e.target.value)} />
+                                                    </div>
                                                 </div>
-                                                <Button variant="outline" className="w-full" onClick={() => { setActiveServiceId(service.id); setShowMediaPicker(true); }}>Select from Library</Button>
+
+                                                <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+                                                    <Label className="mb-2 block font-bold text-xs uppercase text-gray-400 tracking-wider">Before & After Showcase</Label>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <div 
+                                                                className="w-full h-32 bg-rose-50 rounded-lg overflow-hidden border border-rose-100 flex items-center justify-center cursor-pointer"
+                                                                onClick={() => { setActiveServiceId(service.id); setActiveField('beforeImage'); setShowMediaPicker(true); }}
+                                                            >
+                                                                {service.beforeImage ? <img src={service.beforeImage} className="w-full h-full object-cover" /> : <span className="text-rose-300 text-xs">Select Before</span>}
+                                                            </div>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <div 
+                                                                className="w-full h-32 bg-emerald-50 rounded-lg overflow-hidden border border-emerald-100 flex items-center justify-center cursor-pointer"
+                                                                onClick={() => { setActiveServiceId(service.id); setActiveField('afterImage'); setShowMediaPicker(true); }}
+                                                            >
+                                                                {service.afterImage ? <img src={service.afterImage} className="w-full h-full object-cover" /> : <span className="text-emerald-300 text-xs">Select After</span>}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -290,7 +322,7 @@ export default function ServicesManager() {
                     </SortableContext>
                 </DndContext>
 
-                <MediaPickerModal isOpen={showMediaPicker} onClose={() => setShowMediaPicker(false)} onSelect={(url) => { if (activeServiceId) updateService(activeServiceId, 'imageUrl', url); }} />
+                <MediaPickerModal isOpen={showMediaPicker} onClose={() => setShowMediaPicker(false)} onSelect={(url) => { if (activeServiceId && activeField) updateService(activeServiceId, activeField, url); }} />
             </div>
         </>
     );
