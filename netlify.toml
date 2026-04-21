@@ -1,16 +1,22 @@
 [build]
-  command = "npm install && npm run build -w apps/admin-portal"
+  command = "npm install && npm run build -w tailadmin-react"
   publish = "apps/admin-portal/dist"
 
 [build.environment]
   NODE_VERSION = "22"
+  VITE_FIREBASE_API_KEY = "AIzaSyBf1CBPOW3UrqfEledkEOSjUCoH31a0tTE"
+  VITE_FIREBASE_AUTH_DOMAIN = "nspc-web.firebaseapp.com"
+  VITE_FIREBASE_PROJECT_ID = "nspc-web"
+  VITE_FIREBASE_STORAGE_BUCKET = "nspc-web.firebasestorage.app"
+  VITE_FIREBASE_MESSAGING_SENDER_ID = "272421073172"
+  VITE_FIREBASE_APP_ID = "1:272421073172:web:7250912c8b371828ff1201"
 
 [[headers]]
   for = "/*"
   [headers.values]
-    X-Frame-Options = "DENY"
+    X-Frame-Options = "SAMEORIGIN"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src 'self' https://*.firebaseapp.com https://*.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.firebaseapp.com https://*.googleapis.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https://*.firebaseapp.com https://*.googleapis.com https://*.googleusercontent.com https://framerusercontent.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com;"
+    Content-Security-Policy = "default-src 'self' https://*.firebaseapp.com https://*.googleapis.com https://firebasestorage.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.firebaseapp.com https://*.googleapis.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.firebaseapp.com https://*.googleapis.com https://*.googleusercontent.com https://framerusercontent.com https://firebasestorage.googleapis.com https://images.unsplash.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com https://firebasestorage.googleapis.com;"
