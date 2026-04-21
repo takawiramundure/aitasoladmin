@@ -1,5 +1,5 @@
 import PageMeta from "../../components/common/PageMeta";
-import { useParams } from "react-router";
+import { useParams, useLocation } from "react-router";
 import { useEffect, useState } from "react";
 import { FirestoreService, PageContent, SectionContent } from "../../services/firestore";
 import { useSite } from "../../context/SiteContext";
@@ -8,6 +8,8 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import ImagePicker from "../../components/form/ImagePicker";
+import { FilePicker } from "../../components/form/FilePicker";
+
 
 import { Modal } from "../../components/ui/modal";
 import Alert from "../../components/ui/alert/Alert";
@@ -16,13 +18,28 @@ import MediaLibrary from "../../components/common/MediaLibrary";
 import { SEED_DATA } from "../../config/seedData";
 
 export default function ContentManager() {
-    const { pageId } = useParams();
+    const params = useParams();
+    const location = useLocation();
+    // Derive pageId from URL path when route is hardcoded (e.g. /cms/careers not /cms/:pageId)
+    const pageId = params.pageId || location.pathname.split('/').filter(Boolean).pop();
     const { currentSite } = useSite();
     const [content, setContent] = useState<PageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
+    
+    // Expose for automation/debugging
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            (window as any).cmsDebug = {
+                seedCareers,
+                handleSave,
+                setContent,
+                content
+            };
+        }
+    }, [content]);
 
     // Modal State
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -115,6 +132,28 @@ export default function ContentManager() {
                         enabled: true,
                         order: 99
                     };
+                } else if (id === 'careers') {
+                    // Modernized Careers Default Structure
+                    initialSections.hero = {
+                        heading: "Current Job Postings",
+                        content: "Join our dedicated team of professionals committed to equity, empowerment, and excellence in community wellness.",
+                        enabled: true,
+                        sidebarContent: {
+                            showNews: true,
+                            showDonate: true,
+                            showSocials: true
+                        },
+                        order: 0
+                    };
+                    initialSections.job_1 = { heading: "Addiction Counsellor (RAAM)", location: "Kitchener, ON, Canada", jobType: "Full Time", pdfUrl: "#", enabled: true, order: 20 };
+                    initialSections.job_2 = { heading: "Addiction Counsellor (CC)", location: "Kitchener, ON, Canada", jobType: "Contract", pdfUrl: "#", enabled: true, order: 30 };
+                    initialSections.job_3 = { heading: "Overnight Attendant (CLT)", location: "Cambridge, ON, Canada", jobType: "Part Time", pdfUrl: "#", enabled: true, order: 40 };
+                    initialSections.job_4 = { heading: "Landscape Labourer - Canada Summer Jobs", location: "Kitchener, ON, Canada", jobType: "Contract", externalLink: "https://www.jobbank.gc.ca/", enabled: true, order: 50 };
+                    initialSections.job_5 = { heading: "Supervisor, Addiction Services (CLT)", location: "Cambridge, ON, Canada", jobType: "Contract", pdfUrl: "#", enabled: true, order: 60 };
+                    initialSections.job_6 = { heading: "Donor Relations & Grants Coordinator", location: "Kitchener, ON, Canada", jobType: "Full Time", externalLink: "https://linktr.ee/kmfw", enabled: true, order: 70 };
+                    initialSections.job_7 = { heading: "ShelterCare Support Worker, Nights Relief", location: "Waterloo, ON, Canada", jobType: "Part Time", pdfUrl: "#", enabled: true, order: 80 };
+                    initialSections.job_8 = { heading: "Manager, Addiction Services (ACSS)", location: "Kitchener, ON, Canada", jobType: "Full Time", pdfUrl: "#", enabled: true, order: 90 };
+                    initialSections.job_9 = { heading: "General Applications", location: "Waterloo Region, ON, Canada", jobType: "Other", buttonUrl: "mailto:careers@kindmindsfamilywellness.org", buttonText: "Inquire via Email", enabled: true, order: 100 };
                 }
                 setContent({
                     title: pageTitles[id] || "New Page",
@@ -135,12 +174,15 @@ export default function ContentManager() {
         setSuccessMsg("");
         setError("");
         try {
-            await FirestoreService.savePageContent(pageId, content, currentSite.id);
+            console.log(`[CMS] Saving content for page: ${pageId} on site: ${currentSite.id}`);
+            // Clean content to ensure it's serializable
+            const cleanContent = JSON.parse(JSON.stringify(content));
+            await FirestoreService.savePageContent(pageId, cleanContent, currentSite.id);
             setSuccessMsg("Content saved successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err: any) {
-            console.error(err);
-            setError("Failed to save content.");
+            console.error("[CMS] Save Error:", err);
+            setError(`Failed to save content: ${err.message || 'Unknown error'}`);
         } finally {
             setSaving(false);
         }
@@ -297,6 +339,103 @@ export default function ContentManager() {
             }
         });
         setSuccessMsg("Seeded Impact data! Click Save to persist.");
+    };
+
+    const seedCareers = () => {
+        setContent({
+            title: "Careers",
+            sections: {
+                hero: {
+                    heading: "Current Job Postings",
+                    content: "Join our dedicated team of professionals committed to equity, empowerment, and excellence in community wellness.",
+                    enabled: true,
+                    sidebarContent: {
+                        showNews: true,
+                        showDonate: true,
+                        showSocials: true
+                    },
+                    order: 0
+                },
+                listings: {
+                    enabled: true,
+                    order: 10
+                },
+                job_1: {
+                    heading: "Addiction Counsellor (RAAM)",
+                    location: "Kitchener, ON, Canada",
+                    jobType: "Full Time",
+                    pdfUrl: "#",
+                    enabled: true,
+                    order: 20
+                },
+                job_2: {
+                    heading: "Addiction Counsellor (CC)",
+                    location: "Kitchener, ON, Canada",
+                    jobType: "Contract",
+                    pdfUrl: "#",
+                    enabled: true,
+                    order: 30
+                },
+                job_3: {
+                    heading: "Overnight Attendant (CLT)",
+                    location: "Cambridge, ON, Canada",
+                    jobType: "Part Time",
+                    pdfUrl: "#",
+                    enabled: true,
+                    order: 40
+                },
+                job_4: {
+                    heading: "Landscape Labourer - Canada Summer Jobs",
+                    location: "Kitchener, ON, Canada",
+                    jobType: "Contract",
+                    externalLink: "https://www.jobbank.gc.ca/",
+                    enabled: true,
+                    order: 50
+                },
+                job_5: {
+                    heading: "Supervisor, Addiction Services (CLT)",
+                    location: "Cambridge, ON, Canada",
+                    jobType: "Contract",
+                    pdfUrl: "#",
+                    enabled: true,
+                    order: 60
+                },
+                job_6: {
+                    heading: "Donor Relations & Grants Coordinator",
+                    location: "Kitchener, ON, Canada",
+                    jobType: "Full Time",
+                    externalLink: "https://linktr.ee/kmfw",
+                    enabled: true,
+                    order: 70
+                },
+                job_7: {
+                    heading: "ShelterCare Support Worker, Nights Relief",
+                    location: "Waterloo, ON, Canada",
+                    jobType: "Part Time",
+                    pdfUrl: "#",
+                    enabled: true,
+                    order: 80
+                },
+                job_8: {
+                    heading: "Manager, Addiction Services (ACSS)",
+                    location: "Kitchener, ON, Canada",
+                    jobType: "Full Time",
+                    pdfUrl: "#",
+                    enabled: true,
+                    order: 90
+                },
+                job_9: {
+                    heading: "General Applications",
+                    location: "Waterloo Region, ON, Canada",
+                    jobType: "Other",
+                    buttonUrl: "mailto:careers@kindmindsfamilywellness.org",
+                    buttonText: "Inquire via Email",
+                    enabled: true,
+                    order: 100
+                }
+            }
+        });
+        setSuccessMsg("Seeded Careers data! Click Save to persist.");
     };
 
     const seedSuccessStories = () => {
@@ -619,62 +758,6 @@ export default function ContentManager() {
         setSuccessMsg("Seeded Join Us Gateway data! Click Save to persist.");
     };
 
-    const seedCareers = () => {
-        setContent({
-            title: "Careers",
-            enabled: true,
-            sections: {
-                hero: {
-                    heading: "Career Services & Employment Support",
-                    content: "Empowering professionals through employment support, and opening our doors to those who want to join our team.",
-                    order: 0,
-                    enabled: true
-                },
-                quote: {
-                    heading: "If you want to go Fast, go Alone. If you want to go Far, go Together",
-                    subtitle: "- African Proverb",
-                    content: "We look forward to having you join our team, because we believe that we are stronger together as we move the much needed work forward!",
-                    order: 10,
-                    enabled: true
-                },
-                employment_support: {
-                    heading: "Employment Support",
-                    content: "We provide resources, resume building workshops, interview preparation, and vocational guidance tailored to help members of the Black community thrive in their careers and navigate workplace challenges.",
-                    buttonText: "Access Support Services",
-                    buttonUrl: "#",
-                    order: 20,
-                    enabled: true
-                },
-                join_our_team: {
-                    heading: "Join Our Team",
-                    content: "Looking to make an impact? We are always seeking passionate researchers, culturally-informed counselors, and community advocates. Check out our open roles below!",
-                    buttonText: "View Open Roles",
-                    buttonUrl: "#current-opportunities",
-                    order: 30,
-                    enabled: true
-                },
-                job_counselor: {
-                    heading: "OUR COUNSELING TEAM IS GROWING!",
-                    subtitle: "Mental Health Counsellor",
-                    content: "<p>We seek counsellors who self-identify as African Canadian (African, Caribbean, Black identifying) to join our counselling team.</p><br/><p>Our counselling is provided by trauma-informed professionals who are racially, culturally, and spiritually aligned in their work with Black persons. Well-attuned to African cultural resiliency, our culturally grounded counsellors are outstanding at ensuring that their chosen modalities are customized to address needs and foster well-being effectively.</p><br/><p><strong>**We currently seek candidates with early afternoon, evening, and weekend availabilities.</strong></p>",
-                    buttonText: "Apply via Email",
-                    buttonUrl: "mailto:services@kindmindsfamilywellness.org",
-                    order: 40,
-                    enabled: true
-                },
-                job_operations: {
-                    heading: "OPERATIONS SPECIALIST",
-                    subtitle: "Non-Profit Operations",
-                    content: "<ul><li>Have you worked with underserved or marginalized communities in the past?</li><li>Do you have a background in leadership, operations, or nonprofit work that aligns with this role?</li><li>Are you currently located in or willing to commute to the Cambridge, Kitchener, Waterloo region or surrounding Townships?</li></ul><br/><p>If you answered yes to all of these, then we'd love to hear from you!</p>",
-                    buttonText: "View Full Job Description",
-                    buttonUrl: "/pdfs/OPERATIONS-SPECIALIST-KMFW-Job-Description.pdf",
-                    order: 50,
-                    enabled: true
-                }
-            }
-        });
-        setSuccessMsg("Seeded Careers data! Click Save to persist.");
-    };
 
     const seedFromConfig = () => {
         if (!pageId || !currentSite?.id) return;
@@ -1049,6 +1132,20 @@ export default function ContentManager() {
                                 Seed Educational Programs
                             </Button>
                         )}
+                        {pageId === 'careers' && (
+                            <Button
+                                id="seed-save-careers-btn"
+                                variant="outline"
+                                onClick={async () => {
+                                    seedCareers();
+                                    await new Promise(r => setTimeout(r, 300));
+                                    await handleSave();
+                                }}
+                                className="bg-green-600 text-white hover:bg-green-700 border-green-600"
+                            >
+                                🌱 Seed &amp; Save Careers
+                            </Button>
+                        )}
                         {pageId === 'advocacy-education' && (
                             <Button variant="outline" onClick={seedAdvocacyEducation}>
                                 Seed Advocacy & Education
@@ -1084,11 +1181,7 @@ export default function ContentManager() {
                                 Seed Join Us
                             </Button>
                         )}
-                        {pageId === 'careers' && (
-                            <Button variant="outline" onClick={seedCareers}>
-                                Seed Careers
-                            </Button>
-                        )}
+
                         {pageId === 'volunteer' && (
                             <Button variant="outline" onClick={seedVolunteer}>
                                 Seed Volunteering
@@ -1240,6 +1333,103 @@ export default function ContentManager() {
                                             </div>
                                         </div>
                                     )}
+
+                                    {pageId === 'careers' && key !== 'hero' && key !== 'quote' && (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-xl bg-blue-50/30 dark:bg-blue-500/5 dark:border-blue-900/30">
+                                            <div className="md:col-span-2">
+                                                <h4 className="text-sm font-semibold text-blue-700 dark:text-blue-400 mb-2">Job Details (Grid Layout)</h4>
+                                            </div>
+                                            <div>
+                                                <Label>Location</Label>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="e.g. Waterloo, ON (Hybrid)"
+                                                    value={section.location || ""}
+                                                    onChange={(e) => handleSectionChange(key, "location", e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Job Type</Label>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="e.g. Full-time"
+                                                    value={section.jobType || ""}
+                                                    onChange={(e) => handleSectionChange(key, "jobType", e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <FilePicker
+                                                    label="Job Description PDF"
+                                                    value={section.pdfUrl || ""}
+                                                    onChange={(url) => handleSectionChange(key, "pdfUrl", url)}
+                                                    description="Select a PDF from the library or paste a URL."
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>External Application Link (e.g. Linktree)</Label>
+                                                <Input
+                                                    type="text"
+                                                    placeholder="https://linktr.ee/..."
+                                                    value={section.externalLink || ""}
+                                                    onChange={(e) => handleSectionChange(key, "externalLink", e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {pageId === 'careers' && key === 'hero' && (
+                                        <div className="p-4 border rounded-xl bg-purple-50/30 dark:bg-purple-500/5 dark:border-purple-900/30">
+                                            <Label>Careers Page Footer Image (The "Team Photo" at the bottom)</Label>
+                                            <ImagePicker
+                                                value={section.footerImage || ""}
+                                                onChange={(url) => handleSectionChange(key, "footerImage", url)}
+                                                placeholder="Select or upload the collective team photo..."
+                                            />
+                                        </div>
+                                    )}
+
+                                    {pageId === 'careers' && key === 'hero' && (
+                                        <div className="p-4 border rounded-xl bg-orange-50/30 dark:bg-orange-500/5 dark:border-orange-900/30">
+                                            <h4 className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-3">Sidebar Configuration</h4>
+                                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                                <div className="flex items-center gap-2">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={section.sidebarContent?.showNews !== false}
+                                                        onChange={(e) => handleSectionChange(key, "sidebarContent", { ...(section.sidebarContent || {}), showNews: e.target.checked })}
+                                                        className="w-4 h-4 text-orange-600 rounded border-gray-300"
+                                                    />
+                                                    <span className="text-xs font-medium">Show Latest News</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={section.sidebarContent?.showDonate !== false}
+                                                        onChange={(e) => handleSectionChange(key, "sidebarContent", { ...(section.sidebarContent || {}), showDonate: e.target.checked })}
+                                                        className="w-4 h-4 text-orange-600 rounded border-gray-300"
+                                                    />
+                                                    <span className="text-xs font-medium">Show Donate Card</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={section.sidebarContent?.showSocials !== false}
+                                                        onChange={(e) => handleSectionChange(key, "sidebarContent", { ...(section.sidebarContent || {}), showSocials: e.target.checked })}
+                                                        className="w-4 h-4 text-orange-600 rounded border-gray-300"
+                                                    />
+                                                    <span className="text-xs font-medium">Show Socials</span>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4">
+                                                <Label>Custom Sidebar Text (Optional)</Label>
+                                                <RichTextEditor
+                                                    value={section.sidebarContent?.customContent || ""}
+                                                    onChange={(content) => handleSectionChange(key, "sidebarContent", { ...(section.sidebarContent || {}), customContent: content })}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
 
                                     {key !== 'hero' && (
                                         <div className="flex flex-col gap-4 p-4 border rounded-xl bg-gray-50/50 dark:bg-gray-800/50 dark:border-gray-700">

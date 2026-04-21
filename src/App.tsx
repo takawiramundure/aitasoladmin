@@ -114,6 +114,13 @@ export default function App() {
                     <Route path="/cms/portfolio" element={<PortfolioManager />} />
                     <Route path="/cms/reviews" element={<ReviewsManager />} />
                     <Route path="/cms/noel-services" element={<ServicesManager />} />
+                    
+                    {/* Catch-all for generic content pages */}
+                    <Route path="/cms/careers" element={<ContentManager />} />
+                    <Route path="/cms/volunteer" element={<ContentManager />} />
+                    <Route path="/cms/funders" element={<ContentManager />} />
+                    <Route path="/cms/join-us" element={<ContentManager />} />
+
                     {/* Protected Management Routes */}
                     <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
                       <Route path="/users" element={<UserManagement />} />

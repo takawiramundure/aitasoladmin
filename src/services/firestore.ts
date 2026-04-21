@@ -34,6 +34,18 @@ export interface SectionContent {
     author_title?: string;
     signature?: string;
     videoUrl?: string;
+    // New fields for Careers and dynamic layouts
+    location?: string;
+    jobType?: string;
+    pdfUrl?: string;
+    externalLink?: string;
+    footerImage?: string;
+    sidebarContent?: {
+        showNews?: boolean;
+        showDonate?: boolean;
+        showSocials?: boolean;
+        customContent?: string;
+    };
 }
 
 export interface ThemeSettings {
@@ -138,7 +150,8 @@ export const FirestoreService = {
                 ...data,
                 siteId, // Store siteId for reference
                 lastUpdated: new Date().toISOString(),
-            }, { merge: true });
+            }); // No merge — full overwrite so deleted sections are removed
+
         } catch (error) {
             console.error("Error saving page content:", error);
             throw error;
