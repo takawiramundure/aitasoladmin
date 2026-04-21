@@ -16,6 +16,7 @@ import SEOEditor from '../../components/form/SEOEditor';
 
 interface HomeSection extends SectionContent {
     enabled?: boolean;
+    [key: string]: any; // Allow site-specific fields (missionHeading, buttonLink, etc.)
 }
 
 interface HomePageContent extends PageContent {
@@ -167,7 +168,7 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                 title: "Empowering You Through <br /> Digital Innovation.",
                 subtitle: "We help small businesses and nonprofits grow online with custom websites, strategic marketing, and powerful software solutions—while also making sure their AI plays nice. From crafting ethical AI policies and auditing for hidden biases to aligning AI with your mission and training teams on responsible AI use, we ensure technology works for you, not against you.",
                 enabled: true
-            },
+            } as any,
             ticker: {
                 items: [
                     { text: "Websites" },
@@ -196,7 +197,7 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                 approachHeading: "Our Approach",
                 approachContent: "We help nonprofits grow online with custom websites, smart marketing strategies, and powerful software solutions that make an impact. But we don’t stop there—we also make sure your AI behaves responsibly. Whether it's building ethical systems, auditing algorithms for bias, or training your team to use AI wisely.",
                 moreAboutLink: "/about"
-            },
+            } as any,
             pricing: {
                 heading: "Transparent Pricing for Nonprofits",
                 subtitle: "PRICING PLANS",
@@ -212,7 +213,7 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                 buttonLink: "/contact",
                 secondaryText: "SEE MORE PROJECTS →",
                 secondaryLink: "/project"
-            }
+            } as any
         };
     }
 
@@ -864,7 +865,7 @@ export default function HomePageManager() {
                                                                                         onChange={(e) => {
                                                                                             const newVal = e.target.value.replace(/[^0-9.]/g, '');
                                                                                             // Initialize as object on first edit if possible
-                                                                                            updateItem(config.id, idx, 'price', { monthly: newVal, yearly: newVal });
+                                                                                            updateItem(config.id, idx, 'price', JSON.stringify({ monthly: newVal, yearly: newVal }));
                                                                                         }} 
                                                                                     />
                                                                                 </div>
@@ -920,7 +921,7 @@ export default function HomePageManager() {
                                                 <div className="mt-4">
                                                     <Label>Gallery Images</Label>
                                                     <div className="space-y-3">
-                                                        {(section.images || []).map((img, idx) => (
+                                                        {(section.images || []).map((img: { url: string; alt: string }, idx: number) => (
                                                             <div key={idx} className="flex gap-4 items-end bg-white p-3 border rounded shadow-sm dark:bg-gray-800 dark:border-gray-700">
                                                                 <div className="flex-1">
                                                                     <ImagePicker
@@ -1187,7 +1188,7 @@ export default function HomePageManager() {
                                                 <div className="mt-4">
                                                     <Label>Impact Statistics</Label>
                                                     <div className="space-y-3">
-                                                        {(section.stats || []).map((stat, idx) => (
+                                                        {(section.stats || []).map((stat: { value: string; label: string }, idx: number) => (
                                                             <div key={idx} className="flex gap-4 items-end bg-white p-3 border rounded shadow-sm dark:bg-gray-800 dark:border-gray-700">
                                                                 <div className="flex-1">
                                                                     <Label className="text-xs mb-1">Value (e.g. 500+)</Label>

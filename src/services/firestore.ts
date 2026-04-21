@@ -17,8 +17,8 @@ export interface PageContent {
 }
 
 export interface SectionContent {
-    heading: string;
-    content: string;
+    heading?: string;   // Optional — not all section types require a heading
+    content?: string;   // Optional — not all section types require body text
     images?: { url: string; alt: string }[];
     imageAlignment?: 'top' | 'left' | 'right';
     enabled?: boolean;

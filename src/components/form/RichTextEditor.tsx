@@ -13,7 +13,7 @@ if (Quill && !Quill.imports['modules/blotFormatter']) {
 }
 
 interface RichTextEditorProps {
-    label: string;
+    label?: string;  // Optional — not all usages need a visible label
     value: string;
     onChange: (content: string) => void;
 }
@@ -60,7 +60,7 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
 
     return (
         <div className="flex flex-col gap-2 relative">
-            <Label>{label}</Label>
+            {label && <Label>{label}</Label>}
             <div className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-700">
                 <ReactQuill
                     ref={quillRef}

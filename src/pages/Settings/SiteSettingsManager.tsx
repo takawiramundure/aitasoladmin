@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FirestoreService } from '../../services/firestore';
-import { SiteSettings, NavigationItem } from '../../types/siteSettings';
+import { SiteSettings, SiteTheme, NavigationItem } from '../../types/siteSettings';
 import { useSite } from '../../context/SiteContext';
 import Button from '../../components/ui/button/Button';
 import Alert from '../../components/ui/alert/Alert';
@@ -806,7 +806,7 @@ export default function SiteSettingsManager() {
                                                                 min="20"
                                                                 max="800"
                                                                 value={settings.branding.logoHeight || 64}
-                                                                onChange={(e) => updateBranding('logoHeight', parseInt(e.target.value))}
+                                                                onChange={(e) => updateBranding('logoHeight', String(parseInt(e.target.value)))}
                                                                 className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600"
                                                             />
                                                             <span className="text-xs text-gray-400">800px</span>

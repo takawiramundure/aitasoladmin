@@ -1,15 +1,18 @@
 import { ReactNode } from "react";
 
 interface ButtonProps {
-  children: ReactNode; // Button text or content
-  size?: "sm" | "md"; // Button size
-  variant?: "primary" | "outline" | "secondary"; // Button variant
-  startIcon?: ReactNode; // Icon before the text
-  endIcon?: ReactNode; // Icon after the text
-  onClick?: () => void; // Click handler
-  disabled?: boolean; // Disabled state
-  className?: string; // Disabled state
+  children: ReactNode;
+  size?: "sm" | "md";
+  variant?: "primary" | "outline" | "secondary";
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  loading?: boolean;       // Shows a spinner / disables while loading
+  className?: string;
   type?: "button" | "submit" | "reset";
+  id?: string;
+  'aria-label'?: string;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -21,7 +24,10 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   className = "",
   disabled = false,
+  loading = false,
   type = "button",
+  id,
+  'aria-label': ariaLabel,
 }) => {
   // Size Classes
   const sizeClasses = {
@@ -41,16 +47,18 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
+      id={id}
       type={type}
+      aria-label={ariaLabel}
       className={`inline-flex items-center justify-center gap-2 rounded-lg transition ${className} ${sizeClasses[size]
-        } ${variantClasses[variant]} ${disabled ? "cursor-not-allowed opacity-50" : ""
+        } ${variantClasses[variant]} ${(disabled || loading) ? "cursor-not-allowed opacity-50" : ""
         }`}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
     >
       {startIcon && <span className="flex items-center">{startIcon}</span>}
-      {children}
-      {endIcon && <span className="flex items-center">{endIcon}</span>}
+      {loading ? <span className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full" /> : children}
+      {!loading && endIcon && <span className="flex items-center">{endIcon}</span>}
     </button>
   );
 };
