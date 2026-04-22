@@ -158,9 +158,15 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
         try {
             await Promise.all(files.map(async (file) => {
                 if (isVideo(file.name)) {
+                    // Size Check (30MB Limit)
+                    const MAX_SIZE = 30 * 1024 * 1024;
+                    if (file.size > MAX_SIZE) {
+                        throw new Error(`Video ${file.name} is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Max size is 30MB.`);
+                    }
+
                     const duration = await getVideoDuration(file);
-                    if (duration > 120) {
-                        throw new Error(`Video ${file.name} exceeds max duration of 2 mins.`);
+                    if (duration > 180) {
+                        throw new Error(`Video ${file.name} exceeds max duration of 3 mins.`);
                     }
                     const totalDuration = await getTotalVideosDuration();
                     if (totalDuration + duration > 1800) {
@@ -381,7 +387,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
                     <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-3 text-blue-800 text-sm">
                         <VideoIcon className="w-5 h-5 flex-shrink-0" />
                         <div>
-                            <span className="font-bold">Video Folder Limits:</span> Max 2 mins per video. Max 30 mins total library duration.
+                            <span className="font-bold">Video Folder Limits:</span> Max 30MB size & 3 mins per video. Max 30 mins total library duration.
                         </div>
                     </div>
                 )}

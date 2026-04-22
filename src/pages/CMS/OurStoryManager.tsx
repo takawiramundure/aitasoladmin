@@ -8,7 +8,8 @@ import Input from "../../components/form/input/InputField";
 import RichTextEditor from "../../components/form/RichTextEditor";
 import Alert from "../../components/ui/alert/Alert";
 import ImagePicker from '../../components/form/ImagePicker';
-import { Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';
+import VideoPicker from '../../components/form/VideoPicker';
+import { Eye, EyeOff, ChevronDown, ChevronUp, Video } from 'lucide-react';
 
 interface OurStorySection extends SectionContent {
     enabled?: boolean;
@@ -23,6 +24,7 @@ const getSectionsConfig = () => {
         { id: 'header', label: 'Our Story Headings' },
         { id: 'originStory', label: 'Origin Story (How We Began)' },
         { id: 'culturalIdentity', label: 'Cultural Identity & Respect' },
+        { id: 'videoSection', label: 'Video Story Section' },
         { id: 'landAcknowledgement', label: 'Land Acknowledgement' }
     ];
 };
@@ -50,6 +52,13 @@ const getDefaultContent = (): Record<string, SectionContent> => {
         culturalIdentity: {
             heading: "Rooted in Respect & Recognition",
             content: "<p>For the majority of Black persons, intergenerational trauma evolving from colonialism, slavery, segregation, and persistent discrimination has led to the distrust of the health care and social service system.</p>",
+            enabled: true
+        },
+        videoSection: {
+            heading: "Healing Through Connection",
+            content: "<p>Experience the heart of Kind Minds Family Wellness. Our journey is one of resilience, community, and the pursuit of mental well-being for all.</p>",
+            videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+            images: [{ url: '/images/video-thumbnail.png', alt: 'Video Thumbnail' }],
             enabled: true
         },
         landAcknowledgement: {
@@ -311,6 +320,37 @@ export default function OurStoryManager() {
                                                             handleSectionChange(config.id, "images", newImages);
                                                         }}
                                                     />
+                                                </div>
+                                            )}
+
+                                            {config.id === 'videoSection' && (
+                                                <div className="grid gap-5">
+                                                    <div>
+                                                        <Label>Video Description</Label>
+                                                        <RichTextEditor
+                                                            label=""
+                                                            value={section.content || ""}
+                                                            onChange={(newContent: string) => handleSectionChange(config.id, "content", newContent)}
+                                                        />
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                                        <VideoPicker
+                                                            label="Upload or Link Video"
+                                                            value={section.videoUrl || ""}
+                                                            onChange={(url) => handleSectionChange(config.id, "videoUrl", url)}
+                                                            helpText="Upload a video file or paste a YouTube/Vimeo link."
+                                                        />
+                                                        <ImagePicker
+                                                            label="Video Thumbnail"
+                                                            value={section.images?.[0]?.url || ""}
+                                                            onChange={(url) => {
+                                                                const newImages = [...(section.images || [])];
+                                                                if (!newImages[0]) newImages[0] = { url: "", alt: "" };
+                                                                newImages[0].url = url;
+                                                                handleSectionChange(config.id, "images", newImages);
+                                                            }}
+                                                        />
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
