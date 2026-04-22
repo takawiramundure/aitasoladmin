@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Image as ImageIcon, X, Upload } from 'lucide-react';
 import MediaLibrary from '../common/MediaLibrary';

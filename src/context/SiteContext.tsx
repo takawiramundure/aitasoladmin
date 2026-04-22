@@ -1,5 +1,7 @@
+"use client";
+
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Site, SITES, getSiteById, getDefaultSite } from '../config/sites';
+import { Site, SITES, getSiteById, getDefaultSite } from "@/config/sites";
 
 interface SiteContextType {
     currentSite: Site;

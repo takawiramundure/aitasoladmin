@@ -1,3 +1,5 @@
+"use client";
+
 import ComponentCard from "../../common/ComponentCard";
 import Switch from "../switch/Switch";
 

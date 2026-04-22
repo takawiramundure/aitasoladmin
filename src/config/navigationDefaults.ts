@@ -1,4 +1,4 @@
-import { NavigationItem } from '../types/siteSettings';
+import { NavigationItem } from "@/types/siteSettings";
 
 export const GET_DEFAULT_NAV = (siteId: string): NavigationItem[] => {
     switch (siteId) {

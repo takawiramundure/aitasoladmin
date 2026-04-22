@@ -1,12 +1,14 @@
+"use client";
+
 import { useState } from "react";
-import { useNavigate } from "react-router";
-import { EyeCloseIcon, EyeIcon } from "../../icons";
+import { useRouter } from "next/navigation";
+import { EyeCloseIcon, EyeIcon } from "@/icons";
 import Label from "../form/Label";
 import Input from "../form/input/InputField";
 import Checkbox from "../form/input/Checkbox";
 import Button from "../ui/button/Button";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebaseConfig";
+import { auth } from "@/firebaseConfig";
 
 export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -15,7 +17,7 @@ export default function SignInForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ export default function SignInForm() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       // AuthProvider will detect the user change
-      navigate("/");
+      router.push("/");
     } catch (err: any) {
       setError(err.message || "Failed to sign in");
     } finally {

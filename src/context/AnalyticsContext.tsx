@@ -1,7 +1,9 @@
+"use client";
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { initGoogleClient, setAccessToken, getAnalyticsReport, getDemographicsReport, getTopPagesReport, getDeviceCategoryReport, getEngagementReport, getSourceMediumReport, getBrowserReport } from '../services/analyticsService';
+import { initGoogleClient, setAccessToken, getAnalyticsReport, getDemographicsReport, getTopPagesReport, getDeviceCategoryReport, getEngagementReport, getSourceMediumReport, getBrowserReport } from "@/services/analyticsService";
 import { useGoogleLogin } from '@react-oauth/google';
-import { ANALYTICS_CONFIG } from '../config/analyticsConfig';
+import { ANALYTICS_CONFIG } from "@/config/analyticsConfig";
 import { useSite } from './SiteContext';
 
 interface AnalyticsContextType {

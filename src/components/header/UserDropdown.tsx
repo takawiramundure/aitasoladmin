@@ -1,15 +1,17 @@
+"use client";
+
 import { useState } from "react";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
-import { useNavigate } from "react-router";
-import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 import { signOut } from "firebase/auth";
-import { auth } from "../../firebaseConfig"; // Ensure this path is correct based on folder structure
+import { auth } from "@/firebaseConfig"; // Ensure this path is correct based on folder structure
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   function toggleDropdown() {
     setIsOpen(!isOpen);
@@ -23,7 +25,7 @@ export default function UserDropdown() {
     try {
       await signOut(auth);
       closeDropdown();
-      navigate("/signin");
+      router.push("/signin");
     } catch (error) {
       console.error("Logout failed", error);
     }

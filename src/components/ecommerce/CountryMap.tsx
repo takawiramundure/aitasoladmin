@@ -1,5 +1,11 @@
+"use client";
+
 // react plugin for creating vector maps
-import { VectorMap } from "@react-jvectormap/core";
+import dynamic from "next/dynamic";
+const VectorMap = dynamic(
+  () => import("@react-jvectormap/core").then((mod) => mod.VectorMap),
+  { ssr: false }
+);
 import { worldMill } from "@react-jvectormap/world";
 
 // Define the component props

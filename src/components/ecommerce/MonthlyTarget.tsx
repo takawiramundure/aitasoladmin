@@ -1,9 +1,12 @@
-import Chart from "react-apexcharts";
+"use client";
+
+import dynamic from "next/dynamic";
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { ApexOptions } from "apexcharts";
 import { useState } from "react";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { DropdownItem } from "../ui/dropdown/DropdownItem";
-import { MoreDotIcon } from "../../icons";
+import { MoreDotIcon } from "@/icons";
 
 export default function MonthlyTarget() {
   const series = [75.55];

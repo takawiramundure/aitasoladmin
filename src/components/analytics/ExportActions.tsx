@@ -1,6 +1,8 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Download, Share2, Printer, Copy, Check } from 'lucide-react';
-import { FirestoreService } from '../../services/firestore';
+import { FirestoreService } from "@/services/firestore";
 
 interface ExportActionsProps {
     siteId: string;

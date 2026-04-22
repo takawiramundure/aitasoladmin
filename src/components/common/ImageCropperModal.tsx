@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useCallback, useMemo } from 'react';
 import Cropper from 'react-easy-crop';
 import Button from '../ui/button/Button';
@@ -38,7 +40,7 @@ export default function ImageCropperModal({
             setCorsError(false);
             try {
                 // Determine bucket name from env or project context
-                const bucketName = import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "your-bucket-name";
+                const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "your-bucket-name";
                 
                 const response = await fetch(image, { mode: 'cors' });
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -258,7 +260,7 @@ export default function ImageCropperModal({
                                     </p>
                                     <div className="group relative">
                                         <code className="block p-3 bg-gray-100 dark:bg-black rounded border font-mono text-[11px] text-blue-700 dark:text-blue-400 break-all select-all">
-                                            gsutil cors set cors.json gs://{import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "your-bucket-name"}
+                                            gsutil cors set cors.json gs://{process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "your-bucket-name"}
                                         </code>
                                         <p className="mt-2 text-[10px] text-gray-400 italic">
                                             Note: This requires the Google Cloud SDK (gsutil) to be installed and authenticated.

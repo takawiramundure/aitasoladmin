@@ -1,6 +1,8 @@
+"use client";
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth } from "@/firebaseConfig";
 
 export interface UserProfile {
     email: string;
@@ -29,7 +31,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import { db } from "@/firebaseConfig";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);

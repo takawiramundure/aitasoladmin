@@ -1,4 +1,4 @@
-import { SiteSettings, NavigationItem } from "../types/siteSettings";
+import { SiteSettings, NavigationItem } from "@/types/siteSettings";
 
 // Extract current BWEIC navigation from Navbar.tsx
 const bweicNavigation: NavigationItem[] = [

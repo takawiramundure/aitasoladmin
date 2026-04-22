@@ -1,5 +1,5 @@
 import { gapi } from 'gapi-script';
-import { ANALYTICS_CONFIG } from '../config/analyticsConfig';
+import { ANALYTICS_CONFIG } from "@/config/analyticsConfig";
 
 // Reusable runReport Wrapper
 const runReport = async (propertyId: string, dimensions: any[], metrics: any[], orderBys?: any[], limit: number = 10) => {

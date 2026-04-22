@@ -1,12 +1,14 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 
-import { Link } from "react-router";
-import { useSidebar } from "../context/SidebarContext";
-import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
-import NotificationDropdown from "../components/header/NotificationDropdown";
-import UserDropdown from "../components/header/UserDropdown";
-import SiteSelector from "../components/header/SiteSelector";
-import { db } from "../firebaseConfig";
+import Link from "next/link";
+import { useSidebar } from "@/context/SidebarContext";
+import { ThemeToggleButton } from "@/components/common/ThemeToggleButton";
+import NotificationDropdown from "@/components/header/NotificationDropdown";
+import UserDropdown from "@/components/header/UserDropdown";
+import SiteSelector from "@/components/header/SiteSelector";
+import { db } from "@/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 
 const AppHeader: React.FC = () => {
@@ -101,7 +103,7 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link to="/" className="lg:hidden">
+          <Link href="/" className="lg:hidden">
             <img
               className="dark:hidden"
               src="./images/logo/logo.svg"

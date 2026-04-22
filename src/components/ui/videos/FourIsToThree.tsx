@@ -1,3 +1,5 @@
+"use client";
+
 export default function FourIsToThree() {
   return (
     <div className="aspect-4/3 overflow-hidden rounded-lg">

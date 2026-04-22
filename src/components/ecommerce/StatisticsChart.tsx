@@ -1,9 +1,12 @@
+"use client";
+
 import { useEffect, useRef } from "react";
-import Chart from "react-apexcharts";
+import dynamic from "next/dynamic";
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 import { ApexOptions } from "apexcharts";
 import flatpickr from "flatpickr";
 import ChartTab from "../common/ChartTab";
-import { CalenderIcon } from "../../icons";
+import { CalenderIcon } from "@/icons";
 
 export default function StatisticsChart() {
   const datePickerRef = useRef<HTMLInputElement>(null);

@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode } from "react";
 
 // Props for Table

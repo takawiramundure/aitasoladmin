@@ -1,3 +1,5 @@
+"use client";
+
 interface ComponentCardProps {
   title: string;
   children: React.ReactNode;

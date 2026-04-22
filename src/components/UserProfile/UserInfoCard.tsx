@@ -1,13 +1,15 @@
-import { useModal } from "../../hooks/useModal";
+"use client";
+
+import { useModal } from "@/hooks/useModal";
 import { Modal } from "../ui/modal";
 import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { useState, useEffect } from "react";
 import { updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../../firebaseConfig"; // Ensure correct import
+import { db } from "@/firebaseConfig"; // Ensure correct import
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();

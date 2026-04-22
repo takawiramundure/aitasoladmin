@@ -1,9 +1,11 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { storage } from "../../firebaseConfig";
+import { storage } from "@/firebaseConfig";
 import { ref, listAll, uploadBytes, getDownloadURL, deleteObject, StorageReference } from "firebase/storage";
 import Alert from "../ui/alert/Alert";
-import { FolderIcon, TrashBinIcon, ArrowUpIcon, PlusIcon, VideoIcon, CopyIcon, PageIcon, HomeIcon } from "../../icons";
-import { useSite } from "../../context/SiteContext";
+import { FolderIcon, TrashBinIcon, ArrowUpIcon, PlusIcon, VideoIcon, CopyIcon, PageIcon, HomeIcon } from "@/icons";
+import { useSite } from "@/context/SiteContext";
 import { Modal } from "../ui/modal";
 
 interface MediaLibraryProps {

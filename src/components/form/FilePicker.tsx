@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { X, FileText } from 'lucide-react';
 import { Modal } from '../ui/modal';

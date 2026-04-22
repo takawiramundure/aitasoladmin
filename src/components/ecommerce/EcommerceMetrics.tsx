@@ -1,7 +1,9 @@
+"use client";
+
 import {
   BoxIconLine,
   GroupIcon,
-} from "../../icons";
+} from "@/icons";
 // import Badge from "../ui/badge/Badge";
 
 interface EcommerceMetricsProps {

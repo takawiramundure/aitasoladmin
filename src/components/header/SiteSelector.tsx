@@ -1,5 +1,7 @@
+"use client";
+
 import { useState, useRef, useEffect } from 'react';
-import { useSite } from '../../context/SiteContext';
+import { useSite } from "@/context/SiteContext";
 
 export default function SiteSelector() {
     const { currentSite, switchSite, sites } = useSite();

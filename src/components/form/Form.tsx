@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, ReactNode, FormEvent } from "react";
 
 interface FormProps {

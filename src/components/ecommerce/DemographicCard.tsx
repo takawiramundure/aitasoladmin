@@ -1,5 +1,8 @@
+"use client";
+
 import { useMemo } from "react";
-// import CountryMap from "./CountryMap"; // Hiding map for now or keeping static
+import dynamic from 'next/dynamic';
+const CountryMap = dynamic(() => import("./CountryMap"), { ssr: false }); // Hiding map for now or keeping static
 
 interface DemographicCardProps {
   data?: any;

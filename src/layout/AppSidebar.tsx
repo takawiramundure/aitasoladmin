@@ -1,5 +1,8 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { Link, useLocation } from "react-router";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // Assume these icons are imported from an icon library
 import {
@@ -11,10 +14,10 @@ import {
   PieChartIcon,
   PlugInIcon,
   UserCircleIcon,
-} from "../icons";
-import { useSidebar } from "../context/SidebarContext";
-import { useSite } from "../context/SiteContext";
-import { useAuth } from "../context/AuthContext";
+} from "@/icons";
+import { useSidebar } from "@/context/SidebarContext";
+import { useSite } from "@/context/SiteContext";
+import { useAuth } from "@/context/AuthContext";
 
 type NavItem = {
   name: string;
@@ -27,7 +30,7 @@ const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const { currentSite } = useSite();
   const { profile } = useAuth();
-  const location = useLocation();
+  const location = usePathname();
 
   const navItems = useMemo(() => {
     const commonItems: NavItem[] = [
@@ -586,7 +589,7 @@ const AppSidebar: React.FC = () => {
           ) : (
             nav.path && (
               <Link
-                to={nav.path}
+                href={nav.path}
                 className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
                   }`}
               >
@@ -621,7 +624,7 @@ const AppSidebar: React.FC = () => {
                 {nav.subItems.map((subItem) => (
                   <li key={subItem.name}>
                     <Link
-                      to={subItem.path}
+                      href={subItem.path}
                       className={`menu-dropdown-item ${isActive(subItem.path)
                         ? "menu-dropdown-item-active"
                         : "menu-dropdown-item-inactive"
@@ -679,7 +682,7 @@ const AppSidebar: React.FC = () => {
         className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
           }`}
       >
-        <Link to="/">
+        <Link href="/">
           {isExpanded || isHovered || isMobileOpen ? (
             <>
               <img

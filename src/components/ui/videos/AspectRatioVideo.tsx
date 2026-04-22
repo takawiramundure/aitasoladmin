@@ -1,3 +1,5 @@
+"use client";
+
 type AspectRatioVideoProps = {
   videoUrl: string; // URL of the video
   aspectRatio?: string; // Aspect ratio in the format "width/height", default is "16/9"

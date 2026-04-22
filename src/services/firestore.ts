@@ -1,7 +1,7 @@
-import { getDb } from "../firebaseConfig";
-import { getSiteById } from "../config/sites";
+import { getDb } from "@/firebaseConfig";
+import { getSiteById } from "@/config/sites";
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, deleteDoc } from "firebase/firestore";
-import { SiteSettings } from "../types/siteSettings";
+import { SiteSettings } from "@/types/siteSettings";
 
 export interface PageContent {
     title?: string;

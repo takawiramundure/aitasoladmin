@@ -1,10 +1,12 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Video, X, Upload } from 'lucide-react';
 import MediaLibrary from '../common/MediaLibrary';
 import Button from '../ui/button/Button';
 import Label from './Label';
 import InputField from './input/InputField';
-import { useSite } from '../../context/SiteContext';
+import { useSite } from "@/context/SiteContext";
 
 interface VideoPickerProps {
     label?: string;

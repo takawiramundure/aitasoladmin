@@ -1,4 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+"use client";
+
+
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import Unauthorized from "./pages/OtherPage/Unauthorized";
@@ -19,8 +21,8 @@ import SiteSettingsManager from "./pages/Settings/SiteSettingsManager";
 import SEOManager from "./pages/Settings/SEOManager";
 import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
-import AppLayout from "./layout/AppLayout";
-import { ScrollToTop } from "./components/common/ScrollToTop";
+import AppLayout from "@/layout/AppLayout";
+import { ScrollToTop } from "@/components/common/ScrollToTop";
 import Home from "./pages/Dashboard/Home";
 import AnalyticsOverview from "./pages/Dashboard/AnalyticsOverview";
 import SharedAnalytics from "./pages/Dashboard/SharedAnalytics";
@@ -58,12 +60,12 @@ import PortfolioManager from "./pages/CMS/PortfolioManager";
 import ServicesManager from "./pages/CMS/ServicesManager";
 import ReviewsManager from "./pages/CMS/ReviewsManager";
 import UserManagement from "./pages/Users/UserManagement";
-import { AuthProvider } from "./context/AuthContext";
-import { AnalyticsProvider } from "./context/AnalyticsContext";
-import { SiteProvider } from "./context/SiteContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { AuthProvider } from "@/context/AuthContext";
+import { AnalyticsProvider } from "@/context/AnalyticsContext";
+import { SiteProvider } from "@/context/SiteContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { ANALYTICS_CONFIG } from "./config/analyticsConfig";
+import { ANALYTICS_CONFIG } from "@/config/analyticsConfig";
 
 export default function App() {
   return (

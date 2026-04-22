@@ -1,3 +1,5 @@
+"use client";
+
 import MediaLibrary from "./MediaLibrary";
 import { Modal } from "../ui/modal";
 

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Link, Globe } from 'lucide-react';
 import Input from './input/InputField';

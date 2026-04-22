@@ -1,13 +1,15 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import { SidebarProvider, useSidebar } from "../context/SidebarContext";
-import { Outlet } from "react-router";
+import { SidebarProvider, useSidebar } from "@/context/SidebarContext";
+
 import AppHeader from "./AppHeader";
 import Backdrop from "./Backdrop";
 import AppSidebar from "./AppSidebar";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { AlertTriangleIcon } from "lucide-react";
-import Button from "../components/ui/button/Button";
-import { FirestoreService } from "../services/firestore";
+import Button from "@/components/ui/button/Button";
+import { FirestoreService } from "@/services/firestore";
 
 const LayoutContent: React.FC = () => {
   const { isExpanded, isHovered, isMobileOpen } = useSidebar();

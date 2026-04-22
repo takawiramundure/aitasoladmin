@@ -1,3 +1,5 @@
+"use client";
+
 interface RadioProps {
   id: string; // Unique ID for the radio button
   name: string; // Group name for the radio button
