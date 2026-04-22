@@ -45,6 +45,9 @@ interface HeroSlide {
     pillText?: string;
     cta: string;
     link: string;
+    ticketCta?: string;
+    ticketCtaLink?: string;
+    showTicketCta?: boolean;
     isActive: boolean;
 }
 
@@ -191,6 +194,9 @@ export default function HeroManager() {
             pillText: "",
             cta: "Learn More",
             link: "#",
+            ticketCta: "Get Tickets",
+            ticketCtaLink: "/tickets",
+            showTicketCta: true,
             isActive: true
         };
         setSlides([...slides, newSlide]);
@@ -217,6 +223,9 @@ export default function HeroManager() {
             pillText: "Welcome to Kind Minds Family Wellness",
             cta: "Get Support Now",
             link: "/services",
+            ticketCta: "Get Tickets",
+            ticketCtaLink: "/tickets",
+            showTicketCta: true,
             isActive: true
         };
         setSlides([kmfwSlide]);
@@ -424,7 +433,7 @@ export default function HeroManager() {
                                             </div>
                                             <div className="grid grid-cols-2 gap-4 mt-4">
                                                 <div>
-                                                    <Label>Button Text</Label>
+                                                    <Label>Primary Button Text</Label>
                                                     <Input
                                                         type="text"
                                                         placeholder="e.g. Learn More"
@@ -433,12 +442,48 @@ export default function HeroManager() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <Label>Button Link</Label>
+                                                    <Label>Primary Button Link</Label>
                                                     <Input
                                                         type="text"
                                                         placeholder="e.g. /about"
                                                         value={slide.link || ""}
                                                         onChange={(e) => updateSlide(slide.id, 'link', e.target.value)}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                                                <div className="col-span-2 flex items-center justify-between">
+                                                    <Label className="!mb-0">Secondary Button (Gold Gradient / Tickets)</Label>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-gray-500">{slide.showTicketCta !== false ? 'Enabled' : 'Disabled'}</span>
+                                                        <button
+                                                            onClick={() => updateSlide(slide.id, 'showTicketCta', slide.showTicketCta === false)}
+                                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${slide.showTicketCta !== false ? 'bg-blue-600' : 'bg-gray-300'}`}
+                                                            onPointerDown={(e) => e.stopPropagation()}
+                                                        >
+                                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${slide.showTicketCta !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <Label>Button Label</Label>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="e.g. Get Tickets"
+                                                        value={slide.ticketCta || ""}
+                                                        onChange={(e) => updateSlide(slide.id, 'ticketCta', e.target.value)}
+                                                        disabled={slide.showTicketCta === false}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>Button Link</Label>
+                                                    <Input
+                                                        type="text"
+                                                        placeholder="e.g. /tickets"
+                                                        value={slide.ticketCtaLink || ""}
+                                                        onChange={(e) => updateSlide(slide.id, 'ticketCtaLink', e.target.value)}
+                                                        disabled={slide.showTicketCta === false}
                                                     />
                                                 </div>
                                             </div>

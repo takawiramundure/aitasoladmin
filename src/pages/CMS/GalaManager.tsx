@@ -32,6 +32,7 @@ interface GalaSection extends SectionContent {
     link?: string;
     buttonText2?: string;
     link2?: string;
+    showTicketCta?: boolean;
     keynote?: any;
     panelists?: any[];
     content: string; // Ensure compatibility with SectionContent
@@ -240,6 +241,7 @@ export default function GalaManager() {
                     link: "https://www.eventbrite.ca/e/black-excellence-awards-gala-tickets-1977921994931?aff=oddtdtcreator",
                     buttonText2: "Learn More",
                     link2: "#about",
+                    showTicketCta: true,
                     content: "", // Added to satisfy GalaSection interface
                     enabled: true // Added to satisfy GalaSection interface
                 },
@@ -431,6 +433,19 @@ export default function GalaManager() {
                                                 <div className="md:col-span-1">
                                                     <Label>Button 2 Link</Label>
                                                     <LinkPicker value={section.link2 || ''} onChange={(val) => handleSectionChange('hero', 'link2', val)} />
+                                                </div>
+
+                                                <div className="md:col-span-2 border-t pt-4 flex items-center justify-between">
+                                                    <Label className="!mb-0">Ticket Button Visibility</Label>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs text-gray-500">{section.showTicketCta !== false ? 'Enabled' : 'Disabled'}</span>
+                                                        <button
+                                                            onClick={() => handleSectionChange('hero', 'showTicketCta', section.showTicketCta === false)}
+                                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${section.showTicketCta !== false ? 'bg-blue-600' : 'bg-gray-300'}`}
+                                                        >
+                                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${section.showTicketCta !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+                                                        </button>
+                                                    </div>
                                                 </div>
 
                                                 <div className="md:col-span-2 border-t pt-4"><Label>Hero Image</Label><ImagePicker value={section.images?.[0]?.url || ''} onChange={(url) => handleSectionChange('hero', 'images', [{url, alt: ''}])} /></div>
