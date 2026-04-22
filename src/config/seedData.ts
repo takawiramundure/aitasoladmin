@@ -1455,4 +1455,70 @@ export const SETTINGS_SEED = {
             updatedBy: 'system'
         }
     },
+    phcg: {
+        hero_slider: {
+            slides: [
+                {
+                    id: 'ph1',
+                    title: 'Compassionate Home Care for Your Loved Ones',
+                    subtitle: 'Professional PSW and nursing services tailored to your needs in the comfort of home.',
+                    cta: 'View Services',
+                    link: '/services',
+                    imageUrl: 'https://images.unsplash.com/photo-1576765608870-67b5e2ef2db0?q=80&w=1920&h=1080&fit=crop',
+                    isActive: true
+                },
+                {
+                    id: 'ph2',
+                    title: 'Your Health, Our Priority',
+                    subtitle: 'Our team of RNs and RPNs provide expert medical care right at your doorstep.',
+                    cta: 'Book Consultation',
+                    link: '/#appointment',
+                    imageUrl: 'https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1920&h=1080&fit=crop',
+                    isActive: true
+                }
+            ]
+        }
+    },
+    aitasol: {
+        hero_slider: {
+            slides: [
+                {
+                    id: 'a1',
+                    title: 'Your Journey to Global Education Starts Here',
+                    subtitle: 'Expert guidance for study abroad opportunities in the world\'s top destinations.',
+                    cta: 'Free Consultation',
+                    link: '/contact',
+                    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1920&h=1080&fit=crop',
+                    isActive: true
+                },
+                {
+                    id: 'a2',
+                    title: 'Unlock Your Potential at World-Class Universities',
+                    subtitle: 'From application to visa, we support you every step of the way.',
+                    cta: 'Explore Destinations',
+                    link: '/destinations',
+                    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08759dfc3ef?q=80&w=1920&h=1080&fit=crop',
+                    isActive: true
+                }
+            ]
+        },
+        services: [
+            { id: 's1', slug: 'study-abroad-consulting', title: 'Study Abroad Consulting', shortDescription: 'One-on-one expert counseling to find your perfect fit.', icon: 'GraduationCap', order: 1, isActive: true },
+            { id: 's2', slug: 'university-application', title: 'University Application', shortDescription: 'Seamless application management for global universities.', icon: 'FileText', order: 2, isActive: true },
+            { id: 's3', slug: 'visa-assistance', title: 'Visa Assistance', shortDescription: 'Expert guidance for smooth student visa processing.', icon: 'Passport', order: 3, isActive: true },
+            { id: 's4', slug: 'pre-departure-briefing', title: 'Pre-Departure Briefing', shortDescription: 'Essential info for your new life abroad.', icon: 'Plane', order: 4, isActive: true },
+            { id: 's5', slug: 'scholarship-guidance', title: 'Scholarship Guidance', shortDescription: 'Helping you secure financial aid and grants.', icon: 'Award', order: 5, isActive: true },
+            { id: 's6', slug: 'career-counseling', title: 'Career Counseling', shortDescription: 'Planning your career path post-graduation.', icon: 'Briefcase', order: 6, isActive: true }
+        ],
+        destinations: [
+            { id: 'd1', country: 'Canada', slug: 'canada', flagEmoji: '🇨🇦', heroImage: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?q=80&w=800&fit=crop', description: 'Top-tier education and post-study work opportunities.', isActive: true, order: 1 },
+            { id: 'd2', country: 'United Kingdom', slug: 'uk', flagEmoji: '🇬🇧', heroImage: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=800&fit=crop', description: 'Historic universities and world-renowned degrees.', isActive: true, order: 2 },
+            { id: 'd3', country: 'Australia', slug: 'australia', flagEmoji: '🇦🇺', heroImage: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?q=80&w=800&fit=crop', description: 'High quality of life and globally recognized programs.', isActive: true, order: 3 },
+            { id: 'd4', country: 'USA', slug: 'usa', flagEmoji: '🇺🇸', heroImage: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=80&w=800&fit=crop', description: 'Innovation, diversity, and world-class research.', isActive: true, order: 4 },
+            { id: 'd5', country: 'Germany', slug: 'germany', flagEmoji: '🇩🇪', heroImage: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800&fit=crop', description: 'Tuition-free high-quality education in many states.', isActive: true, order: 5 },
+            { id: 'd6', country: 'New Zealand', slug: 'new-zealand', flagEmoji: '🇳🇿', heroImage: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&fit=crop', description: 'Safe environment and personalized learning.', isActive: true, order: 6 },
+            { id: 'd7', country: 'Ireland', slug: 'ireland', flagEmoji: '🇮🇪', heroImage: 'https://images.unsplash.com/photo-1590089415225-403ed0f96a05?q=80&w=800&fit=crop', description: 'Welcoming culture and booming tech sector.', isActive: true, order: 7 },
+            { id: 'd8', country: 'Malaysia', slug: 'malaysia', flagEmoji: '🇲🇾', heroImage: 'https://images.unsplash.com/photo-1528181304800-2f540292418f?q=80&w=800&fit=crop', description: 'Affordable high-quality education in Asia.', isActive: true, order: 8 }
+        ]
+    }
 };

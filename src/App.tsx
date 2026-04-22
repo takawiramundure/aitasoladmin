@@ -108,6 +108,8 @@ export default function App() {
                     <Route path="/cms/strategic-plan" element={<StrategicPlanManager />} />
                     <Route path="/cms/contact" element={<ContactPageManager />} />
                     <Route path="/cms/messages" element={<MessagesManager />} />
+                    <Route path="/cms/appointments" element={<MessagesManager collectionName="appointments" />} />
+                    <Route path="/cms/applications" element={<MessagesManager collectionName="applications" />} />
                     <Route path="/cms/page-visibility" element={<PageVisibilityManager />} />
                     <Route path="/cms/research" element={<ResearchPageManager />} />
                     <Route path="/cms/project-:projectId" element={<ProjectPageManager />} />

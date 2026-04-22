@@ -53,6 +53,22 @@ export const SITES: Site[] = [
     description: 'Digital Innovation & AI Safety',
     databaseId: 'dmlabs-web',
     usePrefix: false
+  },
+  {
+    id: 'phcg',
+    name: 'Private Home Care Guru',
+    domain: 'privatehomecareguru.ca',
+    description: 'Compassionate Senior Care in Ontario',
+    databaseId: 'phcg-web',
+    usePrefix: false
+  },
+  {
+    id: 'aitasol',
+    name: 'Aitasol',
+    domain: 'aitasol.com',
+    description: 'Education Consultancy & Study Abroad',
+    databaseId: 'aitasol-web',
+    usePrefix: false
   }
 ];
 

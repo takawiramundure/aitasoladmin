@@ -13,12 +13,27 @@ interface Message {
     email: string;
     phone?: string;
     subject?: string;
-    message: string;
+    message?: string;
     timestamp: any;
     status?: string;
+    // For applications
+    qualifications?: string;
+    address?: string;
+    startDate?: string;
+    legallyAbleToWork?: string;
+    // For appointments
+    service?: string;
+    age?: string;
+    hoursNeeded?: string;
+    assessmentDate?: string;
 }
 
-export default function MessagesManager() {
+interface MessagesManagerProps {
+    collectionName?: string;
+    titleOverride?: string;
+}
+
+export default function MessagesManager({ collectionName = "messages", titleOverride }: MessagesManagerProps) {
     const { currentSite } = useSite();
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,33 +41,39 @@ export default function MessagesManager() {
     const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
+    const displayTitle = titleOverride || (
+        collectionName === "messages" ? "Inbound Messages" :
+        collectionName === "appointments" ? "Service Appointments" :
+        collectionName === "applications" ? "Job Applications" : "Inbox"
+    );
+
     useEffect(() => {
         loadMessages();
-    }, [currentSite.id]);
+    }, [currentSite.id, collectionName]);
 
     const loadMessages = async () => {
         setLoading(true);
         try {
-            const data = await FirestoreService.getMessages(currentSite.id);
+            const data = await FirestoreService.getMessages(currentSite.id, collectionName);
             setMessages(data.map((m: any) => ({ ...m, timestamp: m.createdAt })));
         } catch (err) {
             console.error(err);
-            setError("Failed to load messages.");
+            setError(`Failed to load ${collectionName}.`);
         } finally {
             setLoading(false);
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this message?")) return;
+        if (!window.confirm("Are you sure you want to delete this entry?")) return;
         setDeletingId(id);
         try {
-            await FirestoreService.deleteMessage(currentSite.id, id);
+            await FirestoreService.deleteMessage(currentSite.id, id, collectionName);
             setMessages(prev => prev.filter(m => m.id !== id));
             if (selectedMessage?.id === id) setSelectedMessage(null);
         } catch (err) {
             console.error(err);
-            alert("Failed to delete message.");
+            alert("Failed to delete entry.");
         } finally {
             setDeletingId(null);
         }
@@ -66,13 +87,13 @@ export default function MessagesManager() {
 
     return (
         <>
-            <PageMeta title="Inbound Messages | Admin Portal" description="Review contact form submissions" />
-            <PageBreadcrumb pageTitle="Inbound Messages" />
+            <PageMeta title={`${displayTitle} | Admin Portal`} description={`Review ${collectionName} submissions`} />
+            <PageBreadcrumb pageTitle={displayTitle} />
 
             <div className="p-6 max-w-6xl mx-auto">
                 <div className="mb-8">
-                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Inbound Messages</h2>
-                    <p className="text-sm text-gray-500">Review and manage messages sent via the website's secure contact form.</p>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{displayTitle}</h2>
+                    <p className="text-sm text-gray-500">Review and manage {collectionName} sent via the website's secure forms.</p>
                 </div>
 
                 {error && <div className="mb-6"><Alert variant="error" title="Error" message={error} /></div>}
@@ -96,8 +117,11 @@ export default function MessagesManager() {
                                 <thead>
                                     <tr className="bg-gray-50 dark:bg-white/[0.02] border-b border-gray-100 dark:border-gray-800">
                                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Sender</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Subject / Message</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                            {collectionName === "messages" ? "Subject / Message" : 
+                                             collectionName === "appointments" ? "Service / Date" : "Qualifications / Role"}
+                                        </th>
+                                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date Received</th>
                                         <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
                                     </tr>
                                 </thead>
@@ -116,8 +140,14 @@ export default function MessagesManager() {
                                             </td>
                                             <td className="px-6 py-4 max-w-xs md:max-w-md">
                                                 <div className="flex flex-col">
-                                                    <span className="font-semibold text-gray-700 dark:text-gray-300 truncate">{msg.subject || "No Subject"}</span>
-                                                    <span className="text-xs text-gray-500 truncate">{msg.message}</span>
+                                                    <span className="font-semibold text-gray-700 dark:text-gray-300 truncate">
+                                                        {collectionName === "messages" ? (msg.subject || "No Subject") : 
+                                                         collectionName === "appointments" ? msg.service : msg.qualifications}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500 truncate">
+                                                        {collectionName === "messages" ? msg.message : 
+                                                         collectionName === "appointments" ? `Assessment: ${msg.assessmentDate}` : `Start: ${msg.startDate}`}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -194,29 +224,79 @@ export default function MessagesManager() {
                                 </div>
                             </div>
 
-                            <div className="space-y-1 pt-4 border-t border-gray-50 dark:border-gray-800">
-                                <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Subject</label>
-                                <div className="text-lg font-bold text-gray-800 dark:text-white italic">
-                                    "{selectedMessage.subject || "No Subject"}"
+                            {selectedMessage.subject && (
+                                <div className="space-y-1 pt-4 border-t border-gray-50 dark:border-gray-800">
+                                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Subject</label>
+                                    <div className="text-lg font-bold text-gray-800 dark:text-white italic">
+                                        "{selectedMessage.subject}"
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <div className="space-y-1">
-                                <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Message Body</label>
-                                <div className="p-6 bg-gray-50 dark:bg-white/[0.02] rounded-2xl border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                    {selectedMessage.message}
+                            {selectedMessage.message && (
+                                <div className="space-y-1">
+                                    <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Message Body</label>
+                                    <div className="p-6 bg-gray-50 dark:bg-white/[0.02] rounded-2xl border border-gray-100 dark:border-gray-800 text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                        {selectedMessage.message}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+
+                            {collectionName === "appointments" && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-50 dark:border-gray-800">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Service Needed</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.service}</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Patient Age</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.age}</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Assessment Date</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.assessmentDate}</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Hours Needed</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.hoursNeeded}</div>
+                                    </div>
+                                    <div className="md:col-span-2 space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Address</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.address}</div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {collectionName === "applications" && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-50 dark:border-gray-800">
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Qualifications</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.qualifications}</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Work Eligibility</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.legallyAbleToWork}</div>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Preferred Start</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.startDate}</div>
+                                    </div>
+                                    <div className="md:col-span-2 space-y-1">
+                                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Address</label>
+                                        <div className="font-bold text-gray-800 dark:text-white">{selectedMessage.address}</div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Modal Footer */}
                         <div className="px-8 py-6 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3 bg-gray-50/30 dark:bg-white/[0.01]">
                             <Button variant="outline" onClick={() => setSelectedMessage(null)}>Close</Button>
                             <Button variant="outline" className="text-red-500 border-red-100 hover:bg-red-50" onClick={() => handleDelete(selectedMessage.id)}>
-                                <Trash2 className="w-4 h-4 mr-2" /> Delete Message
+                                <Trash2 className="w-4 h-4 mr-2" /> Delete Entry
                             </Button>
                             <a 
-                                href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject || 'Your message to KMFW'}`} 
+                                href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject || `Your request to ${currentSite.name}`}`} 
                                 className="inline-flex items-center px-6 py-3 rounded-full bg-primary text-white font-bold hover:scale-105 transition-transform"
                             >
                                 <PaperPlaneIcon className="w-4 h-4 mr-2" /> Reply via Email

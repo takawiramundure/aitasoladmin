@@ -266,6 +266,31 @@ export default function HeroManager() {
         setSuccessMsg("Noel Construction Hero content seeded! Remember to click Save Changes.");
     };
 
+    const seedPHCGHero = () => {
+        const phcgSlides: HeroSlide[] = [
+            {
+                id: 'ph1-' + Date.now(),
+                title: 'Compassionate Home Care for Your Loved Ones',
+                subtitle: 'Professional PSW and nursing services tailored to your needs in the comfort of home.',
+                cta: 'View Services',
+                link: '/services',
+                imageUrl: 'https://images.unsplash.com/photo-1576765608870-67b5e2ef2db0?q=80&w=1920&h=1080&fit=crop',
+                isActive: true
+            },
+            {
+                id: 'ph2-' + Date.now(),
+                title: 'Your Health, Our Priority',
+                subtitle: 'Our team of RNs and RPNs provide expert medical care right at your doorstep.',
+                cta: 'Book Consultation',
+                link: '/#appointment',
+                imageUrl: 'https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1920&h=1080&fit=crop',
+                isActive: true
+            }
+        ];
+        setSlides(phcgSlides);
+        setSuccessMsg("PHCG Hero content seeded! Remember to click Save Changes.");
+    };
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (active.id !== over?.id) {
@@ -302,6 +327,11 @@ export default function HeroManager() {
                         {currentSite.id === 'noel' && (
                             <Button variant="outline" onClick={seedNoelHero}>
                                 Seed Noel Hero Content
+                            </Button>
+                        )}
+                        {currentSite.id === 'phcg' && (
+                            <Button variant="outline" onClick={seedPHCGHero}>
+                                Seed PHCG Hero Content
                             </Button>
                         )}
                         <Button variant="outline" onClick={migrateImages} disabled={migrating}>

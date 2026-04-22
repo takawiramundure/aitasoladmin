@@ -629,11 +629,12 @@ export const FirestoreService = {
     },
 
     // Message Management
-    getMessages: async (siteId: string): Promise<any[]> => {
+    getMessages: async (siteId: string, collectionOverride?: string): Promise<any[]> => {
         try {
             const site = getSiteById(siteId);
             const dbInstance = getDb(siteId);
-            const collectionName = site?.usePrefix !== false ? `${siteId}_messages` : 'messages';
+            const defaultCollection = collectionOverride || 'messages';
+            const collectionName = site?.usePrefix !== false ? `${siteId}_${defaultCollection}` : defaultCollection;
             const messagesRef = collection(dbInstance, collectionName);
             const snapshot = await getDocs(messagesRef);
             return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
@@ -643,20 +644,21 @@ export const FirestoreService = {
                     return timeB - timeA;
                 });
         } catch (error) {
-            console.error("Error fetching messages:", error);
+            console.error(`Error fetching ${collectionOverride || 'messages'}:`, error);
             return [];
         }
     },
 
-    deleteMessage: async (siteId: string, messageId: string) => {
+    deleteMessage: async (siteId: string, messageId: string, collectionOverride?: string) => {
         try {
             const site = getSiteById(siteId);
             const dbInstance = getDb(siteId);
-            const collectionName = site?.usePrefix !== false ? `${siteId}_messages` : 'messages';
+            const defaultCollection = collectionOverride || 'messages';
+            const collectionName = site?.usePrefix !== false ? `${siteId}_${defaultCollection}` : defaultCollection;
             const docRef = doc(dbInstance, collectionName, messageId);
             await deleteDoc(docRef);
         } catch (error) {
-            console.error("Error deleting message:", error);
+            console.error(`Error deleting ${collectionOverride || 'message'}:`, error);
             throw error;
         }
     },

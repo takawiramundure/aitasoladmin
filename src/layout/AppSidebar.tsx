@@ -351,6 +351,43 @@ const AppSidebar: React.FC = () => {
       ];
     }
 
+    if (currentSite.id === 'phcg') {
+      return [
+        ...commonItems,
+        {
+          icon: <BoxCubeIcon />,
+          name: "Hero Slider",
+          path: "/cms/hero",
+        },
+        {
+          name: "Page Sections",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "About PHCG", path: "/cms/about" },
+            { name: "Services", path: "/cms/services" },
+            { name: "FAQs", path: "/cms/faq" },
+            { name: "Testimonials", path: "/cms/reviews" },
+            { name: "Careers", path: "/cms/careers" },
+            { name: "Footer Details", path: "/cms/footer" },
+          ],
+        },
+        {
+          name: "Inbound Messages",
+          icon: <HorizontaLDots />,
+          subItems: [
+            { name: "Contacts", path: "/cms/messages" },
+            { name: "Appointments", path: "/cms/appointments" },
+            { name: "Job Applications", path: "/cms/applications" },
+          ]
+        },
+        {
+          icon: <BoxCubeIcon />,
+          name: "Media Library",
+          path: "/cms/media",
+        },
+      ];
+    }
+
     // Default NSPC Menu
     return [
       ...commonItems,
