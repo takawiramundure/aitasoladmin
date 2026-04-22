@@ -213,29 +213,32 @@ export default function EventHeroManager() {
                                 Call-to-Action Buttons
                             </h2>
 
-                            <div className="flex items-center justify-between mb-2">
-                                <label className={labelClass}>🎟 Primary (Gold) Button Label</label>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-500">{data.showTicketCta !== false ? 'Enabled' : 'Disabled'}</span>
-                                    <button
-                                        onClick={() => update('showTicketCta', data.showTicketCta === false)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${data.showTicketCta !== false ? 'bg-yellow-500' : 'bg-gray-300'}`}
-                                    >
-                                        <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${data.showTicketCta !== false ? 'translate-x-6' : 'translate-x-1'}`} />
-                                    </button>
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <label className={labelClass}>🎟 Primary (Gold) Button Label</label>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs text-gray-500">{data.showTicketCta !== false ? 'Enabled' : 'Disabled'}</span>
+                                        <button
+                                            onClick={() => update('showTicketCta', data.showTicketCta === false)}
+                                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${data.showTicketCta !== false ? 'bg-yellow-500' : 'bg-gray-300'}`}
+                                        >
+                                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${data.showTicketCta !== false ? 'translate-x-6' : 'translate-x-1'}`} />
+                                        </button>
+                                    </div>
                                 </div>
+                                <input className={inputClass} value={data.ticketCta} onChange={e => update('ticketCta', e.target.value)} placeholder="Get Your Tickets" disabled={data.showTicketCta === false} />
                             </div>
-                            <input className={inputClass} value={data.ticketCta} onChange={e => update('ticketCta', e.target.value)} placeholder="Get Your Tickets" disabled={data.showTicketCta === false} />
-                        </div>
-                        <div>
-                            <label className={labelClass}>🎟 Primary Button Link (URL)</label>
-                            <input className={inputClass} value={data.ticketCtaLink} onChange={e => update('ticketCtaLink', e.target.value)} placeholder="https://eventbrite.ca/..." disabled={data.showTicketCta === false} />
-                        </div>
+
+                            <div>
+                                <label className={labelClass}>🎟 Primary Button Link (URL)</label>
+                                <input className={inputClass} value={data.ticketCtaLink} onChange={e => update('ticketCtaLink', e.target.value)} placeholder="https://eventbrite.ca/..." disabled={data.showTicketCta === false} />
+                            </div>
 
                             <div>
                                 <label className={labelClass}>Secondary Button Label</label>
                                 <input className={inputClass} value={data.primaryCta} onChange={e => update('primaryCta', e.target.value)} placeholder="Explore The Gala" />
                             </div>
+
                             <div>
                                 <label className={labelClass}>Secondary Button Link (path or URL)</label>
                                 <input className={inputClass} value={data.primaryCtaLink} onChange={e => update('primaryCtaLink', e.target.value)} placeholder="/impact/events/black-excellence-gala" />
