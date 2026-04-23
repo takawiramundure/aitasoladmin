@@ -354,6 +354,41 @@ const AppSidebar: React.FC = () => {
       ];
     }
 
+    if (currentSite.id === 'aitasol') {
+      return [
+        ...commonItems,
+        {
+          name: "Application Manager",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "Student Applications", path: "/cms/aitasol-applications" },
+            { name: "Global Services", path: "/cms/services" },
+            { name: "Destinations", path: "/cms/destinations" },
+          ]
+        },
+        {
+          name: "Site Content",
+          icon: <BoxCubeIcon />,
+          subItems: [
+            { name: "Home Page", path: "/cms/home-settings" },
+            { name: "About Page", path: "/cms/about" },
+            { name: "Universities", path: "/cms/universities" },
+            { name: "Blog / News", path: "/cms/blog" },
+            { name: "Contact Page", path: "/cms/contact" },
+          ]
+        },
+        {
+          name: "Media & Footer",
+          icon: <PageIcon />,
+          subItems: [
+            { name: "Hero Slider", path: "/cms/hero" },
+            { name: "Media Library", path: "/cms/media" },
+            { name: "Footer Details", path: "/cms/footer" },
+          ]
+        },
+      ];
+    }
+
     if (currentSite.id === 'phcg') {
       return [
         ...commonItems,

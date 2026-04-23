@@ -27,15 +27,15 @@ export function SiteProvider({ children }: { children: ReactNode }) {
         return SITES.filter(site => profile.allowedSites?.includes(site.id));
     }, [profile]);
 
-    const [currentSite, setCurrentSite] = useState<Site>(() => {
+    const [currentSite, setCurrentSite] = useState<Site>(getDefaultSite());
+
+    useEffect(() => {
         const savedSiteId = localStorage.getItem(STORAGE_KEY);
-        // We can't validate against profile yet on init, so rely on effect to correct it later
         if (savedSiteId) {
             const site = getSiteById(savedSiteId);
-            if (site) return site;
+            if (site) setCurrentSite(site);
         }
-        return getDefaultSite();
-    });
+    }, []);
 
     // Validate and correct current site when profile/availableSites changes
     useEffect(() => {

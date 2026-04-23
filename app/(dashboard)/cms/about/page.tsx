@@ -46,6 +46,13 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'team', label: 'Team Section' }
         ];
     }
+    if (siteId === 'aitasol') {
+        return [
+            { id: 'hero', label: 'Hero Section' },
+            { id: 'mission', label: 'Mission & Vision' },
+            { id: 'values', label: 'Core Values' }
+        ];
+    }
     // Fallback BWEIC config
     return [
         { id: 'header', label: 'About Header' },
@@ -145,6 +152,32 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                 heading: "Meet the Team",
                 content: "Our diverse team of designers, engineers, and strategists are united by one mission: helping good organizations do more good in the world.",
                 enabled: true
+            }
+        };
+    }
+
+    if (siteId === 'aitasol') {
+        return {
+            hero: {
+                heading: "Your Partner in Global Education Excellence",
+                subtitle: "Empowering Students Since 2014",
+                content: "<p>Aitasol is a leading education consultancy dedicated to helping students achieve their dreams of international education.</p>",
+                enabled: true,
+                images: [{ url: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&h=1080&fit=crop', alt: 'Education consultancy' }]
+            },
+            mission: {
+                heading: "Our Mission & Vision",
+                content: "<p>Our mission is to simplify the complex process of international university applications and visa processing.</p>",
+                enabled: true
+            },
+            values: {
+                heading: "The Values That Guide Us",
+                subtitle: "Our Core Principles",
+                enabled: true,
+                items: [
+                    { title: "Integrity", desc: "Honest guidance throughout the process.", icon: "ShieldCheck" },
+                    { title: "Excellence", desc: "High success rates in admissions.", icon: "Award" }
+                ]
             }
         };
     }
@@ -308,7 +341,7 @@ export default function AboutPageManager() {
                         </p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
-                        {['dmlabs', 'noel'].includes(currentSite.id) && (
+                        {['dmlabs', 'noel', 'aitasol'].includes(currentSite.id) && (
                             <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                                 🌱 Seed Default Data
                             </Button>

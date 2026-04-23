@@ -49,13 +49,7 @@ export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) =
     const [isConnected, setIsConnected] = useState(false);
     const [isInitialized, setIsInitialized] = useState(false);
     
-    // Use site-specific property ID or fallback to the one in localStorage/global default
-    const getInitialPropertyId = () => {
-        if (currentSite?.ga4PropertyId) return currentSite.ga4PropertyId;
-        return localStorage.getItem('ga4_property_id') || ANALYTICS_CONFIG.DEFAULT_PROPERTY_ID;
-    };
-
-    const [propertyId, setPropertyId] = useState(getInitialPropertyId());
+    const [propertyId, setPropertyId] = useState(ANALYTICS_CONFIG.DEFAULT_PROPERTY_ID);
     const [analyticsData, setAnalyticsData] = useState<any | null>(null);
     const [demographicsData, setDemographicsData] = useState<any | null>(null);
     const [topPagesData, setTopPagesData] = useState<any | null>(null);
@@ -66,19 +60,24 @@ export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) =
 
     const [loadingData, setLoadingData] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [token, setToken] = useState<string | null>(localStorage.getItem('ga_access_token'));
+    const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
+        // Load persisted state on mount
+        const savedPropertyId = localStorage.getItem('ga4_property_id');
+        if (savedPropertyId) setPropertyId(savedPropertyId);
+        
+        const savedToken = localStorage.getItem('ga_access_token');
+        if (savedToken) {
+            setToken(savedToken);
+            setAccessToken(savedToken);
+            setIsConnected(true);
+        }
+        
         const initialize = async () => {
-            // ... existing initialization code
             try {
                 await initGoogleClient();
                 setIsInitialized(true);
-
-                if (token) {
-                    setAccessToken(token);
-                    setIsConnected(true);
-                }
             } catch (error) {
                 console.error("Failed to initialize Google Analytics client", error);
                 setError("Failed to initialize Google API. Please refresh capabilities.");
@@ -112,7 +111,6 @@ export const AnalyticsProvider = ({ children }: { children: React.ReactNode }) =
 
     const login = useGoogleLogin({
         onSuccess: (tokenResponse) => {
-
             const accessToken = tokenResponse.access_token;
             setAccessToken(accessToken);
             setToken(accessToken);

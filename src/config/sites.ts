@@ -67,7 +67,7 @@ export const SITES: Site[] = [
     name: 'Aitasol',
     domain: 'aitasol.com',
     description: 'Education Consultancy & Study Abroad',
-    databaseId: 'aitasol-web',
+    databaseId: 'aitahsol-web', // Matched with aitasol-web/.env PROJECT_ID
     usePrefix: false
   }
 ];

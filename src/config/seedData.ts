@@ -1304,6 +1304,170 @@ export const SEED_DATA: any = {
                 }
             ]
         }
+    },
+    phcg: {
+        home: {
+            title: 'Private Home Care Guru',
+            sections: {
+                hero: {
+                    badge: "Professional Care at Home",
+                    title: "Compassionate Home Care for Your Loved Ones",
+                    subtitle: "Providing expert nursing and PSW services in the comfort of your home. Your health and dignity are our top priority.",
+                    primaryButton: "Our Services",
+                    secondaryButton: "Book Consultation",
+                    imageUrl: "https://images.unsplash.com/photo-1576765608870-67b5e2ef2db0?q=80&w=1920&h=1080&fit=crop",
+                    enabled: true
+                }
+            }
+        },
+        hero_slider: {
+            slides: [
+                {
+                    id: 'ph1',
+                    title: 'Compassionate Home Care for Your Loved Ones',
+                    subtitle: 'Professional PSW and nursing services tailored to your needs in the comfort of home.',
+                    cta: 'View Services',
+                    link: '/services',
+                    imageUrl: 'https://images.unsplash.com/photo-1576765608870-67b5e2ef2db0?q=80&w=1920&h=1080&fit=crop',
+                    isActive: true
+                },
+                {
+                    id: 'ph2',
+                    title: 'Your Health, Our Priority',
+                    subtitle: 'Our team of RNs and RPNs provide expert medical care right at your doorstep.',
+                    cta: 'Book Consultation',
+                    link: '/#appointment',
+                    imageUrl: 'https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1920&h=1080&fit=crop',
+                    isActive: true
+                }
+            ]
+        }
+    },
+    aitasol: {
+        home: {
+            title: 'Home',
+            sections: {
+                hero: {
+                    badge: "Trusted by 5,000+ Students",
+                    title: "Your Journey to Global Education Starts Here",
+                    subtitle: "Unlock world-class opportunities with expert guidance. We help you navigate applications, visas, and scholarships for the world's top universities.",
+                    primaryButton: "Free Consultation",
+                    secondaryButton: "Explore Destinations",
+                    imageUrl: "/hero-bg.png",
+                    enabled: true
+                },
+                stats: {
+                    heading: "Our Impact",
+                    items: [
+                        { label: "Students Placed", value: "5,000+", color: "text-blue-600", bg: "bg-blue-50", icon: "Users" },
+                        { label: "Partner Universities", value: "500+", color: "text-amber-600", bg: "bg-amber-50", icon: "Landmark" },
+                        { label: "Destinations", value: "15+", color: "text-emerald-600", bg: "bg-emerald-50", icon: "Globe" },
+                        { label: "Visa Success Rate", value: "98%", color: "text-rose-600", bg: "bg-rose-50", icon: "CheckCircle2" }
+                    ],
+                    enabled: true
+                },
+                process: {
+                    heading: "How We Help You Succeed",
+                    subtitle: "A simplified, transparent four-step process to take you from your initial inquiry to your dream university.",
+                    items: [
+                        { title: "Free Inquiry", desc: "Submit your details and get an initial free consultation from our experts.", color: "bg-blue-600", icon: "MessageSquare" },
+                        { title: "Counseling", desc: "One-on-one sessions to finalize your course, university, and destination.", color: "bg-amber-600", icon: "ClipboardCheck" },
+                        { title: "Application", desc: "We manage your entire application process and documentation with precision.", color: "bg-emerald-600", icon: "GraduationCap" },
+                        { title: "Visa & Departure", desc: "Secure your student visa and prepare for your exciting new journey.", color: "bg-primary", icon: "Plane" }
+                    ],
+                    enabled: true
+                },
+                testimonials: {
+                    heading: "What Our Students Say",
+                    subtitle: "Join thousands of successful students who have started their international education journey with Aitasol.",
+                    items: [
+                        { name: "Sarah Johnson", university: "University of Toronto", country: "Canada", program: "Master of Computer Science", quote: "Aitasol made my dream of studying in Canada a reality. Their expert guidance on documentation and visa was flawless.", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" },
+                        { name: "Ahmed Raza", university: "Imperial College London", country: "UK", program: "MSc in Data Science", quote: "The personalized counseling sessions helped me choose the right program that aligned perfectly with my career goals.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" }
+                    ],
+                    enabled: true
+                },
+                cta: {
+                    heading: "Ready to Start Your Global Success Story?",
+                    subtitle: "Don't navigate the complex world of international education alone. Let our experts guide you every step of the way.",
+                    primaryButton: "Book Free Consultation",
+                    secondaryButton: "WhatsApp Us",
+                    enabled: true
+                }
+            }
+        },
+        hero_slider: {
+            slides: [
+                {
+                    id: 'a1',
+                    title: 'Your Journey to Global Education Starts Here',
+                    subtitle: 'Expert guidance for study abroad opportunities in the world\'s top destinations.',
+                    cta: 'Free Consultation',
+                    link: '/contact',
+                    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1920&h=1080&fit=crop',
+                    isActive: true
+                },
+                {
+                    id: 'a2',
+                    title: 'Unlock Your Potential at World-Class Universities',
+                    subtitle: 'From application to visa, we support you every step of the way.',
+                    cta: 'Explore Destinations',
+                    link: '/destinations',
+                    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08759dfc3ef?q=80&w=1920&h=1080&fit=crop',
+                    isActive: true
+                }
+            ]
+        },
+        services: [
+            { id: 's1', slug: 'study-abroad-consulting', title: 'Study Abroad Consulting', shortDescription: 'One-on-one expert counseling to find your perfect fit.', icon: 'GraduationCap', order: 1, isActive: true },
+            { id: 's2', slug: 'university-application', title: 'University Application', shortDescription: 'Seamless application management for global universities.', icon: 'FileText', order: 2, isActive: true },
+            { id: 's3', slug: 'visa-assistance', title: 'Visa Assistance', shortDescription: 'Expert guidance for smooth student visa processing.', icon: 'Passport', order: 3, isActive: true },
+            { id: 's4', slug: 'pre-departure-briefing', title: 'Pre-Departure Briefing', shortDescription: 'Essential info for your new life abroad.', icon: 'Plane', order: 4, isActive: true },
+            { id: 's5', slug: 'scholarship-guidance', title: 'Scholarship Guidance', shortDescription: 'Helping you secure financial aid and grants.', icon: 'Award', order: 5, isActive: true },
+            { id: 's6', slug: 'career-counseling', title: 'Career Counseling', shortDescription: 'Planning your career path post-graduation.', icon: 'Briefcase', order: 6, isActive: true }
+        ],
+        destinations: [
+            { id: 'd1', country: 'Canada', slug: 'canada', flagEmoji: '🇨🇦', heroImage: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?q=80&w=800&fit=crop', description: 'Top-tier education and post-study work opportunities.', isActive: true, order: 1 },
+            { id: 'd2', country: 'United Kingdom', slug: 'uk', flagEmoji: '🇬🇧', heroImage: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=800&fit=crop', description: 'Historic universities and world-renowned degrees.', isActive: true, order: 2 },
+            { id: 'd3', country: 'Australia', slug: 'australia', flagEmoji: '🇦🇺', heroImage: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?q=80&w=800&fit=crop', description: 'High quality of life and globally recognized programs.', isActive: true, order: 3 },
+            { id: 'd4', country: 'USA', slug: 'usa', flagEmoji: '🇺🇸', heroImage: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=80&w=800&fit=crop', description: 'Innovation, diversity, and world-class research.', isActive: true, order: 4 },
+            { id: 'd5', country: 'Germany', slug: 'germany', flagEmoji: '🇩🇪', heroImage: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800&fit=crop', description: 'Tuition-free high-quality education in many states.', isActive: true, order: 5 },
+            { id: 'd6', country: 'New Zealand', slug: 'new-zealand', flagEmoji: '🇳🇿', heroImage: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&fit=crop', description: 'Safe environment and personalized learning.', isActive: true, order: 6 },
+            { id: 'd7', country: 'Ireland', slug: 'ireland', flagEmoji: '🇮🇪', heroImage: 'https://images.unsplash.com/photo-1590089415225-403ed0f96a05?q=80&w=800&fit=crop', description: 'Welcoming culture and booming tech sector.', isActive: true, order: 7 },
+            { id: 'd8', country: 'Malaysia', slug: 'malaysia', flagEmoji: '🇲🇾', heroImage: 'https://images.unsplash.com/photo-1528181304800-2f540292418f?q=80&w=800&fit=crop', description: 'Affordable high-quality education in Asia.', isActive: true, order: 8 }
+        ],
+        about: {
+            title: 'About Aitasol',
+            sections: {
+                hero: {
+                    heading: "Your Partner in Global Education Excellence",
+                    subtitle: "Empowering Students Since 2014",
+                    content: "<p>Aitasol is a leading education consultancy dedicated to helping students achieve their dreams of international education. We believe that global exposure is the key to unlocking a world of opportunities.</p>",
+                    imageUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&h=1080&fit=crop",
+                    enabled: true
+                },
+                mission: {
+                    heading: "Our Mission & Vision",
+                    content: "<p>Our mission is to simplify the complex process of international university applications and visa processing, providing transparent and ethical guidance to every student. We envision a world where every deserving student has access to the best education regardless of geographical boundaries.</p>",
+                    enabled: true
+                },
+                values: {
+                    heading: "The Values That Guide Us",
+                    subtitle: "Our Core Principles",
+                    items: [
+                        { title: "Integrity", desc: "We provide honest, transparent guidance throughout the process.", icon: "ShieldCheck" },
+                        { title: "Excellence", desc: "We strive for the highest success rates in admissions and visas.", icon: "Award" },
+                        { title: "Student-First", desc: "Your career goals and aspirations are our top priority.", icon: "Heart" },
+                        { title: "Global Reach", desc: "Access to 500+ partner universities across the globe.", icon: "Globe" }
+                    ],
+                    enabled: true
+                }
+            }
+        },
+        universities: [
+            { id: 'u1', name: 'University of Toronto', country: 'Canada', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/04/Utoronto_logo.svg/1200px-Utoronto_logo.svg.png', description: 'One of the world\'s top research-intensive universities.', programs: ['Computer Science', 'Engineering', 'Business'], isActive: true },
+            { id: 'u2', name: 'University of Melbourne', country: 'Australia', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/30/University_of_Melbourne_logo.svg/1200px-University_of_Melbourne_logo.svg.png', description: 'Australia\'s leading university with a global reputation.', programs: ['Medicine', 'Arts', 'Law'], isActive: true },
+            { id: 'u3', name: 'Imperial College London', country: 'UK', logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Imperial_College_London_logo.svg/1200px-Imperial_College_London_logo.svg.png', description: 'A world-class university focusing on science, engineering, and medicine.', programs: ['Data Science', 'Physics', 'Mathematics'], isActive: true }
+        ]
     }
 };
 
@@ -1456,69 +1620,51 @@ export const SETTINGS_SEED = {
         }
     },
     phcg: {
-        hero_slider: {
-            slides: [
-                {
-                    id: 'ph1',
-                    title: 'Compassionate Home Care for Your Loved Ones',
-                    subtitle: 'Professional PSW and nursing services tailored to your needs in the comfort of home.',
-                    cta: 'View Services',
-                    link: '/services',
-                    imageUrl: 'https://images.unsplash.com/photo-1576765608870-67b5e2ef2db0?q=80&w=1920&h=1080&fit=crop',
-                    isActive: true
-                },
-                {
-                    id: 'ph2',
-                    title: 'Your Health, Our Priority',
-                    subtitle: 'Our team of RNs and RPNs provide expert medical care right at your doorstep.',
-                    cta: 'Book Consultation',
-                    link: '/#appointment',
-                    imageUrl: 'https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1920&h=1080&fit=crop',
-                    isActive: true
-                }
-            ]
-        }
+        siteId: 'phcg',
+        branding: {
+            logo: '/logo.png',
+            siteName: 'Private Home Care Guru',
+            favicon: '/favicon.ico'
+        },
+        footer: {
+            contact: {
+                email: 'info@privatehomecareguru.ca',
+                phone: '+1 (123) 456-7890',
+                address: 'Serving Ontario, Canada',
+                socials: []
+            }
+        },
+        navigation: [
+            { id: 'n1', name: 'Home', path: '/', order: 1 },
+            { id: 'n2', name: 'Services', path: '/services', order: 2 },
+            { id: 'n3', name: 'Contact', path: '/contact', order: 3 }
+        ]
     },
     aitasol: {
-        hero_slider: {
-            slides: [
-                {
-                    id: 'a1',
-                    title: 'Your Journey to Global Education Starts Here',
-                    subtitle: 'Expert guidance for study abroad opportunities in the world\'s top destinations.',
-                    cta: 'Free Consultation',
-                    link: '/contact',
-                    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1920&h=1080&fit=crop',
-                    isActive: true
-                },
-                {
-                    id: 'a2',
-                    title: 'Unlock Your Potential at World-Class Universities',
-                    subtitle: 'From application to visa, we support you every step of the way.',
-                    cta: 'Explore Destinations',
-                    link: '/destinations',
-                    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08759dfc3ef?q=80&w=1920&h=1080&fit=crop',
-                    isActive: true
-                }
-            ]
+        siteId: 'aitasol',
+        branding: {
+            logo: '/logo.svg',
+            siteName: 'Aitasol',
+            favicon: '/favicon.ico'
         },
-        services: [
-            { id: 's1', slug: 'study-abroad-consulting', title: 'Study Abroad Consulting', shortDescription: 'One-on-one expert counseling to find your perfect fit.', icon: 'GraduationCap', order: 1, isActive: true },
-            { id: 's2', slug: 'university-application', title: 'University Application', shortDescription: 'Seamless application management for global universities.', icon: 'FileText', order: 2, isActive: true },
-            { id: 's3', slug: 'visa-assistance', title: 'Visa Assistance', shortDescription: 'Expert guidance for smooth student visa processing.', icon: 'Passport', order: 3, isActive: true },
-            { id: 's4', slug: 'pre-departure-briefing', title: 'Pre-Departure Briefing', shortDescription: 'Essential info for your new life abroad.', icon: 'Plane', order: 4, isActive: true },
-            { id: 's5', slug: 'scholarship-guidance', title: 'Scholarship Guidance', shortDescription: 'Helping you secure financial aid and grants.', icon: 'Award', order: 5, isActive: true },
-            { id: 's6', slug: 'career-counseling', title: 'Career Counseling', shortDescription: 'Planning your career path post-graduation.', icon: 'Briefcase', order: 6, isActive: true }
-        ],
-        destinations: [
-            { id: 'd1', country: 'Canada', slug: 'canada', flagEmoji: '🇨🇦', heroImage: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?q=80&w=800&fit=crop', description: 'Top-tier education and post-study work opportunities.', isActive: true, order: 1 },
-            { id: 'd2', country: 'United Kingdom', slug: 'uk', flagEmoji: '🇬🇧', heroImage: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=800&fit=crop', description: 'Historic universities and world-renowned degrees.', isActive: true, order: 2 },
-            { id: 'd3', country: 'Australia', slug: 'australia', flagEmoji: '🇦🇺', heroImage: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?q=80&w=800&fit=crop', description: 'High quality of life and globally recognized programs.', isActive: true, order: 3 },
-            { id: 'd4', country: 'USA', slug: 'usa', flagEmoji: '🇺🇸', heroImage: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=80&w=800&fit=crop', description: 'Innovation, diversity, and world-class research.', isActive: true, order: 4 },
-            { id: 'd5', country: 'Germany', slug: 'germany', flagEmoji: '🇩🇪', heroImage: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800&fit=crop', description: 'Tuition-free high-quality education in many states.', isActive: true, order: 5 },
-            { id: 'd6', country: 'New Zealand', slug: 'new-zealand', flagEmoji: '🇳🇿', heroImage: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&fit=crop', description: 'Safe environment and personalized learning.', isActive: true, order: 6 },
-            { id: 'd7', country: 'Ireland', slug: 'ireland', flagEmoji: '🇮🇪', heroImage: 'https://images.unsplash.com/photo-1590089415225-403ed0f96a05?q=80&w=800&fit=crop', description: 'Welcoming culture and booming tech sector.', isActive: true, order: 7 },
-            { id: 'd8', country: 'Malaysia', slug: 'malaysia', flagEmoji: '🇲🇾', heroImage: 'https://images.unsplash.com/photo-1528181304800-2f540292418f?q=80&w=800&fit=crop', description: 'Affordable high-quality education in Asia.', isActive: true, order: 8 }
+        footer: {
+            contact: {
+                email: 'info@aitasol.com',
+                phone: '+1 (123) 456-7890',
+                address: '123 Global Way, Education City',
+                socials: [
+                    { platform: 'Facebook', url: '#' },
+                    { platform: 'Instagram', url: '#' },
+                    { platform: 'LinkedIn', url: '#' }
+                ]
+            }
+        },
+        navigation: [
+            { id: 'n1', name: 'Home', path: '/', order: 1 },
+            { id: 'n2', name: 'About', path: '/about', order: 2 },
+            { id: 'n3', name: 'Destinations', path: '/destinations', order: 3 },
+            { id: 'n4', name: 'Services', path: '/services', order: 4 },
+            { id: 'n5', name: 'Contact', path: '/contact', order: 5 }
         ]
     }
 };

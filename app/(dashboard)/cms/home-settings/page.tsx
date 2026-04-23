@@ -62,6 +62,15 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'reviews', label: 'Testimonials (Toggle)' }
         ];
     }
+    if (siteId === 'aitasol') {
+        return [
+            { id: 'hero', label: 'Hero Section' },
+            { id: 'stats', label: 'Impact Stats' },
+            { id: 'process', label: 'Our Process' },
+            { id: 'testimonials', label: 'Testimonials' },
+            { id: 'cta', label: 'Call to Action' }
+        ];
+    }
     return [
         { id: 'founder', label: 'Message from Founder' },
         { id: 'mission', label: 'Why Choose BWEIC' },
@@ -253,6 +262,48 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
             }
         };
     }
+
+    if (siteId === 'aitasol') {
+        return {
+            hero: {
+                badge: "Trusted by 5,000+ Students",
+                title: "Your Journey to Global Education Starts Here",
+                subtitle: "Unlock world-class opportunities with expert guidance.",
+                primaryButton: "Free Consultation",
+                secondaryButton: "Explore Destinations",
+                enabled: true
+            } as any,
+            stats: {
+                heading: "Our Impact",
+                enabled: true,
+                items: [
+                    { label: "Students Placed", value: "5,000+", icon: "Users" },
+                    { label: "Visa Success Rate", value: "98%", icon: "CheckCircle2" }
+                ]
+            },
+            process: {
+                heading: "How We Help You Succeed",
+                subtitle: "Our simple 4-step process",
+                enabled: true,
+                items: [
+                    { title: "Free Inquiry", desc: "Submit your details for a free consultation." },
+                    { title: "Application", desc: "We manage your entire application process." }
+                ]
+            },
+            testimonials: {
+                heading: "What Our Students Say",
+                enabled: true,
+                items: [
+                    { name: "Sarah J.", university: "UofT", quote: "Aitasol made my dream a reality." }
+                ]
+            },
+            cta: {
+                heading: "Ready to Start Your Global Success Story?",
+                primaryButton: "Book Free Consultation",
+                enabled: true
+            }
+        };
+    }
     
     // Default BWEIC
     return {
@@ -358,7 +409,7 @@ export default function HomePageManager() {
         setError("");
         try {
             // For modern sites, wrap the content in 'sections' for the dynamic frontend loader
-            const modernSites = ['dmlabs', 'noel', 'nspc'];
+            const modernSites = ['dmlabs', 'noel', 'nspc', 'aitasol'];
             let dataToSave: any = { ...content };
             
             if (modernSites.includes(currentSite.id)) {
@@ -487,7 +538,7 @@ export default function HomePageManager() {
                         </p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
-                        {['dmlabs', 'noel'].includes(currentSite.id) && (
+                        {['dmlabs', 'noel', 'aitasol'].includes(currentSite.id) && (
                             <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                                 🌱 Seed Default Data
                             </Button>
@@ -577,6 +628,52 @@ export default function HomePageManager() {
                                                         value={(section as any).title || ""}
                                                         onChange={(e) => handleSectionChange(config.id, "title" as any, e.target.value)}
                                                     />
+                                                </div>
+                                            )}
+
+                                            {config.id === 'hero' && currentSite.id === 'aitasol' && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label>Badge Text</Label>
+                                                        <Input value={(section as any).badge || ""} onChange={(e) => handleSectionChange(config.id, "badge" as any, e.target.value)} placeholder="e.g. Trusted by 5000+ Students" />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Primary Button Text</Label>
+                                                        <Input value={(section as any).primaryButton || ""} onChange={(e) => handleSectionChange(config.id, "primaryButton" as any, e.target.value)} />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Secondary Button Text</Label>
+                                                        <Input value={(section as any).secondaryButton || ""} onChange={(e) => handleSectionChange(config.id, "secondaryButton" as any, e.target.value)} />
+                                                    </div>
+                                                    <div>
+                                                        <ImagePicker 
+                                                            label="Background Image"
+                                                            value={section.imageUrl || ""}
+                                                            onChange={(url) => handleSectionChange(config.id, "imageUrl" as any, url)}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {config.id === 'cta' && currentSite.id === 'aitasol' && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="col-span-2">
+                                                        <Label>Description / Subtitle</Label>
+                                                        <textarea 
+                                                            className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                            rows={3}
+                                                            value={section.subtitle || ""}
+                                                            onChange={(e) => handleSectionChange(config.id, "subtitle", e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Primary Button Text</Label>
+                                                        <Input value={(section as any).primaryButton || ""} onChange={(e) => handleSectionChange(config.id, "primaryButton" as any, e.target.value)} />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Secondary Button Text</Label>
+                                                        <Input value={(section as any).secondaryButton || ""} onChange={(e) => handleSectionChange(config.id, "secondaryButton" as any, e.target.value)} />
+                                                    </div>
                                                 </div>
                                             )}
 
@@ -754,7 +851,7 @@ export default function HomePageManager() {
                                             )}
 
                                             {/* ITEMS EDITOR BLOCKS */}
-                                            {['coreFoundations', 'howItWorks', 'testimonials', 'mindfulness', 'pricing', 'trusted_by'].includes(config.id) && (
+                                            {['coreFoundations', 'howItWorks', 'testimonials', 'mindfulness', 'pricing', 'trusted_by', 'stats', 'process'].includes(config.id) && (
                                                 <div className="mt-4">
                                                     <Label>List Items</Label>
                                                     <div className="space-y-3">
@@ -784,24 +881,41 @@ export default function HomePageManager() {
                                                                     </div>
                                                                 )}
 
+                                                                {config.id === 'stats' && (
+                                                                    <div className="grid grid-cols-2 gap-4">
+                                                                        <div><Label className="text-xs mb-1">Label</Label><Input value={item.label || ''} onChange={(e) => updateItem(config.id, idx, 'label', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Value</Label><Input value={item.value || ''} onChange={(e) => updateItem(config.id, idx, 'value', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Icon (Lucide name)</Label><Input value={item.icon || ''} onChange={(e) => updateItem(config.id, idx, 'icon', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Text Color Class</Label><Input value={item.color || ''} onChange={(e) => updateItem(config.id, idx, 'color', e.target.value)} /></div>
+                                                                    </div>
+                                                                )}
+
                                                                 {config.id === 'howItWorks' && (
                                                                     <div className="grid grid-cols-1 gap-4">
                                                                         <div><Label className="text-xs mb-1">Title</Label><Input value={item.title || ''} onChange={(e) => updateItem(config.id, idx, 'title', e.target.value)} /></div>
                                                                         <div><Label className="text-xs mb-1">Description</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={2} value={item.desc || ''} onChange={(e) => updateItem(config.id, idx, 'desc', e.target.value)} /></div>
                                                                     </div>
                                                                 )}
-
                                                                 {config.id === 'testimonials' && (
                                                                     <div className="grid grid-cols-2 gap-4">
-                                                                        <div><Label className="text-xs mb-1">Author Name</Label><Input value={item.author || ''} onChange={(e) => updateItem(config.id, idx, 'author', e.target.value)} /></div>
-                                                                        <div><Label className="text-xs mb-1">Role / Subtitle</Label><Input value={item.role || ''} onChange={(e) => updateItem(config.id, idx, 'role', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Author Name</Label><Input value={item.author || item.name || ''} onChange={(e) => updateItem(config.id, idx, item.author ? 'author' : 'name', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Role / Subtitle / University</Label><Input value={item.role || item.university || ''} onChange={(e) => updateItem(config.id, idx, item.role ? 'role' : 'university', e.target.value)} /></div>
                                                                         <div className="col-span-2"><Label className="text-xs mb-1">Quote</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={3} value={item.quote || ''} onChange={(e) => updateItem(config.id, idx, 'quote', e.target.value)} /></div>
                                                                     </div>
                                                                 )}
 
+
                                                                 {config.id === 'mindfulness' && (
                                                                     <div className="grid grid-cols-1 gap-4">
                                                                         <div><Label className="text-xs mb-1">Bullet Point Text</Label><Input value={item.text || ''} onChange={(e) => updateItem(config.id, idx, 'text', e.target.value)} /></div>
+                                                                    </div>
+                                                                )}
+
+                                                                {config.id === 'process' && (
+                                                                    <div className="grid grid-cols-1 gap-4">
+                                                                        <div><Label className="text-xs mb-1">Title</Label><Input value={item.title || ''} onChange={(e) => updateItem(config.id, idx, 'title', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Description</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={2} value={item.desc || ''} onChange={(e) => updateItem(config.id, idx, 'desc', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Icon (Lucide name)</Label><Input value={item.icon || ''} onChange={(e) => updateItem(config.id, idx, 'icon', e.target.value)} /></div>
                                                                     </div>
                                                                 )}
 

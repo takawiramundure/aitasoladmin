@@ -1,6 +1,6 @@
 "use client";
 
-import { HelmetProvider, Helmet } from "react-helmet-async";
+import { useEffect } from "react";
 
 const PageMeta = ({
   title,
@@ -8,17 +8,28 @@ const PageMeta = ({
 }: {
   title: string;
   description: string;
-}) => (
-  // @ts-ignore - React 19 type compatibility
-  <Helmet>
-    <title>{title}</title>
-    <meta name="description" content={description} />
-  </Helmet>
-);
+}) => {
+  useEffect(() => {
+    if (title) {
+      document.title = `${title} | Admin Portal`;
+    }
+
+    if (description) {
+      let metaDescription = document.querySelector('meta[name="description"]');
+      if (!metaDescription) {
+        metaDescription = document.createElement("meta");
+        metaDescription.setAttribute("name", "description");
+        document.head.appendChild(metaDescription);
+      }
+      metaDescription.setAttribute("content", description);
+    }
+  }, [title, description]);
+
+  return null;
+};
 
 export const AppWrapper = ({ children }: { children: React.ReactNode }) => (
-  // @ts-ignore - React 19 type compatibility specific fix
-  <HelmetProvider><>{children}</></HelmetProvider>
+  <>{children}</>
 );
 
 export default PageMeta;

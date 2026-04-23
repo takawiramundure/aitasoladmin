@@ -735,5 +735,37 @@ export const FirestoreService = {
             console.error("Error fetching analytics snapshot:", error);
             return null;
         }
+    },
+
+    // Aitasol Applications Management
+    getApplications: async (siteId: string): Promise<any[]> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const applicationsRef = collection(dbInstance, "applications");
+            const snapshot = await getDocs(applicationsRef);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a: any, b: any) => {
+                    const timeA = (a.updatedAt?.seconds || 0);
+                    const timeB = (b.updatedAt?.seconds || 0);
+                    return timeB - timeA;
+                });
+        } catch (error) {
+            console.error("Error fetching applications:", error);
+            return [];
+        }
+    },
+
+    updateApplicationStatus: async (siteId: string, applicationId: string, status: string) => {
+        try {
+            const dbInstance = getDb(siteId);
+            const docRef = doc(dbInstance, "applications", applicationId);
+            await updateDoc(docRef, {
+                status,
+                updatedAt: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error("Error updating application status:", error);
+            throw error;
+        }
     }
 };

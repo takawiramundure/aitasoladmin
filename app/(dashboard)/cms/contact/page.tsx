@@ -35,7 +35,6 @@ const DEFAULT_DATA = {
         { id: 'message', label: 'Message', type: 'textarea', required: true }
     ]
 };
-
 const DMLABS_CONTACT_DEFAULT = {
     enabled: true,
     hero: {
@@ -82,6 +81,43 @@ const DMLABS_CONTACT_DEFAULT = {
     ]
 };
 
+const AITASOL_CONTACT_DEFAULT = {
+    enabled: true,
+    hero: {
+        title: "Contact Aitasol",
+        subtitle: "Start Your Journey Today",
+        description: "Have questions about studying abroad? Our expert counselors are ready to help you navigate your international education path."
+    },
+    info: {
+        address: "123 Global Way, Suite 500\nEducation District, Toronto, ON",
+        appointment_only: true,
+        hours: [
+            { label: "Monday to Friday", value: "9 am to 6 pm", note: "(Walk-ins Welcome)" },
+            { label: "Saturday", value: "10 am to 4 pm", note: "(Appointment Only)" }
+        ],
+        disclaimer: "For urgent inquiries regarding ongoing applications, please include your Reference ID in the subject."
+    },
+    form_fields: [
+        { id: 'name', label: 'Full Name', type: 'text', required: true },
+        { id: 'email', label: 'Email Address', type: 'email', required: true },
+        { id: 'phone', label: 'Phone Number', type: 'tel', required: true },
+        { 
+            id: 'destination', 
+            label: 'Preferred Destination', 
+            type: 'select', 
+            required: true,
+            options: ['Canada', 'UK', 'Australia', 'USA', 'Germany', 'Other']
+        },
+        { 
+            id: 'program', 
+            label: 'Interested Program', 
+            type: 'text', 
+            required: false 
+        },
+        { id: 'message', label: 'How can we help you?', type: 'textarea', required: true }
+    ]
+};
+
 export default function ContactPageManager() {
     const { currentSite } = useSite();
     const [content, setContent] = useState<any>(null);
@@ -102,9 +138,11 @@ export default function ContactPageManager() {
             if (settings) {
                 if (settings.recipient_email) setRecipientEmail(settings.recipient_email);
                 if (settings.sendgrid_api_key) setSendgridApiKey(settings.sendgrid_api_key);
+            } else if (currentSite.id === 'aitasol') {
+                setRecipientEmail("info@aitasol.com");
             }
 
-            const siteDefaults = currentSite.id === 'dmlabs' ? DMLABS_CONTACT_DEFAULT : DEFAULT_DATA;
+            const siteDefaults = currentSite.id === 'dmlabs' ? DMLABS_CONTACT_DEFAULT : (currentSite.id === 'aitasol' ? AITASOL_CONTACT_DEFAULT : DEFAULT_DATA);
             const data = await FirestoreService.getPageContent('contact', currentSite.id);
 
             setContent(data ? {
