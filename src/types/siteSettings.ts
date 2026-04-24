@@ -3,6 +3,7 @@ export interface NavigationItem {
     name: string;
     path: string;
     isExternal?: boolean;
+    isHidden?: boolean;
     subItems?: NavigationItem[];
     order: number;
 }

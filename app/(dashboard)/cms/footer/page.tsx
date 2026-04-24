@@ -38,98 +38,171 @@ interface FooterContent {
     developer_url: string;
 }
 
-const DEFAULT_FOOTER: FooterContent = {
-    logo_url: '/logo-footer.png',
-    tagline: '',
-    crisis_banner_enabled: true,
-    crisis_banner_text: 'IMMEDIATE CRISIS SUPPORT',
-    crisis_banner_number: '988',
-    crisis_banner_label: 'Call or Text 988',
-    email: 'info@kindmindsfamilywellness.org',
-    phone: '+1-226-336-1988',
-    address_line1: '2 King Street West, Suite 100',
-    address_line2: 'Kitchener, ON N2G 1A3',
-    appointment_only: true,
-    social_instagram: '',
-    social_twitter: '',
-    social_facebook: '',
-    social_linkedin: '',
-    social_youtube: '',
-    nav_columns: [
-        {
-            heading: 'Explore',
-            links: [
+const FOOTER_DEFAULTS: Record<string, FooterContent> = {
+    kmfw: {
+        logo_url: '/logo-footer.png',
+        tagline: 'Empowering Black community wellness in Waterloo Region.',
+        crisis_banner_enabled: true,
+        crisis_banner_text: 'IMMEDIATE CRISIS SUPPORT',
+        crisis_banner_number: '988',
+        crisis_banner_label: 'Call or Text 988',
+        email: 'info@kindmindsfamilywellness.org',
+        phone: '+1-226-336-1988',
+        address_line1: '2 King Street West, Suite 100',
+        address_line2: 'Kitchener, ON N2G 1A3',
+        appointment_only: true,
+        social_instagram: '', social_twitter: '', social_facebook: '', social_linkedin: '', social_youtube: '',
+        nav_columns: [
+            { heading: 'Explore', links: [
                 { label: 'About Our Story', url: '/about' },
                 { label: 'Programs & Services', url: '/services' },
                 { label: 'Community Events', url: '/events' },
                 { label: 'Success Stories', url: '/impact/success-stories' },
                 { label: 'Newsletters & Media', url: '/impact/newsletters' },
-            ]
-        },
-        {
-            heading: 'Join Us',
-            links: [
+            ]},
+            { heading: 'Join Us', links: [
                 { label: 'Donate', url: '/donate' },
                 { label: 'Volunteer', url: '/join-us/volunteer' },
                 { label: 'Careers', url: '/join-us/careers' },
                 { label: 'Partner With Us', url: '/contact' },
                 { label: 'Our Partners', url: '/join-us/partners' },
                 { label: 'Our Funders', url: '/join-us/funders' },
-            ]
-        },
-    ],
-    policy_links: [
-        { label: 'Privacy Policy', url: '/privacy' },
-        { label: 'Terms of Service', url: '/terms' },
-    ],
-    copyright_text: '',
-    developer_text: 'Designed by Digital Maples Labs Inc.',
-    developer_url: 'https://digitalmaples.ca',
+            ]},
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
+        copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+    },
+    dmlabs: {
+        logo_url: 'https://framerusercontent.com/images/WNXCQwxTt2Dmjz4hPcX5bcoDw.svg',
+        tagline: 'Empowering nonprofits through ethical tech & human-centric AI.',
+        crisis_banner_enabled: false, crisis_banner_text: '', crisis_banner_number: '', crisis_banner_label: '',
+        email: 'hello@dmlabs.ca', phone: '', address_line1: 'Ontario, Canada', address_line2: '',
+        appointment_only: false,
+        social_instagram: 'https://instagram.com/dmlabs', social_twitter: 'https://twitter.com/dmlabs',
+        social_facebook: '', social_linkedin: 'https://linkedin.com/company/digitalmaples', social_youtube: '',
+        nav_columns: [
+            { heading: 'Explore', links: [
+                { label: 'Who We Are', url: '/about' }, { label: 'What We Do', url: '/services' },
+                { label: 'Our Work', url: '/portfolio' }, { label: 'Just Opinions', url: '/blog' },
+            ]},
+            { heading: 'Connect', links: [
+                { label: 'Get in Touch', url: '/contact' }, { label: 'Project Inquiry', url: '/contact' },
+            ]},
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Use', url: '/terms' }],
+        copyright_text: `© ${new Date().getFullYear()} Digital Maples Labs Inc.`,
+        developer_text: 'Designed by Digital Maples Labs', developer_url: 'https://digitalmaples.ca',
+    },
+    aitasol: {
+        logo_url: '/logo.png',
+        tagline: 'Your trusted partner in global education consultancy.',
+        crisis_banner_enabled: false, crisis_banner_text: '', crisis_banner_number: '', crisis_banner_label: '',
+        email: 'info@aitasol.com', phone: '+1 (234) 567-890',
+        address_line1: '123 Education Hub, Global Plaza', address_line2: 'NY 10001',
+        appointment_only: false,
+        social_instagram: '', social_twitter: '', social_facebook: 'https://facebook.com/aitasol',
+        social_linkedin: 'https://linkedin.com/company/aitasol', social_youtube: 'https://youtube.com/@aitasol',
+        nav_columns: [
+            { heading: 'Company', links: [
+                { label: 'About Us', url: '/about' }, { label: 'Our Services', url: '/services' },
+                { label: 'Partner Universities', url: '/universities' }, { label: 'Contact Us', url: '/contact' },
+            ]},
+            { heading: 'Destinations', links: [
+                { label: 'Study in Canada', url: '/destinations/canada' }, { label: 'Study in UK', url: '/destinations/uk' },
+                { label: 'Study in USA', url: '/destinations/usa' }, { label: 'Study in Australia', url: '/destinations/australia' },
+            ]},
+            { heading: 'Resources', links: [
+                { label: 'Blog', url: '/blog' }, { label: 'Scholarship Guidance', url: '/services/scholarship-guidance' },
+                { label: 'Visa Assistance', url: '/services/visa-assistance' }, { label: 'Apply Now', url: '/apply' },
+            ]},
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }, { label: 'Cookie Policy', url: '/cookies' }],
+        copyright_text: `© ${new Date().getFullYear()} Aitasol Education Consultancy. All rights reserved.`,
+        developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+    },
+    noel: {
+        logo_url: '/logo.png',
+        tagline: 'High-end renovation & custom woodworking.',
+        crisis_banner_enabled: false, crisis_banner_text: '', crisis_banner_number: '', crisis_banner_label: '',
+        email: 'info@noelconstruction.ca', phone: '', address_line1: 'Ontario, Canada', address_line2: '',
+        appointment_only: false,
+        social_instagram: '', social_twitter: '', social_facebook: '', social_linkedin: '', social_youtube: '',
+        nav_columns: [
+            { heading: 'Company', links: [
+                { label: 'About Us', url: '/about' }, { label: 'Services', url: '/services' },
+                { label: 'Portfolio', url: '/portfolio' }, { label: 'Contact', url: '/contact' },
+            ]},
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
+        copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+    },
+    phcg: {
+        logo_url: '/logo.png',
+        tagline: 'Compassionate senior care in Ontario.',
+        crisis_banner_enabled: false, crisis_banner_text: '', crisis_banner_number: '', crisis_banner_label: '',
+        email: 'info@privatehomecareguru.ca', phone: '', address_line1: 'Ontario, Canada', address_line2: '',
+        appointment_only: false,
+        social_instagram: '', social_twitter: '', social_facebook: '', social_linkedin: '', social_youtube: '',
+        nav_columns: [
+            { heading: 'Services', links: [
+                { label: 'Home Care', url: '/services' }, { label: 'About Us', url: '/about' },
+                { label: 'Careers', url: '/career' }, { label: 'Contact', url: '/contact' },
+            ]},
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
+        copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+    },
+    nspc: {
+        logo_url: '/logo.png',
+        tagline: 'Suicide prevention through community collaboration.',
+        crisis_banner_enabled: true, crisis_banner_text: 'CRISIS SUPPORT', crisis_banner_number: '988', crisis_banner_label: 'Call or Text 988',
+        email: 'info@niagarasuicidepreventioncoalition.ca', phone: '', address_line1: 'Niagara Region', address_line2: 'Ontario, Canada',
+        appointment_only: false,
+        social_instagram: '', social_twitter: '', social_facebook: '', social_linkedin: '', social_youtube: '',
+        nav_columns: [
+            { heading: 'About', links: [
+                { label: 'Our Mission', url: '/about' }, { label: 'Resources', url: '/resources' },
+                { label: 'Events', url: '/events' }, { label: 'Contact', url: '/contact' },
+            ]},
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }],
+        copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+    },
+    bweic: {
+        logo_url: '/logo.png',
+        tagline: 'Empowering Black women across Canada.',
+        crisis_banner_enabled: false, crisis_banner_text: '', crisis_banner_number: '', crisis_banner_label: '',
+        email: 'info@bweic.org', phone: '', address_line1: 'Canada', address_line2: '',
+        appointment_only: false,
+        social_instagram: '', social_twitter: '', social_facebook: '', social_linkedin: '', social_youtube: '',
+        nav_columns: [
+            { heading: 'Explore', links: [
+                { label: 'About Us', url: '/about' }, { label: 'Programs', url: '/programs' },
+                { label: 'Events', url: '/events' }, { label: 'Contact', url: '/contact' },
+            ]},
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
+        copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+    },
+    elwg: {
+        logo_url: '/logo.png',
+        tagline: 'Supporting women in the Elliot Lake community.',
+        crisis_banner_enabled: false, crisis_banner_text: '', crisis_banner_number: '', crisis_banner_label: '',
+        email: 'info@elwg.ca', phone: '', address_line1: 'Elliot Lake', address_line2: 'Ontario, Canada',
+        appointment_only: false,
+        social_instagram: '', social_twitter: '', social_facebook: '', social_linkedin: '', social_youtube: '',
+        nav_columns: [
+            { heading: 'Explore', links: [
+                { label: 'About Us', url: '/about' }, { label: 'Programs', url: '/programs' },
+                { label: 'Events', url: '/events' }, { label: 'Contact', url: '/contact' },
+            ]},
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }],
+        copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+    },
 };
 
-const DMLABS_FOOTER_DEFAULT: FooterContent = {
-    logo_url: 'https://framerusercontent.com/images/WNXCQwxTt2Dmjz4hPcX5bcoDw.svg',
-    tagline: 'Empowering nonprofits through ethical tech & human-centric AI.',
-    crisis_banner_enabled: false,
-    crisis_banner_text: '',
-    crisis_banner_number: '',
-    crisis_banner_label: '',
-    email: 'hello@dmlabs.ca',
-    phone: '',
-    address_line1: 'Ontario, Canada',
-    address_line2: '',
-    appointment_only: false,
-    social_instagram: 'https://instagram.com/dmlabs',
-    social_twitter: 'https://twitter.com/dmlabs',
-    social_facebook: '',
-    social_linkedin: 'https://linkedin.com/company/digitalmaples',
-    social_youtube: '',
-    nav_columns: [
-        {
-            heading: 'Explore',
-            links: [
-                { label: 'Who We Are', url: '/about' },
-                { label: 'What We Do', url: '/services' },
-                { label: 'Our Work', url: '/portfolio' },
-                { label: 'Just Opinions', url: '/blog' },
-            ]
-        },
-        {
-            heading: 'Connect',
-            links: [
-                { label: 'Get in Touch', url: '/contact' },
-                { label: 'Project Inquiry', url: '/contact' },
-            ]
-        },
-    ],
-    policy_links: [
-        { label: 'Privacy Policy', url: '/privacy' },
-        { label: 'Terms of Use', url: '/terms' },
-    ],
-    copyright_text: `© ${new Date().getFullYear()} Digital Maples Labs Inc.`,
-    developer_text: 'Designed by Digital Maples Labs',
-    developer_url: 'https://digitalmaples.ca',
-};
+const getDefaultFooter = (siteId: string): FooterContent => FOOTER_DEFAULTS[siteId] || FOOTER_DEFAULTS.kmfw;
 
 const SECTION_LABELS: Record<string, string> = {
     brand: 'Brand & Logo',
@@ -161,11 +234,12 @@ export default function FooterManager() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [seeding, setSeeding] = useState(false);
-    const [content, setContent] = useState<FooterContent>(DEFAULT_FOOTER);
     const [status, setStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
     const [openSection, setOpenSection] = useState<string>('brand');
 
     const siteId = currentSite?.id || 'kmfw';
+    const siteDefault = getDefaultFooter(siteId);
+    const [content, setContent] = useState<FooterContent>(siteDefault);
 
     useEffect(() => {
         loadContent();
@@ -176,9 +250,9 @@ export default function FooterManager() {
         try {
             const data = await FirestoreService.getFooterData(siteId);
             if (data) {
-                setContent({ ...DEFAULT_FOOTER, ...data });
+                setContent({ ...siteDefault, ...data });
             } else {
-                setContent(DEFAULT_FOOTER);
+                setContent(siteDefault);
             }
         } catch (err) {
             console.error(err);
@@ -203,7 +277,7 @@ export default function FooterManager() {
     };
 
     const handleSeedDefault = async () => {
-        const seedData = siteId === 'dmlabs' ? DMLABS_FOOTER_DEFAULT : DEFAULT_FOOTER;
+        const seedData = getDefaultFooter(siteId);
         setSeeding(true);
         setStatus(null);
         try {
@@ -259,7 +333,7 @@ export default function FooterManager() {
 
     return (
         <>
-            <PageMeta title="Footer Manager | KMFW Admin" description="Manage footer content and settings" />
+            <PageMeta title={`Footer Manager | ${currentSite?.name || 'Admin'}`} description={`Manage footer content and settings for ${currentSite?.name}`} />
             <PageBreadcrumb pageTitle="Footer Manager" />
 
             <div className="p-6 space-y-6">
@@ -267,7 +341,7 @@ export default function FooterManager() {
                 <div className="flex items-center justify-between flex-wrap gap-4">
                     <div>
                         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Footer Manager</h1>
-                        <p className="text-sm text-gray-500 mt-1">Edit all footer content — changes go live on the website after saving.</p>
+                        <p className="text-sm text-gray-500 mt-1">Edit footer content for <strong>{currentSite?.name}</strong> — changes go live after saving.</p>
                     </div>
                     <div className="flex gap-3">
                         <button
@@ -276,7 +350,7 @@ export default function FooterManager() {
                             className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                         >
                             <Zap className="w-4 h-4" />
-                            {seeding ? 'Seeding...' : 'Seed Default KMFW Data'}
+                            {seeding ? 'Seeding...' : `Seed ${currentSite?.name || 'Default'} Data`}
                         </button>
                         <Button onClick={handleSave} disabled={saving}>
                             <Save className="w-4 h-4 mr-2" />
@@ -300,11 +374,11 @@ export default function FooterManager() {
                     </div>
                     <div>
                         <Label>Tagline (optional short description under logo)</Label>
-                        <Input value={content.tagline} onChange={e => set('tagline', e.target.value)} placeholder="Empowering Black community wellness in Waterloo Region" />
+                        <Input value={content.tagline} onChange={e => set('tagline', e.target.value)} placeholder={siteDefault.tagline || 'Short description for your organization'} />
                     </div>
                     <div>
                         <Label>Copyright Text (leave empty for auto-generated)</Label>
-                        <Input value={content.copyright_text} onChange={e => set('copyright_text', e.target.value)} placeholder={`© ${new Date().getFullYear()} Kind Minds Family Wellness. All rights reserved.`} />
+                        <Input value={content.copyright_text} onChange={e => set('copyright_text', e.target.value)} placeholder={`© ${new Date().getFullYear()} ${currentSite?.name || 'Your Organization'}. All rights reserved.`} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -354,7 +428,7 @@ export default function FooterManager() {
                 <Section id="contact" isOpen={openSection === 'contact'} onToggle={() => setOpenSection(openSection === 'contact' ? '' : 'contact')}>
                     <div>
                         <Label>Email Address</Label>
-                        <Input value={content.email} onChange={e => set('email', e.target.value)} placeholder="info@kindmindsfamilywellness.org" />
+                        <Input value={content.email} onChange={e => set('email', e.target.value)} placeholder={siteDefault.email || 'info@yoursite.com'} />
                     </div>
                     <div>
                         <Label>Phone Number (optional)</Label>
@@ -387,11 +461,11 @@ export default function FooterManager() {
                     <p className="text-sm text-gray-500 mb-2">Leave a field empty to hide that social icon.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
-                            { key: 'social_instagram', label: 'Instagram', placeholder: 'https://instagram.com/kindmindsfamilywellness' },
-                            { key: 'social_twitter', label: 'Twitter / X', placeholder: 'https://twitter.com/kmfw' },
-                            { key: 'social_facebook', label: 'Facebook', placeholder: 'https://facebook.com/kindmindsfamilywellness' },
-                            { key: 'social_linkedin', label: 'LinkedIn', placeholder: 'https://linkedin.com/company/kmfw' },
-                            { key: 'social_youtube', label: 'YouTube', placeholder: 'https://youtube.com/@kmfw' },
+                            { key: 'social_instagram', label: 'Instagram', placeholder: `https://instagram.com/${siteId}` },
+                            { key: 'social_twitter', label: 'Twitter / X', placeholder: `https://twitter.com/${siteId}` },
+                            { key: 'social_facebook', label: 'Facebook', placeholder: `https://facebook.com/${siteId}` },
+                            { key: 'social_linkedin', label: 'LinkedIn', placeholder: `https://linkedin.com/company/${siteId}` },
+                            { key: 'social_youtube', label: 'YouTube', placeholder: `https://youtube.com/@${siteId}` },
                         ].map(({ key, label, placeholder }) => (
                             <div key={key}>
                                 <Label>{label} URL</Label>

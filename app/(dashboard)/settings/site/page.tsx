@@ -6,7 +6,7 @@ import { SiteSettings, SiteTheme, NavigationItem } from "@/types/siteSettings";
 import { useSite } from "@/context/SiteContext";
 import Button from "@/components/ui/button/Button";
 import Alert from "@/components/ui/alert/Alert";
-import { Plus, Trash2, GripVertical, Save, Upload, ExternalLink, ArrowUp, ArrowDown, Image as ImageIcon, Search, Crop } from 'lucide-react';
+import { Plus, Trash2, GripVertical, Save, Upload, ExternalLink, ArrowUp, ArrowDown, Image as ImageIcon, Search, Crop, Eye, EyeOff } from 'lucide-react';
 import MediaPickerModal from "@/components/common/MediaPickerModal";
 import ImageCropperModal from "@/components/common/ImageCropperModal";
 import { storage } from "@/firebaseConfig";
@@ -675,23 +675,36 @@ export default function SiteSettingsManager() {
                                                             list="route-options"
                                                             className="px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                         />
-                                                        <div className="flex gap-2">
-                                                            <label className="flex items-center gap-2 text-sm">
+                                                        <div className="flex items-center gap-4">
+                                                            <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                                                                 <input
                                                                     type="checkbox"
                                                                     checked={item.isExternal || false}
                                                                     onChange={(e) => updateNavItem(item.id, { isExternal: e.target.checked })}
-                                                                    className="rounded"
+                                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                                                 />
                                                                 <ExternalLink className="w-4 h-4" />
                                                                 External
+                                                            </label>
+                                                            <div className="flex items-center ml-auto gap-2">
                                                                 <button
+                                                                    type="button"
+                                                                    onClick={() => updateNavItem(item.id, { isHidden: !item.isHidden })}
+                                                                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${item.isHidden ? 'bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-400' : 'bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400'}`}
+                                                                    title={item.isHidden ? "Hidden from Navigation" : "Visible in Navigation"}
+                                                                >
+                                                                    {item.isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                                    {item.isHidden ? 'Hidden' : 'Visible'}
+                                                                </button>
+                                                                <button
+                                                                    type="button"
                                                                     onClick={() => deleteNavItem(item.id)}
-                                                                    className="ml-auto p-1.5 text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
+                                                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
+                                                                    title="Delete Item"
                                                                 >
                                                                     <Trash2 className="w-4 h-4" />
                                                                 </button>
-                                                            </label>
+                                                            </div>
                                                         </div>
                                                     </div>
 
@@ -716,6 +729,15 @@ export default function SiteSettingsManager() {
                                                                         className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                                     />
                                                                     <button
+                                                                        type="button"
+                                                                        onClick={() => updateSubItem(item.id, subItem.id, { isHidden: !subItem.isHidden })}
+                                                                        className={`p-1.5 rounded transition-colors ${subItem.isHidden ? 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800' : 'text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20'}`}
+                                                                        title={subItem.isHidden ? "Hidden" : "Visible"}
+                                                                    >
+                                                                        {subItem.isHidden ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
                                                                         onClick={() => deleteSubItem(item.id, subItem.id)}
                                                                         className="p-1.5 text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-900/20"
                                                                     >

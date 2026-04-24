@@ -685,7 +685,7 @@ export const SEED_DATA: any = {
                     heading: "Support ELWG",
                     subtitle: "Your Gift Matters",
                     content: "Your generous donations directly support our mission of providing safe shelter and healing to those fleeing abuse. Every dollar makes a difference.",
-                    images: [{ url: "https://images.unsplash.com/photo-1544027993-37dbfe43552e?auto=format&fit=crop&q=80&w=1000", alt: "Donate" }],
+                    images: [{ url: "https://images.unsplash.com/photo-1544027993-37dbfe43562e?auto=format&fit=crop&q=80&w=1000", alt: "Donate" }],
                     order: 0,
                     enabled: true
                 },
@@ -765,7 +765,7 @@ export const SEED_DATA: any = {
                     fullDescription: 'Embrace self-sufficiency with a custom-designed edible landscape. We build high-yield cedar garden beds, integrated irrigation systems, and optimized greenhouse structures. Our designs consider soil health, sun orientation, and ease of maintenance, allowing you to harvest fresh, organic produce right in your backyard. We bridge the gap between traditional gardening and expert construction to help you achieve true food sovereignty.',
                     image: '/service-gardens.png',
                     beforeImage: 'https://images.unsplash.com/photo-1558905619-172542012737?q=80&w=800&auto=format&fit=crop', // Empty yard
-                    afterImage: 'https://images.unsplash.com/photo-1592150621344-22d7688860bc?q=80&w=800&auto=format&fit=crop', // Garden beds
+                    afterImage: 'https://images.unsplash.com/photo-1592150621344-22d7688860bc?q=80&w=800&fit=crop', // Garden beds
                     order: 2,
                     isActive: true
                 },
@@ -777,7 +777,7 @@ export const SEED_DATA: any = {
                     fullDescription: 'A Noel Construction deck is an extension of your primary living space. We use premium cedar and sustainable composite materials to craft multi-level outdoor oasis spaces. Our signature includes hidden fastenting systems, custom-built stairs, and integrated ambient lighting. Every joint is precision-cut to ensure your outdoor sanctuary remains structural and stunning through generations of seasonal changes.',
                     image: '/service-decks.png',
                     beforeImage: 'https://images.unsplash.com/photo-1591825729269-caeb344f6df2?q=80&w=800&auto=format&fit=crop', // Old deck
-                    afterImage: 'https://images.unsplash.com/photo-1590060419632-68c37ed55f26?q=80&w=800&auto=format&fit=crop', // New deck
+                    afterImage: 'https://images.unsplash.com/photo-1590060419632-68c37ed55f26?q=80&w=800&fit=crop', // New deck
                     order: 3,
                     isActive: true
                 },
@@ -1353,6 +1353,8 @@ export const SEED_DATA: any = {
                     subtitle: "Unlock world-class opportunities with expert guidance. We help you navigate applications, visas, and scholarships for the world's top universities.",
                     primaryButton: "Free Consultation",
                     secondaryButton: "Explore Destinations",
+                    primaryLink: "/contact",
+                    secondaryLink: "/destinations",
                     imageUrl: "/hero-bg.png",
                     enabled: true
                 },
@@ -1391,9 +1393,110 @@ export const SEED_DATA: any = {
                     subtitle: "Don't navigate the complex world of international education alone. Let our experts guide you every step of the way.",
                     primaryButton: "Book Free Consultation",
                     secondaryButton: "WhatsApp Us",
+                    primaryLink: "/contact",
+                    whatsappNumber: "1234567890",
                     enabled: true
                 }
             }
+        },
+        about: {
+            sections: {
+                hero: {
+                    heading: "About ASEC",
+                    subtitle: "Aitah Solutions Education Consultancy(ASEC) is dedicated to helping students achieve their dreams of studying internationally.",
+                    content: `<h3>Who We Are</h3><p>Aitah Solutions Educational Consultancy was founded in 2019 with a clear purpose: to provide ethical, realistic, and student-focused education guidance in an industry often driven by volume rather than outcomes.</p><p>We recognized that many students make costly education decisions based on incomplete information, unrealistic expectations, or pressure to apply quickly. ASEC was created to slow that process down, replacing guesswork with structured advising and transparency.</p>`,
+                    enabled: true,
+                    images: [{ url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&fit=crop", alt: "About ASEC" }],
+                    order: 0
+                },
+                who_we_are: {
+                    heading: "Who We Are",
+                    subtitle: "OUR FOUNDATION",
+                    content: `<p>Aitah Solutions Educational Consultancy was founded in 2019 with a clear purpose: to provide ethical, realistic, and student-focused education guidance in an industry often driven by volume rather than outcomes.</p><p>We recognized that many students make costly education decisions based on incomplete information, unrealistic expectations, or pressure to apply quickly. ASEC was created to slow that process down, replacing guesswork with structured advising and transparency.</p>`,
+                    enabled: true,
+                    images: [{ url: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=1200&fit=crop", alt: "Who We Are" }],
+                    order: 5
+                },
+                mission_statement: {
+                    heading: "Mission Statement",
+                    subtitle: "OUR STORY",
+                    content: `<p>Aitah Solutions Educational Consultancy exists to provide ethical, informed, and student-centered guidance for individuals pursuing international education pathways. Our mission is to support students in making academically sound, financially realistic, and career-aligned study decisions through transparent advising and evidence-based recommendations.</p>`,
+                    enabled: true,
+                    images: [{ url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=1200&fit=crop", alt: "Mission Statement" }],
+                    order: 10
+                },
+                philosophy: {
+                    heading: "Our Philosophy",
+                    subtitle: "OUR APPROACH",
+                    content: `<p>We believe that:</p><ul><li>Not every student should apply immediately</li><li>Not every program is the right fit</li><li>Not every opportunity leads to long-term success</li></ul><p>Our advisors focus on student readiness, not just eligibility. This means discussing risks, limitations, alternative pathways, and timing, even when those conversations are uncomfortable.</p>`,
+                    enabled: true,
+                    images: [{ url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1200&fit=crop", alt: "Our Philosophy" }],
+                    order: 20
+                },
+                how_we_work: {
+                    heading: "How We Work",
+                    subtitle: "OUR PROCESS",
+                    content: `<p>We guide students through:</p><ul><li>Evaluating academic and career goals</li><li>Understanding institutional and program requirements</li><li>Navigating application and documentation processes</li><li>Exploring scholarships and funding responsibly</li><li>Preparing for arrival and transition</li></ul><p>Where immigration advice is required, we refer students to licensed immigration professionals, maintaining clear professional boundaries.</p>`,
+                    enabled: true,
+                    images: [{ url: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1200&fit=crop", alt: "How We Work" }],
+                    order: 30
+                },
+                commitment: {
+                    heading: "Our Commitment",
+                    subtitle: "OUR PROMISE",
+                    content: `<p>We are committed to the success and well-being of every student we serve. Our focus is on long-term educational outcomes and career success, not just short-term placements.</p><ul><li>Transparency over promises</li><li>Guidance over guarantees</li><li>Long-term outcomes over short-term placements</li></ul>`,
+                    enabled: true,
+                    images: [{ url: "https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1200&fit=crop", alt: "Our Commitment" }],
+                    order: 40
+                },
+                values: {
+                    heading: "Core Values",
+                    subtitle: "What Drives Us",
+                    enabled: true,
+                    order: 50,
+                    items: [
+                        { title: "Ethical Practice", desc: "We operate within clearly defined professional boundaries. We do not guarantee admissions, visas, or funding outcomes, and we avoid misrepresentation at all stages.", icon: "ShieldCheck" },
+                        { title: "Student-Centered", desc: "Our recommendations are based on student readiness, academic history, financial capacity, and long-term goals—not institutional pressure or commission incentives.", icon: "Users" },
+                        { title: "Transparency", desc: "We communicate risks, limitations, timelines, and alternatives openly, even when that means advising a student to delay or reconsider applying.", icon: "Eye" },
+                        { title: "Evidence-Informed", desc: "Our advising reflects current admission standards, institutional requirements, and employability trends rather than assumptions or outdated practices.", icon: "Search" },
+                        { title: "Collaboration", desc: "We collaborate with accredited institutions, education platforms, and licensed immigration professionals while maintaining independence in academic advising.", icon: "Globe" }
+                    ]
+                },
+                cta: {
+                    heading: "Ready to Begin Your Journey?",
+                    content: "Let us help you navigate the path to your dream university.",
+                    buttonText: "Start Application",
+                    buttonUrl: "/apply",
+                    secondaryButtonText: "Contact Us",
+                    secondaryButtonUrl: "/contact",
+                    enabled: true,
+                    order: 60
+                }
+            }
+        },
+        contact: {
+            hero: {
+                title: "Contact Us",
+                subtitle: "GET IN TOUCH",
+                description: "Whether you have questions about programs, institutions, or our guidance process, our team is ready to support your journey."
+            },
+            info: {
+                address: "Aitah Solutions Educational Consultancy\nBased in Kitchener, ON\nServing Students Globally",
+                hours: [
+                    { label: "Monday - Friday", value: "9:00 AM - 5:00 PM", note: "EST" },
+                    { label: "Saturday", value: "10:00 AM - 2:00 PM", note: "By Appointment" }
+                ],
+                appointment_only: true,
+                disclaimer: "Please note that we provide educational consultancy. For immigration-specific advice, we will refer you to our licensed partners."
+            },
+            form_fields: [
+                { id: "name", label: "Full Name", type: "text", required: true },
+                { id: "email", label: "Email Address", type: "email", required: true },
+                { id: "phone", label: "Phone Number", type: "tel", required: false },
+                { id: "interest", label: "Interested Destination", type: "select", options: ["Canada", "USA", "UK", "Australia", "Europe", "Other"], required: true },
+                { id: "message", label: "How can we help?", type: "textarea", required: true }
+            ],
+            enabled: true
         },
         hero_slider: {
             slides: [
@@ -1418,51 +1521,373 @@ export const SEED_DATA: any = {
             ]
         },
         services: [
-            { id: 's1', slug: 'study-abroad-consulting', title: 'Study Abroad Consulting', shortDescription: 'One-on-one expert counseling to find your perfect fit.', icon: 'GraduationCap', order: 1, isActive: true },
-            { id: 's2', slug: 'university-application', title: 'University Application', shortDescription: 'Seamless application management for global universities.', icon: 'FileText', order: 2, isActive: true },
-            { id: 's3', slug: 'visa-assistance', title: 'Visa Assistance', shortDescription: 'Expert guidance for smooth student visa processing.', icon: 'Passport', order: 3, isActive: true },
-            { id: 's4', slug: 'pre-departure-briefing', title: 'Pre-Departure Briefing', shortDescription: 'Essential info for your new life abroad.', icon: 'Plane', order: 4, isActive: true },
-            { id: 's5', slug: 'scholarship-guidance', title: 'Scholarship Guidance', shortDescription: 'Helping you secure financial aid and grants.', icon: 'Award', order: 5, isActive: true },
-            { id: 's6', slug: 'career-counseling', title: 'Career Counseling', shortDescription: 'Planning your career path post-graduation.', icon: 'Briefcase', order: 6, isActive: true }
+            { 
+                id: 's1', 
+                slug: 'program-institution-selection', 
+                title: 'Program & Institution Selection', 
+                shortDescription: 'Comprehensive guidance to identify academic options aligning with your goals.', 
+                longDescription: 'Aitasol Educational Consultancy provides structured program and institution selection services designed to support students in identifying academic options that align with their educational background, career objectives, financial capacity, and long-term plans. Our process begins with a comprehensive student assessment, which includes academic history, prior qualifications, language proficiency, professional experience, financial preparedness, and post-study goals. We assist students in understanding the differences between universities, colleges, pathway programs, and graduate certificates, clarifying how each option may impact employability and further education opportunities.',
+                icon: 'GraduationCap', 
+                imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=1200&fit=crop',
+                benefits: [
+                    "Comprehensive analysis of your options",
+                    "Personalized roadmap for success",
+                    "Expert guidance on documentation",
+                    "Ongoing support until arrival",
+                ],
+                process: [
+                    { title: "Strategy", desc: "We build a personalized roadmap aligned with your long-term goals." },
+                    { title: "Verification", desc: "Thorough review of all documents to ensure 100% compliance." },
+                    { title: "Support", desc: "Ongoing assistance from application to arrival and settlement." },
+                ],
+                order: 1, 
+                isActive: true 
+            },
+            { 
+                id: 's2', 
+                slug: 'application-process-support', 
+                title: 'Application Process Support', 
+                shortDescription: 'Seamless navigation through administrative requirements and deadlines.', 
+                longDescription: 'Aitasol Educational Consultancy provides application process support to assist students in navigating the administrative and procedural requirements of applying to international education institutions. Our role includes explaining institutional application procedures, intake timelines, documentation requirements, and submission processes. We assist students in organizing required materials, understanding conditional offers, and tracking application progress. We emphasize accuracy and consistency, as discrepancies can lead to complications. This service prioritizes clarity, organization, and compliance.',
+                icon: 'FileText', 
+                imageUrl: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1200&fit=crop',
+                benefits: [
+                    "Comprehensive analysis of your options",
+                    "Personalized roadmap for success",
+                    "Expert guidance on documentation",
+                    "Ongoing support until arrival",
+                ],
+                process: [
+                    { title: "Strategy", desc: "We build a personalized roadmap aligned with your long-term goals." },
+                    { title: "Verification", desc: "Thorough review of all documents to ensure 100% compliance." },
+                    { title: "Support", desc: "Ongoing assistance from application to arrival and settlement." },
+                ],
+                order: 2, 
+                isActive: true 
+            },
+            { 
+                id: 's3', 
+                slug: 'admissions-documentation', 
+                title: 'Admissions Documentation', 
+                shortDescription: 'Expert assistance in crafting High-quality SOPs, CVs, and transcripts.', 
+                longDescription: 'Admissions documentation is a critical component of successful applications. We assist students in understanding the purpose and structure of key documents such as Statements of Purpose, letters of intent, CVs/resumés, and academic transcripts. Our approach focuses on clarity, honesty, and relevance rather than exaggerated claims. We also provide document review services to identify issues related to formatting, clarity, tone, and completeness, ensuring your profile stands out to admissions officers.',
+                icon: 'FileCheck', 
+                imageUrl: 'https://images.unsplash.com/photo-1544027993-37dbfe43562a?q=80&w=1200&fit=crop',
+                benefits: [
+                    "Comprehensive analysis of your options",
+                    "Personalized roadmap for success",
+                    "Expert guidance on documentation",
+                    "Ongoing support until arrival",
+                ],
+                process: [
+                    { title: "Strategy", desc: "We build a personalized roadmap aligned with your long-term goals." },
+                    { title: "Verification", desc: "Thorough review of all documents to ensure 100% compliance." },
+                    { title: "Support", desc: "Ongoing assistance from application to arrival and settlement." },
+                ],
+                order: 3, 
+                isActive: true 
+            },
+            { 
+                id: 's4', 
+                slug: 'scholarships-funding', 
+                title: 'Scholarships & Funding', 
+                shortDescription: 'Financial planning guidance to make your education affordable.', 
+                longDescription: 'Aitasol Educational Consultancy provides guidance on scholarships, institutional funding options, and education-related financial planning. We assist students in identifying scholarships offered by institutions and recognized organizations, explaining eligibility criteria and application timelines. For students exploring education financing options, we provide general information on eligibility considerations and repayment awareness. This service emphasizes realistic financial planning and understanding the full cost of study.',
+                icon: 'DollarSign', 
+                imageUrl: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=1200&fit=crop',
+                benefits: [
+                    "Comprehensive analysis of your options",
+                    "Personalized roadmap for success",
+                    "Expert guidance on documentation",
+                    "Ongoing support until arrival",
+                ],
+                process: [
+                    { title: "Strategy", desc: "We build a personalized roadmap aligned with your long-term goals." },
+                    { title: "Verification", desc: "Thorough review of all documents to ensure 100% compliance." },
+                    { title: "Support", desc: "Ongoing assistance from application to arrival and settlement." },
+                ],
+                order: 4, 
+                isActive: true 
+            },
+            { 
+                id: 's5', 
+                slug: 'career-counselling', 
+                title: 'Career Counselling', 
+                shortDescription: 'Aligning your education choices with long-term employability.', 
+                longDescription: 'Career counselling at Aitasol focuses on aligning education choices with long-term employability and personal capacity. Students are guided through structured discussions about career interests, market trends, transferable skills, and realistic outcomes of chosen programs. We assist students in understanding how different qualifications may impact employment opportunities and further study pathways, ensuring your educational investment yields the best possible career returns.',
+                icon: 'Briefcase', 
+                imageUrl: 'https://images.unsplash.com/photo-1454165833767-027ffea86c1e?q=80&w=1200&fit=crop',
+                benefits: [
+                    "Comprehensive analysis of your options",
+                    "Personalized roadmap for success",
+                    "Expert guidance on documentation",
+                    "Ongoing support until arrival",
+                ],
+                process: [
+                    { title: "Strategy", desc: "We build a personalized roadmap aligned with your long-term goals." },
+                    { title: "Verification", desc: "Thorough review of all documents to ensure 100% compliance." },
+                    { title: "Support", desc: "Ongoing assistance from application to arrival and settlement." },
+                ],
+                order: 5, 
+                isActive: true 
+            },
+            { 
+                id: 's6', 
+                slug: 'immigration-pre-arrival', 
+                title: 'Immigration & Pre-Arrival', 
+                shortDescription: 'Trusted referrals and support for a smooth transition to Canada.', 
+                longDescription: 'We connect students with trusted, licensed immigration consultants for immigration-related matters and provide pre-arrival guidance such as travel preparation and arrival coordination. From housing tips to understanding initial settlement needs, we guide you through the logistics of moving to a new country so you can focus on your studies from day one. Our pre-arrival support ensures you are prepared for landing and smooth integration.',
+                icon: 'Plane', 
+                imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109c0f2?q=80&w=1200&fit=crop',
+                benefits: [
+                    "Comprehensive analysis of your options",
+                    "Personalized roadmap for success",
+                    "Expert guidance on documentation",
+                    "Ongoing support until arrival",
+                ],
+                process: [
+                    { title: "Strategy", desc: "We build a personalized roadmap aligned with your long-term goals." },
+                    { title: "Verification", desc: "Thorough review of all documents to ensure 100% compliance." },
+                    { title: "Support", desc: "Ongoing assistance from application to arrival and settlement." },
+                ],
+                order: 6, 
+                isActive: true 
+            }
         ],
         destinations: [
-            { id: 'd1', country: 'Canada', slug: 'canada', flagEmoji: '🇨🇦', heroImage: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?q=80&w=800&fit=crop', description: 'Top-tier education and post-study work opportunities.', isActive: true, order: 1 },
-            { id: 'd2', country: 'United Kingdom', slug: 'uk', flagEmoji: '🇬🇧', heroImage: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=800&fit=crop', description: 'Historic universities and world-renowned degrees.', isActive: true, order: 2 },
-            { id: 'd3', country: 'Australia', slug: 'australia', flagEmoji: '🇦🇺', heroImage: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?q=80&w=800&fit=crop', description: 'High quality of life and globally recognized programs.', isActive: true, order: 3 },
-            { id: 'd4', country: 'USA', slug: 'usa', flagEmoji: '🇺🇸', heroImage: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?q=80&w=800&fit=crop', description: 'Innovation, diversity, and world-class research.', isActive: true, order: 4 },
-            { id: 'd5', country: 'Germany', slug: 'germany', flagEmoji: '🇩🇪', heroImage: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800&fit=crop', description: 'Tuition-free high-quality education in many states.', isActive: true, order: 5 },
-            { id: 'd6', country: 'New Zealand', slug: 'new-zealand', flagEmoji: '🇳🇿', heroImage: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&fit=crop', description: 'Safe environment and personalized learning.', isActive: true, order: 6 },
-            { id: 'd7', country: 'Ireland', slug: 'ireland', flagEmoji: '🇮🇪', heroImage: 'https://images.unsplash.com/photo-1590089415225-403ed0f96a05?q=80&w=800&fit=crop', description: 'Welcoming culture and booming tech sector.', isActive: true, order: 7 },
-            { id: 'd8', country: 'Malaysia', slug: 'malaysia', flagEmoji: '🇲🇾', heroImage: 'https://images.unsplash.com/photo-1528181304800-2f540292418f?q=80&w=800&fit=crop', description: 'Affordable high-quality education in Asia.', isActive: true, order: 8 }
-        ],
-        about: {
-            title: 'About Aitasol',
-            sections: {
-                hero: {
-                    heading: "Your Partner in Global Education Excellence",
-                    subtitle: "Empowering Students Since 2014",
-                    content: "<p>Aitasol is a leading education consultancy dedicated to helping students achieve their dreams of international education. We believe that global exposure is the key to unlocking a world of opportunities.</p>",
-                    imageUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=1920&h=1080&fit=crop",
-                    enabled: true
+            { 
+                id: 'd1', 
+                country: 'Canada', 
+                slug: 'canada', 
+                flagEmoji: '🇨🇦', 
+                heroImage: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?q=80&w=800&fit=crop', 
+                description: 'Canada is one of the most popular destinations for international students, offering high-quality education, a welcoming culture, and excellent post-study work opportunities.', 
+                highlights: [
+                    "Top-ranked universities globally",
+                    "Affordable tuition compared to USA/UK",
+                    "Post-Graduation Work Permit (PGWP) eligibility",
+                    "Safe and multicultural environment",
+                ],
+                stats: {
+                    universities: "90+",
+                    avgCost: "$15,000 - $30,000 / year",
+                    livingExp: "$10,000 - $15,000 / year",
+                    visaSuccess: "95%+",
                 },
-                mission: {
-                    heading: "Our Mission & Vision",
-                    content: "<p>Our mission is to simplify the complex process of international university applications and visa processing, providing transparent and ethical guidance to every student. We envision a world where every deserving student has access to the best education regardless of geographical boundaries.</p>",
-                    enabled: true
+                popularCities: ["Toronto", "Vancouver", "Montreal", "Ottawa"],
+                requirements: [
+                    "Academic Transcripts",
+                    "IELTS/TOEFL Scores",
+                    "Statement of Purpose (SOP)",
+                    "Proof of Funds",
+                ],
+                isActive: true, 
+                order: 1 
+            },
+            { 
+                id: 'd2', 
+                country: 'United Kingdom', 
+                slug: 'uk', 
+                flagEmoji: '🇬🇧', 
+                heroImage: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?q=80&w=800&fit=crop', 
+                description: 'The UK is home to some of the world\'s oldest and most prestigious universities. A degree from the UK is recognized globally and offers a unique cultural experience.', 
+                highlights: [
+                    "Global academic reputation",
+                    "Shorter degree durations (3-yr UG, 1-yr PG)",
+                    "Graduate Route visa (2 years post-study)",
+                    "Rich history and culture",
+                ],
+                stats: {
+                    universities: "160+",
+                    avgCost: "£12,000 - £25,000 / year",
+                    livingExp: "£9,000 - £12,000 / year",
+                    visaSuccess: "98%+",
                 },
-                values: {
-                    heading: "The Values That Guide Us",
-                    subtitle: "Our Core Principles",
-                    items: [
-                        { title: "Integrity", desc: "We provide honest, transparent guidance throughout the process.", icon: "ShieldCheck" },
-                        { title: "Excellence", desc: "We strive for the highest success rates in admissions and visas.", icon: "Award" },
-                        { title: "Student-First", desc: "Your career goals and aspirations are our top priority.", icon: "Heart" },
-                        { title: "Global Reach", desc: "Access to 500+ partner universities across the globe.", icon: "Globe" }
-                    ],
-                    enabled: true
-                }
+                popularCities: ["London", "Manchester", "Edinburgh", "Birmingham"],
+                requirements: [
+                    "CAS Letter",
+                    "Academic Reference",
+                    "IELTS Academic",
+                    "Bank Statements",
+                ],
+                isActive: true,
+                order: 2
+            },
+            {
+                id: 'd3',
+                country: 'USA',
+                slug: 'usa',
+                flagEmoji: '🇺🇸',
+                heroImage: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=800&fit=crop',
+                description: 'The United States boasts many of the world\'s top-ranked universities and offers unparalleled opportunities for research and career growth across all fields.',
+                highlights: [
+                    "World-renowned Ivy League institutions",
+                    "Flexible curriculum and research focus",
+                    "OPT (Optional Practical Training) for graduates",
+                    "Global hub for tech and innovation",
+                ],
+                stats: {
+                    universities: "4000+",
+                    avgCost: "$25,000 - $50,000 / year",
+                    livingExp: "$12,000 - $18,000 / year",
+                    visaSuccess: "92%+",
+                },
+                popularCities: ["New York", "Los Angeles", "Chicago", "Boston"],
+                requirements: [
+                    "SAT/ACT Scores",
+                    "TOEFL/IELTS",
+                    "Letters of Recommendation",
+                    "Financial Verification",
+                ],
+                isActive: true,
+                order: 3
+            },
+            {
+                id: 'd4',
+                country: 'Australia',
+                slug: 'australia',
+                flagEmoji: '🇦🇺',
+                heroImage: 'https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?q=80&w=800&fit=crop',
+                description: 'Australia offers a high quality of life and world-class education. Its research-led institutions and beautiful environment make it a top choice for students.',
+                highlights: [
+                    "High standards of living",
+                    "Strong focus on research and innovation",
+                    "Post-study work rights",
+                    "Stunning natural landscapes",
+                ],
+                stats: {
+                    universities: "43",
+                    avgCost: "A$20,000 - A$45,000 / year",
+                    livingExp: "A$21,041 / year",
+                    visaSuccess: "96%+",
+                },
+                popularCities: ["Sydney", "Melbourne", "Brisbane", "Perth"],
+                requirements: [
+                    "GTE Requirement",
+                    "English Proficiency",
+                    "Health Insurance (OSHC)",
+                    "Educational Certificates",
+                ],
+                isActive: true,
+                order: 4
+            },
+            {
+                id: 'd5',
+                country: 'Germany',
+                slug: 'germany',
+                flagEmoji: '🇩🇪',
+                heroImage: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?q=80&w=800&fit=crop',
+                description: 'Germany is a global leader in engineering and technology. Many public universities offer tuition-free education for international students.',
+                highlights: [
+                    "No or low tuition fees at public universities",
+                    "World-class engineering programs",
+                    "Strong economy and job prospects",
+                    "Central European location",
+                ],
+                stats: {
+                    universities: "380+",
+                    avgCost: "€0 - €10,000 / year",
+                    livingExp: "€10,000 - €11,000 / year",
+                    visaSuccess: "94%+",
+                },
+                popularCities: ["Berlin", "Munich", "Hamburg", "Frankfurt"],
+                requirements: [
+                    "University Entrance Qualification",
+                    "TestDaF/DSH (for German taught)",
+                    "Blocked Account",
+                    "Transcript Verification",
+                ],
+                isActive: true,
+                order: 5
+            },
+            {
+                id: 'd6',
+                country: 'New Zealand',
+                slug: 'new-zealand',
+                flagEmoji: '🇳🇿',
+                heroImage: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&fit=crop',
+                description: 'New Zealand is known for its safe environment, friendly people, and globally recognized education system focused on practical learning.',
+                highlights: [
+                    "Safe and peaceful country",
+                    "High-quality educational standards",
+                    "Personalized learning environments",
+                    "Amazing outdoor activities",
+                ],
+                stats: {
+                    universities: "8",
+                    avgCost: "NZ$22,000 - NZ$35,000 / year",
+                    livingExp: "NZ$15,000 - NZ$20,000 / year",
+                    visaSuccess: "97%+",
+                },
+                popularCities: ["Auckland", "Wellington", "Christchurch", "Hamilton"],
+                requirements: [
+                    "Offer of Place",
+                    "English Competency",
+                    "Medical Certificates",
+                    "Character Proof",
+                ],
+                isActive: true,
+                order: 6
+            },
+            {
+                id: 'd7',
+                country: 'Ireland',
+                slug: 'ireland',
+                flagEmoji: '🇮🇪',
+                heroImage: 'https://images.unsplash.com/photo-1590089415225-401ed6f9db8e?q=80&w=800&fit=crop',
+                description: 'Ireland is a hub for multinational companies and offers a rich academic tradition. It is one of the few English-speaking countries in Europe.',
+                highlights: [
+                    "English-speaking environment",
+                    "European hub for tech and pharma",
+                    "Friendly and vibrant culture",
+                    "Stay-back option (1-2 years)",
+                ],
+                stats: {
+                    universities: "8",
+                    avgCost: "€10,000 - €25,000 / year",
+                    livingExp: "€10,000 - €12,000 / year",
+                    visaSuccess: "95%+",
+                },
+                popularCities: ["Dublin", "Cork", "Galway", "Limerick"],
+                requirements: [
+                    "Proof of Enrollment",
+                    "English Language Proficiency",
+                    "Private Medical Insurance",
+                    "Evidence of Funds",
+                ],
+                isActive: true,
+                order: 7
+            },
+            { 
+                id: 'd8', 
+                country: 'Malaysia', 
+                slug: 'malaysia', 
+                flagEmoji: '🇲🇾', 
+                heroImage: 'https://images.unsplash.com/photo-1548013146-72479768bbaa?q=80&w=800&fit=crop', 
+                description: 'Malaysia offers affordable education with international standards. It is a multicultural country with branch campuses of many global universities.', 
+                highlights: [
+                    "Low cost of living and tuition",
+                    "Multicultural and diverse society",
+                    "Branch campuses of top universities",
+                    "Safe and politically stable",
+                ],
+                stats: {
+                    universities: "20+",
+                    avgCost: "$4,000 - $10,000 / year",
+                    livingExp: "$3,000 - $5,000 / year",
+                    visaSuccess: "98%+",
+                },
+                popularCities: ["Kuala Lumpur", "Penang", "Johor Bahru", "Selangor"],
+                requirements: [
+                    "Valid Passport",
+                    "Academic Certificates",
+                    "Health Declaration",
+                    "English Proficiency (optional for some)",
+                ],
+                isActive: true,
+                order: 8
             }
-        },
+        ],
         universities: [
             { id: 'u1', name: 'University of Toronto', country: 'Canada', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/04/Utoronto_logo.svg/1200px-Utoronto_logo.svg.png', description: 'One of the world\'s top research-intensive universities.', programs: ['Computer Science', 'Engineering', 'Business'], isActive: true },
             { id: 'u2', name: 'University of Melbourne', country: 'Australia', logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/3/30/University_of_Melbourne_logo.svg/1200px-University_of_Melbourne_logo.svg.png', description: 'Australia\'s leading university with a global reputation.', programs: ['Medicine', 'Arts', 'Law'], isActive: true },

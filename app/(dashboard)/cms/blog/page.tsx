@@ -275,12 +275,41 @@ export default function BlogManager() {
     };
 
     const handleSeedArticles = async () => {
-        if (!confirm(`Seed 6 default DMLabs blog articles into Firestore for "${currentSite.name}"? Existing articles will not be deleted.`)) return;
+        const isAitasol = currentSite.id === 'aitasol';
+        const siteName = isAitasol ? "Aitasol" : "DMLabs";
+        if (!confirm(`Seed default ${siteName} blog articles into Firestore for "${currentSite.name}"? Existing articles will not be deleted.`)) return;
         setSaving(true);
         setError("");
         setSuccessMsg("");
         try {
-            const defaultArticles = [
+            const aitasolArticles = [
+                { 
+                    id: 'study-in-canada-2024', 
+                    title: 'Ultimate Guide to Studying in Canada for 2024', 
+                    slug: 'ultimate-guide-to-studying-in-canada-2024', 
+                    author: 'Aitasol Admissions', 
+                    category: 'Canada', 
+                    date: new Date('2024-04-10'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1503614472-8c93d56e92ce?q=80&w=800&fit=crop', 
+                    excerpt: 'Everything you need to know about the latest visa changes, university rankings, and post-study work permits in Canada.', 
+                    content: '<h2>Why Canada?</h2><p>Canada remains a top choice for international students due to its high-quality education and welcoming policies. In 2024, the government has introduced several updates that every student should know...</p><h3>New Visa Regulations</h3><p>The IRCC has implemented a new attestation letter system to ensure sustainable growth in the international student sector. While this adds a step, it also ensures that students who receive visas are coming to reputable institutions with guaranteed support.</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'scholarship-success-tips', 
+                    title: 'Top 5 Tips for a Successful Scholarship Application', 
+                    slug: 'top-5-tips-for-a-successful-scholarship-application', 
+                    author: 'Aitasol Counselors', 
+                    category: 'Scholarships', 
+                    date: new Date('2024-03-25'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&fit=crop', 
+                    excerpt: 'Securing financial aid is a competitive process. Learn how to craft a compelling essay and build a profile that stands out to scholarship committees.', 
+                    content: '<h2>Winning the Scholarship Game</h2><p>Financial barriers shouldn\'t stop you from global education. Many universities offer fully-funded or partial scholarships based on merit and need. Here is how you can maximize your chances...</p>', 
+                    published: true 
+                }
+            ];
+
+            const dmlabsArticles = [
                 { 
                     id: 'future-of-ai', 
                     title: 'The Future of AI: Opportunities and Challenges', 
@@ -355,10 +384,12 @@ export default function BlogManager() {
                 },
             ];
 
-            for (const article of defaultArticles) {
+            const articlesToSeed = isAitasol ? aitasolArticles : dmlabsArticles;
+
+            for (const article of articlesToSeed) {
                 await FirestoreService.saveArticle(currentSite.id, article, article.id);
             }
-            setSuccessMsg(`✅ Seeded ${defaultArticles.length} articles successfully! Refreshing...`);
+            setSuccessMsg(`✅ Seeded ${articlesToSeed.length} articles successfully! Refreshing...`);
             await loadArticles();
         } catch (err) {
             console.error(err);

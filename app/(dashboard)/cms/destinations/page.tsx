@@ -266,6 +266,55 @@ export default function DestinationsManager() {
                                                     onChange={(e) => updateDest(dest.id, 'description', e.target.value)} 
                                                 />
                                             </div>
+
+                                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-slate-50 dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/10">
+                                                <div>
+                                                    <Label className="text-[10px]">Universities</Label>
+                                                    <Input size="sm" value={dest.stats?.universities || ""} onChange={(e) => updateDest(dest.id, 'stats', { ...dest.stats, universities: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-[10px]">Avg. Tuition</Label>
+                                                    <Input size="sm" value={dest.stats?.avgCost || ""} onChange={(e) => updateDest(dest.id, 'stats', { ...dest.stats, avgCost: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-[10px]">Living Exp.</Label>
+                                                    <Input size="sm" value={dest.stats?.livingExp || ""} onChange={(e) => updateDest(dest.id, 'stats', { ...dest.stats, livingExp: e.target.value })} />
+                                                </div>
+                                                <div>
+                                                    <Label className="text-[10px]">Visa Success</Label>
+                                                    <Input size="sm" value={dest.stats?.visaSuccess || ""} onChange={(e) => updateDest(dest.id, 'stats', { ...dest.stats, visaSuccess: e.target.value })} />
+                                                </div>
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <Label>Highlights (One per line)</Label>
+                                                    <textarea 
+                                                        className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+                                                        value={Array.isArray(dest.highlights) ? dest.highlights.join('\n') : ""} 
+                                                        onChange={(e) => updateDest(dest.id, 'highlights', e.target.value.split('\n').filter(b => b.trim()))} 
+                                                        placeholder="Post-study work permit&#10;High quality of life..."
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>Admission Requirements (One per line)</Label>
+                                                    <textarea 
+                                                        className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+                                                        value={Array.isArray(dest.requirements) ? dest.requirements.join('\n') : ""} 
+                                                        onChange={(e) => updateDest(dest.id, 'requirements', e.target.value.split('\n').filter(b => b.trim()))} 
+                                                        placeholder="IELTS/TOEFL scores&#10;Academic transcripts..."
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <Label>Popular Cities (Comma separated)</Label>
+                                                <Input 
+                                                    value={Array.isArray(dest.popularCities) ? dest.popularCities.join(', ') : ""} 
+                                                    onChange={(e) => updateDest(dest.id, 'popularCities', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} 
+                                                    placeholder="Toronto, Vancouver, Montreal..."
+                                                />
+                                            </div>
                                         </div>
 
                                         <div className="w-full lg:w-64 space-y-4">

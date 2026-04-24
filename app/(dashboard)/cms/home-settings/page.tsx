@@ -66,6 +66,8 @@ const getSectionsConfig = (siteId: string) => {
         return [
             { id: 'hero', label: 'Hero Section' },
             { id: 'stats', label: 'Impact Stats' },
+            { id: 'services', label: 'Services Section' },
+            { id: 'destinations', label: 'Destinations Section' },
             { id: 'process', label: 'Our Process' },
             { id: 'testimonials', label: 'Testimonials' },
             { id: 'cta', label: 'Call to Action' }
@@ -271,6 +273,8 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                 subtitle: "Unlock world-class opportunities with expert guidance.",
                 primaryButton: "Free Consultation",
                 secondaryButton: "Explore Destinations",
+                primaryLink: "/contact",
+                secondaryLink: "/destinations",
                 enabled: true
             } as any,
             stats: {
@@ -290,16 +294,35 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                     { title: "Application", desc: "We manage your entire application process." }
                 ]
             },
+            services: {
+                heading: "Comprehensive Services for Every Step of Your Journey",
+                subtitle: "Our Expertise",
+                content: "We provide a full spectrum of consultancy services to ensure your transition to international education is seamless and successful.",
+                enabled: true
+            },
+            destinations: {
+                heading: "Explore Popular Destinations",
+                subtitle: "World-Class Education",
+                enabled: true
+            },
             testimonials: {
                 heading: "What Our Students Say",
+                subtitle: "Student Stories",
+                content: "Join thousands of successful students who have started their international education journey with Aitasol.",
                 enabled: true,
                 items: [
-                    { name: "Sarah J.", university: "UofT", quote: "Aitasol made my dream a reality." }
+                    { name: "Sarah Johnson", university: "University of Toronto", country: "Canada", program: "Master of Computer Science", quote: "Aitasol made my dream of studying in Canada a reality.", image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop" },
+                    { name: "Ahmed Raza", university: "Imperial College London", country: "UK", program: "MSc in Data Science", quote: "The personalized counseling sessions helped me choose the right program.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" },
+                    { name: "Emily Chen", university: "University of Melbourne", country: "Australia", program: "Bachelor of Business", quote: "Highly recommend Aitasol for their pre-departure briefing.", image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop" }
                 ]
             },
             cta: {
                 heading: "Ready to Start Your Global Success Story?",
+                subtitle: "Don't navigate the complex world of international education alone. Let our experts guide you every step of the way.",
                 primaryButton: "Book Free Consultation",
+                secondaryButton: "WhatsApp Us",
+                primaryLink: "/contact",
+                whatsappNumber: "1234567890",
                 enabled: true
             }
         };
@@ -609,7 +632,7 @@ export default function HomePageManager() {
                                             )}
 
                                             {/* Optional Subtitle */}
-                                            {(config.id === 'coreFoundations' || config.id === 'howItWorks' || config.id === 'testimonials' || config.id === 'who_we_are') && (
+                                            {['coreFoundations', 'howItWorks', 'testimonials', 'who_we_are', 'services', 'destinations', 'process'].includes(config.id) && (
                                                 <div>
                                                     <Label>Subtitle</Label>
                                                     <Input
@@ -646,6 +669,14 @@ export default function HomePageManager() {
                                                         <Input value={(section as any).secondaryButton || ""} onChange={(e) => handleSectionChange(config.id, "secondaryButton" as any, e.target.value)} />
                                                     </div>
                                                     <div>
+                                                        <Label>Primary Link Path</Label>
+                                                        <Input value={(section as any).primaryLink || ""} onChange={(e) => handleSectionChange(config.id, "primaryLink" as any, e.target.value)} placeholder="/contact" />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Secondary Link Path</Label>
+                                                        <Input value={(section as any).secondaryLink || ""} onChange={(e) => handleSectionChange(config.id, "secondaryLink" as any, e.target.value)} placeholder="/destinations" />
+                                                    </div>
+                                                    <div>
                                                         <ImagePicker 
                                                             label="Background Image"
                                                             value={section.imageUrl || ""}
@@ -674,6 +705,28 @@ export default function HomePageManager() {
                                                         <Label>Secondary Button Text</Label>
                                                         <Input value={(section as any).secondaryButton || ""} onChange={(e) => handleSectionChange(config.id, "secondaryButton" as any, e.target.value)} />
                                                     </div>
+                                                    <div>
+                                                        <Label>Primary Link Path</Label>
+                                                        <Input value={(section as any).primaryLink || ""} onChange={(e) => handleSectionChange(config.id, "primaryLink" as any, e.target.value)} placeholder="/contact" />
+                                                    </div>
+                                                    <div>
+                                                        <Label>WhatsApp Number</Label>
+                                                        <Input value={(section as any).whatsappNumber || ""} onChange={(e) => handleSectionChange(config.id, "whatsappNumber" as any, e.target.value)} placeholder="e.g. 1234567890" />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Plain-text description for these section types */}
+                                            {['services', 'destinations', 'testimonials', 'process'].includes(config.id) && (
+                                                <div>
+                                                    <Label>Description</Label>
+                                                    <textarea
+                                                        className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                        rows={3}
+                                                        value={section.content || ""}
+                                                        onChange={(e) => handleSectionChange(config.id, "content", e.target.value)}
+                                                        placeholder="Section description text..."
+                                                    />
                                                 </div>
                                             )}
 
@@ -899,11 +952,41 @@ export default function HomePageManager() {
                                                                 {config.id === 'testimonials' && (
                                                                     <div className="grid grid-cols-2 gap-4">
                                                                         <div><Label className="text-xs mb-1">Author Name</Label><Input value={item.author || item.name || ''} onChange={(e) => updateItem(config.id, idx, item.author ? 'author' : 'name', e.target.value)} /></div>
-                                                                        <div><Label className="text-xs mb-1">Role / Subtitle / University</Label><Input value={item.role || item.university || ''} onChange={(e) => updateItem(config.id, idx, item.role ? 'role' : 'university', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">University</Label><Input value={item.university || item.role || ''} onChange={(e) => updateItem(config.id, idx, 'university', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Country</Label><Input value={item.country || ''} onChange={(e) => updateItem(config.id, idx, 'country', e.target.value)} placeholder="e.g. Canada" /></div>
+                                                                        <div><Label className="text-xs mb-1">Program</Label><Input value={item.program || ''} onChange={(e) => updateItem(config.id, idx, 'program', e.target.value)} placeholder="e.g. Master of Computer Science" /></div>
                                                                         <div className="col-span-2"><Label className="text-xs mb-1">Quote</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={3} value={item.quote || ''} onChange={(e) => updateItem(config.id, idx, 'quote', e.target.value)} /></div>
+                                                                        <div className="col-span-2">
+                                                                            <ImagePicker
+                                                                                label="Author Photo"
+                                                                                value={item.image || ''}
+                                                                                onChange={(url) => updateItem(config.id, idx, 'image', url)}
+                                                                            />
+                                                                        </div>
                                                                     </div>
                                                                 )}
 
+                                                                {config.id === 'services' && (
+                                                                    <div className="grid grid-cols-1 gap-4">
+                                                                        <div><Label className="text-xs mb-1">Service Title</Label><Input value={item.title || ''} onChange={(e) => updateItem(config.id, idx, 'title', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Description</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={2} value={item.desc || ''} onChange={(e) => updateItem(config.id, idx, 'desc', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Icon (Lucide name)</Label><Input value={item.icon || ''} onChange={(e) => updateItem(config.id, idx, 'icon', e.target.value)} /></div>
+                                                                    </div>
+                                                                )}
+
+                                                                {config.id === 'destinations' && (
+                                                                    <div className="grid grid-cols-1 gap-4">
+                                                                        <div><Label className="text-xs mb-1">Destination Name</Label><Input value={item.name || ''} onChange={(e) => updateItem(config.id, idx, 'name', e.target.value)} /></div>
+                                                                        <div><Label className="text-xs mb-1">Description</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={2} value={item.desc || ''} onChange={(e) => updateItem(config.id, idx, 'desc', e.target.value)} /></div>
+                                                                        <div>
+                                                                            <ImagePicker
+                                                                                label="Destination Image"
+                                                                                value={item.image || ''}
+                                                                                onChange={(url) => updateItem(config.id, idx, 'image', url)}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+                                                                )}
 
                                                                 {config.id === 'mindfulness' && (
                                                                     <div className="grid grid-cols-1 gap-4">

@@ -55,6 +55,8 @@ export default function ServicesManager() {
     const { currentSite } = useSite();
     const [services, setServices] = useState<ServiceItem[]>([]);
     const [seo, setSeo] = useState<any>({});
+    const [hero, setHero] = useState<any>({ heading: "", content: "" });
+    const [banner, setBanner] = useState<any>({ heading: "", subtitle: "", buttonText: "", buttonLink: "" });
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -76,6 +78,8 @@ export default function ServicesManager() {
             if (data) {
                 setServices(data.services || []);
                 setSeo(data.seo || {});
+                setHero(data.hero || { heading: "Our Expert Services", content: "From your first inquiry..." });
+                setBanner(data.banner || { heading: "Not sure which service you need?", subtitle: "Book a free call...", buttonText: "Book Free Call", buttonLink: "/contact" });
             } else {
                 // Try to load from seed
                 const siteSeed = SEED_DATA[currentSite.id];
@@ -104,6 +108,8 @@ export default function ServicesManager() {
             const data = {
                 services: services.map((s, idx) => ({ ...s, order: idx })),
                 seo,
+                hero,
+                banner,
                 lastUpdated: new Date().toISOString()
             };
             await FirestoreService.savePageContent("services", data as any, currentSite.id);
@@ -200,6 +206,57 @@ export default function ServicesManager() {
                     />
                 </div>
 
+                {/* Hero & Banner Sections */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="p-6 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
+                        <div className="flex items-center gap-2 mb-4">
+                            <LayoutIcon size={18} className="text-primary" />
+                            <h3 className="font-bold">Hero Section</h3>
+                        </div>
+                        <div className="space-y-3">
+                            <div>
+                                <Label>Heading</Label>
+                                <Input value={hero.heading} onChange={(e) => setHero({ ...hero, heading: e.target.value })} />
+                            </div>
+                            <div>
+                                <Label>Content</Label>
+                                <textarea 
+                                    className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-20 outline-none"
+                                    value={hero.content} 
+                                    onChange={(e) => setHero({ ...hero, content: e.target.value })} 
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
+                        <div className="flex items-center gap-2 mb-4">
+                            <LayoutIcon size={18} className="text-accent" />
+                            <h3 className="font-bold">Trust Banner / CTA</h3>
+                        </div>
+                        <div className="space-y-3">
+                            <div>
+                                <Label>Heading</Label>
+                                <Input value={banner.heading} onChange={(e) => setBanner({ ...banner, heading: e.target.value })} />
+                            </div>
+                            <div>
+                                <Label>Subtitle</Label>
+                                <Input value={banner.subtitle} onChange={(e) => setBanner({ ...banner, subtitle: e.target.value })} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <Label>Button Text</Label>
+                                    <Input value={banner.buttonText} onChange={(e) => setBanner({ ...banner, buttonText: e.target.value })} />
+                                </div>
+                                <div>
+                                    <Label>Button Link</Label>
+                                    <Input value={banner.buttonLink} onChange={(e) => setBanner({ ...banner, buttonLink: e.target.value })} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>
                     <SortableContext items={services.map(s => s.id)} strategy={verticalListSortingStrategy}>
                         <div className="space-y-4">
@@ -250,12 +307,49 @@ export default function ServicesManager() {
                                             </div>
 
                                             <div>
-                                                <Label>Short Description</Label>
+                                                <Label>Short Description (for cards)</Label>
                                                 <textarea 
-                                                    className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-24 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+                                                    className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-20 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
                                                     value={service.shortDescription || service.description || ""} 
                                                     onChange={(e) => updateService(service.id, 'shortDescription', e.target.value)} 
                                                 />
+                                            </div>
+
+                                            <div>
+                                                <Label>Full Overview (Long Description)</Label>
+                                                <textarea 
+                                                    className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-32 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+                                                    value={service.longDescription || ""} 
+                                                    onChange={(e) => updateService(service.id, 'longDescription', e.target.value)} 
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div>
+                                                    <Label>Benefits (One per line)</Label>
+                                                    <textarea 
+                                                        className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-40 focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+                                                        value={Array.isArray(service.benefits) ? service.benefits.join('\n') : ""} 
+                                                        onChange={(e) => updateService(service.id, 'benefits', e.target.value.split('\n').filter(b => b.trim()))} 
+                                                        placeholder="Priority Visa Processing&#10;Personalized SOP Reviews..."
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Label>Process Steps (JSON format for now, or simple text list)</Label>
+                                                    <p className="text-[10px] text-gray-400 mb-1">Example: {'[{"title":"Step 1", "desc":"..."}]'}</p>
+                                                    <textarea 
+                                                        className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-40 font-mono focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none transition-all"
+                                                        value={typeof service.process === 'string' ? service.process : JSON.stringify(service.process || [], null, 2)} 
+                                                        onChange={(e) => {
+                                                            try {
+                                                                const val = JSON.parse(e.target.value);
+                                                                updateService(service.id, 'process', val);
+                                                            } catch (err) {
+                                                                updateService(service.id, 'process', e.target.value);
+                                                            }
+                                                        }} 
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 

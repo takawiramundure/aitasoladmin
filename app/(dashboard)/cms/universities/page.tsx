@@ -55,6 +55,8 @@ export default function UniversitiesManager() {
     const { currentSite } = useSite();
     const [universities, setUniversities] = useState<UniversityItem[]>([]);
     const [seo, setSeo] = useState<any>({});
+    const [hero, setHero] = useState<any>({ heading: "", content: "" });
+    const [cta, setCta] = useState<any>({ heading: "", subtitle: "" });
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -76,6 +78,8 @@ export default function UniversitiesManager() {
             if (data) {
                 setUniversities(data.universities || []);
                 setSeo(data.seo || {});
+                setHero(data.hero || { heading: "Partner Universities", content: "Explore our extensive network..." });
+                setCta(data.cta || { heading: "Don't see your dream university?", subtitle: "We partner with hundreds..." });
             } else {
                 // Try to load from seed
                 const siteSeed = (SEED_DATA as any)[currentSite.id];
@@ -104,6 +108,8 @@ export default function UniversitiesManager() {
             const data = {
                 universities: universities.map((s, idx) => ({ ...s, order: idx })),
                 seo,
+                hero,
+                cta,
                 lastUpdated: new Date().toISOString()
             };
             await FirestoreService.savePageContent("universities", data as any, currentSite.id);
@@ -200,6 +206,47 @@ export default function UniversitiesManager() {
                         data={seo} 
                         onChange={(field, value) => setSeo({ ...seo, [field]: value })}
                     />
+                </div>
+
+                {/* Hero & CTA Sections */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="p-6 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
+                        <div className="flex items-center gap-2 mb-4">
+                            <LayoutIcon size={18} className="text-primary" />
+                            <h3 className="font-bold">Hero Section</h3>
+                        </div>
+                        <div className="space-y-3">
+                            <div>
+                                <Label>Heading</Label>
+                                <Input value={hero.heading} onChange={(e) => setHero({ ...hero, heading: e.target.value })} />
+                            </div>
+                            <div>
+                                <Label>Content</Label>
+                                <textarea 
+                                    className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-lg p-3 text-sm h-20 outline-none"
+                                    value={hero.content} 
+                                    onChange={(e) => setHero({ ...hero, content: e.target.value })} 
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="p-6 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
+                        <div className="flex items-center gap-2 mb-4">
+                            <LayoutIcon size={18} className="text-accent" />
+                            <h3 className="font-bold">CTA Section</h3>
+                        </div>
+                        <div className="space-y-3">
+                            <div>
+                                <Label>Heading</Label>
+                                <Input value={cta.heading} onChange={(e) => setCta({ ...cta, heading: e.target.value })} />
+                            </div>
+                            <div>
+                                <Label>Subtitle</Label>
+                                <Input value={cta.subtitle} onChange={(e) => setCta({ ...cta, subtitle: e.target.value })} />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd} sensors={sensors}>

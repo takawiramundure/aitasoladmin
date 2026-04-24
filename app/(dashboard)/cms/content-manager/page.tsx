@@ -1095,19 +1095,19 @@ export default function ContentManager() {
                         )}
                         
                         {/* Generic Seed from config button for modern sites */}
-                        {(currentSite.id === 'dmlabs' || currentSite.id === 'noel' || currentSite.id === 'nspc') && (
+                        {(currentSite.id === 'dmlabs' || currentSite.id === 'noel' || currentSite.id === 'nspc' || currentSite.id === 'aitasol') && (
                             <Button variant="outline" size="sm" onClick={seedFromConfig} className="gap-2">
                                 <Leaf size={14} className="text-green-600" />
                                 Seed Defaults
                             </Button>
                         )}
 
-                        {pageId === 'about' && (
+                        {pageId === 'about' && currentSite.id === 'kmfw' && (
                             <Button variant="outline" onClick={seedAboutUs}>
                                 Seed About Us
                             </Button>
                         )}
-                        {pageId === 'impact' && (
+                        {pageId === 'impact' && currentSite.id === 'kmfw' && (
                             <Button variant="outline" onClick={seedImpact}>
                                 Seed Impact
                             </Button>
@@ -1244,7 +1244,7 @@ export default function ContentManager() {
                         .filter(([key]) => pageId !== 'footer' || !['policy_links', 'donate_label', 'donate_url'].includes(key))
                         .sort((a, b) => (a[1].order ?? 999) - (b[1].order ?? 999))
                         .map(([key, section]) => (
-                            <div key={key} className="p-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
+                            <div key={key} className="p-4 border border-gray-100 rounded-lg bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700 max-w-full overflow-hidden">
                                 <div className="mb-3 flex items-center justify-between">
                                     <Label>Section ID: <span className="font-mono text-xs text-gray-400">{key}</span></Label>
                                     <div className="flex items-center gap-4">

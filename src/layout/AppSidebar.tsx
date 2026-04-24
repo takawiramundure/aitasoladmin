@@ -362,8 +362,6 @@ const AppSidebar: React.FC = () => {
           icon: <PageIcon />,
           subItems: [
             { name: "Student Applications", path: "/cms/aitasol-applications" },
-            { name: "Global Services", path: "/cms/services" },
-            { name: "Destinations", path: "/cms/destinations" },
           ]
         },
         {
@@ -372,6 +370,8 @@ const AppSidebar: React.FC = () => {
           subItems: [
             { name: "Home Page", path: "/cms/home-settings" },
             { name: "About Page", path: "/cms/about" },
+            { name: "Services", path: "/cms/services" },
+            { name: "Destinations", path: "/cms/destinations" },
             { name: "Universities", path: "/cms/universities" },
             { name: "Blog / News", path: "/cms/blog" },
             { name: "Contact Page", path: "/cms/contact" },

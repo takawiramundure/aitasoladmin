@@ -58,38 +58,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            setUser(currentUser);
-            if (currentUser) {
-                // 1. Sync user to Firestore
-                const userRef = doc(db, 'users', currentUser.uid);
-                const userSnap = await getDoc(userRef);
-                let currentProfile: UserProfile | null = null;
+            try {
+                setUser(currentUser);
+                if (currentUser) {
+                    // 1. Sync user to Firestore
+                    const userRef = doc(db, 'users', currentUser.uid);
+                    const userSnap = await getDoc(userRef);
+                    let currentProfile: UserProfile | null = null;
 
-                if (userSnap.exists()) {
-                    currentProfile = { ...userSnap.data(), uid: currentUser.uid } as UserProfile;
+                    if (userSnap.exists()) {
+                        currentProfile = { ...userSnap.data(), uid: currentUser.uid } as UserProfile;
+                    } else {
+                        currentProfile = {
+                            email: currentUser.email!,
+                            displayName: currentUser.displayName || '',
+                            role: 'editor' as const,
+                            allowedSites: [],
+                            uid: currentUser.uid
+                        };
+                        await setDoc(userRef, currentProfile);
+                    }
+                    setRealProfile(currentProfile);
+
+                    // 2. Check for persisted impersonation
+                    const persistedImpersonationId = localStorage.getItem('impersonatedUserId');
+                    if (persistedImpersonationId) {
+                        await attemptRestoreImpersonation(persistedImpersonationId);
+                    }
                 } else {
-                    currentProfile = {
-                        email: currentUser.email!,
-                        displayName: currentUser.displayName || '',
-                        role: 'editor' as const,
-                        allowedSites: [],
-                        uid: currentUser.uid
-                    };
-                    await setDoc(userRef, currentProfile);
+                    setRealProfile(null);
+                    setImpersonatedProfile(null);
+                    localStorage.removeItem('impersonatedUserId');
                 }
-                setRealProfile(currentProfile);
-
-                // 2. Check for persisted impersonation
-                const persistedImpersonationId = localStorage.getItem('impersonatedUserId');
-                if (persistedImpersonationId) {
-                    await attemptRestoreImpersonation(persistedImpersonationId);
-                }
-            } else {
-                setRealProfile(null);
-                setImpersonatedProfile(null);
-                localStorage.removeItem('impersonatedUserId');
+            } catch (err) {
+                console.error("Auth state change error:", err);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false);
         });
         return () => unsubscribe();
     }, []);

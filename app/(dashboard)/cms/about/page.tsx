@@ -407,9 +407,9 @@ export default function AboutPageManager() {
                                                 />
                                             </div>
 
-                                            {config.id === 'header' && (
+                                            {['header', 'hero', 'values'].includes(config.id) && (
                                                 <div>
-                                                    <Label>Subtitle / Philosophy Label</Label>
+                                                    <Label>Subtitle / Secondary Heading</Label>
                                                     <Input
                                                         type="text"
                                                         value={section.subtitle || ""}
@@ -489,16 +489,18 @@ export default function AboutPageManager() {
                                             )}
 
                                             {/* Feature Images */}
-                                            {(config.id === 'header' || config.id === 'ai_for_good') && (
+                                            {(config.id === 'header' || config.id === 'ai_for_good' || config.id === 'hero') && (
                                                 <div className="mt-4">
                                                     <ImagePicker
-                                                        label="Main Feature Image"
-                                                        value={section.images?.[0]?.url || ""}
+                                                        label="Main Feature Image / Hero Image"
+                                                        value={section.images?.[0]?.url || section.imageUrl || ""}
                                                         onChange={(url) => {
                                                             const newImages = [...(section.images || [])];
                                                             if (!newImages[0]) newImages[0] = { url: "", alt: "" };
                                                             newImages[0].url = url;
+                                                            // Also update imageUrl for backward compatibility/different field names
                                                             handleSectionChange(config.id, "images", newImages);
+                                                            handleSectionChange(config.id, "imageUrl", url);
                                                         }}
                                                     />
                                                 </div>
