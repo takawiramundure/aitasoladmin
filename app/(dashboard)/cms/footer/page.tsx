@@ -36,6 +36,11 @@ interface FooterContent {
     copyright_text: string;
     developer_text: string;
     developer_url: string;
+    show_brand: boolean;
+    show_contact: boolean;
+    show_social: boolean;
+    show_nav: boolean;
+    show_policy: boolean;
 }
 
 const FOOTER_DEFAULTS: Record<string, FooterContent> = {
@@ -71,6 +76,7 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         ],
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
         copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+        show_brand: true, show_contact: true, show_social: true, show_nav: true, show_policy: true,
     },
     dmlabs: {
         logo_url: 'https://framerusercontent.com/images/WNXCQwxTt2Dmjz4hPcX5bcoDw.svg',
@@ -92,6 +98,7 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Use', url: '/terms' }],
         copyright_text: `© ${new Date().getFullYear()} Digital Maples Labs Inc.`,
         developer_text: 'Designed by Digital Maples Labs', developer_url: 'https://digitalmaples.ca',
+        show_brand: true, show_contact: true, show_social: true, show_nav: true, show_policy: true,
     },
     aitasol: {
         logo_url: '/logo.png',
@@ -119,6 +126,7 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }, { label: 'Cookie Policy', url: '/cookies' }],
         copyright_text: `© ${new Date().getFullYear()} Aitasol Education Consultancy. All rights reserved.`,
         developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+        show_brand: true, show_contact: true, show_social: true, show_nav: true, show_policy: true,
     },
     noel: {
         logo_url: '/logo.png',
@@ -135,6 +143,7 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         ],
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
         copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+        show_brand: true, show_contact: true, show_social: true, show_nav: true, show_policy: true,
     },
     phcg: {
         logo_url: '/logo.png',
@@ -151,6 +160,7 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         ],
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
         copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+        show_brand: true, show_contact: true, show_social: true, show_nav: true, show_policy: true,
     },
     nspc: {
         logo_url: '/logo.png',
@@ -167,6 +177,7 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         ],
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }],
         copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+        show_brand: true, show_contact: true, show_social: true, show_nav: true, show_policy: true,
     },
     bweic: {
         logo_url: '/logo.png',
@@ -183,6 +194,7 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         ],
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
         copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
+        show_brand: true, show_contact: true, show_social: true, show_nav: true, show_policy: true,
     },
     elwg: {
         logo_url: '/logo.png',
@@ -213,17 +225,30 @@ const SECTION_LABELS: Record<string, string> = {
     policy: 'Policy Links & Legal',
 };
 
-const Section = ({ id, isOpen, onToggle, children }: { id: string; isOpen: boolean; onToggle: () => void; children: React.ReactNode }) => {
+const Section = ({ id, isOpen, onToggle, isVisible, onVisibilityToggle, children }: { id: string; isOpen: boolean; onToggle: () => void; isVisible?: boolean; onVisibilityToggle?: () => void; children: React.ReactNode }) => {
     const sectionCls = "bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden";
     const headerCls = "w-full flex items-center justify-between p-5 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors";
     const bodyOpen = "p-5 border-t border-gray-100 dark:border-gray-700 space-y-4";
     
     return (
         <div className={sectionCls}>
-            <button className={headerCls} onClick={onToggle}>
-                <span className="font-semibold text-gray-800 dark:text-white">{SECTION_LABELS[id]}</span>
-                {isOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
-            </button>
+            <div className="flex items-center">
+                <button className={headerCls} onClick={onToggle}>
+                    <span className="font-semibold text-gray-800 dark:text-white">{SECTION_LABELS[id]}</span>
+                    {isOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
+                </button>
+                {onVisibilityToggle && (
+                    <div className="pr-5 flex items-center gap-2">
+                        <span className="text-[10px] text-gray-400 font-normal">{isVisible ? 'Visible' : 'Hidden'}</span>
+                        <button
+                            onClick={onVisibilityToggle}
+                            className={`w-8 h-4 rounded-full relative transition-colors ${isVisible ? 'bg-green-500' : 'bg-gray-300'}`}
+                        >
+                            <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isVisible ? 'translate-x-4' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
+                )}
+            </div>
             {isOpen && <div className={bodyOpen}>{children}</div>}
         </div>
     );
@@ -364,7 +389,13 @@ export default function FooterManager() {
                 )}
 
                 {/* Brand & Logo */}
-                <Section id="brand" isOpen={openSection === 'brand'} onToggle={() => setOpenSection(openSection === 'brand' ? '' : 'brand')}>
+                <Section 
+                    id="brand" 
+                    isOpen={openSection === 'brand'} 
+                    onToggle={() => setOpenSection(openSection === 'brand' ? '' : 'brand')}
+                    isVisible={content.show_brand}
+                    onVisibilityToggle={() => set('show_brand', !content.show_brand)}
+                >
                     <div>
                         <Label>Logo URL</Label>
                         <Input value={content.logo_url} onChange={e => set('logo_url', e.target.value)} placeholder="/logo-footer.png" />
@@ -425,7 +456,13 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Contact Info */}
-                <Section id="contact" isOpen={openSection === 'contact'} onToggle={() => setOpenSection(openSection === 'contact' ? '' : 'contact')}>
+                <Section 
+                    id="contact" 
+                    isOpen={openSection === 'contact'} 
+                    onToggle={() => setOpenSection(openSection === 'contact' ? '' : 'contact')}
+                    isVisible={content.show_contact}
+                    onVisibilityToggle={() => set('show_contact', !content.show_contact)}
+                >
                     <div>
                         <Label>Email Address</Label>
                         <Input value={content.email} onChange={e => set('email', e.target.value)} placeholder={siteDefault.email || 'info@yoursite.com'} />
@@ -457,7 +494,13 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Social Media */}
-                <Section id="social" isOpen={openSection === 'social'} onToggle={() => setOpenSection(openSection === 'social' ? '' : 'social')}>
+                <Section 
+                    id="social" 
+                    isOpen={openSection === 'social'} 
+                    onToggle={() => setOpenSection(openSection === 'social' ? '' : 'social')}
+                    isVisible={content.show_social}
+                    onVisibilityToggle={() => set('show_social', !content.show_social)}
+                >
                     <p className="text-sm text-gray-500 mb-2">Leave a field empty to hide that social icon.</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[
@@ -480,7 +523,13 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Navigation Columns */}
-                <Section id="nav" isOpen={openSection === 'nav'} onToggle={() => setOpenSection(openSection === 'nav' ? '' : 'nav')}>
+                <Section 
+                    id="nav" 
+                    isOpen={openSection === 'nav'} 
+                    onToggle={() => setOpenSection(openSection === 'nav' ? '' : 'nav')}
+                    isVisible={content.show_nav}
+                    onVisibilityToggle={() => set('show_nav', !content.show_nav)}
+                >
                     <p className="text-sm text-gray-500 mb-4">Add up to 3 navigation columns for the footer. Each column has a heading and a list of links.</p>
                     <div className="space-y-6">
                         {content.nav_columns.map((col, colIdx) => (
@@ -551,7 +600,13 @@ export default function FooterManager() {
                 </Section>
 
                 {/* Policy Links */}
-                <Section id="policy" isOpen={openSection === 'policy'} onToggle={() => setOpenSection(openSection === 'policy' ? '' : 'policy')}>
+                <Section 
+                    id="policy" 
+                    isOpen={openSection === 'policy'} 
+                    onToggle={() => setOpenSection(openSection === 'policy' ? '' : 'policy')}
+                    isVisible={content.show_policy}
+                    onVisibilityToggle={() => set('show_policy', !content.show_policy)}
+                >
                     <p className="text-sm text-gray-500 mb-3">These links appear at the bottom right of the footer (Privacy Policy, Terms of Service, etc.)</p>
                     <div className="space-y-2">
                         {(content.policy_links || []).map((link, i) => (
