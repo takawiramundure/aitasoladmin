@@ -93,8 +93,8 @@ const AITASOL_CONTACT_DEFAULT = {
     info: {
         address: "123 Global Way, Suite 500\nEducation District, Toronto, ON",
         addresses: [
-            { label: "Main Office (Canada)", value: "123 Global Way, Suite 500\nToronto, ON" },
-            { label: "Local Office (Nigeria)", value: "45 Lagos Road\nIkeja, Lagos" }
+            { label: "Main Office (Canada)", value: "123 Global Way, Suite 500\nToronto, ON", phone: "+1 (416) 000-0000", whatsapp: "14160000000" },
+            { label: "Local Office (Zimbabwe)", value: "20 McChlery Avenue South, Harare", phone: "+263 24 2000000", whatsapp: "263000000000" }
         ],
         appointment_only: true,
         hours: [
@@ -222,9 +222,9 @@ export default function ContactPageManager() {
     const addAddress = () => {
         const newAddresses = [...(content.info.addresses || [])];
         if (newAddresses.length === 0 && content.info.address) {
-            newAddresses.push({ label: 'Primary Location', value: content.info.address });
+            newAddresses.push({ label: 'Primary Location', value: content.info.address, phone: '', whatsapp: '' });
         }
-        newAddresses.push({ label: '', value: '' });
+        newAddresses.push({ label: '', value: '', phone: '', whatsapp: '' });
         setInfo('addresses', newAddresses);
     };
 
@@ -384,6 +384,16 @@ export default function ContactPageManager() {
                                                         onChange={e => updateAddress(i, 'value', e.target.value)}
                                                         placeholder="Street, City, Province..."
                                                     />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label className="text-[10px] uppercase text-gray-400">Phone Number</Label>
+                                                        <Input value={addr.phone} onChange={e => updateAddress(i, 'phone', e.target.value)} placeholder="+1 (000) 000-0000" />
+                                                    </div>
+                                                    <div>
+                                                        <Label className="text-[10px] uppercase text-gray-400">WhatsApp (Digits only)</Label>
+                                                        <Input value={addr.whatsapp} onChange={e => updateAddress(i, 'whatsapp', e.target.value)} placeholder="14160000000" />
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
