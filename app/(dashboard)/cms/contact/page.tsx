@@ -90,6 +90,10 @@ const AITASOL_CONTACT_DEFAULT = {
     },
     info: {
         address: "123 Global Way, Suite 500\nEducation District, Toronto, ON",
+        addresses: [
+            { label: "Main Office (Canada)", value: "123 Global Way, Suite 500\nToronto, ON" },
+            { label: "Local Office (Nigeria)", value: "45 Lagos Road\nIkeja, Lagos" }
+        ],
         appointment_only: true,
         hours: [
             { label: "Monday to Friday", value: "9 am to 6 pm", note: "(Walk-ins Welcome)" },
@@ -205,6 +209,25 @@ export default function ContactPageManager() {
     const removeHour = (index: number) => {
         setInfo('hours', content.info.hours.filter((_: any, i: number) => i !== index));
     };
+    
+    const updateAddress = (index: number, field: string, value: string) => {
+        const newAddresses = [...(content.info.addresses || [])];
+        newAddresses[index] = { ...newAddresses[index], [field]: value };
+        setInfo('addresses', newAddresses);
+    };
+
+    const addAddress = () => {
+        const newAddresses = [...(content.info.addresses || [])];
+        if (newAddresses.length === 0 && content.info.address) {
+            newAddresses.push({ label: 'Primary Location', value: content.info.address });
+        }
+        newAddresses.push({ label: '', value: '' });
+        setInfo('addresses', newAddresses);
+    };
+
+    const removeAddress = (index: number) => {
+        setInfo('addresses', content.info.addresses.filter((_: any, i: number) => i !== index));
+    };
 
     const handleSEOChange = (seoData: any) => {
         if (!content) return;
@@ -306,15 +329,52 @@ export default function ContactPageManager() {
                             <MapPin className="w-5 h-5 text-red-500" /> Office Information
                         </h3>
                         <div className="space-y-4">
-                            <div>
-                                <Label>Physical Address</Label>
-                                <textarea
-                                    className="w-full px-4 py-2 border rounded-xl dark:bg-gray-800 dark:border-gray-700 text-sm font-mono"
-                                    rows={3}
-                                    value={content.info.address}
-                                    onChange={e => setInfo('address', e.target.value)}
-                                    placeholder="2 King Street West..."
-                                />
+                            <div className="space-y-4">
+                                <Label className="flex items-center justify-between">
+                                    <span>Physical Addresses</span>
+                                    <Button size="sm" variant="outline" onClick={addAddress}>
+                                        <Plus className="w-4 h-4 mr-1" /> Add Address
+                                    </Button>
+                                </Label>
+
+                                {(!content.info.addresses || content.info.addresses.length === 0) ? (
+                                    <div>
+                                        <textarea
+                                            className="w-full px-4 py-2 border rounded-xl dark:bg-gray-800 dark:border-gray-700 text-sm font-mono"
+                                            rows={3}
+                                            value={content.info.address}
+                                            onChange={e => setInfo('address', e.target.value)}
+                                            placeholder="2 King Street West..."
+                                        />
+                                        <p className="text-[10px] text-gray-400 mt-1">Single address mode. Add an address entry above to enable multiple addresses.</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {content.info.addresses.map((addr: any, i: number) => (
+                                            <div key={i} className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 space-y-3 relative group">
+                                                <div className="flex justify-between items-center">
+                                                    <div className="flex-1 mr-4">
+                                                        <Label className="text-[10px] uppercase text-gray-400">Address Label</Label>
+                                                        <Input value={addr.label} onChange={e => updateAddress(i, 'label', e.target.value)} placeholder="e.g. Local Office, Head Office" />
+                                                    </div>
+                                                    <button onClick={() => removeAddress(i)} className="p-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity pt-6">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                                <div>
+                                                    <Label className="text-[10px] uppercase text-gray-400">Address Details</Label>
+                                                    <textarea
+                                                        className="w-full px-4 py-2 border rounded-xl dark:bg-gray-800 dark:border-gray-700 text-sm font-mono"
+                                                        rows={2}
+                                                        value={addr.value}
+                                                        onChange={e => updateAddress(i, 'value', e.target.value)}
+                                                        placeholder="Street, City, Province..."
+                                                    />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                             
                             <div className="flex items-center gap-3 py-2 border-b border-gray-100 dark:border-gray-800">
