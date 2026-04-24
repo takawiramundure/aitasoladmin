@@ -42,7 +42,7 @@
     "react-apexcharts": "^1.7.0",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
-    "react-dom": "19.2.4",
+    "react-dom": "19.0.0-rc-65a56d0e-20241020",
     "react-dropzone": "^14.3.5",
     "react-easy-crop": "^5.5.7",
     "react-helmet-async": "^2.0.5",

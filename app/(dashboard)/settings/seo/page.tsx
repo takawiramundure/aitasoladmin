@@ -527,8 +527,7 @@ const AITASOL_SEO_SEED: SEOData = {
     }
 };
 
-    }
-};
+
 
 const PHCG_SEO_SEED: SEOData = {
     'home': {
