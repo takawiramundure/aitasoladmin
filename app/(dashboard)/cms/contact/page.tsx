@@ -26,7 +26,8 @@ const DEFAULT_DATA = {
             { label: "Monday to Friday", value: "9 am to 3:30 pm", note: "(By Appointment Only)" },
             { label: "Saturday", value: "10 am to 2 pm", note: "(By Appointment Only)" }
         ],
-        disclaimer: "Please note: Scheduled programs, consultations, training, counseling and outreach support may happen outside these office hours and at a different location. If you have any questions, please email or call us."
+        disclaimer: "Please note: Scheduled programs, consultations, training, counseling and outreach support may happen outside these office hours and at a different location. If you have any questions, please email or call us.",
+        show_info: true
     },
     form_fields: [
         { id: 'name', label: 'Name', type: 'text', required: true },
@@ -48,7 +49,8 @@ const DMLABS_CONTACT_DEFAULT = {
         hours: [
             { label: "Monday to Friday", value: "9 am to 5 pm", note: "(EST)" }
         ],
-        disclaimer: "Our team operates remotely and across various time zones to support our global mission-driven partners."
+        disclaimer: "Our team operates remotely and across various time zones to support our global mission-driven partners.",
+        show_info: true
     },
     form_fields: [
         { id: 'name', label: 'Full Name', type: 'text', required: true },
@@ -99,7 +101,8 @@ const AITASOL_CONTACT_DEFAULT = {
             { label: "Monday to Friday", value: "9 am to 6 pm", note: "(Walk-ins Welcome)" },
             { label: "Saturday", value: "10 am to 4 pm", note: "(Appointment Only)" }
         ],
-        disclaimer: "For urgent inquiries regarding ongoing applications, please include your Reference ID in the subject."
+        disclaimer: "For urgent inquiries regarding ongoing applications, please include your Reference ID in the subject.",
+        show_info: true
     },
     form_fields: [
         { id: 'name', label: 'Full Name', type: 'text', required: true },
@@ -325,8 +328,19 @@ export default function ContactPageManager() {
 
                     {/* Address & Hours */}
                     <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03]">
-                        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                            <MapPin className="w-5 h-5 text-red-500" /> Office Information
+                        <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <MapPin className="w-5 h-5 text-red-500" /> Office Information
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-400 font-normal">{content.info.show_info ? 'Visible' : 'Hidden'}</span>
+                                <button
+                                    onClick={() => setInfo('show_info', !content.info.show_info)}
+                                    className={`w-8 h-4 rounded-full relative transition-colors ${content.info.show_info ? 'bg-green-500' : 'bg-gray-300'}`}
+                                >
+                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.info.show_info ? 'translate-x-4' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
                         </h3>
                         <div className="space-y-4">
                             <div className="space-y-4">
