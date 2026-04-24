@@ -86,10 +86,53 @@ const DMLABS_PAGES: PageDef[] = [
     { path: '/contact', label: 'Get in Touch', key: 'contact' },
 ];
 
-const SITE_PAGES: Record<string, PageDef[]> = {
+// Aitasol Pages
+const AITASOL_PAGES: PageDef[] = [
+    { path: '/', label: 'Home', key: 'home' },
+    { path: '/about', label: 'About Us', key: 'about' },
+    { path: '/services', label: 'Our Services', key: 'services' },
+    { path: '/services/university-application', label: 'University Admission', key: 'admission' },
+    { path: '/services/visa-assistance', label: 'Visa Assistance', key: 'visa' },
+    { path: '/services/scholarship-guidance', label: 'Scholarship Guidance', key: 'scholarship' },
+    { path: '/services/sop-cv-review', label: 'SOP & CV Review', key: 'sop' },
+    { path: '/services/pre-departure-briefing', label: 'Pre-Departure Briefing', key: 'briefing' },
+    { path: '/universities', label: 'Partner Universities', key: 'universities' },
+    { path: '/destinations', label: 'Destinations', key: 'destinations' },
+    { path: '/destinations/canada', label: 'Study in Canada', key: 'canada' },
+    { path: '/destinations/uk', label: 'Study in UK', key: 'uk' },
+    { path: '/destinations/usa', label: 'Study in USA', key: 'usa' },
+    { path: '/destinations/australia', label: 'Study in Australia', key: 'australia' },
+    { path: '/destinations/germany', label: 'Study in Germany', key: 'germany' },
+    { path: '/blog', label: 'Blog', key: 'blog' },
+    { path: '/careers', label: 'Careers', key: 'careers' },
+    { path: '/contact', label: 'Contact Us', key: 'contact' },
+    { path: '/apply', label: 'Apply Now', key: 'apply' },
+];
+
+// Private Home Care Guru Pages
+const PHCG_PAGES: PageDef[] = [
+    { path: '/', label: 'Home', key: 'home' },
+    { path: '/about', label: 'About Us', key: 'about' },
+    { path: '/services', label: 'Care Services', key: 'services' },
+    { path: '/career', label: 'Join Our Team', key: 'career' },
+    { path: '/contact', label: 'Contact', key: 'contact' },
+];
+
+// Niagara Suicide Prevention Coalition Pages
+const NSPC_PAGES: PageDef[] = [
+    { path: '/', label: 'Home', key: 'home' },
+    { path: '/about', label: 'Our Mission', key: 'about' },
+    { path: '/resources', label: 'Crisis Resources', key: 'resources' },
+    { path: '/events', label: 'Community Events', key: 'events' },
+    { path: '/contact', label: 'Get in Touch', key: 'contact' },
+];
+
     kmfw: KMFW_PAGES,
     noel: NOEL_PAGES,
     dmlabs: DMLABS_PAGES,
+    aitasol: AITASOL_PAGES,
+    phcg: PHCG_PAGES,
+    nspc: NSPC_PAGES,
     elwg: [
         { path: '/', label: 'Home', key: 'home' },
         { path: '/about', label: 'About Us', key: 'about' },
@@ -271,9 +314,101 @@ const DMLABS_SEO_SEED: SEOData = {
     }
 };
 
+const AITASOL_SEO_SEED: SEOData = {
+    'home': {
+        title: 'Aitasol Education Consultancy | Your Gateway to Global Learning',
+        description: 'Empowering students to achieve their dreams of studying abroad. Expert guidance for university admissions in Canada, UK, USA, Australia, and Germany.',
+        keywords: 'study abroad, education consultancy, international students, study in canada, study in uk, university admission',
+        ogTitle: 'Aitasol – Expert International Education Consultancy',
+        ogDescription: 'Unlock world-class academic opportunities. From visa assistance to scholarship guidance, we support your journey every step of the way.',
+        ogImage: '',
+        twitterTitle: 'Aitasol | Gateway to Global Learning',
+        twitterDescription: 'Professional consultancy for international students seeking admission in top global universities.',
+        noIndex: false,
+    },
+    'about': {
+        title: 'About Aitasol | Leading Education Consultants',
+        description: 'Learn about Aitasol’s mission to provide transparent and expert guidance for students seeking international education.',
+        keywords: 'about aitasol, education consultants mission, study abroad experts',
+        ogTitle: 'About Us | Aitasol Education Consultancy',
+        ogDescription: 'Our story and commitment to empowering the next generation of global scholars.',
+        ogImage: '',
+        twitterTitle: 'About Aitasol | Our Mission',
+        twitterDescription: 'Transparency and expertise in international education consultancy.',
+        noIndex: false,
+    },
+    'services': {
+        title: 'Our Services | Full Support for International Students',
+        description: 'Discover how Aitasol helps with university applications, visa processing, scholarships, and pre-departure briefings.',
+        keywords: 'study abroad services, visa assistance, scholarship help, SOP review',
+        ogTitle: 'Comprehensive Student Services | Aitasol',
+        ogDescription: 'End-to-end support for your study abroad journey. We handle the complexity so you can focus on your studies.',
+        ogImage: '',
+        twitterTitle: 'Aitasol Services | Global Education Support',
+        twitterDescription: 'From application to arrival, we guide you through every step of studying abroad.',
+        noIndex: false,
+    },
+    'admission': {
+        title: 'University Admission Assistance | Aitasol Education',
+        description: 'Get expert help with your university applications. We ensure your SOP and documentation meet the highest standards.',
+        keywords: 'university application help, SOP writing, admission consultancy',
+        ogTitle: 'Expert University Admission Support',
+        ogDescription: 'Boost your chances of admission to top global universities with our expert review and guidance.',
+        ogImage: '',
+        twitterTitle: 'Admission Support | Aitasol',
+        twitterDescription: 'Professional guidance for successful university applications.',
+        noIndex: false,
+    },
+    'visa': {
+        title: 'Visa Assistance & Guidance | Aitasol',
+        description: 'Navigate the complex student visa process with confidence. High success rates for Canada, UK, and USA student visas.',
+        keywords: 'student visa help, visa consultancy, study permit assistance',
+        ogTitle: 'Student Visa Guidance | Aitasol',
+        ogDescription: 'Expert support for your study permit application. We help you navigate the requirements and documentation.',
+        ogImage: '',
+        twitterTitle: 'Visa Assistance | Aitasol',
+        twitterDescription: 'Professional guidance for your student visa application.',
+        noIndex: false,
+    },
+    'destinations': {
+        title: 'Study Destinations | Top Universities Worldwide',
+        description: 'Explore your study options in Canada, UK, USA, Australia, and Germany. Compare education systems and opportunities.',
+        keywords: 'study destinations, study in canada, study in uk, study in usa',
+        ogTitle: 'Top Study Destinations | Aitasol',
+        ogDescription: 'Choose the best country for your academic and career goals. Detailed guides for major study destinations.',
+        ogImage: '',
+        twitterTitle: 'Study Destinations | Aitasol',
+        twitterDescription: 'Your guide to top international study destinations.',
+        noIndex: false,
+    },
+    'contact': {
+        title: 'Contact Aitasol | Start Your Global Education Journey',
+        description: 'Get in touch with our expert counselors today. Book a free consultation to discuss your study abroad plans.',
+        keywords: 'contact aitasol, education consultancy contact, study abroad consultation',
+        ogTitle: 'Contact Us | Aitasol Education Consultancy',
+        ogDescription: 'We’re here to help you navigate your international education path. Reach out today.',
+        ogImage: '',
+        twitterTitle: 'Contact Aitasol | Free Consultation',
+        twitterDescription: 'Start your international education journey with a free consultation.',
+        noIndex: false,
+    },
+    'apply': {
+        title: 'Apply Now | Begin Your Application with Aitasol',
+        description: 'Take the first step toward your international education. Fill out our application form to get started.',
+        keywords: 'apply study abroad, international student application, aitasol application',
+        ogTitle: 'Apply Now | Start Your Journey with Aitasol',
+        ogDescription: 'Ready to study abroad? Begin your application process today with our expert support.',
+        ogImage: '',
+        twitterTitle: 'Apply Now | Aitasol',
+        twitterDescription: 'The first step to your global academic future starts here.',
+        noIndex: false,
+    }
+};
+
 const SITE_SEED_DATA: Record<string, SEOData> = {
     noel: NOEL_SEO_SEED,
     dmlabs: DMLABS_SEO_SEED,
+    aitasol: AITASOL_SEO_SEED,
     kmfw: {
         'home': {
             title: 'Kind Minds Family Wellness | Black Mental Health & Wellness in Waterloo Region',
