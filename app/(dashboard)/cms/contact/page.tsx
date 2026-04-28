@@ -39,8 +39,8 @@ const DEFAULT_DATA = {
 const DMLABS_CONTACT_DEFAULT = {
     enabled: true,
     hero: {
-        title: "Contact Digital Maples Labs",
-        subtitle: "Let’s Build Something Meaningful",
+        title: "Let's build the future.",
+        subtitle: "Collaborate With Us",
         description: "Whether you have a question about our services, AI governance, or want to discuss a new project, we'd love to hear from you."
     },
     info: {
@@ -49,6 +49,12 @@ const DMLABS_CONTACT_DEFAULT = {
         hours: [
             { label: "Monday to Friday", value: "9 am to 5 pm", note: "(EST)" }
         ],
+        project_availability: {
+            q1: false,
+            q2: false,
+            q3: true,
+            q4: true
+        },
         disclaimer: "Our team operates remotely and across various time zones to support our global mission-driven partners.",
         show_info: true
     },
@@ -56,30 +62,30 @@ const DMLABS_CONTACT_DEFAULT = {
         { id: 'name', label: 'Full Name', type: 'text', required: true },
         { id: 'email', label: 'Work Email', type: 'email', required: true },
         { id: 'phone', label: 'Phone Number', type: 'tel', required: false },
+        { id: 'company', label: 'Company/Organization', type: 'text', required: false },
         { 
-            id: 'projectType', 
-            label: 'Project/Service Type', 
-            type: 'select', 
+            id: 'service', 
+            label: 'How can we help?', 
+            type: 'radio', 
             required: true,
-            options: ['AI Automations', 'Web Development', 'SEO & Performance', 'Digital Strategy', 'App Maintenance']
+            options: ['AI Automation', 'Custom Web Development', 'Cloud Infrastructure', 'Strategic Branding', 'Managed IT Services', 'Other']
+        },
+        {
+            id: 'budget',
+            label: 'Estimated Budget',
+            type: 'select',
+            required: true,
+            options: ['< $5,000', '$5,000 - $15,000', '$15,000 - $50,000', '$50,000+', 'Monthly Retainer']
         },
         {
             id: 'timeline',
-            label: 'When do you need this by?',
+            label: 'Project Timeline',
             type: 'select',
             required: true,
-            options: ['1 - 3 Weeks', '1 Month', '3 Months', 'Flexible']
+            options: ['Immediate (ASAP)', '1 - 3 Months', '3 - 6 Months', 'Flexible / Not Sure']
         },
-        { id: 'website', label: 'Current Website (if any)', type: 'text', required: false },
-        { id: 'company', label: 'Company/Organization Name', type: 'text', required: false },
-        { id: 'message', label: 'Any Additional information', type: 'textarea', required: true },
-        {
-            id: 'subject',
-            label: 'Subject',
-            type: 'radio',
-            required: true,
-            options: ['feedback', 'complaint', 'inquiry']
-        }
+        { id: 'message', label: 'The Brief / Challenge', type: 'textarea', required: true },
+        { id: 'discovery', label: 'How did you hear about us?', type: 'text', required: false }
     ]
 };
 
@@ -152,7 +158,7 @@ export default function ContactPageManager() {
             const siteDefaults = currentSite.id === 'dmlabs' ? DMLABS_CONTACT_DEFAULT : (currentSite.id === 'aitasol' ? AITASOL_CONTACT_DEFAULT : DEFAULT_DATA);
             const data = await FirestoreService.getPageContent('contact', currentSite.id);
 
-            setContent(data ? {
+            const mergedContent = data ? {
                 ...siteDefaults,
                 ...data,
                 hero: { ...siteDefaults.hero, ...(data.hero || {}) },
@@ -160,8 +166,19 @@ export default function ContactPageManager() {
                     ...siteDefaults.info,
                     ...(data.info || {}),
                     hours: data.info?.hours ?? siteDefaults.info.hours,
-                }
-            } : siteDefaults);
+                },
+                form_fields: (data.form_fields && data.form_fields.length > 0) ? data.form_fields : siteDefaults.form_fields
+            } : siteDefaults;
+
+            setContent(mergedContent);
+
+            // Automatically seed the database if it was empty
+            if (!data || !data.form_fields || data.form_fields.length === 0) {
+                setTimeout(() => {
+                    FirestoreService.savePageContent('contact', mergedContent, currentSite.id)
+                        .catch(err => console.error('Failed auto-seed:', err));
+                }, 1000);
+            }
         } catch (err: any) {
             console.error(err);
             setError("Failed to load content.");
@@ -276,7 +293,10 @@ export default function ContactPageManager() {
                         <p className="text-sm text-gray-500">Update the address, hours, and hero section of the Contact Us page.</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={() => { if (window.confirm("Reset to defaults?")) setContent(DEFAULT_DATA); }}>
+                        <Button variant="outline" onClick={() => { 
+                            const siteDefaults = currentSite.id === 'dmlabs' ? DMLABS_CONTACT_DEFAULT : (currentSite.id === 'aitasol' ? AITASOL_CONTACT_DEFAULT : DEFAULT_DATA);
+                            if (window.confirm("Reset all content and form fields to agency defaults?")) setContent(siteDefaults); 
+                        }}>
                             Reset to Defaults
                         </Button>
                         <Button onClick={handleSave} disabled={saving}>
@@ -443,7 +463,7 @@ export default function ContactPageManager() {
                                 ))}
                             </div>
 
-                             <div className="pt-4">
+                             <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
                                 <Label>Hours Disclaimer / Footer Note</Label>
                                 <textarea
                                     className="w-full px-4 py-2 border rounded-xl dark:bg-gray-800 dark:border-gray-700 text-sm italic"
@@ -453,6 +473,26 @@ export default function ContactPageManager() {
                                 />
                                 <p className="text-[10px] text-gray-400 mt-1">This note appears below the office hours.</p>
                             </div>
+
+                            {currentSite.id === 'dmlabs' && (
+                                <div className="pt-4 border-t border-gray-100 dark:border-gray-800 mt-4">
+                                    <Label>Project Availability Status</Label>
+                                    <div className="flex gap-4 mt-2">
+                                        {['q1', 'q2', 'q3', 'q4'].map((q) => (
+                                            <label key={q} className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={content.info.project_availability?.[q] || false}
+                                                    onChange={e => setInfo('project_availability', { ...content.info.project_availability, [q]: e.target.checked })}
+                                                    className="w-4 h-4 text-blue-600 rounded border-gray-300"
+                                                />
+                                                <span className="text-sm uppercase font-bold text-gray-600 dark:text-gray-300">{q}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    <p className="text-[10px] text-gray-400 mt-2">Check the quarters you are available to take new projects. It will show a green indicator on the contact form.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
