@@ -72,6 +72,7 @@ export interface SiteSettings {
     supportEmail?: string;
     supportTicketLink?: string;
     maintenanceMode?: boolean;
+    maintenanceScope?: 'all' | 'production' | 'development';
     retellAi?: {
         enabled: boolean;
         publicKey: string;

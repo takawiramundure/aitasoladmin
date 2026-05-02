@@ -554,12 +554,32 @@ export default function SiteSettingsManager() {
                                             </div>
                                             <select
                                                 value={settings.maintenanceMode ? "true" : "false"}
-                                                onChange={(e) => setSettings({ ...settings, maintenanceMode: e.target.value === "true" })}
-                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                onChange={(e) => setSettings({ ...settings, maintenanceMode: e.target.value === "true", maintenanceScope: settings.maintenanceScope || 'all' })}
+                                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-3"
                                             >
                                                 <option value="false">🟢 Live — Site is publicly accessible</option>
-                                                <option value="true">🔴 Maintenance Mode — Show branded splash page to all visitors</option>
+                                                <option value="true">🔴 Maintenance Mode — Active</option>
                                             </select>
+
+                                            {settings.maintenanceMode && (
+                                                <div className="space-y-2 animate-in fade-in slide-in-from-top-1">
+                                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        Maintenance Scope
+                                                    </label>
+                                                    <select
+                                                        value={settings.maintenanceScope || "all"}
+                                                        onChange={(e) => setSettings({ ...settings, maintenanceScope: e.target.value as any })}
+                                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                    >
+                                                        <option value="all">🌍 All Environments (Live & Local)</option>
+                                                        <option value="production">🚀 Production Only (Live site offline, Local site works)</option>
+                                                        <option value="development">💻 Development Only (Local site offline, Live site works)</option>
+                                                    </select>
+                                                    <p className="text-xs text-gray-500">
+                                                        Control which environments see the maintenance splash screen.
+                                                    </p>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
