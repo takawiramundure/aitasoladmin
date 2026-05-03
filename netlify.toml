@@ -7,8 +7,6 @@
 
 [build.environment]
   NODE_VERSION = "22"
-  # Note: These VITE_ variables are preserved for compatibility, 
-  # but the app is now running on Next.js.
   VITE_FIREBASE_API_KEY = "AIzaSyBf1CBPOW3UrqfEledkEOSjUCoH31a0tTE"
   VITE_FIREBASE_AUTH_DOMAIN = "nspc-web.firebaseapp.com"
   VITE_FIREBASE_PROJECT_ID = "nspc-web"
@@ -30,5 +28,4 @@
   skip_processing = false
 
 [context.production]
-  ignore = "git diff --quiet HEAD^ HEAD apps/admin-portal ../../package.json ../../firebase.json ../../firestore.rules"
-
+  ignore = "git diff --quiet HEAD^ HEAD apps/admin-portal package.json firebase.json firestore.rules"
