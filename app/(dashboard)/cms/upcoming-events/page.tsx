@@ -182,6 +182,18 @@ export default function EventsManager() {
         setIsModalOpen(true);
     };
 
+    const handleClone = (event: Event) => {
+        setCurrentEventId(null); // Clear ID to make it a new entry
+        const dateObj = event.date?.toDate ? event.date.toDate() : new Date(event.date);
+        setFormData({
+            ...event,
+            title: `${event.title} (Copy)`,
+            date: dateObj,
+            isDone: false // Cloned events should typically start as not done
+        });
+        setIsModalOpen(true);
+    };
+
     const handleImageSelect = (url: string) => {
         setFormData({ ...formData, imageUrl: url });
         setIsMediaLibraryOpen(false);
@@ -278,8 +290,13 @@ export default function EventsManager() {
                                     description: "<p>Our signature annual celebration of Black brilliance and achievement. Join us for a monumental evening of awards, networking, and community building.</p>",
                                     registrationUrl: "/black-excellence-gala"
                                 }
-                            ];
-                            sampleEvents.forEach(e => FirestoreService.saveEvent(currentSite.id, e));
+                            sampleEvents.forEach(e => {
+                                // Use a predictable ID based on the title to avoid duplicates
+                                const slugId = e.title.toLowerCase()
+                                    .replace(/[^a-z0-9]+/g, '-')
+                                    .replace(/(^-|-$)+/g, '');
+                                FirestoreService.saveEvent(currentSite.id, e, slugId);
+                            });
                             setTimeout(loadEvents, 1000);
                         }}>
                             Seed Events
@@ -353,6 +370,9 @@ export default function EventsManager() {
                                     <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                                         <Button variant="outline" size="sm" onClick={() => openEditModal(event)} className="flex-1">
                                             <PencilIcon className="w-4 h-4 mr-2" /> Edit
+                                        </Button>
+                                        <Button variant="outline" size="sm" onClick={() => handleClone(event)} title="Clone Event">
+                                            <PlusIcon className="w-4 h-4" />
                                         </Button>
                                         <Button variant="outline" size="sm" onClick={() => handleDelete(event.id)} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
                                             <TrashBinIcon className="w-4 h-4" />

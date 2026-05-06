@@ -5,6 +5,9 @@ import { SiteSettings } from "@/types/siteSettings";
 
 export interface PageContent {
     title?: string;
+    slug?: string;
+    status?: 'published' | 'draft';
+    template?: string; // used for dynamic rendering
     seo?: {
         title?: string;
         description?: string;
@@ -157,6 +160,60 @@ export const FirestoreService = {
             throw error;
         }
     },
+
+    getPages: async (siteId: string): Promise<any[]> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
+            const contentRef = collection(dbInstance, collectionName);
+            const snapshot = await getDocs(contentRef);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error("Error fetching pages:", error);
+            return [];
+        }
+    },
+
+    clonePage: async (siteId: string, pageId: string, newPageId: string, newTitle: string): Promise<void> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
+            const originalDocRef = doc(dbInstance, collectionName, pageId);
+            const docSnap = await getDoc(originalDocRef);
+            if (!docSnap.exists()) throw new Error('Original page not found');
+            
+            const originalData = docSnap.data() as PageContent;
+            const newDocRef = doc(dbInstance, collectionName, newPageId);
+            await setDoc(newDocRef, {
+                ...originalData,
+                title: newTitle,
+                slug: newPageId,
+                status: 'draft',
+                template: originalData.template || pageId,
+                siteId,
+                lastUpdated: new Date().toISOString(),
+            });
+        } catch (error) {
+            console.error("Error cloning page:", error);
+            throw error;
+        }
+    },
+
+    updatePageVisibility: async (siteId: string, pageId: string, status: 'published' | 'draft'): Promise<void> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
+            const docRef = doc(dbInstance, collectionName, pageId);
+            await updateDoc(docRef, { status, lastUpdated: new Date().toISOString() });
+        } catch (error) {
+            console.error("Error updating page visibility:", error);
+            throw error;
+        }
+    },
+
     // User Management
     getUsers: async (): Promise<any[]> => {
         try {
@@ -245,12 +302,16 @@ export const FirestoreService = {
             const site = getSiteById(siteId);
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_events` : 'events';
+            
             if (eventId) {
-                // Update
+                // Upsert: Create or Update with specific ID
                 const docRef = doc(dbInstance, collectionName, eventId);
-                await updateDoc(docRef, { ...event });
+                await setDoc(docRef, { 
+                    ...event,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
             } else {
-                // Add
+                // Create with Auto-ID
                 const collectionRef = collection(dbInstance, collectionName);
                 await addDoc(collectionRef, {
                     ...event,
