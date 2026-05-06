@@ -9,7 +9,7 @@ import Button from "@/components/ui/button/Button";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import { Eye, EyeOff, Zap, Clock, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router';
+import Link from 'next/link';
 
 interface EventHeroData {
     enabled: boolean;

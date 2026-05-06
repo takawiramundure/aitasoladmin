@@ -176,7 +176,7 @@ export default function AitasolApplications() {
             </div>
 
             {/* Details Modal */}
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} className="max-w-3xl w-full p-0 overflow-hidden">
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="7xl" className="p-0 overflow-hidden">
                 {selectedApp && (
                     <div className="flex flex-col h-full max-h-[90vh]">
                         {/* Header */}

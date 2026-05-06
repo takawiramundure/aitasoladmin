@@ -11,6 +11,7 @@ import RichTextEditor from "@/components/form/RichTextEditor";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import { Eye, EyeOff, ChevronDown, ChevronUp, Trash2, Search } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
 
@@ -199,6 +200,8 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
 
 export default function AboutPageManager() {
     const { currentSite } = useSite();
+    const searchParams = useSearchParams();
+    const slug = searchParams.get('slug') || 'about';
     const [content, setContent] = useState<AboutPageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -217,7 +220,7 @@ export default function AboutPageManager() {
         setLoading(true);
         setError("");
         try {
-            const data = await FirestoreService.getPageContent('about', currentSite.id);
+            const data = await FirestoreService.getPageContent(slug, currentSite.id);
             const mergedSections: Record<string, AboutSection> = {};
 
             Object.keys(defaultContentForSite).forEach(key => {
@@ -258,7 +261,7 @@ export default function AboutPageManager() {
         setSuccessMsg("");
         setError("");
         try {
-            await FirestoreService.savePageContent('about', content, currentSite.id);
+            await FirestoreService.savePageContent(slug, content, currentSite.id);
             setSuccessMsg("About page settings saved successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err: any) {
@@ -334,10 +337,10 @@ export default function AboutPageManager() {
                 <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
                     <div>
                         <h2 className="text-xl font-bold text-gray-800 dark:text-white/90">
-                            About Page Manager
+                            {slug === 'about' ? 'About Page Manager' : `Editing Page: ${slug}`}
                         </h2>
                         <p className="text-sm text-gray-500">
-                            Manage content for the {currentSite.name} about page.
+                            Manage content for the {currentSite.name} {slug} page.
                         </p>
                     </div>
                     <div className="flex gap-3 flex-wrap">

@@ -38,6 +38,12 @@ const AppSidebar: React.FC = () => {
         icon: <GridIcon />,
         name: "Dashboard",
         path: "/",
+      },
+      {
+        icon: <PageIcon />,
+        name: "Pages Manager",
+        path: "/cms/pages",
+        new: true,
       }
     ];
 

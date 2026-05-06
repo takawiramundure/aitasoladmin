@@ -387,7 +387,7 @@ export default function EventsManager() {
             </div>
 
             {/* Edit/Create Modal */}
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} className="max-w-4xl h-[90vh] flex flex-col">
+            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} size="7xl" className="h-[90vh] flex flex-col">
                 <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-white dark:bg-gray-800 rounded-t-3xl">
                     <h2 className="text-xl font-bold">{currentEventId ? "Edit Event" : "Create New Event"}</h2>
                     <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">

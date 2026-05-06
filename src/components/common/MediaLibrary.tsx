@@ -536,7 +536,7 @@ export default function MediaLibrary({ isOpen, onSelect, basePath = "", onClose,
             isOpen={isOpen}
             onClose={onClose}
             title={`Media Library - ${currentSite.name}`}
-            size="2xl"
+            size="7xl"
         >
             <div className="h-[70vh] relative">
                 <MediaLibraryContent

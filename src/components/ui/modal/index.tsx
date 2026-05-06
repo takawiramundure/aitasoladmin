@@ -57,16 +57,17 @@ export const Modal: React.FC<ModalProps> = ({
 
   const contentClasses = isFullscreen
     ? "w-full h-full"
-    : "relative w-full rounded-2xl bg-white dark:bg-gray-900 max-h-[90vh]"; 
+    : "relative w-full rounded-3xl bg-white dark:bg-gray-900 max-h-[95vh] mx-auto"; 
 
   const sizeClasses = {
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
-    "2xl": "max-w-2xl",
-    "7xl": "max-w-7xl",
-    full: "max-w-[95vw]",
+    sm: "max-w-md w-full",
+    md: "max-w-[80vw] w-full",
+    lg: "max-w-[85vw] w-full",
+    xl: "max-w-[88vw] w-full",
+    "2xl": "max-w-[90vw] w-full",
+    "5xl": "max-w-[92vw] w-full",
+    "7xl": "max-w-[94vw] w-full",
+    full: "max-w-[98vw] w-full",
     none: ""
   };
 
