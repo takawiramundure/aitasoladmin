@@ -372,8 +372,8 @@ export default function EventsManager() {
                                         <Button variant="outline" size="sm" onClick={() => openEditModal(event)} className="flex-1">
                                             <PencilIcon className="w-4 h-4 mr-2" /> Edit
                                         </Button>
-                                        <Button variant="outline" size="sm" onClick={() => handleClone(event)} title="Clone Event">
-                                            <PlusIcon className="w-4 h-4" />
+                                        <Button variant="outline" size="sm" onClick={() => handleClone(event)} className="flex-1 bg-blue-50/50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800">
+                                            <PlusIcon className="w-4 h-4 mr-2" /> Clone
                                         </Button>
                                         <Button variant="outline" size="sm" onClick={() => handleDelete(event.id)} className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200">
                                             <TrashBinIcon className="w-4 h-4" />
