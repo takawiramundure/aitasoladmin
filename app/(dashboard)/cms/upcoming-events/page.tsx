@@ -290,6 +290,7 @@ export default function EventsManager() {
                                     description: "<p>Our signature annual celebration of Black brilliance and achievement. Join us for a monumental evening of awards, networking, and community building.</p>",
                                     registrationUrl: "/black-excellence-gala"
                                 }
+                            ];
                             sampleEvents.forEach(e => {
                                 // Use a predictable ID based on the title to avoid duplicates
                                 const slugId = e.title.toLowerCase()
