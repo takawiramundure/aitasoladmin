@@ -13,6 +13,7 @@ import { useSite } from "@/context/SiteContext";
 import MediaLibrary from "@/components/common/MediaLibrary";
 import RichTextEditor from "@/components/form/RichTextEditor";
 import LinkPicker from "@/components/form/LinkPicker";
+import { useDialog } from "@/context/DialogContext";
 import {
     PencilIcon,
     TrashBinIcon,
@@ -33,11 +34,13 @@ interface Event {
     imageUrl: string;
     description: string;
     registrationUrl: string;
+    isDone?: boolean;
 }
 
 export default function EventsManager() {
     const { currentSite } = useSite();
     const [events, setEvents] = useState<Event[]>([]);
+    const { confirm, alert } = useDialog();
 
     // Limits
     const MAX_DESCRIPTION_LENGTH = 400;
@@ -65,7 +68,7 @@ export default function EventsManager() {
         category: "",
         imageUrl: "",
         description: "",
-        registrationUrl: "",
+        isDone: false,
         date: new Date(),
     });
 
@@ -132,7 +135,14 @@ export default function EventsManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this event?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete Event",
+            message: "Are you sure you want to delete this event? This action cannot be undone.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (!isConfirmed) return;
 
         try {
             await FirestoreService.deleteEvent(currentSite.id, id);
@@ -155,7 +165,7 @@ export default function EventsManager() {
             category: "",
             imageUrl: "",
             description: "",
-            registrationUrl: "",
+            isDone: false,
             date: new Date(),
         });
         setIsModalOpen(true);
@@ -194,7 +204,7 @@ export default function EventsManager() {
     return (
         <>
             <PageMeta title="Events Manager | CMS" description="Manage upcoming events" />
-
+            
             <div className="p-6">
                 <div className="flex flex-col gap-4 mb-6 md:flex-row md:items-center md:justify-between">
                     <div>
@@ -202,9 +212,61 @@ export default function EventsManager() {
                         <p className="text-gray-500 mt-1">Manage upcoming events, workshops, and gatherings.</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={() => {
-                            if (!confirm("This will add sample events. Continue?")) return;
+                        <Button variant="outline" onClick={async () => {
+                            const isConfirmed = await confirm({
+                                title: "Seed Events",
+                                message: "This will add the new Global Cooking Classes and other sample events. Continue?",
+                                variant: "primary",
+                                confirmLabel: "Seed Data"
+                            });
+
+                            if (!isConfirmed) return;
+
                             const sampleEvents = [
+                                {
+                                    title: "UMOJA Program Information Session",
+                                    date: new Date("2026-03-27T16:30:00"),
+                                    formattedDate: "Friday, March 27th",
+                                    timeRange: "4:30 PM – 5:30 PM",
+                                    location: "SDG Idea Factory, 2 King Street W, Kitchener",
+                                    category: "Info Session",
+                                    imageUrl: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800",
+                                    description: "Information session for the African, Caribbean, and Black Neuro-diverse Community Program initiative.",
+                                    registrationUrl: ""
+                                },
+                                {
+                                    title: "Adult Circle: Karaoke Night!",
+                                    date: new Date("2026-04-18T14:00:00"),
+                                    formattedDate: "Saturday, April 18th",
+                                    timeRange: "2:00 PM – 4:00 PM",
+                                    location: "SDG Ideas Factory, 2 King Street W, Kitchener",
+                                    category: "Community",
+                                    imageUrl: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=800",
+                                    description: "<p>Our Adult Circle continues this April with a special twist: an afternoon of Karaoke, conversation, and community. Come sing, laugh, and connect with others in a safe and welcoming space.</p><p>The Adult Circle is a welcoming and safe space for adults to slow down, connect, and build meaningful community together.</p><ul><li>Foster conversations and shared experiences</li><li>Tools for mental health and resilience</li><li>Karaoke, music, and fun!</li></ul><p><em>Adults-only space. Light refreshments and transportation support available.</em></p>",
+                                    registrationUrl: "https://docs.google.com/forms/d/1BhYRuzKqHNqudXS9e4xYiDIORGJCt2OrwexEb56m6aQ/edit"
+                                },
+                                {
+                                    title: "Global Cooking Class: Seeds & Spices! (Kitchener)",
+                                    date: new Date("2026-05-15T17:00:00"),
+                                    formattedDate: "Friday, May 15th",
+                                    timeRange: "5:00 PM – 7:00 PM",
+                                    location: "St. Andrew’s Presbyterian Church, Kitchener",
+                                    category: "Cooking",
+                                    imageUrl: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=800",
+                                    description: "<p>We are thrilled to announce that our Global Cooking Classes are expanding! Join us for our brand-new Kitchener session. Food has a way of bringing us all together, and we can't wait to share a meal with you!</p>",
+                                    registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLScTRnfBdLxj8swLJun2FXNEmTXD_pGhLT-DLJG9y_5l74rwcQ/viewform?usp=header"
+                                },
+                                {
+                                    title: "Global Cooking Class: Seeds & Spices! (Waterloo)",
+                                    date: new Date("2026-05-29T17:00:00"),
+                                    formattedDate: "Friday, May 29th",
+                                    timeRange: "5:00 PM – 7:00 PM",
+                                    location: "231 Herbert St., Waterloo",
+                                    category: "Cooking",
+                                    imageUrl: "https://images.unsplash.com/photo-1507048331197-7d4ac70811cf?w=800",
+                                    description: "<p>Join us for our monthly Waterloo cooking session! Discover the world one spice at a time. Food has a way of bringing us all together, and we can't wait to share a meal with you!</p>",
+                                    registrationUrl: "https://docs.google.com/forms/d/e/1FAIpQLScTRnfBdLxj8swLJun2FXNEmTXD_pGhLT-DLJG9y_5l74rwcQ/viewform?usp=header"
+                                },
                                 {
                                     title: "Black Excellence Gala 2026",
                                     date: new Date("2026-04-11T18:00:00"),
@@ -215,17 +277,6 @@ export default function EventsManager() {
                                     imageUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800",
                                     description: "<p>Our signature annual celebration of Black brilliance and achievement. Join us for a monumental evening of awards, networking, and community building.</p>",
                                     registrationUrl: "/black-excellence-gala"
-                                },
-                                {
-                                    title: "Community Wellness Workshop",
-                                    date: new Date("2024-07-20T10:00:00"),
-                                    formattedDate: "July 20, 2024",
-                                    timeRange: "10:00 AM - 2:00 PM",
-                                    location: "KMFW Office",
-                                    category: "Wellness",
-                                    imageUrl: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800",
-                                    description: "A restorative session focused on mental health and community support.",
-                                    registrationUrl: "#"
                                 }
                             ];
                             sampleEvents.forEach(e => FirestoreService.saveEvent(currentSite.id, e));
@@ -270,13 +321,25 @@ export default function EventsManager() {
                                             <CalenderIcon className="w-12 h-12" />
                                         </div>
                                     )}
+                                    <div className="absolute top-2 left-2 flex gap-1">
+                                        {event.isDone && (
+                                            <div className="bg-green-500 text-white px-2 py-1 rounded text-xs font-bold shadow-sm">
+                                                DONE
+                                            </div>
+                                        )}
+                                        {event.date?.seconds && (new Date(event.date.seconds * 1000) < new Date()) && !event.isDone && (
+                                            <div className="bg-gray-500 text-white px-2 py-1 rounded text-xs font-bold shadow-sm">
+                                                PAST
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="absolute top-2 right-2 bg-white/90 dark:bg-black/80 px-2 py-1 rounded text-xs font-semibold">
                                         {event.category || "Uncategorized"}
                                     </div>
                                 </div>
                                 <div className="p-4">
                                     <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-lg text-gray-900 dark:text-white line-clamp-1">{event.title}</h3>
+                                        <h3 className={`font-bold text-lg text-gray-900 dark:text-white line-clamp-1 ${event.isDone ? 'line-through opacity-50' : ''}`}>{event.title}</h3>
                                     </div>
                                     <div className="flex items-center text-sm text-gray-500 mb-2">
                                         <CalenderIcon className="w-4 h-4 mr-2" />
@@ -320,6 +383,17 @@ export default function EventsManager() {
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 placeholder="e.g. Annual Gala"
                             />
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2 flex items-center gap-2 bg-gray-100 p-3 rounded-xl dark:bg-gray-800">
+                            <input 
+                                type="checkbox" 
+                                id="isDone" 
+                                checked={formData.isDone} 
+                                onChange={(e) => setFormData({ ...formData, isDone: e.target.checked })}
+                                className="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                            />
+                            <Label htmlFor="isDone" className="mb-0 cursor-pointer">Mark as Completed / Done</Label>
                         </div>
 
                         <div>

@@ -13,6 +13,7 @@ import { storage } from "@/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { availableRoutes } from "@/utils/routes";
 import { GET_DEFAULT_NAV, GET_SITE_DEFAULTS } from "@/config/navigationDefaults";
+import { useDialog } from "@/context/DialogContext";
 
 import RichTextEditor from "@/components/form/RichTextEditor";
 
@@ -20,6 +21,7 @@ type TabType = 'general' | 'navigation' | 'theme' | 'seo' | 'scripts' | 'payment
 
 export default function SiteSettingsManager() {
     const { currentSite } = useSite();
+    const { confirm, alert } = useDialog();
     const [settings, setSettings] = useState<SiteSettings | null>(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('general');
@@ -283,8 +285,17 @@ export default function SiteSettingsManager() {
         });
     };
 
-    const deleteNavItem = (id: string) => {
+    const deleteNavItem = async (id: string) => {
         if (!settings) return;
+        const isConfirmed = await confirm({
+            title: "Delete Navigation Item",
+            message: "Are you sure you want to delete this menu item and all its sub-items?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+        
+        if (!isConfirmed) return;
+
         setSettings({
             ...settings,
             navigation: settings.navigation.filter(item => item.id !== id)
@@ -332,8 +343,17 @@ export default function SiteSettingsManager() {
         });
     };
 
-    const deleteSubItem = (parentId: string, subId: string) => {
+    const deleteSubItem = async (parentId: string, subId: string) => {
         if (!settings) return;
+        const isConfirmed = await confirm({
+            title: "Delete Sub-item",
+            message: "Are you sure you want to delete this sub-item?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+        
+        if (!isConfirmed) return;
+
         setSettings({
             ...settings,
             navigation: settings.navigation.map(item => {

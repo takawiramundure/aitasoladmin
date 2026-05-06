@@ -6,6 +6,7 @@ import { SiteProvider } from "@/context/SiteContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ANALYTICS_CONFIG } from "@/config/analyticsConfig";
+import { DialogProvider } from "@/context/DialogContext";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -13,7 +14,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <ThemeProvider>
         <AuthProvider>
           <SiteProvider>
-            <AnalyticsProvider>{children}</AnalyticsProvider>
+            <DialogProvider>
+              <AnalyticsProvider>{children}</AnalyticsProvider>
+            </DialogProvider>
           </SiteProvider>
         </AuthProvider>
       </ThemeProvider>
