@@ -61,7 +61,29 @@ export default function SiteSettingsManager() {
             const defaultNav = GET_DEFAULT_NAV(currentSite.id);
             const siteDefaults = GET_SITE_DEFAULTS(currentSite.id, currentSite.name);
 
-            if (data && (!data.navigation || data.navigation.length <= 1)) {
+            if (data && data.navigation && data.navigation.length > 0) {
+                // Perform a merge so that default sub-items are populated if they are missing in Firestore
+                // This ensures the Admin UI matches the actual frontend rendering logic.
+                data.navigation = data.navigation.map((firestoreItem: any) => {
+                    const defaultItem = defaultNav.find(
+                        d => d.path === firestoreItem.path || d.name === firestoreItem.name
+                    );
+                    
+                    // If no matching default item or it has no sub-items, keep firestore item as is
+                    if (!defaultItem || !defaultItem.subItems || defaultItem.subItems.length === 0) {
+                        return firestoreItem;
+                    }
+
+                    // Identify sub-items present in defaultNav but missing in Firestore
+                    const firestoreSubPaths = new Set((firestoreItem.subItems || []).map((s: any) => s.path));
+                    const missingSubItems = defaultItem.subItems.filter(s => !firestoreSubPaths.has(s.path));
+
+                    return {
+                        ...firestoreItem,
+                        subItems: [...(firestoreItem.subItems || []), ...missingSubItems]
+                    };
+                });
+            } else if (data && (!data.navigation || data.navigation.length <= 1)) {
                 data.navigation = defaultNav;
             }
 

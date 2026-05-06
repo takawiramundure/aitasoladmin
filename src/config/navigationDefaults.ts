@@ -50,8 +50,6 @@ export const GET_DEFAULT_NAV = (siteId: string): NavigationItem[] => {
                 { id: 'a-apply', name: 'Apply Now', path: '/apply', order: 8 },
             ];
         case 'kmfw':
-        case 'nspc':
-        default:
             return [
                 { id: 'nav-home', name: 'Home', path: '/', order: 1 },
                 { id: 'nav-about', name: 'About', path: '/about', order: 2, subItems: [
@@ -63,9 +61,37 @@ export const GET_DEFAULT_NAV = (siteId: string): NavigationItem[] => {
                 { id: 'nav-services', name: 'Services', path: '/services', order: 3, subItems: [
                     { id: 'nav-serv-prog', name: 'Programs & Services', path: '/services', order: 1 },
                     { id: 'nav-serv-ground', name: 'Grounded Counseling', path: '/services/grounded-counseling', order: 2 },
+                    { id: 'nav-serv-edu', name: 'Educational Programs & Groups', path: '/services/educational-programs', order: 3 },
+                    { id: 'nav-serv-advocacy', name: 'Advocacy, Training & Education', path: '/services/advocacy-education', order: 4 },
+                    { id: 'nav-serv-community', name: 'Community Support & Engagement', path: '/services/community-support', order: 5 },
+                    { id: 'nav-serv-system', name: 'System Navigation', path: '/services/system-navigation', order: 6 },
+                ] },
+                { id: 'nav-impact', name: 'Impact', path: '/impact', order: 4, subItems: [
+                    { id: 'nav-impact-gate', name: 'Impact Gateway', path: '/impact', order: 1 },
+                    { id: 'nav-impact-events', name: 'Events', path: '/impact/events', order: 2 },
+                    { id: 'nav-impact-news', name: 'Newsletters', path: '/impact/newsletters', order: 3 },
+                    { id: 'nav-impact-success', name: 'Success Stories', path: '/impact/success-stories', order: 4 },
+                    { id: 'nav-impact-blog', name: 'Community Blog', path: '/impact/blog', order: 5 },
+                    { id: 'nav-impact-gallery', name: 'Gallery', path: '/impact/gallery', order: 6 },
+                ] },
+                { id: 'nav-gala', name: 'BEA Gala', path: '/impact/events/black-excellence-gala', order: 5 },
+                { id: 'nav-research', name: 'Research', path: '/research', order: 6, subItems: [
+                    { id: 'nav-res-gate', name: 'Research Gateway', path: '/research', order: 1 },
+                    { id: 'nav-res-wellness', name: 'Black Wellness Project', path: '/research/black-wellness', order: 2 },
+                    { id: 'nav-res-phac', name: 'PHAC Child Welfare', path: '/research/phac-child-welfare', order: 3 },
+                    { id: 'nav-res-umoja', name: 'Umoja Neurodivergent Program', path: '/research/umoja-neurodivergent', order: 4 },
+                ] },
+                { id: 'nav-join', name: 'Join Us', path: '/join', order: 7, subItems: [
+                    { id: 'nav-join-get', name: 'Get Involved', path: '/join', order: 1 },
+                    { id: 'nav-join-funders', name: 'Our Funders/Sponsors', path: '/join/funders', order: 2 },
+                    { id: 'nav-join-partners', name: 'Our Partners', path: '/join/partners', order: 3 },
+                    { id: 'nav-join-volunteer', name: 'Volunteering', path: '/join/volunteer', order: 4 },
+                    { id: 'nav-join-careers', name: 'Career Services & Employment Support', path: '/join/careers', order: 5 },
                 ] },
                 { id: 'nav-contact', name: 'Contact', path: '/contact', order: 8 },
             ];
+        case 'nspc':
+        default:
     }
 };
 
