@@ -17,6 +17,7 @@ import RichTextEditor from "@/components/form/RichTextEditor";
 import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { SEED_DATA } from "@/config/seedData";
 import { GridIcon } from "@/icons";
+import { useDialog } from "@/context/DialogContext";
 
 // ---- Sortable Item Component ----
 function SortableProgramItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -47,6 +48,7 @@ interface Program {
 
 export default function ProgramsManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [programs, setPrograms] = useState<Program[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -191,8 +193,15 @@ export default function ProgramsManager() {
         ));
     };
 
-    const removeProgram = (id: string) => {
-        if (confirm("Are you sure you want to delete this program?")) {
+    const removeProgram = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Program",
+            message: "Are you sure you want to delete this program? You will need to save changes to apply this permanently.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setPrograms(programs.filter(p => p.id !== id));
         }
     };
@@ -208,8 +217,15 @@ export default function ProgramsManager() {
         }
     };
 
-    const seedDefaults = () => {
-        if (confirm("This will overwrite current items with default data. Are you sure?")) {
+    const seedDefaults = async () => {
+        const isConfirmed = await confirm({
+            title: "Restore Defaults",
+            message: "This will overwrite current items with default data. Are you sure you want to proceed?",
+            variant: "warning",
+            confirmLabel: "Restore Defaults"
+        });
+
+        if (isConfirmed) {
             // @ts-ignore
             const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
             // @ts-ignore

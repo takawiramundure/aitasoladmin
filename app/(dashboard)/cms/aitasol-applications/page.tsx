@@ -7,6 +7,7 @@ import { useSite } from "@/context/SiteContext";
 import Button from "@/components/ui/button/Button";
 import { Modal } from "@/components/ui/modal";
 import { EyeIcon, FileTextIcon, UserIcon, CalendarIcon, GraduationCapIcon, GlobeIcon, CheckCircleIcon, ClockIcon, XCircleIcon } from "lucide-react";
+import { useDialog } from "@/context/DialogContext";
 
 interface Application {
     id: string;
@@ -31,6 +32,7 @@ interface Application {
 
 export default function AitasolApplications() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedApp, setSelectedApp] = useState<Application | null>(null);
@@ -61,6 +63,15 @@ export default function AitasolApplications() {
     };
 
     const handleUpdateStatus = async (appId: string, newStatus: string) => {
+        const isConfirmed = await confirm({
+            title: "Update Status",
+            message: `Are you sure you want to change the status of this application to "${newStatus.toUpperCase()}"?`,
+            variant: newStatus === 'rejected' ? 'danger' : 'warning',
+            confirmLabel: `Update to ${newStatus}`
+        });
+
+        if (!isConfirmed) return;
+
         setUpdating(true);
         try {
             await FirestoreService.updateApplicationStatus('aitasol', appId, newStatus);
@@ -70,7 +81,11 @@ export default function AitasolApplications() {
                 setSelectedApp({ ...selectedApp, status: newStatus as any });
             }
         } catch (error) {
-            alert("Failed to update status");
+            await dialogAlert({
+                title: "Update Error",
+                message: "Failed to update application status. Please try again.",
+                variant: "danger"
+            });
         } finally {
             setUpdating(false);
         }

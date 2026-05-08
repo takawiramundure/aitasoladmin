@@ -9,6 +9,7 @@ import Button from "@/components/ui/button/Button";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import { Images, Plus, Trash2, GripVertical, ExternalLink } from 'lucide-react';
+import { useDialog } from "@/context/DialogContext";
 
 interface GalleryImage {
     id: string;
@@ -26,6 +27,7 @@ const inputClass = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:rin
 
 export default function GalleryManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [images, setImages] = useState<GalleryImage[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -89,8 +91,15 @@ export default function GalleryManager() {
         setImages(prev => prev.map(img => img.id === id ? { ...img, [field]: value } : img));
     };
 
-    const removeImage = (id: string) => {
-        if (!confirm('Remove this image from the gallery?')) return;
+    const removeImage = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Remove Image",
+            message: "Remove this image from the gallery? You will need to save the gallery to apply the changes.",
+            variant: "danger",
+            confirmLabel: "Remove"
+        });
+
+        if (!isConfirmed) return;
         setImages(prev => prev.filter(img => img.id !== id));
     };
 

@@ -18,9 +18,11 @@ import { SITES } from "@/config/sites";
 import Button from "@/components/ui/button/Button";
 import Alert from "@/components/ui/alert/Alert";
 import { auth } from "@/firebaseConfig";
+import { useDialog } from "@/context/DialogContext";
 
 export default function Home() {
   const { isConnected, connect, propertyId, fetchData, analyticsData, demographicsData, topPagesData, deviceData, engagementData, loadingData, error } = useAnalytics();
+  const { confirm, alert: dialogAlert } = useDialog();
 
   // Widget IDs
   const defaultWidgets = ['traffic', 'devices', 'pages', 'demographics'];
@@ -71,7 +73,14 @@ export default function Home() {
   const [seedStatus, setSeedStatus] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
 
   const handleSeedData = async () => {
-    if (!confirm("This will overwrite existing content for ALL sites with the real-world defaults. Continue?")) return;
+    const isConfirmed = await confirm({
+      title: "Seed Master Data",
+      message: "This will overwrite existing content for ALL sites with the real-world defaults. Are you sure you want to proceed?",
+      variant: "warning",
+      confirmLabel: "Seed All Data"
+    });
+
+    if (!isConfirmed) return;
 
     setSeeding(true);
     setSeedStatus(null);

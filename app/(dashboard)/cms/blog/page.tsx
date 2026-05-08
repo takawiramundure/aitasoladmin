@@ -15,6 +15,7 @@ import RichTextEditor from "@/components/form/RichTextEditor";
 import { Search } from 'lucide-react';
 import SEOEditor from "@/components/form/SEOEditor";
 import { SEED_DATA } from "@/config/seedData";
+import { useDialog } from "@/context/DialogContext";
 import {
     UserIcon,
     CalenderIcon,
@@ -35,6 +36,7 @@ interface Article {
     excerpt: string;
     content: string;
     published: boolean;
+    videoUrl?: string;
     seo?: {
         title?: string;
         description?: string;
@@ -62,6 +64,7 @@ interface BlogPageContent extends PageContent {
 
 export default function BlogManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [articles, setArticles] = useState<Article[]>([]);
     const [pageContent, setPageContent] = useState<BlogPageContent | null>(null);
     const [loading, setLoading] = useState(true);
@@ -85,6 +88,7 @@ export default function BlogManager() {
         excerpt: "",
         content: "",
         published: false,
+        videoUrl: "",
         date: new Date(),
         seo: {
             title: "",
@@ -170,6 +174,13 @@ export default function BlogManager() {
             seo: { ...prev?.seo, [field]: value }
         }));
     };
+    
+    const handleArticleSEOChange = (field: string, value: string) => {
+        setFormData((prev: any) => ({
+            ...prev,
+            seo: { ...prev?.seo, [field]: value }
+        }));
+    };
 
     const handleSave = async () => {
         if (!formData.title || !formData.author) {
@@ -207,7 +218,14 @@ export default function BlogManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this article?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete Article",
+            message: "Are you sure you want to delete this article? This action cannot be undone.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (!isConfirmed) return;
 
         try {
             await FirestoreService.deleteArticle(currentSite.id, id);
@@ -246,6 +264,7 @@ export default function BlogManager() {
             excerpt: "",
             content: "",
             published: false,
+            videoUrl: "",
             date: new Date(),
         });
         setIsModalOpen(true);
@@ -267,17 +286,22 @@ export default function BlogManager() {
         setIsMediaLibraryOpen(false);
     };
 
-    const handleArticleSEOChange = (field: string, value: string) => {
-        setFormData(prev => ({
-            ...prev,
-            seo: { ...prev.seo, [field]: value }
-        }));
-    };
-
     const handleSeedArticles = async () => {
         const isAitasol = currentSite.id === 'aitasol';
-        const siteName = isAitasol ? "Aitasol" : "DMLabs";
-        if (!confirm(`Seed default ${siteName} blog articles into Firestore for "${currentSite.name}"? Existing articles will not be deleted.`)) return;
+        const isKMFW = currentSite.id === 'kmfw';
+        
+        let siteName = "DMLabs";
+        if (isAitasol) siteName = "Aitasol";
+        if (isKMFW) siteName = "KMFW";
+
+        const isConfirmed = await confirm({
+            title: "Seed Default Data",
+            message: `Seed default ${siteName} blog articles into Firestore for "${currentSite.name}"? Existing articles will not be deleted.`,
+            variant: "warning",
+            confirmLabel: "Seed Data"
+        });
+
+        if (!isConfirmed) return;
         setSaving(true);
         setError("");
         setSuccessMsg("");
@@ -305,6 +329,249 @@ export default function BlogManager() {
                     imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&fit=crop', 
                     excerpt: 'Securing financial aid is a competitive process. Learn how to craft a compelling essay and build a profile that stands out to scholarship committees.', 
                     content: '<h2>Winning the Scholarship Game</h2><p>Financial barriers shouldn\'t stop you from global education. Many universities offer fully-funded or partial scholarships based on merit and need. Here is how you can maximize your chances...</p>', 
+                    published: true 
+                }
+            ];
+
+            const kmfwArticles = [
+                { 
+                    id: 'kmfw-four-years-strong', 
+                    title: 'Kind Minds Family Wellness is Four Years Strong!', 
+                    slug: 'kmfw-four-years-strong', 
+                    author: 'Ajirioghene Evi', 
+                    category: 'Anniversary', 
+                    date: new Date('2024-08-20'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=800&fit=crop', 
+                    excerpt: '🎉 Celebrating 4 incredible years of making a difference! A message from our Founder and Executive Director.', 
+                    content: '<p>🎉 Celebrating 4 incredible years of making a difference! 🎉</p><p>Here is a message from our Founder and Executive Director, Ajirioghene Evi.</p><blockquote>"I am thrilled to celebrate Kind Minds Family Wellness\'s fourth anniversary! As the inaugural Executive Director, it has been an honor to witness the incredible work we have accomplished as an organization. Over the years, we have touched countless lives, providing short—and long-term support to individuals and families. Our program evaluations and outreach efforts have strengthened communities and continue to address the disproportionate challenges they face through advocacy and system navigation."</blockquote><p>To read more, please look through the slides on our post.</p><p>#Anniversary #4years #nonprofit #gratitude</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-4th-anniversary-fundraiser', 
+                    title: 'Kind Minds Family Wellness 4th Anniversary Fundraiser', 
+                    slug: 'kmfw-4th-anniversary-fundraiser', 
+                    author: 'Olusegun Isioye', 
+                    category: 'Fundraiser', 
+                    date: new Date('2024-06-12'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?q=80&w=800&fit=crop', 
+                    excerpt: 'Our Goal: $40,000 by August 20, 2024. Join us in making a difference and building a brighter future.', 
+                    content: '<p>Celebrating four years of dedicated service to the racialized community means the world to us, but it means even more to the individuals whose lives we\'ve touched. This year, we have supported and engaged with more individuals than ever before, surpassing last year\'s numbers.</p><p>Our growth is evident, and our mission is to continue expanding our workforce and enhancing our services to transform the lives of those in the Waterloo Region.</p><h3>Our comprehensive services include:</h3><ul><li>Culturally Grounded Counseling</li><li>Culturally Informed Educational Programs & Groups</li><li>Advocacy</li><li>Training & Education</li><li>Research & Consultancy</li><li>Community Support & Engagement</li><li>Systems Navigation</li><li>Career Services & Employment Support</li></ul><p><strong>Our Goal: $40,000 by August 20, 2024</strong></p><p>We are aiming to raise $40,000, and we need your help. We encourage donations of $4-$40 or more. Together, we can transform our community into a better society. With food inflation at an all-time high, many individuals struggle to afford essential items, especially pricier African foods. Additionally, newcomers face significant challenges in navigating the job market due to disparities in their previous experiences.</p><p>Partner with us as we expand our services to meet the daily needs of our community. Together, we can create lasting change and build a brighter future for all. Donate today and become a vital part of the work we do.</p><p>E-transfers can be sent to <strong>payments@kindmindsfamilywellness.org</strong>.</p><p>Thank you for your support!</p><p><strong>Olusegun Isioye</strong><br/>Manager of Client Services & Program Coordination</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'celebrating-fathers-day-2024', 
+                    title: 'Celebrating Father\'s Day', 
+                    slug: 'celebrating-fathers-day-2024', 
+                    author: 'Olusegun Isioye', 
+                    category: 'Community', 
+                    date: new Date('2024-06-14'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1550133730-695473e510b0?q=80&w=800&fit=crop', 
+                    excerpt: 'Fatherhood is a calling to leadership within the smallest unit of society. We celebrate every father and father figure in our community.', 
+                    content: '<p>Fatherhood is a calling to leadership within the smallest unit of society, ensuring that our children can contribute positively to the growth and development of our communities. As John C. Maxwell aptly states, "Leadership is influence," and this is precisely what every father needs to thrive in their role.</p><p>Guiding young minds to believe in the family\'s vision and inspiring them to act is pivotal. Achieving these great feats requires exceptional care for children, nurturing a strong culture, effective communication, exemplary parenting styles, and collaborations within the nuclear family, extended family, and society at large.</p><p>Though Father’s Day may not receive as much fanfare, we choose to celebrate every father and father figure, including stepfathers, fathers-in-law, guardians, and family friends who have significantly contributed to guiding children towards creating bright futures for themselves and society. Despite facing societal pressures, these men remain resilient, consistently exceeding their daily responsibilities.</p><p>Love is a vital component of performing optimally, and those leaders who embody this trait succeed not only in their families but also in their businesses and countries, gaining worldwide recognition. We encourage you to celebrate any father figure in your life as we honor all the fathers in our community.</p><p>Happy Father’s Day!</p><p><strong>Olusegun Isioye</strong><br/>Manager of Client Services & Program Coordination<br/>BDS, EMBA</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'black-history-month-markers-of-the-past', 
+                    title: 'Black History Month: MARKERS OF THE PAST', 
+                    slug: 'black-history-month-markers-of-the-past', 
+                    author: 'Olusegun Isioye', 
+                    category: 'History', 
+                    date: new Date('2024-02-01'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1614030424754-24d9e97f0229?q=80&w=800&fit=crop', 
+                    excerpt: 'Reflections on Black History Month: Exploring the "markers of the past" to mold a shared and promising future.', 
+                    content: '<p>Greetings everyone, I am Olusegun Isioye, Manager of Client Services and Program Coordination. I am here to share my reflections as we commemorate Black History Month in our communities.</p><p>In our pursuit of a shared and promising future, it is essential to delve into the factors that have molded our present—what I refer to as the "markers of the past." The Government of Canada notes that over 400 years ago, the first person of African heritage arrived in what is now Canada. In 1628, Oliver Lejeune became the first recorded enslaved African to live in Canada, his birth name lost to history.</p><p>While slavery was officially abolished in 1833, its impact lingers, particularly in the realm of identity. Identity, encompassing names, origin, culture, individuality, and the unity of the Black community, bears a significant gap in collaboration. I urge that these collaborations must extend beyond music into science, technology, economics, healthcare, and other sectors to amplify the greatness within us and to heal the scars of colonization.</p><h3>Coping with the impact of scars from anti-Black racism:</h3><ol><li><strong>Seek Support:</strong> Surround yourself with a supportive community that understands and validates your experiences.</li><li><strong>Therapy and Counseling:</strong> Professional therapy can be a valuable resource for processing emotions and developing coping strategies.</li><li><strong>Self-Care Practices:</strong> Prioritize self-care to nurture your mental, emotional, and physical well-being.</li><li><strong>Educate Yourself and Others:</strong> Knowledge is empowering. Understanding the roots of racism can provide context and combat isolation.</li><li><strong>Advocacy and Activism:</strong> Channeling your energy into creating positive change can be empowering.</li></ol><p>At Kind Minds Family Wellness, we are committed to nurturing leadership capabilities not only within our organization but also among our clients. We aim to foster leaders capable of solving problems, envisioning change, and empowering Black communities.</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-happy-new-year-2024', 
+                    title: 'HAPPY NEW YEAR!', 
+                    slug: 'kmfw-happy-new-year-2024', 
+                    author: 'Kind Minds Family Wellness', 
+                    category: 'Greetings', 
+                    date: new Date('2024-01-01'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1467810563316-b5476525c0f9?q=80&w=800&fit=crop', 
+                    excerpt: 'Happy New Year from Kind Minds Family Wellness! A look back at our impact in 2023 and our vision for 2024.', 
+                    content: '<p>Happy New Year from Kind Minds Family Wellness! As we joyfully usher in the new year, we want to express our deepest gratitude to all our stakeholders who have been an integral part of our journey.</p><p>In 2023, we worked tirelessly to foster empowerment and resilience within our community. We offered specialized Afrocentric counselling, educational and psychoeducational programs, and research advocacy to address anti-Black racism and systemic oppression.</p><h3>A glimpse of the impact we have made together in 2023:</h3><ul><li><strong>Culturally Grounded Counseling:</strong> Tailored support promoting well-being and healing.</li><li><strong>Research & Consultancy:</strong> Understanding and addressing the needs of racialized groups.</li><li><strong>Culturally Informed Educational Programs:</strong> Specialized groups for children to seniors.</li><li><strong>Advocacy and Education:</strong> Workshops on anti-Black racism and Black history.</li><li><strong>Community Support and Engagement:</strong> Standing alongside newcomers and facilitating youth activities.</li><li><strong>Career Services and Employment Support:</strong> Coaching, mentorship, and financial literacy.</li></ul><p>As we step into 2024, we are excited about the possibilities and look forward to continued collaboration. Together, we will build on the foundation laid in 2023 and strive for an even more significant positive impact.</p><p>#HappyNewYear #KindMinds2024 #CommunityStrengths</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-fathers-day-message-2023', 
+                    title: 'HAPPY FATHER\'S DAY: A Message from the Heart', 
+                    slug: 'kmfw-fathers-day-message-2023', 
+                    author: 'Ajirioghene Evi', 
+                    category: 'Greetings', 
+                    date: new Date('2023-06-18'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1590073242678-70ee3fc28e8e?q=80&w=800&fit=crop', 
+                    excerpt: 'A message from our Executive Director to all the father figures invested in the lives of our community.', 
+                    content: '<p>Happy Father\'s Day to all fathers and those stepping in as father figures 🙌🏾</p><p>Our leadership team has this message for you 👇🏽</p><blockquote>"To all the father figures out there who are invested in the lives of children and youth whose identities are pushed to the margins, I want you to know you are powerful, resilient, and deeply valued. Your role in the lives of our children, youth and loved ones is immeasurable and essential."</blockquote><p>In a world that may sometimes attempt to diminish your worth or challenge your abilities, remember that you are a beacon of strength and inspiration. By being present in their lives, you are breaking down barriers and defying stereotypes.</p><p>Continue to be a guiding light, a source of inspiration, and an unwavering force of love in the lives of your/our children and youth. Your presence makes a difference, and your impact is immeasurable. The world is a better place because of you, and the future is brighter because of the love and guidance you provide.</p><p>With utmost respect and admiration,<br/><strong>Ajirioghene on behalf of KMFW!</strong></p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-black-women-cambridge-event', 
+                    title: 'Celebration and learning from Black Women in our community event', 
+                    slug: 'kmfw-black-women-cambridge-event', 
+                    author: 'Kind Minds Family Wellness', 
+                    category: 'Event', 
+                    date: new Date('2023-04-09'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=800&fit=crop', 
+                    excerpt: 'Reflections from the Community Care: Black Women\'s Mental Health event in the city of Cambridge.', 
+                    content: '<p>On March 31, 2023, our Executive Director and two outstanding speakers, <strong>@wounds2wings</strong> and <strong>Suzanne Trotman</strong>, participated in the "celebration and learning" from Black Women in our community event.</p><p>The event was one of the new series for Community Care: Black Women\'s Mental Health hosted by <strong>@porchlightcnd</strong> and <strong>@rhythmandbluescambridge</strong>.</p><p>KMFW is grateful for the platform and opportunity to answer and speak to the following:</p><ul><li><strong>Sisterhood:</strong> Does sistering offer a lifeline of support and validation?</li><li><strong>Black women in leadership:</strong> Why their authority may be met with reluctance by stakeholders with implicit biases that lead them to doubt leadership qualities.</li></ul><p>Enjoy these photos and well-captured moments with the organizers and speakers 🤗</p><p>#communityengagememt #blackwomen #mentalhealth #community #speakers #notforprofit #leadership #sisterhood #sistering #support #learning</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-growing-diversity-research', 
+                    title: 'The growing diversity of Black-identified persons in our region', 
+                    slug: 'kmfw-growing-diversity-research', 
+                    author: 'Grace Okusanya', 
+                    category: 'Research', 
+                    date: new Date('2023-04-09'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1551288049-bbdac8626ad1?q=80&w=800&fit=crop', 
+                    excerpt: 'Research analysis of municipal, provincial, and federal data for our region between 2016 and 2021.', 
+                    content: '<p>The growing diversity of Black-identified persons in our region has been well captured by one of our Research Coordinators, <strong>Grace Okusanya</strong>, who is also a Master of Public Health Student at the University of Waterloo.</p><p>Grace\'s research revolves around increasing access to mental health for Black, Indigenous, and Racialized persons. Analyzing municipal, provincial, and federal data for our region, Grace compared numbers between 2016 and 2021.</p><h3>How does this inform our work at KMFW?</h3><p><strong>Vision:</strong> Equity, inclusiveness, and community engagement.</p><p><strong>Mission:</strong> To transform the personal narratives of Black persons and support them as they navigate systems to attain positive Self-actualization and Holistic wellness.</p><p><strong>Values:</strong> Respect. Equity. Inclusivity. Openness. Diversity. Dignity and Self-determination.</p><p><strong>Commitment:</strong> We are committed to providing equitable and culturally sensitive programs and services within evidence-based practice.</p><p>This data validates the need for all Black-serving organizations to intentionally ensure equitable practices inform their services. Want to discuss this further? Contact us at <strong>info@kindmindsfamilywellness.org</strong></p><p>#research #statistics #regionofwaterloo #growth #blackcommunities #equity #inclusive #culture #practice #censuscanada</p><p><small>References: Statistics Canada</small></p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-coop-community-collaboration', 
+                    title: 'KMFW collaborates on the Co-op for Community program', 
+                    slug: 'kmfw-coop-community-collaboration', 
+                    author: 'Kind Minds Family Wellness', 
+                    category: 'Collaboration', 
+                    date: new Date('2023-04-09'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08759dfc3ef?q=80&w=800&fit=crop', 
+                    excerpt: 'KMFW is grateful for the ongoing impact of the Co-op for Community program on the demographics we serve.', 
+                    content: '<p>KMFW is grateful for the ongoing impact of the Co-op for Community program on the demographics we serve 🫶🏾</p><p>Thank you, <strong>United Way Waterloo Region Communities</strong>.</p><p>Here is what United Way Waterloo Region Communities had to say about our collaboration:</p><blockquote>"Co-op for Community is a program that we are EXTREMELY grateful for! Not only do Co-operative and Experiential Education at University of Waterloo students bring energy and knowledge to their co-op placements, but they get the opportunity to support other local nonprofits alongside their work at United Way."</blockquote><p>This term students from the program are supporting UWWRC, Crow Shield Lodge, Kind Minds Family Wellness, Peace for All Canada, and Child Witness Centre doing all kinds of work like event support, data entry and analysis, program design and evaluation and research.</p><p>#WRAwesome #locallove #UWaterlooCoop #HireWaterloo</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-health-inequities-awareness', 
+                    title: 'Social Determinants and Inequities in health for Black Canadians', 
+                    slug: 'kmfw-health-inequities-awareness', 
+                    author: 'Kind Minds Family Wellness', 
+                    category: 'Awareness', 
+                    date: new Date('2023-02-15'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1576091160550-2173dad99a01?q=80&w=800&fit=crop', 
+                    excerpt: 'Social, economic, and political factors shape the conditions in which individuals grow, live, work, and age.', 
+                    content: '<p>Did you know: Social, economic, and political factors share the conditions in which individuals grow, live, work, and age and are vitally important for health and well-being.</p><p>These should be the starting points for you to reflect on how racism and discrimination may contribute to how Black-identified individuals experience them 🤔</p><p>In other words, <strong>racism is increasingly recognized as an essential driver of inequitable health outcomes</strong> for Black and racialized Canadians!</p><p>Discrimination against Black people is deeply entrenched and normalized in Canadian institutions, policies, and practices and is often invisible to those who do not feel its effects 😔</p><p>Today, Black Canadians experience health and social inequities linked to processes of discrimination at multiple levels of society. Visit <strong>www.Canada.ca</strong> to read more about the Social Determinants and Inequities in health for Black Canadians.</p><p>#kmfw #awareness #ourstotell #health #inequities #communityengagement #blackhistory #canada</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-black-history-profile-spectrum', 
+                    title: 'BLACK HISTORY MONTH PROFILE', 
+                    slug: 'kmfw-black-history-profile-spectrum', 
+                    author: 'Kind Minds Family Wellness', 
+                    category: 'Profile', 
+                    date: new Date('2023-02-02'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=800&fit=crop', 
+                    excerpt: 'We are honored to have our Executive Director featured in SPECTRUM Waterloo Region\'s Rainbow Community Space\'s weekly blog.', 
+                    content: '<p>We are honored to have our Executive Director, <strong>Ajirioghene Evi’s profile</strong> featured in SPECTRUM Waterloo Region\'s Rainbow Community Space\'s weekly blog in February.</p><p>The featured profiles are one of their initiatives to do more community engagement with Black, Indigenous, and racialized queer folks in our region. This month, you can read profiles of African, Caribbean, and Black folks making a difference in the queer community!</p><p>KMFW is thrilled to know that <strong>KOJO Institute</strong> is working with the team at Spectrum through its program, <em>The Foundation of Equity and Anti-Black Racism</em> 🙌🏾</p><p>Thank you for the feature, SPECTRUM Waterloo Region\'s Rainbow Community Space 🙌🏾</p><p>Please visit the link below to read the full profile:</p><p><a href="https://www.ourspectrum.com/2023/02/01/black-history-month-profile-on-ajirioghene-evi-cobbina/" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline"><strong>READ ARTICLE HERE</strong></a></p><p>#kmfw #queer #equity #intersectionality #justice #2slgbtq+ #inclusion #commumityengagement #blackhistory #february</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-we-are-black-history-2023', 
+                    title: 'We are Black History!', 
+                    slug: 'kmfw-we-are-black-history-2023', 
+                    author: 'KMFW Team', 
+                    category: 'History', 
+                    date: new Date('2023-01-31'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1614030424754-24d9e97f0229?q=80&w=800&fit=crop', 
+                    excerpt: 'Happy Black History Month! The 2023 theme is Black Resistance. Join us in celebrating excellence all year round.', 
+                    content: '<p>As we welcome the month of February tomorrow, we wish to say Happy Black History Month!! ✊🏾</p><p>The 2023 theme is <strong>Black Resistance</strong> 🙌🏾</p><p>Kind Minds Family Wellness celebrates Black history and excellence every day of the year. Therefore, we would like to hearten you to embrace the following acts throughout the year:</p><h3>For Individuals:</h3><ul><li><strong>Support Black-Owned Businesses:</strong> Make an intentional effort to buy Black.</li><li><strong>Learn about local Black History:</strong> Remain updated on current affairs and systemic exclusions.</li><li><strong>Donate:</strong> Reach out to underfunded Black-led initiatives in our region.</li><li><strong>Volunteer:</strong> Your skills and experience are well-regarded and needed.</li><li><strong>Celebrate:</strong> Honor Black literature, authors, artists, and professionals!</li></ul><h3>For Organizations:</h3><ul><li><strong>Organize Diversity Events:</strong> Promote conversations that bring change to workplaces and shared spaces.</li></ul><p>For the next 28 days and beyond, remember that Black history is Canadian History. We will continue to highlight Black excellence of the past, present, and future leaders! 🤎</p><p>#nonprofitorganization #activism #blackhistorymonth #blackexcellence #blackpride</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-organic-leadership-esther', 
+                    title: 'Organic Leadership', 
+                    slug: 'kmfw-organic-leadership-esther', 
+                    author: 'Kind Minds Family Wellness', 
+                    category: 'Leadership', 
+                    date: new Date('2022-09-05'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=800&fit=crop', 
+                    excerpt: 'Introducing Mama Esther Kowai, an initiator who enjoys planning, organizing, and directing joint efforts for the happiness of others.', 
+                    content: '<p>We have numerous Organic Leaders in our community, and we are confident you also know a few.</p><p>Today, we introduce you to <strong>Mama Esther Kowai</strong>, a resident of our Region and a member of our Wazee Senior Group. Mama Esther is an initiator who enjoys planning, organizing, and directing joint efforts for the happiness of others.</p><p>She would appreciate the donation of the following items (ongoing):</p><ul><li>Used clothing (summer and spring items only) and shoes for all ages</li><li>Writing materials and school supplies for school-aged children</li><li>Toiletries (soap, shampoo, deodorant, toothpaste, etc.)</li></ul><p>You can communicate directly with her via her email address at <strong>estherkowai073@gmail.com</strong>. Thank you as you support her initiatives!!</p><p>#leadership #community #donations #givingback #growth #africa #sierraleon #kwregion</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-racial-diversity-cycling', 
+                    title: 'Reflections: Racial Diversity in Cycling', 
+                    slug: 'kmfw-racial-diversity-cycling', 
+                    author: 'Shirley G', 
+                    category: 'Community', 
+                    date: new Date('2022-08-06'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1541625602330-2277a1c4b6c3?q=80&w=800&fit=crop', 
+                    excerpt: 'Shirley G shares hard-to-accept facts on Racial Diversity in Cycling and organizations supporting inclusivity.', 
+                    content: '<p>We share a great reflection following a community Bike Festivities sponsored by the City and hosted by us and some organizations serving racialized communities in the Region of Waterloo.</p><blockquote>"Generally, the bike industry defaults to this lens of a white, cisgender, heterosexual, non-disabled man with class privilege." - Kara Fallon, Bikes Together</blockquote><p>An equity view around inclusiveness means cities need an intersectional approach to planning and promoting racial diversity in cycling. Organizations working to encourage diversity include:</p><ul><li><strong>Ontario Cycling:</strong> Women in Cycling Steering Committee</li><li><strong>Everyone Rides Initiative (Hamilton):</strong> Removing barriers to biking.</li><li><strong>The Culture Link (Bike Host):</strong> Matching Newcomers with mentors.</li><li><strong>ManDem Cycling (Toronto):</strong> Diverse and inclusive cycling community.</li></ul><p>#RepresentationMatters. We recommend reading the article by Tamika Butler titled, <em>Why We Must Talk About Race When We Talk About Bikes</em>.</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-lgbtq-newcomers-support', 
+                    title: 'The need for more supports for LGBTQ+ newcomers within Ontario', 
+                    slug: 'kmfw-lgbtq-newcomers-support', 
+                    author: 'Britney Andrews', 
+                    category: 'Advocacy', 
+                    date: new Date('2022-06-29'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1573055419107-1e531818c156?q=80&w=800&fit=crop', 
+                    excerpt: 'Settlement organizations in Canada are not doing enough to illustrate their support of LGBTQ2S+ newcomers.', 
+                    content: '<p>Content analyses indicate that youth-serving and settlement organizations in Canada are not doing enough to illustrate their support of LGBTQ2S+ newcomers.</p><p>In a study focusing on 34 immigrant-serving organizations in Ontario, it was found that only 9% offered specific resources for LGBTQ Newcomers. This suggests that these organizations do not have an adequate understanding of the unique needs of the population they serve.</p><h3>Organizations offering support:</h3><ul><li><strong>Rainbow Community Council:</strong> Addressing gaps in services for LGBTQ+ Newcomers.</li><li><strong>OK2BME:</strong> Supportive services for children, teens, and adults in Waterloo Region.</li><li><strong>SPECTRUM:</strong> Transgender peer support and multicultural connect groups.</li><li><strong>The Black Queer Youth Initiative (BQY):</strong> Safe space for Black, African, and Caribbean youth in Toronto.</li></ul><p>Kind Minds Family Wellness is happy to support any LGBTQ Newcomers in connecting and navigating these resources.</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-self-care-kids-tips', 
+                    title: 'Self-Care for Kids: Tips to Help Your Family Recharge', 
+                    slug: 'kmfw-self-care-kids-tips', 
+                    author: 'Anya Willis', 
+                    category: 'Wellness', 
+                    date: new Date('2022-02-22'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1510154221590-ff63e90a136f?q=80&w=800&fit=crop', 
+                    excerpt: 'Practical ways you can help your child develop a healthy self-care routine to unwind and reset.', 
+                    content: '<p>Kids are busy these days. School, household chores, and social pressures take a lot of time and energy. Without balance, even kids can become overly stressed!</p><h3>Practical ways to help:</h3><ul><li><strong>Practice It Yourself:</strong> Be a self-care role model. Build strong routines for eating, sleep, and hobbies.</li><li><strong>Boost Your Home Atmosphere:</strong> A tidy, clutter-free home sets a peaceful tone.</li><li><strong>Try Yoga:</strong> Helps children regulate emotions and anxiety while improving concentration.</li><li><strong>Weekly Family Movie Night:</strong> Build bonds and spark imagination together.</li><li><strong>Encourage Puzzling:</strong> Sudoku, jigsaws, and crosswords offer cognitive and emotional benefits.</li></ul><p>Self-care is required for all people to live a balanced and healthy life. Teach your child what they can do to improve their physical, mental, and emotional well-being.</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-islamophobia-remembrance-2022', 
+                    title: 'National Day of Remembrance and Action Against Islamophobia', 
+                    slug: 'kmfw-islamophobia-remembrance-2022', 
+                    author: 'Kind Minds Family Wellness', 
+                    category: 'Advocacy', 
+                    date: new Date('2022-01-29'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1596131397999-90d560934091?q=80&w=800&fit=crop', 
+                    excerpt: 'Remembering the lives lost in the Quebec Mosque massacre. We stand against Islamophobia.', 
+                    content: '<p>Today we remember the lives lost in the Quebec Mosque massacre on Jan 29. Islamophobia is real. Hate is real. It has cost us too much already. This needs to stop!</p><h3>What you can do to make a difference:</h3><ol><li>Take a moment to learn about Islamophobia in Canada.</li><li>Join the action against Bill 21 (Laicité Law) that promotes state-sanctioned discrimination.</li><li>Seek support or report hate crimes at <strong>www.reportinghate.ca</strong>.</li></ol><p>#QuebecMosqueShooting #WeRememberJan29 #WRagainstislamophobia #Islamophobia #StopIslamophobia</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-international-day-education-2022', 
+                    title: 'Today is the International Day of Education', 
+                    slug: 'kmfw-international-day-education-2022', 
+                    author: 'United Nations', 
+                    category: 'Education', 
+                    date: new Date('2022-01-24'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=800&fit=crop', 
+                    excerpt: 'Education is a human right, a public good and a public responsibility.', 
+                    content: '<blockquote>"Without inclusive and equitable quality education and lifelong opportunities for all, countries will not succeed in achieving gender equality and breaking the cycle of poverty." - UNESCO</blockquote><p>Today, 258 million children and youth still do not attend school. Their right to education is being violated and it is unacceptable. This year’s International Day of Education is a platform to realize everyone’s fundamental right to education.</p><p>#educationisahumanright #transformingeducation #educationday</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-region-waterloo-grant-2021', 
+                    title: 'KMFW Comments on Recently awarded grant by The Region of Waterloo', 
+                    slug: 'kmfw-region-waterloo-grant-2021', 
+                    author: 'Ajirioghene Evi-Cobbinnah', 
+                    category: 'Grant', 
+                    date: new Date('2021-11-20'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1526628953301-3e589a6a8b74?q=80&w=800&fit=crop', 
+                    excerpt: 'Leadership Skills Development and Pathway to Youth Entrepreneurship program grant.', 
+                    content: '<p>I am so happy to commence work on this program that will run for 24 months and will create a culturally inclusive environment for Black youth in our region.</p><p>Participants will learn hands-on planning, budgeting, and foundational skills in running a small business. The instructors and mentors are professionals invested in contributing to the growth of Black identifying youth.</p><blockquote>"No greater place to be than in a leadership position to lead young minds to prosperity" - Darrius Garrett</blockquote><p>Thank you to the Region of Waterloo for the grant to move this work forward in our community!</p><p>#youthleadership #communitydevelopment #blackyouth #notforprofit</p>', 
+                    published: true 
+                },
+                { 
+                    id: 'kmfw-restorative-region-panel', 
+                    title: 'KMFW Leadership in Restorative Work', 
+                    slug: 'kmfw-restorative-region-panel', 
+                    author: 'Kind Minds Family Wellness', 
+                    category: 'Event', 
+                    date: new Date('2021-11-11'), 
+                    imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800&fit=crop', 
+                    excerpt: 'KMFW is thrilled to be a panelist in the upcoming conversation on becoming a Restorative Region.', 
+                    content: '<p>KMFW is thrilled to be a panelist in the upcoming conversation on November 25th: <em>Our Community In Transformation: Next Steps Towards Becoming a Restorative Region.</em></p><p>The conversation will be moderated by Mike Farwell, and the panel will deconstruct principles of restorative justice and transformative justice. Panelists include Chris Cowie (ED of CJI), Tafadzwa Takaendesa (KMFW), and MPP Laura Mae Lindo.</p><p>Register for free at: <strong>https://www.eventbrite.ca/e/our-community-in-transformation-tickets-178881548527</strong></p>', 
                     published: true 
                 }
             ];
@@ -384,7 +651,9 @@ export default function BlogManager() {
                 },
             ];
 
-            const articlesToSeed = isAitasol ? aitasolArticles : dmlabsArticles;
+            let articlesToSeed = dmlabsArticles;
+            if (isAitasol) articlesToSeed = aitasolArticles;
+            if (isKMFW) articlesToSeed = kmfwArticles;
 
             for (const article of articlesToSeed) {
                 await FirestoreService.saveArticle(currentSite.id, article, article.id);
@@ -665,6 +934,16 @@ export default function BlogManager() {
                                     </div>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="col-span-1 md:col-span-2">
+                            <Label>Featured Video URL (YouTube, Vimeo, or Direct MP4)</Label>
+                            <Input
+                                value={formData.videoUrl || ""}
+                                onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                                placeholder="https://www.youtube.com/watch?v=... or https://example.com/video.mp4"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">If provided, this will be shown instead of the featured image.</p>
                         </div>
 
                         <div className="col-span-1 md:col-span-2">

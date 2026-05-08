@@ -15,6 +15,7 @@ import RichTextEditor from "@/components/form/RichTextEditor";
 import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
 import { Search } from 'lucide-react';
+import { useDialog } from "@/context/DialogContext";
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -46,6 +47,7 @@ interface CopingResource {
 
 export default function CopingManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [content, setContent] = useState<any>(null);
     const [resources, setResources] = useState<CopingResource[]>([]);
     const [loading, setLoading] = useState(false);
@@ -135,8 +137,15 @@ export default function CopingManager() {
         ));
     };
 
-    const removeResource = (id: string) => {
-        if (confirm("Are you sure you want to delete this resource?")) {
+    const removeResource = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Resource",
+            message: "Are you sure you want to delete this resource?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setResources(resources.filter(r => r.id !== id));
         }
     };
@@ -169,8 +178,15 @@ export default function CopingManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={() => {
-                            if (confirm("This will overwrite current changes with default data. Are you sure?")) {
+                        <Button variant="outline" onClick={async () => {
+                            const isConfirmed = await confirm({
+                                title: "Seed Defaults",
+                                message: "This will overwrite current changes with default data. Are you sure?",
+                                variant: "warning",
+                                confirmLabel: "Seed Data"
+                            });
+
+                            if (isConfirmed) {
                                 const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
                                 if (siteData?.coping) {
                                     const newData = {

@@ -15,6 +15,7 @@ import { Eye, EyeOff, ChevronDown, ChevronUp, Search, Trash2 } from 'lucide-reac
 import { SEED_DATA } from "@/config/seedData";
 
 import SEOEditor from "@/components/form/SEOEditor";
+import { useDialog } from "@/context/DialogContext";
 
 interface HomeSection extends SectionContent {
     enabled?: boolean;
@@ -370,6 +371,7 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
 
 export default function HomePageManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [content, setContent] = useState<HomePageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -474,7 +476,14 @@ export default function HomePageManager() {
     };
 
     const handleSeedData = async () => {
-        if (!confirm(`This will overwrite the current home page sections for "${currentSite.name}" with professional seed data. Continue?`)) return;
+        const isConfirmed = await confirm({
+            title: "Seed Home Page Data",
+            message: `This will overwrite the current home page sections for "${currentSite.name}" with professional seed data. This action cannot be undone.`,
+            variant: "warning",
+            confirmLabel: "Seed Data"
+        });
+
+        if (!isConfirmed) return;
         setSaving(true);
         setError("");
         setSuccessMsg("");

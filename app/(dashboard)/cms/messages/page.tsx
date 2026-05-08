@@ -8,6 +8,7 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import { Mail, Trash2, Calendar, User, Phone, MessageSquare, X, Eye } from 'lucide-react';
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
+import { useDialog } from "@/context/DialogContext";
 
 interface Message {
     id: string;
@@ -37,6 +38,7 @@ interface MessagesManagerProps {
 
 export default function MessagesManager({ collectionName = "messages", titleOverride }: MessagesManagerProps) {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -67,7 +69,14 @@ export default function MessagesManager({ collectionName = "messages", titleOver
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this entry?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete Entry",
+            message: "Are you sure you want to delete this entry? This action cannot be undone.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (!isConfirmed) return;
         setDeletingId(id);
         try {
             await FirestoreService.deleteMessage(currentSite.id, id, collectionName);
@@ -75,7 +84,11 @@ export default function MessagesManager({ collectionName = "messages", titleOver
             if (selectedMessage?.id === id) setSelectedMessage(null);
         } catch (err) {
             console.error(err);
-            alert("Failed to delete entry.");
+            await dialogAlert({
+                title: "Error",
+                message: "Failed to delete entry. Please try again.",
+                variant: "danger"
+            });
         } finally {
             setDeletingId(null);
         }

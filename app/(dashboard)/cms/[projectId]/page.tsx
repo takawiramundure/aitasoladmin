@@ -15,6 +15,7 @@ import {
   Database,
   LayoutTemplate
 } from 'lucide-react';
+import { useDialog } from "@/context/DialogContext";
 import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
 import RichTextEditor from "@/components/form/RichTextEditor";
@@ -27,6 +28,7 @@ import PageMeta from "@/components/common/PageMeta";
 const ProjectPageManager: React.FC = () => {
     const { projectId } = useParams() as { projectId: string };
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -109,9 +111,16 @@ const ProjectPageManager: React.FC = () => {
         return defaults[id] || { title: "", subtitle: "", description: "", content: "", objectives: [], timeline: "", status: "", partners: [] };
     };
 
-    const handleSeed = () => {
+    const handleSeed = async () => {
         if (!projectId) return;
-        if (window.confirm("This will overwrite your current changes with the initial hardcoded data. Continue?")) {
+        const isConfirmed = await confirm({
+            title: "Seed Project Data",
+            message: "This will overwrite your current changes with the initial hardcoded data. Are you sure you want to proceed?",
+            variant: "warning",
+            confirmLabel: "Seed Data"
+        });
+
+        if (isConfirmed) {
             const cleanId = projectId.replace('project-', '');
             setData(getDefaults(cleanId));
         }

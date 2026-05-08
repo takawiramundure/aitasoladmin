@@ -8,6 +8,7 @@ import Button from "@/components/ui/button/Button";
 import Alert from "@/components/ui/alert/Alert";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import PageMeta from "@/components/common/PageMeta";
+import { useDialog } from "@/context/DialogContext";
 
 interface PageDef {
     path: string;
@@ -640,6 +641,7 @@ const defaultPageSEO = (label: string): PageSEO => ({
 
 export default function SEOManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const siteId = currentSite?.id || 'kmfw';
     
     // Get pages for the current site
@@ -696,9 +698,18 @@ export default function SEOManager() {
     const handleSeedAll = async () => {
         const seedData = SITE_SEED_DATA[siteId];
         if (!seedData) {
-            setStatus({ type: 'error', msg: `No professional seed data available yet for ${currentSite?.name || siteId}.` });
+            setStatus({ type: 'error', msg: 'No seed data available for this site.' });
             return;
         }
+
+        const isConfirmed = await confirm({
+            title: "Seed SEO Metadata",
+            message: `This will overwrite ALL page metadata for "${currentSite?.name}" with AI-optimized seeds. Are you sure you want to proceed?`,
+            variant: "warning",
+            confirmLabel: "Seed All Pages"
+        });
+
+        if (!isConfirmed) return;
 
         setSeeding(true);
         setStatus(null);

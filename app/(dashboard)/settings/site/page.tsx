@@ -470,11 +470,23 @@ export default function SiteSettingsManager() {
                                                     type="checkbox"
                                                     className="sr-only"
                                                     checked={settings.emergencyBar.enabled}
-                                                    onChange={(e) => {
+                                                    onChange={async (e) => {
                                                         if (!settings) return;
+                                                        const isChecked = e.target.checked;
+                                                        
+                                                        if (isChecked) {
+                                                            const isConfirmed = await confirm({
+                                                                title: "Enable Emergency Bar",
+                                                                message: "Are you sure you want to show the emergency alert bar on the live site?",
+                                                                variant: "warning",
+                                                                confirmLabel: "Enable"
+                                                            });
+                                                            if (!isConfirmed) return;
+                                                        }
+
                                                         setSettings({
                                                             ...settings,
-                                                            emergencyBar: { ...settings.emergencyBar!, enabled: e.target.checked }
+                                                            emergencyBar: { ...settings.emergencyBar!, enabled: isChecked }
                                                         });
                                                     }}
                                                 />
@@ -596,7 +608,33 @@ export default function SiteSettingsManager() {
                                             </div>
                                             <select
                                                 value={settings.maintenanceMode ? "true" : "false"}
-                                                onChange={(e) => setSettings({ ...settings, maintenanceMode: e.target.value === "true", maintenanceScope: settings.maintenanceScope || 'all' })}
+                                                onChange={async (e) => {
+                                                    const isEnabling = e.target.value === "true";
+                                                    
+                                                    if (isEnabling) {
+                                                        const isConfirmed = await confirm({
+                                                            title: "Enable Global Maintenance Mode",
+                                                            message: "This will take the ENTIRE website offline and replace all pages with a splash screen. Are you absolutely sure?",
+                                                            variant: "danger",
+                                                            confirmLabel: "Take Site Offline"
+                                                        });
+                                                        if (!isConfirmed) return;
+                                                    } else {
+                                                        const isConfirmed = await confirm({
+                                                            title: "Disable Maintenance Mode",
+                                                            message: "The website will go LIVE for all visitors. Proceed?",
+                                                            variant: "primary",
+                                                            confirmLabel: "Go Live"
+                                                        });
+                                                        if (!isConfirmed) return;
+                                                    }
+
+                                                    setSettings({ 
+                                                        ...settings, 
+                                                        maintenanceMode: isEnabling, 
+                                                        maintenanceScope: settings.maintenanceScope || 'all' 
+                                                    });
+                                                }}
                                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-3"
                                             >
                                                 <option value="false">🟢 Live — Site is publicly accessible</option>

@@ -7,6 +7,7 @@ import Alert from "../ui/alert/Alert";
 import { FolderIcon, TrashBinIcon, ArrowUpIcon, PlusIcon, VideoIcon, CopyIcon, PageIcon, HomeIcon } from "@/icons";
 import { useSite } from "@/context/SiteContext";
 import { Modal } from "../ui/modal";
+import { useDialog } from "@/context/DialogContext";
 
 interface MediaLibraryProps {
     isOpen: boolean;
@@ -34,6 +35,7 @@ interface MediaLibraryContentProps {
 
 export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, multiSelect, onSelectMultiple }: MediaLibraryContentProps) {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const siteRoot = currentSite.id;
     const [currentPath, setCurrentPath] = useState(basePath || siteRoot);
     const [items, setItems] = useState<FileItem[]>([]);
@@ -44,7 +46,6 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
     const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
     const [isCreatingFolder, setIsCreatingFolder] = useState(false);
     const [newFolderName, setNewFolderName] = useState("");
-    const [itemToDelete, setItemToDelete] = useState<FileItem | null>(null);
 
     useEffect(() => {
         loadMedia(currentPath);
@@ -229,22 +230,24 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
         }
     };
 
-    const confirmDelete = (fileItem: FileItem) => {
-        setItemToDelete(fileItem);
-    };
+    const confirmDelete = async (fileItem: FileItem) => {
+        const isConfirmed = await confirm({
+            title: "Delete File?",
+            message: `Are you sure you want to permanently delete "${fileItem.name}"? This action cannot be undone.`,
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
 
-    const executeDelete = async () => {
-        if (!itemToDelete) return;
+        if (!isConfirmed) return;
+
         try {
-            await deleteObject(itemToDelete.ref);
-            setItems(items.filter(i => i.name !== itemToDelete.name));
-            setSuccessMsg(`Deleted ${itemToDelete.name} successfully.`);
+            await deleteObject(fileItem.ref);
+            setItems(items.filter(i => i.name !== fileItem.name));
+            setSuccessMsg(`Deleted ${fileItem.name} successfully.`);
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err) {
             console.error(err);
             setError("Failed to delete item.");
-        } finally {
-            setItemToDelete(null);
         }
     };
 
@@ -495,32 +498,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
                 </div>
             )}
 
-            {/* Delete Confirmation Modal */}
-            {itemToDelete && (
-                <div className="absolute inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 dark:border-gray-700 text-center animate-in fade-in zoom-in-95 duration-200">
-                        <TrashBinIcon className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Delete File?</h3>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 max-h-24 overflow-auto">
-                            Are you sure you want to permanently delete <strong>{itemToDelete.name}</strong>? This action cannot be undone.
-                        </p>
-                        <div className="flex gap-3 justify-center">
-                            <button
-                                onClick={() => setItemToDelete(null)}
-                                className="px-5 py-2.5 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={executeDelete}
-                                className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-                            >
-                                Yes, Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+
         </div>
     );
 }

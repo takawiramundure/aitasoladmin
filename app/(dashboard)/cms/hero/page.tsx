@@ -13,6 +13,7 @@ import { useSite } from "@/context/SiteContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useDialog } from "@/context/DialogContext";
 import { storage } from "@/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { SEED_DATA } from "@/config/seedData";
@@ -55,6 +56,7 @@ interface HeroSlide {
 
 export default function HeroManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -137,7 +139,14 @@ export default function HeroManager() {
 
     // Function to migrate external images to Firebase
     const migrateImages = async () => {
-        if (!confirm("This will download all 'framerusercontent' images and re-upload them to your own storage settings. Continue?")) return;
+        const isConfirmed = await confirm({
+            title: "Migrate External Images",
+            message: "This will download all 'framerusercontent' images and re-upload them to your own storage settings. Continue?",
+            variant: "warning",
+            confirmLabel: "Migrate"
+        });
+
+        if (!isConfirmed) return;
 
         setMigrating(true);
         setError("");
@@ -210,8 +219,15 @@ export default function HeroManager() {
         ));
     };
 
-    const removeSlide = (id: string) => {
-        if (confirm("Are you sure you want to delete this slide?")) {
+    const removeSlide = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Slide",
+            message: "Are you sure you want to delete this slide?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setSlides(slides.filter(s => s.id !== id));
         }
     };

@@ -13,7 +13,15 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+
+// Use environment variables for flexibility
+const COLLECTION_NAME = process.env.COLLECTION_NAME || 'bweic_articles';
+const DATABASE_ID = process.env.DATABASE_ID || '(default)';
+
+console.log(`Using Database: ${DATABASE_ID}`);
+console.log(`Using Collection: ${COLLECTION_NAME}`);
+
+const db = getFirestore(app, DATABASE_ID);
 
 const articles = [
     {
@@ -310,7 +318,7 @@ async function seedArticles() {
     
     try {
         for (const article of articles) {
-            const docRef = await addDoc(collection(db, 'bweic_articles'), {
+            const docRef = await addDoc(collection(db, COLLECTION_NAME), {
                 ...article,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()

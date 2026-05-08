@@ -13,6 +13,7 @@ import ImagePicker from "@/components/form/ImagePicker";
 import LinkPicker from "@/components/form/LinkPicker";
 import { Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { nominees as defaultNominees, agenda as defaultAgenda, speakers as defaultSpeakers } from "@/data/fallbackNominees";
+import { useDialog } from "@/context/DialogContext";
 
 interface GalaSection extends SectionContent {
     enabled?: boolean;
@@ -61,6 +62,7 @@ const GALA_SECTIONS = [
 
 export default function GalaManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [content, setContent] = useState<GalaPageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -227,7 +229,14 @@ export default function GalaManager() {
     };
 
     const seedGalaData = async () => {
-        if (!confirm("This will overwrite your current Gala settings with default data. Continue?")) return;
+        const isConfirmed = await confirm({
+            title: "Seed Gala Data",
+            message: "This will overwrite your current Gala settings with default data. Continue?",
+            variant: "warning",
+            confirmLabel: "Seed Data"
+        });
+
+        if (!isConfirmed) return;
 
         const fullSeedData: GalaPageContent = {
             title: "Black Excellence Gala",
@@ -934,17 +943,7 @@ export default function GalaManager() {
                                                                                     handleSectionChange('nominees', 'items', newItems);
                                                                                 }} 
                                                                             />
-                                                                            <div className="pt-2">
-                                                                                <button onClick={() => {
-                                                                                    if (confirm("Remove this nominee?")) {
-                                                                                        const newItems = (section.items || []).filter((_: any, i: number) => i !== idx);
-                                                                                        handleSectionChange('nominees', 'items', newItems);
-                                                                                    }
-                                                                                }} className="text-red-500 text-sm flex items-center gap-2"><Trash2 size={16}/> Remove Nominee</button>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="col-span-1 md:col-span-2">
-                                                                            <Label>Bio</Label>
+
                                                                             <textarea 
                                                                                 className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 min-h-[150px]" 
                                                                                 value={nominee.bio || ''} 

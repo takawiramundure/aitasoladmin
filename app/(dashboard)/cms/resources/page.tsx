@@ -19,6 +19,7 @@ import { GridIcon } from "@/icons";
 import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
 import { Search } from 'lucide-react';
+import { useDialog } from "@/context/DialogContext";
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -50,6 +51,7 @@ interface Resource {
 
 export default function ResourcesManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [resources, setResources] = useState<Resource[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -167,8 +169,15 @@ export default function ResourcesManager() {
         ));
     };
 
-    const removeResource = (id: string) => {
-        if (confirm("Are you sure you want to delete this resource?")) {
+    const removeResource = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Resource",
+            message: "Are you sure you want to delete this resource? You will need to save changes to apply this permanently.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setResources(resources.filter(r => r.id !== id));
         }
     };

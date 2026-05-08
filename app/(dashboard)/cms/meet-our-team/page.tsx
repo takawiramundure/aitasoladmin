@@ -10,6 +10,7 @@ import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import { Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { useDialog } from "@/context/DialogContext";
 
 const DEFAULT_TEAM_DATA = {
     enabled: true,
@@ -77,6 +78,7 @@ const DEFAULT_TEAM_DATA = {
 
 export default function MeetOurTeamManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -152,8 +154,14 @@ export default function MeetOurTeamManager() {
                     <div className="flex items-center gap-3">
                         <Button 
                             variant="outline" 
-                            onClick={() => {
-                                if (window.confirm("Restore defaults? This will overwrite your current changes.")) {
+                            onClick={async () => {
+                                const isConfirmed = await confirm({
+                                    title: "Reset Defaults",
+                                    message: "Are you sure you want to restore defaults? This will overwrite your current changes and cannot be undone.",
+                                    variant: "warning",
+                                    confirmLabel: "Reset Content"
+                                });
+                                if (isConfirmed) {
                                     setContent(DEFAULT_TEAM_DATA);
                                 }
                             }}

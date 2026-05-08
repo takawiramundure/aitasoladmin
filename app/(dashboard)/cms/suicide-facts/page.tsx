@@ -8,6 +8,7 @@ import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
+import { useDialog } from "@/context/DialogContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -140,6 +141,7 @@ const DEFAULT_FACTS: Fact[] = [
 
 export default function SuicideFactsManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [facts, setFacts] = useState<Fact[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -191,7 +193,14 @@ export default function SuicideFactsManager() {
     };
 
     const handleSeedDefaults = async () => {
-        if (confirm("This will overwrite your current facts with the defaults. Are you sure?")) {
+        const isConfirmed = await confirm({
+            title: "Restore Default Facts",
+            message: "This will overwrite your current facts with the defaults. Are you sure?",
+            variant: "warning",
+            confirmLabel: "Restore Defaults"
+        });
+
+        if (isConfirmed) {
             setFacts(DEFAULT_FACTS);
             setSuccessMsg("Reset to defaults. Don't forget to click Save Changes!");
         }
@@ -221,8 +230,15 @@ export default function SuicideFactsManager() {
         ));
     };
 
-    const removeFact = (id: string) => {
-        if (confirm("Are you sure you want to delete this fact?")) {
+    const removeFact = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Fact",
+            message: "Are you sure you want to delete this fact?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setFacts(facts.filter(f => f.id !== id));
         }
     };

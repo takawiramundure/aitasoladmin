@@ -12,6 +12,7 @@ import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import VideoPicker from "@/components/form/VideoPicker";
 import { Eye, EyeOff, ChevronDown, ChevronUp, Video } from 'lucide-react';
+import { useDialog } from "@/context/DialogContext";
 
 interface OurStorySection extends SectionContent {
     enabled?: boolean;
@@ -73,6 +74,7 @@ const getDefaultContent = (): Record<string, SectionContent> => {
 
 export default function OurStoryManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [content, setContent] = useState<OurStoryPageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -144,7 +146,14 @@ export default function OurStoryManager() {
     };
 
     const handleRestoreDefaults = async () => {
-        if (!window.confirm("Are you sure you want to restore the original 4-card 'Our Story' configuration? This will overwrite your current settings.")) return;
+        const isConfirmed = await confirm({
+            title: "Restore Defaults",
+            message: "Are you sure you want to restore the original 4-card 'Our Story' configuration? This will overwrite your current settings.",
+            variant: "warning",
+            confirmLabel: "Restore Layout"
+        });
+
+        if (!isConfirmed) return;
         setSaving(true);
         try {
             const defaultData = { title: "Our Story", sections: getDefaultContent() };
