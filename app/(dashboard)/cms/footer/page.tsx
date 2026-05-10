@@ -153,9 +153,14 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         appointment_only: false,
         social_instagram: '', social_twitter: '', social_facebook: '', social_linkedin: '', social_youtube: '',
         nav_columns: [
-            { heading: 'Services', links: [
-                { label: 'Home Care', url: '/services' }, { label: 'About Us', url: '/about' },
-                { label: 'Careers', url: '/career' }, { label: 'Contact', url: '/contact' },
+            { heading: 'Quick Links', links: [
+                { label: 'Home', url: '/' },
+                { label: 'About Us', url: '/about' },
+                { label: 'Care Solutions', url: '/service' },
+                { label: 'Careers', url: '/career' },
+                { label: 'Latest News', url: '/blog' },
+                { label: 'FAQ', url: '/faq' },
+                { label: 'Contact Us', url: '/contact' },
             ]},
         ],
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],

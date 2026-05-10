@@ -828,5 +828,55 @@ export const FirestoreService = {
             console.error("Error updating application status:", error);
             throw error;
         }
+    },
+
+    // Dynamic Forms Engine
+    getForms: async (siteId: string): Promise<any[]> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const formsRef = collection(dbInstance, "forms");
+            const snapshot = await getDocs(formsRef);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error("Error fetching forms:", error);
+            return [];
+        }
+    },
+
+    getForm: async (siteId: string, formId: string): Promise<any | null> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const docRef = doc(dbInstance, "forms", formId);
+            const docSnap = await getDoc(docRef);
+            return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+        } catch (error) {
+            console.error("Error fetching form:", error);
+            return null;
+        }
+    },
+
+    saveForm: async (siteId: string, formId: string, data: any): Promise<void> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const docRef = doc(dbInstance, "forms", formId);
+            await setDoc(docRef, {
+                ...data,
+                updatedAt: new Date().toISOString()
+            }, { merge: true });
+        } catch (error) {
+            console.error("Error saving form:", error);
+            throw error;
+        }
+    },
+
+    deleteForm: async (siteId: string, formId: string): Promise<void> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const docRef = doc(dbInstance, "forms", formId);
+            await deleteDoc(docRef);
+        } catch (error) {
+            console.error("Error deleting form:", error);
+            throw error;
+        }
     }
 };

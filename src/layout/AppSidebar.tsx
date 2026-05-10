@@ -44,6 +44,12 @@ const AppSidebar: React.FC = () => {
         name: "Pages Manager",
         path: "/cms/pages",
         new: true,
+      },
+      {
+        icon: <PageIcon />,
+        name: "Forms Manager",
+        path: "/cms/forms",
+        new: true,
       }
     ];
 
@@ -416,7 +422,6 @@ const AppSidebar: React.FC = () => {
             { name: "Contact Us", path: "/cms/contact" },
             { name: "Testimonials", path: "/cms/reviews" },
             { name: "Footer Details", path: "/cms/footer" },
-            { name: "Consultation Form", path: "/cms/appointment-form" },
           ],
         },
         {
