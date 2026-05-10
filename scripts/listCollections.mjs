@@ -6,22 +6,16 @@ const appDefault = admin.initializeApp({
 
 const dbDefault = admin.firestore(appDefault);
 
-async function inspect() {
-    console.log('Inspecting projects...');
-    const projectsSnapshot = await dbDefault.collection('projects').get();
-    projectsSnapshot.forEach(doc => {
-        console.log(`Project ID: ${doc.id}`);
-        console.log(`Data:`, JSON.stringify(doc.data()).substring(0, 100) + '...');
-    });
-
-    console.log('\nInspecting site_content...');
-    const siteContentSnapshot = await dbDefault.collection('site_content').get();
-    siteContentSnapshot.forEach(doc => {
-        console.log(`Site Content ID: ${doc.id}`);
-        console.log(`Data:`, JSON.stringify(doc.data()).substring(0, 100) + '...');
-    });
-    
+async function inspectSettings() {
+    console.log('Inspecting noel_settings/config in (default) database...');
+    const docRef = dbDefault.collection('noel_settings').doc('config');
+    const docSnap = await docRef.get();
+    if (docSnap.exists) {
+        console.log(`Data:`, JSON.stringify(docSnap.data(), null, 2));
+    } else {
+        console.log('Document noel_settings/config does not exist!');
+    }
     process.exit(0);
 }
 
-inspect();
+inspectSettings();
