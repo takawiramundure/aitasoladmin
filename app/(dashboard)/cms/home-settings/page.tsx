@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import PageMeta from "@/components/common/PageMeta";
 import { FirestoreService, PageContent, SectionContent } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
+import { useDialog } from "@/context/DialogContext";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
@@ -71,6 +72,15 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'process', label: 'Our Process' },
             { id: 'testimonials', label: 'Testimonials' },
             { id: 'cta', label: 'Call to Action' }
+        ];
+    }
+    if (siteId === 'phcg') {
+        return [
+            { id: 'why_choose_us', label: 'Why Choose Us' },
+            { id: 'how_it_works', label: 'How It Works / Simple Process' },
+            { id: 'services_section', label: 'Our Services Section' },
+            { id: 'cta_banner', label: 'Call to Action' },
+            { id: 'home_faqs', label: 'Home Page FAQs' }
         ];
     }
     return [
@@ -327,6 +337,33 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
             }
         };
     }
+
+    if (siteId === 'phcg') {
+        return {
+            why_choose_us: {
+                heading: "Why Choose Us",
+                subtitle: "Experience The Difference",
+                content: "We provide compassionate, personalized care...",
+                enabled: true,
+                items: [
+                    { title: 'Compassionate Care', desc: 'We treat your loved ones like family.' },
+                    { title: 'Experienced Staff', desc: 'Our caregivers are trained and certified.' },
+                    { title: '24/7 Support', desc: 'We are always here when you need us.' }
+                ]
+            },
+            how_it_works: {
+                heading: "How It Works",
+                subtitle: "Simple Steps to Care",
+                content: "Getting started is easy...",
+                enabled: true,
+                items: [
+                    { title: 'Initial Consultation', desc: 'We assess your needs.' },
+                    { title: 'Personalized Plan', desc: 'We create a care plan.' },
+                    { title: 'Care Begins', desc: 'We provide the care.' }
+                ]
+            }
+        };
+    }
     
     // Default BWEIC
     return {
@@ -370,6 +407,7 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
 
 export default function HomePageManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [content, setContent] = useState<HomePageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -432,7 +470,7 @@ export default function HomePageManager() {
         setError("");
         try {
             // For modern sites, wrap the content in 'sections' for the dynamic frontend loader
-            const modernSites = ['dmlabs', 'noel', 'nspc', 'aitasol'];
+            const modernSites = ['dmlabs', 'noel', 'nspc', 'aitasol', 'phcg'];
             let dataToSave: any = { ...content };
             
             if (modernSites.includes(currentSite.id)) {
@@ -474,7 +512,13 @@ export default function HomePageManager() {
     };
 
     const handleSeedData = async () => {
-        if (!confirm(`This will overwrite the current home page sections for "${currentSite.name}" with professional seed data. Continue?`)) return;
+        const isConfirmed = await confirm({
+            title: "Overwrite Sections",
+            message: `This will overwrite the current home page sections for "${currentSite.name}" with professional seed data. Continue?`,
+            variant: "danger",
+            confirmLabel: "Overwrite"
+        });
+        if (!isConfirmed) return;
         setSaving(true);
         setError("");
         setSuccessMsg("");
@@ -561,7 +605,7 @@ export default function HomePageManager() {
                         </p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
-                        {['dmlabs', 'noel', 'aitasol'].includes(currentSite.id) && (
+                        {['dmlabs', 'noel', 'aitasol', 'phcg'].includes(currentSite.id) && (
                             <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                                 🌱 Seed Default Data
                             </Button>
@@ -632,7 +676,7 @@ export default function HomePageManager() {
                                             )}
 
                                             {/* Optional Subtitle */}
-                                            {['coreFoundations', 'howItWorks', 'testimonials', 'who_we_are', 'services', 'destinations', 'process'].includes(config.id) && (
+                                            {['coreFoundations', 'howItWorks', 'testimonials', 'who_we_are', 'services', 'destinations', 'process', 'why_choose_us', 'how_it_works'].includes(config.id) && (
                                                 <div>
                                                     <Label>Subtitle</Label>
                                                     <Input
@@ -686,6 +730,56 @@ export default function HomePageManager() {
                                                 </div>
                                             )}
 
+                                             {(config.id === 'services_section' || config.id === 'cta_banner' || config.id === 'home_faqs') && currentSite.id === 'phcg' && (
+                                                 <div className="space-y-4 mt-4">
+                                                     <div>
+                                                         <Label>Tagline / Subtitle</Label>
+                                                         <Input
+                                                             type="text"
+                                                             value={(section as any).subtitle || ""}
+                                                             onChange={(e) => handleSectionChange(config.id, "subtitle" as any, e.target.value)}
+                                                         />
+                                                     </div>
+                                                     <div>
+                                                         <Label>Title</Label>
+                                                         <Input
+                                                             type="text"
+                                                             value={(section as any).title || ""}
+                                                             onChange={(e) => handleSectionChange(config.id, "title" as any, e.target.value)}
+                                                         />
+                                                     </div>
+                                                     <div>
+                                                         <Label>Description</Label>
+                                                         <textarea
+                                                             className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                             rows={3}
+                                                             value={(section as any).description || ""}
+                                                             onChange={(e) => handleSectionChange(config.id, "description" as any, e.target.value)}
+                                                         />
+                                                     </div>
+                                                     {config.id === 'cta_banner' && (
+                                                         <div className="grid grid-cols-2 gap-4">
+                                                             <div>
+                                                                 <Label>Button Text</Label>
+                                                                 <Input
+                                                                     type="text"
+                                                                     value={(section as any).button_text || ""}
+                                                                     onChange={(e) => handleSectionChange(config.id, "button_text" as any, e.target.value)}
+                                                                 />
+                                                             </div>
+                                                             <div>
+                                                                 <Label>Button Link</Label>
+                                                                 <Input
+                                                                     type="text"
+                                                                     value={(section as any).button_link || ""}
+                                                                     onChange={(e) => handleSectionChange(config.id, "button_link" as any, e.target.value)}
+                                                                 />
+                                                             </div>
+                                                         </div>
+                                                     )}
+                                                 </div>
+                                             )}
+
                                             {config.id === 'cta' && currentSite.id === 'aitasol' && (
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                     <div className="col-span-2">
@@ -717,7 +811,7 @@ export default function HomePageManager() {
                                             )}
 
                                             {/* Plain-text description for these section types */}
-                                            {['services', 'destinations', 'testimonials', 'process'].includes(config.id) && (
+                                            {['services', 'destinations', 'testimonials', 'process', 'why_choose_us', 'how_it_works'].includes(config.id) && (
                                                 <div>
                                                     <Label>Description</Label>
                                                     <textarea
@@ -904,7 +998,7 @@ export default function HomePageManager() {
                                             )}
 
                                             {/* ITEMS EDITOR BLOCKS */}
-                                            {['coreFoundations', 'howItWorks', 'testimonials', 'mindfulness', 'pricing', 'trusted_by', 'stats', 'process'].includes(config.id) && (
+                                            {['coreFoundations', 'howItWorks', 'testimonials', 'mindfulness', 'pricing', 'trusted_by', 'stats', 'process', 'why_choose_us', 'how_it_works'].includes(config.id) && (
                                                 <div className="mt-4">
                                                     <Label>List Items</Label>
                                                     <div className="space-y-3">
@@ -943,7 +1037,7 @@ export default function HomePageManager() {
                                                                     </div>
                                                                 )}
 
-                                                                {config.id === 'howItWorks' && (
+                                                                {(config.id === 'howItWorks' || config.id === 'how_it_works' || config.id === 'why_choose_us') && (
                                                                     <div className="grid grid-cols-1 gap-4">
                                                                         <div><Label className="text-xs mb-1">Title</Label><Input value={item.title || ''} onChange={(e) => updateItem(config.id, idx, 'title', e.target.value)} /></div>
                                                                         <div><Label className="text-xs mb-1">Description</Label><textarea className="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" rows={2} value={item.desc || ''} onChange={(e) => updateItem(config.id, idx, 'desc', e.target.value)} /></div>

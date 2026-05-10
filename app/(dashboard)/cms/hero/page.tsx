@@ -10,6 +10,7 @@ import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
+import { useDialog } from "@/context/DialogContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -55,6 +56,7 @@ interface HeroSlide {
 
 export default function HeroManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [slides, setSlides] = useState<HeroSlide[]>([]);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -137,7 +139,13 @@ export default function HeroManager() {
 
     // Function to migrate external images to Firebase
     const migrateImages = async () => {
-        if (!confirm("This will download all 'framerusercontent' images and re-upload them to your own storage settings. Continue?")) return;
+        const isConfirmed = await confirm({
+            title: "Migrate Images",
+            message: "This will download all 'framerusercontent' images and re-upload them to your own storage settings. Continue?",
+            variant: "primary",
+            confirmLabel: "Migrate"
+        });
+        if (!isConfirmed) return;
 
         setMigrating(true);
         setError("");
@@ -210,8 +218,14 @@ export default function HeroManager() {
         ));
     };
 
-    const removeSlide = (id: string) => {
-        if (confirm("Are you sure you want to delete this slide?")) {
+    const removeSlide = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Slide",
+            message: "Are you sure you want to delete this slide?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+        if (isConfirmed) {
             setSlides(slides.filter(s => s.id !== id));
         }
     };
@@ -276,7 +290,7 @@ export default function HeroManager() {
                 subtitle: 'Professional PSW and nursing services tailored to your needs in the comfort of home.',
                 cta: 'View Services',
                 link: '/services',
-                imageUrl: 'https://images.unsplash.com/photo-1576765608870-67b5e2ef2db0?q=80&w=1920&h=1080&fit=crop',
+                imageUrl: 'https://storage.googleapis.com/nspc-web.firebasestorage.app/phcg/senior_care_1.png',
                 isActive: true
             },
             {
@@ -285,12 +299,30 @@ export default function HeroManager() {
                 subtitle: 'Our team of RNs and RPNs provide expert medical care right at your doorstep.',
                 cta: 'Book Consultation',
                 link: '/#appointment',
-                imageUrl: 'https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1920&h=1080&fit=crop',
+                imageUrl: 'https://storage.googleapis.com/nspc-web.firebasestorage.app/phcg/senior_care_2.png',
+                isActive: true
+            },
+            {
+                id: 'ph3-' + Date.now(),
+                title: 'Quality Care You Can Trust',
+                subtitle: 'Dedicated professionals providing personalized support for seniors.',
+                cta: 'Contact Us',
+                link: '/contact',
+                imageUrl: 'https://storage.googleapis.com/nspc-web.firebasestorage.app/phcg/senior_care_3.png',
+                isActive: true
+            },
+            {
+                id: 'ph4-' + Date.now(),
+                title: 'Supporting Independent Living',
+                subtitle: 'Helping seniors maintain independence and quality of life at home.',
+                cta: 'Learn More',
+                link: '/about',
+                imageUrl: 'https://storage.googleapis.com/nspc-web.firebasestorage.app/phcg/senior_care_4.png',
                 isActive: true
             }
         ];
         setSlides(phcgSlides);
-        setSuccessMsg("PHCG Hero content seeded! Remember to click Save Changes.");
+        setSuccessMsg("PHCG Hero content seeded with Firebase images! Remember to click Save Changes.");
     };
 
     const handleDragEnd = (event: DragEndEvent) => {

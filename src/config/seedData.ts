@@ -1317,6 +1317,49 @@ export const SEED_DATA: any = {
                     secondaryButton: "Book Consultation",
                     imageUrl: "https://images.unsplash.com/photo-1576765608870-67b5e2ef2db0?q=80&w=1920&h=1080&fit=crop",
                     enabled: true
+                },
+                why_choose_us: {
+                    subtitle: "Why Choose Us",
+                    title: "Why Choose Home Care Guru Inc.",
+                    description: "We are dedicated to providing exceptional care that respects the dignity and individuality of every senior we serve. Our holistic approach ensures not just health, but happiness.",
+                    items: [
+                        { title: "Compassionate & Experienced Caregivers", desc: "Our team consists of certified professionals who lead with empathy and expertise.", icon: "Heart" },
+                        { title: "Expert In-Home Care Tailored to You", desc: "Medical and personal support delivered right in the comfort of your own home.", icon: "ShieldCheck" },
+                        { title: "Personalized Care Plans", desc: "We create custom roadmaps for health and wellness unique to every individual.", icon: "ClipboardCheck" },
+                        { title: "Engagement & Family Support", desc: "We keep families involved and informed, building a circle of trust and care.", icon: "Users" }
+                    ],
+                    enabled: true
+                },
+                how_it_works: {
+                    subtitle: "Simple Process",
+                    title: "How to Get Started with Our Care Services",
+                    items: [
+                        { title: "Schedule a Consultation", desc: "Reach out to us via phone or our online form to set up an initial discovery call.", number: "01" },
+                        { title: "Personalized Care Assessment", desc: "Our nursing experts visit you to understand the specific needs and medical requirements.", number: "02" },
+                        { title: "Choose the Right Care Plan", desc: "We present a tailored care strategy that aligns with your family's preferences and budget.", number: "03" },
+                        { title: "Get Matched with a Caregiver", desc: "We introduce you to a professional caregiver who is the perfect fit for your personality and needs.", number: "04" }
+                    ],
+                    image: "https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=1000",
+                    enabled: true
+                },
+                services_section: {
+                    subtitle: "Our Services",
+                    title: "Our Care & Support Services",
+                    description: "Providing complete, personalized nursing care in the comfort of your home. We focus on dignity, safety, and health.",
+                    enabled: true
+                },
+                cta_banner: {
+                    title: "Get a Free Care Assessment Today!",
+                    description: "Let's discuss your loved one's needs and create a personalized care plan tailored just for them. Our experts are ready to help.",
+                    button_text: "Get Free Assessment",
+                    button_link: "/#appointment",
+                    enabled: true
+                },
+                home_faqs: {
+                    subtitle: "Common Questions",
+                    title: "Frequently Asked Questions",
+                    description: "Find answers to common questions about our services and process.",
+                    enabled: true
                 }
             }
         },
