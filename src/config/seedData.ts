@@ -1306,6 +1306,82 @@ export const SEED_DATA: any = {
         }
     },
     phcg: {
+        about: {
+            title: "About Us",
+            slug: "about",
+            sections: {
+                hero: {
+                    heading: "About Us",
+                    subtitle: "Dedicated to Excellence in Care",
+                    images: [{ url: "https://storage.googleapis.com/nspc-web.firebasestorage.app/phcg/senior_care_1.png", alt: "About Us" }],
+                    enabled: true
+                },
+                journey: {
+                    heading: "Our Journey",
+                    content: "<p>Home Care Guru Inc. was founded with a singular vision: to redefine senior care in Ontario. What started as a small team of passionate nurses has grown into a leading provider of holistic home care, serving hundreds of families with unwavering commitment.</p>",
+                    images: [{ url: "https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=1000", alt: "Our Journey" }],
+                    enabled: true
+                },
+                mission: {
+                    heading: "Our Mission",
+                    content: "<p>Our mission is to empower seniors to age with dignity and independence in the comfort of their own homes. We provide medical expertise combined with genuine human connection, ensuring that every patient feels seen, heard, and valued.</p>",
+                    images: [{ url: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1000", alt: "Our Mission" }],
+                    enabled: true
+                },
+                vision: {
+                    heading: "Our Vision",
+                    content: "<p>We envision a future where high-quality healthcare is accessible to every senior in their home. By integrating technology with personalized nursing, we aim to be the gold standard of home care services in Canada.</p>",
+                    images: [{ url: "https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=1000", alt: "Our Vision" }],
+                    enabled: true
+                },
+                team: {
+                    heading: "Our Expert Team",
+                    content: "<p>Our team consists of Registered Nurses (RNs), Registered Practical Nurses (RPNs), and Personal Support Workers (PSWs) who are fully vetted, insured, and committed to your well-being.</p>",
+                    images: [{ url: "https://storage.googleapis.com/nspc-web.firebasestorage.app/phcg/senior_care_3.png", alt: "Our Expert Team" }],
+                    enabled: true
+                },
+                join: {
+                    heading: "Join Home Care Guru Team",
+                    content: "<p>Become part of a mission-driven organization that values your skills and dedication.</p>",
+                    enabled: true
+                }
+            }
+        },
+        reviews: {
+            seo: {
+                title: "Client Testimonials | Private Home Care Guru",
+                description: "Read what our clients and their families say about our compassionate home care services."
+            },
+            items: [
+                {
+                    id: "t1",
+                    author: "Sarah M.",
+                    role: "Daughter of Client",
+                    text: "The nurses from Private Home Care Guru were an absolute blessing to our family. They treated my mother with such dignity and respect during her recovery. I highly recommend their services to anyone looking for reliable home care.",
+                    rating: 5,
+                    date: new Date().toLocaleDateString(),
+                    isActive: true
+                },
+                {
+                    id: "t2",
+                    author: "James T.",
+                    role: "Client",
+                    text: "After my surgery, I needed daily assistance. The PSWs were punctual, professional, and incredibly kind. They made a difficult time much easier to manage.",
+                    rating: 5,
+                    date: new Date().toLocaleDateString(),
+                    isActive: true
+                },
+                {
+                    id: "t3",
+                    author: "Eleanor P.",
+                    role: "Spouse of Client",
+                    text: "Finding trustworthy care for my husband was stressful until we found Home Care Guru. Their personalized approach and 24/7 support gave us the peace of mind we desperately needed.",
+                    rating: 5,
+                    date: new Date().toLocaleDateString(),
+                    isActive: true
+                }
+            ]
+        },
         home: {
             title: 'Private Home Care Guru',
             sections: {

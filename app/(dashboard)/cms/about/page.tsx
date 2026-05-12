@@ -14,6 +14,7 @@ import { Eye, EyeOff, ChevronDown, ChevronUp, Trash2, Search } from 'lucide-reac
 import { useSearchParams } from 'next/navigation';
 import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
+import { ConfirmationDialog } from "@/components/ui/modal/ConfirmationDialog";
 
 interface AboutSection extends SectionContent {
     enabled?: boolean;
@@ -52,6 +53,16 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'hero', label: 'Hero Section' },
             { id: 'mission', label: 'Mission & Vision' },
             { id: 'values', label: 'Core Values' }
+        ];
+    }
+    if (siteId === 'phcg') {
+        return [
+            { id: 'hero', label: 'Hero Section' },
+            { id: 'journey', label: 'Our Journey Section' },
+            { id: 'mission', label: 'Our Mission Section' },
+            { id: 'vision', label: 'Our Vision Section' },
+            { id: 'team', label: 'Expert Team Section' },
+            { id: 'join', label: 'Join Our Team Section' }
         ];
     }
     // Fallback BWEIC config
@@ -182,6 +193,45 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
             }
         };
     }
+    if (siteId === 'phcg') {
+        return {
+            hero: {
+                heading: "About Us",
+                subtitle: "Dedicated to Excellence in Care",
+                images: [{ url: "https://storage.googleapis.com/nspc-web.firebasestorage.app/phcg/senior_care_1.png", alt: "About Us" }],
+                enabled: true
+            },
+            journey: {
+                heading: "Our Journey",
+                content: "<p>Home Care Guru Inc. was founded with a singular vision: to redefine senior care in Ontario. What started as a small team of passionate nurses has grown into a leading provider of holistic home care, serving hundreds of families with unwavering commitment.</p>",
+                images: [{ url: "https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=1000", alt: "Our Journey" }],
+                enabled: true
+            },
+            mission: {
+                heading: "Our Mission",
+                content: "<p>Our mission is to empower seniors to age with dignity and independence in the comfort of their own homes. We provide medical expertise combined with genuine human connection, ensuring that every patient feels seen, heard, and valued.</p>",
+                images: [{ url: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1000", alt: "Our Mission" }],
+                enabled: true
+            },
+            vision: {
+                heading: "Our Vision",
+                content: "<p>We envision a future where high-quality healthcare is accessible to every senior in their home. By integrating technology with personalized nursing, we aim to be the gold standard of home care services in Canada.</p>",
+                images: [{ url: "https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?q=80&w=1000", alt: "Our Vision" }],
+                enabled: true
+            },
+            team: {
+                heading: "Our Expert Team",
+                content: "<p>Our team consists of Registered Nurses (RNs), Registered Practical Nurses (RPNs), and Personal Support Workers (PSWs) who are fully vetted, insured, and committed to your well-being.</p>",
+                images: [{ url: "https://storage.googleapis.com/nspc-web.firebasestorage.app/phcg/senior_care_3.png", alt: "Our Expert Team" }],
+                enabled: true
+            },
+            join: {
+                heading: "Join Home Care Guru Team",
+                content: "<p>Become part of a mission-driven organization that values your skills and dedication.</p>",
+                enabled: true
+            }
+        };
+    }
     
     // Default BWEIC fallback
     return {
@@ -208,6 +258,7 @@ export default function AboutPageManager() {
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
+    const [showSeedConfirm, setShowSeedConfirm] = useState(false);
 
     const sectionsConfig = getSectionsConfig(currentSite.id);
     const defaultContentForSite = getDefaultContent(currentSite.id);
@@ -273,7 +324,7 @@ export default function AboutPageManager() {
     };
 
     const handleSeedData = async () => {
-        if (!confirm(`Initialize "${currentSite.name}" About Page with professional seed data?`)) return;
+        setShowSeedConfirm(false);
         setSaving(true);
         try {
             const seed = (SEED_DATA as any)[currentSite.id]?.about;
@@ -344,8 +395,8 @@ export default function AboutPageManager() {
                         </p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
-                        {['dmlabs', 'noel', 'aitasol'].includes(currentSite.id) && (
-                            <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                        {['dmlabs', 'noel', 'aitasol', 'phcg'].includes(currentSite.id) && (
+                            <Button variant="outline" onClick={() => setShowSeedConfirm(true)} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                                 🌱 Seed Default Data
                             </Button>
                         )}
@@ -593,6 +644,18 @@ export default function AboutPageManager() {
                     })}
                 </div>
             </div>
+
+            <ConfirmationDialog
+                isOpen={showSeedConfirm}
+                onClose={() => setShowSeedConfirm(false)}
+                onConfirm={handleSeedData}
+                title="Seed Default Data"
+                message={`Are you sure you want to initialize the "${currentSite.name}" About Page with professional seed data? This will overwrite your current unsaved changes.`}
+                confirmLabel="Yes, Seed Data"
+                cancelLabel="Cancel"
+                variant="primary"
+                loading={saving}
+            />
         </>
     );
 }

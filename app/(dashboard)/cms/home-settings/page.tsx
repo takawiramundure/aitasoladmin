@@ -79,6 +79,7 @@ const getSectionsConfig = (siteId: string) => {
             { id: 'why_choose_us', label: 'Why Choose Us' },
             { id: 'how_it_works', label: 'How It Works / Simple Process' },
             { id: 'services_section', label: 'Our Services Section' },
+            { id: 'testimonials_section', label: 'Testimonials' },
             { id: 'cta_banner', label: 'Call to Action' },
             { id: 'home_faqs', label: 'Home Page FAQs' }
         ];
@@ -361,6 +362,12 @@ const getDefaultContent = (siteId: string): Record<string, SectionContent> => {
                     { title: 'Personalized Plan', desc: 'We create a care plan.' },
                     { title: 'Care Begins', desc: 'We provide the care.' }
                 ]
+            },
+            testimonials_section: {
+                heading: "What Our Clients Say",
+                subtitle: "Testimonials",
+                content: "Hear from families we've helped.",
+                enabled: true
             }
         };
     }
