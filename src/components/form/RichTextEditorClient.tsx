@@ -29,9 +29,11 @@ const quillStyles = `
     word-break: break-word;
     overflow-wrap: break-word;
   }
-  .ql-editor img {
+  .ql-editor img, .ql-editor iframe, .ql-editor video {
     max-width: 100%;
     height: auto;
+    aspect-ratio: 16 / 9;
+    border-radius: 12px;
   }
   .ql-toolbar {
     border-top-left-radius: 8px;
@@ -63,7 +65,7 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
                 ['blockquote'],
                 [{ 'list': 'ordered' }, { 'list': 'bullet' }],
                 [{ 'align': [] }],
-                ['link', 'image', 'clean']
+                ['link', 'image', 'video', 'clean']
             ],
             handlers: {
                 image: imageHandler
@@ -73,7 +75,7 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
 
     const formats = [
         'header', 'bold', 'italic', 'underline', 'strike',
-        'blockquote', 'list', 'align', 'link', 'image'
+        'blockquote', 'list', 'align', 'link', 'image', 'video'
     ];
 
     const handleMediaSelect = (url: string) => {

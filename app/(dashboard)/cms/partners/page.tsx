@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/modal";
 import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
 import MediaLibrary from "@/components/common/MediaLibrary";
+import { useDialog } from "@/context/DialogContext";
 import {
     PencilIcon,
     TrashBinIcon,
@@ -30,6 +31,7 @@ interface Partner {
 
 export default function PartnerManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [partners, setPartners] = useState<Partner[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -198,7 +200,14 @@ export default function PartnerManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this partner?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete Partner",
+            message: "Are you sure you want to delete this partner? This action cannot be undone.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (!isConfirmed) return;
 
         try {
             await FirestoreService.deletePartner(currentSite.id, id);

@@ -9,6 +9,7 @@ import Alert from "@/components/ui/alert/Alert";
 import { Modal } from "@/components/ui/modal";
 import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
+import { useDialog } from "@/context/DialogContext";
 import MediaLibrary from "@/components/common/MediaLibrary";
 import {
     PencilIcon,
@@ -28,6 +29,7 @@ interface Video {
 
 export default function VideoManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [videos, setVideos] = useState<Video[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -98,7 +100,14 @@ export default function VideoManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this video?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete Video",
+            message: "Are you sure you want to delete this video?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (!isConfirmed) return;
 
         try {
             await FirestoreService.deleteVideo(currentSite.id, id);

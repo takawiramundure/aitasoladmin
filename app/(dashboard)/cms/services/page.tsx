@@ -14,8 +14,8 @@ import { CSS } from "@dnd-kit/utilities";
 import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { SEED_DATA } from "@/config/seedData";
 import { GridIcon } from "@/icons";
-import { Search, PlusIcon, Trash2Icon, GlobeIcon, LayoutIcon } from 'lucide-react';
 import SEOEditor from "@/components/form/SEOEditor";
+import { useDialog } from "@/context/DialogContext";
 
 interface ServiceItem {
     id: string;
@@ -53,6 +53,7 @@ function SortableServiceItem({ id, children, dragHandle }: { id: string; childre
 
 export default function ServicesManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [services, setServices] = useState<ServiceItem[]>([]);
     const [seo, setSeo] = useState<any>({});
     const [hero, setHero] = useState<any>({ heading: "", content: "" });
@@ -138,8 +139,15 @@ export default function ServicesManager() {
         setServices(services.map(s => s.id === id ? { ...s, [field]: value } : s));
     };
 
-    const removeService = (id: string) => {
-        if (confirm("Delete this service?")) {
+    const removeService = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Service",
+            message: "Are you sure you want to delete this service? You will need to save changes to apply this permanently.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setServices(services.filter(s => s.id !== id));
         }
     };
@@ -156,13 +164,20 @@ export default function ServicesManager() {
     };
 
     const handleSeedData = async () => {
-        const siteSeed = SEED_DATA[currentSite.id];
+        const siteSeed = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
         if (!siteSeed || !siteSeed.services) {
             setError("No seed data found for this site.");
             return;
         }
 
-        if (!confirm(`This will replace current services with seed data. Continue?`)) return;
+        const isConfirmed = await confirm({
+            title: "Restore Defaults",
+            message: "This will replace current services with seed data. Continue?",
+            variant: "warning",
+            confirmLabel: "Restore Defaults"
+        });
+
+        if (!isConfirmed) return;
 
         const seedArray = Array.isArray(siteSeed.services) ? siteSeed.services : (siteSeed.services.services || []);
         setServices(seedArray.map((s: any, idx: number) => ({ ...s, id: s.id || `seed-${idx}-${Date.now()}` })));

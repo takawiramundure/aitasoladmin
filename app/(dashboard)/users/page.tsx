@@ -14,6 +14,7 @@ import { initializeApp, deleteApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { EyeIcon, PencilIcon, XIcon, AlertTriangleIcon } from "lucide-react";
 import { SITES } from "@/config/sites";
+import { useDialog } from "@/context/DialogContext";
 
 interface User {
     id: string;
@@ -33,6 +34,7 @@ const permissions = [
 ];
 
 export default function UserManagement() {
+    const { confirm, alert: dialogAlert } = useDialog();
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
     const { user: currentUser, profile, impersonate, isImpersonating, stopImpersonation } = useAuth();
@@ -116,20 +118,32 @@ export default function UserManagement() {
 
     const handleSaveUser = async () => {
         if (!editUser && (!newUserEmail || !newUserPassword)) {
-            alert("Email and Password are required for new users.");
+            await dialogAlert({
+                title: "Validation Error",
+                message: "Email and Password are required for new users.",
+                variant: "warning"
+            });
             return;
         }
 
         // Security check for Editors creating users
         if (profile?.role === 'editor') {
             if (newUserRole === 'super_admin') {
-                alert("Editors cannot create Super Admins.");
+                await dialogAlert({
+                    title: "Access Denied",
+                    message: "Editors cannot create Super Admins.",
+                    variant: "danger"
+                });
                 return;
             }
             // Ensure they are not assigning sites they don't have access to
             const illegalSites = selectedSites.filter(siteId => !profile.allowedSites?.includes(siteId));
             if (illegalSites.length > 0) {
-                alert("You cannot assign access to sites you do not manage.");
+                await dialogAlert({
+                    title: "Permission Error",
+                    message: "You cannot assign access to sites you do not manage.",
+                    variant: "warning"
+                });
                 return;
             }
         }
@@ -142,7 +156,11 @@ export default function UserManagement() {
                     role: newUserRole,
                     allowedSites: selectedSites
                 }, { merge: true });
-                alert("User updated successfully");
+                await dialogAlert({
+                    title: "Success",
+                    message: "User updated successfully",
+                    variant: "success"
+                });
             } else {
                 // CREATE new
                 const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
@@ -159,7 +177,11 @@ export default function UserManagement() {
                     createdAt: new Date().toISOString(),
                     pending: false
                 });
-                alert(`User created! Password: ${newUserPassword}`);
+                await dialogAlert({
+                    title: "User Created",
+                    message: `User created successfully! Password: ${newUserPassword}`,
+                    variant: "success"
+                });
             }
 
             setIsModalOpen(false);
@@ -167,9 +189,17 @@ export default function UserManagement() {
         } catch (e: any) {
             console.error(e);
             if (e.code === 'auth/email-already-in-use') {
-                alert("This email is already registered.");
+                await dialogAlert({
+                    title: "Registration Error",
+                    message: "This email is already registered.",
+                    variant: "danger"
+                });
             } else {
-                alert("Operation failed: " + e.message);
+                await dialogAlert({
+                    title: "Operation Failed",
+                    message: "Operation failed: " + e.message,
+                    variant: "danger"
+                });
             }
         } finally {
             setCreating(false);
@@ -177,14 +207,30 @@ export default function UserManagement() {
     };
 
     const handleDeleteUser = async (userId: string, email: string) => {
-        if (confirm(`Are you sure you want to delete user ${email}? This will revoke their access.`)) {
+        const isConfirmed = await confirm({
+            title: "Delete User",
+            message: `Are you sure you want to delete user ${email}? This will revoke their access permanently.`,
+            variant: "danger",
+            confirmLabel: "Delete User"
+        });
+
+        if (isConfirmed) {
             try {
                 const { deleteDoc, doc } = await import("firebase/firestore");
                 await deleteDoc(doc(db, "users", userId));
                 loadUsers();
+                await dialogAlert({
+                    title: "User Deleted",
+                    message: "The user has been successfully removed.",
+                    variant: "success"
+                });
             } catch (error) {
                 console.error("Error deleting user:", error);
-                alert("Failed to delete user.");
+                await dialogAlert({
+                    title: "Delete Error",
+                    message: "Failed to delete user. Please try again.",
+                    variant: "danger"
+                });
             }
         }
     };

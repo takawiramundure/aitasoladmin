@@ -14,7 +14,7 @@ import { Eye, EyeOff, ChevronDown, ChevronUp, Trash2, Search } from 'lucide-reac
 import { useSearchParams } from 'next/navigation';
 import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
-import { ConfirmationDialog } from "@/components/ui/modal/ConfirmationDialog";
+import { useDialog } from "@/context/DialogContext";
 
 interface AboutSection extends SectionContent {
     enabled?: boolean;
@@ -258,7 +258,7 @@ export default function AboutPageManager() {
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-    const [showSeedConfirm, setShowSeedConfirm] = useState(false);
+    const { confirm } = useDialog();
 
     const sectionsConfig = getSectionsConfig(currentSite.id);
     const defaultContentForSite = getDefaultContent(currentSite.id);
@@ -324,7 +324,14 @@ export default function AboutPageManager() {
     };
 
     const handleSeedData = async () => {
-        setShowSeedConfirm(false);
+        const isConfirmed = await confirm({
+            title: "Seed About Page",
+            message: `Are you sure you want to initialize the "${currentSite.name}" About Page with professional seed data? This will overwrite your current settings.`,
+            variant: "warning",
+            confirmLabel: "Seed Data"
+        });
+
+        if (!isConfirmed) return;
         setSaving(true);
         try {
             const seed = (SEED_DATA as any)[currentSite.id]?.about;
@@ -396,7 +403,7 @@ export default function AboutPageManager() {
                     </div>
                     <div className="flex gap-3 flex-wrap">
                         {['dmlabs', 'noel', 'aitasol', 'phcg'].includes(currentSite.id) && (
-                            <Button variant="outline" onClick={() => setShowSeedConfirm(true)} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                            <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                                 🌱 Seed Default Data
                             </Button>
                         )}
@@ -645,17 +652,6 @@ export default function AboutPageManager() {
                 </div>
             </div>
 
-            <ConfirmationDialog
-                isOpen={showSeedConfirm}
-                onClose={() => setShowSeedConfirm(false)}
-                onConfirm={handleSeedData}
-                title="Seed Default Data"
-                message={`Are you sure you want to initialize the "${currentSite.name}" About Page with professional seed data? This will overwrite your current unsaved changes.`}
-                confirmLabel="Yes, Seed Data"
-                cancelLabel="Cancel"
-                variant="primary"
-                loading={saving}
-            />
         </>
     );
 }

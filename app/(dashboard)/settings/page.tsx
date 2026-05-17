@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import PageMeta from "@/components/common/PageMeta";
 import { FirestoreService } from "@/services/firestore";
+import { useDialog } from "@/context/DialogContext";
 
 export default function SystemSettings() {
+    const { confirm } = useDialog();
     const [settings, setSettings] = useState<any>({});
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -40,6 +42,18 @@ export default function SystemSettings() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // If maintenance mode is being enabled, ask for confirmation
+        if (settings.globalMaintenanceMode) {
+            const isConfirmed = await confirm({
+                title: "Enable Global Maintenance",
+                message: "This will put ALL sites in maintenance mode immediately. Are you sure you want to continue?",
+                variant: "danger",
+                confirmLabel: "Enable Global Maintenance"
+            });
+            if (!isConfirmed) return;
+        }
+
         setSaving(true);
         setMessage({ type: "", text: "" });
         try {

@@ -8,6 +8,7 @@ import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
+import { useDialog } from "@/context/DialogContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -42,6 +43,7 @@ function SortableReviewItem({ id, children }: { id: string; children: React.Reac
 
 export default function ReviewsManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [content, setContent] = useState<any>(null);
     const [reviews, setReviews] = useState<ReviewItem[]>([]);
     const [loading, setLoading] = useState(false);
@@ -97,7 +99,14 @@ export default function ReviewsManager() {
             return;
         }
 
-        if (!confirm(`This will overwrite the current reviews list for "${currentSite.name}" with ${defaultReviews.length} seed reviews. Continue?`)) return;
+        const isConfirmed = await confirm({
+            title: "Seed Reviews",
+            message: `This will overwrite the current reviews list for "${currentSite.name}" with ${defaultReviews.length} seed reviews. Continue?`,
+            variant: "warning",
+            confirmLabel: "Seed Reviews"
+        });
+        
+        if (!isConfirmed) return;
         
         setSaving(true);
         setError("");
@@ -164,8 +173,15 @@ export default function ReviewsManager() {
         setReviews(reviews.map(r => r.id === id ? { ...r, [field]: value } : r));
     };
 
-    const removeReview = (id: string) => {
-        if (confirm("Delete this review?")) {
+    const removeReview = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Review",
+            message: "Are you sure you want to delete this review?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setReviews(reviews.filter(r => r.id !== id));
         }
     };

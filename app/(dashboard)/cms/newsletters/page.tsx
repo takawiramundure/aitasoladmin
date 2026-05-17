@@ -13,6 +13,7 @@ import MediaPickerModal from "@/components/common/MediaPickerModal";
 import MediaLibrary from "@/components/common/MediaLibrary";
 import { Modal } from "@/components/ui/modal";
 import RichTextEditor from "@/components/form/RichTextEditor";
+import { useDialog } from "@/context/DialogContext";
 
 interface Article {
     id: string;
@@ -29,6 +30,7 @@ interface Article {
 
 export default function NewslettersManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [activeTab, setActiveTab] = useState<'pdfs' | 'news'>('pdfs');
     
     // PDF Newsletters State
@@ -121,8 +123,15 @@ export default function NewslettersManager() {
         setNewsletters(newNewsletters);
     };
 
-    const deleteNewsletter = (index: number) => {
-        if (confirm("Are you sure you want to delete this newsletter?")) {
+    const deleteNewsletter = async (index: number) => {
+        const isConfirmed = await confirm({
+            title: "Delete Newsletter",
+            message: "Are you sure you want to delete this newsletter? This cannot be undone.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setNewsletters(newsletters.filter((_, i) => i !== index));
         }
     };
@@ -163,7 +172,14 @@ export default function NewslettersManager() {
     };
 
     const handleDeleteArticle = async (id: string) => {
-        if (!confirm("Delete this article?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete News Article",
+            message: "Are you sure you want to delete this news item? This action cannot be undone.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (!isConfirmed) return;
         try {
             await FirestoreService.deleteArticle(currentSite.id, id);
             setArticles(articles.filter(a => a.id !== id));
@@ -173,7 +189,14 @@ export default function NewslettersManager() {
     };
 
     const seedNews = async () => {
-        if (!confirm("This will add the authentic Recent News items. Continue?")) return;
+        const isConfirmed = await confirm({
+            title: "Seed News Articles",
+            message: "This will add the authentic Recent News items. Continue?",
+            variant: "warning",
+            confirmLabel: "Seed News"
+        });
+
+        if (!isConfirmed) return;
         const fallbackArticles = [
             {
                 title: "KMFW Featured on The Observer News",
@@ -253,8 +276,15 @@ export default function NewslettersManager() {
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-gray-700 dark:text-gray-200">Quarterly PDF Releases</h3>
                             <div className="flex gap-3">
-                                <Button variant="outline" onClick={() => {
-                                    if (!confirm("Seed authentic KMFW newsletters?")) return;
+                                <Button variant="outline" onClick={async () => {
+                                    const isConfirmed = await confirm({
+                                        title: "Seed Newsletters",
+                                        message: "Seed authentic KMFW newsletters? This will add them to your current list.",
+                                        variant: "warning",
+                                        confirmLabel: "Seed PDFs"
+                                    });
+
+                                    if (!isConfirmed) return;
                                     const samples = [
                                         { id: 's1', title: "Summer Newsletter 2024", pdfUrl: "/newsletters/Summer-2024.pdf", date: "Summer 2024", isActive: true },
                                         { id: 's2', title: "Fall Newsletter 2024", pdfUrl: "/newsletters/Fall-2024.pdf", date: "Fall 2024", isActive: true },

@@ -14,8 +14,8 @@ import { CSS } from "@dnd-kit/utilities";
 import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { SEED_DATA } from "@/config/seedData";
 import { GridIcon } from "@/icons";
-import { Search } from 'lucide-react';
 import SEOEditor from "@/components/form/SEOEditor";
+import { useDialog } from "@/context/DialogContext";
 
 interface ServiceItem {
     id: string;
@@ -64,6 +64,7 @@ function SortableServiceItem({ id, children, dragHandle }: { id: string; childre
 
 export default function ServicesManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [content, setContent] = useState<ServicesPageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -125,7 +126,14 @@ export default function ServicesManager() {
             return;
         }
 
-        if (!confirm(`This will overwrite the current services list for "${currentSite.name}" with ${defaultServices.length} seed services. Continue?`)) return;
+        const isConfirmed = await confirm({
+            title: "Seed Services Data",
+            message: `This will overwrite the current services list for "${currentSite.name}" with ${defaultServices.length} seed services. This cannot be undone.`,
+            variant: "warning",
+            confirmLabel: "Seed Data"
+        });
+        
+        if (!isConfirmed) return;
         
         setSaving(true);
         setError("");
@@ -196,8 +204,15 @@ export default function ServicesManager() {
         setServices(services.map(s => s.id === id ? { ...s, [field]: value } : s));
     };
 
-    const removeService = (id: string) => {
-        if (confirm("Delete this service?")) {
+    const removeService = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Service",
+            message: "Are you sure you want to delete this service? You will need to save changes to apply this permanently.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setServices(services.filter(s => s.id !== id));
         }
     };

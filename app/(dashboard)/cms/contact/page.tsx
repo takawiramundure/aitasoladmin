@@ -11,6 +11,7 @@ import Alert from "@/components/ui/alert/Alert";
 import { Eye, EyeOff, Save, Clock, MapPin, Trash2, Plus, Mail, Search } from 'lucide-react';
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import SEOEditor from "@/components/form/SEOEditor";
+import { useDialog } from "@/context/DialogContext";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -133,6 +134,7 @@ const AITASOL_CONTACT_DEFAULT = {
 
 export default function ContactPageManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -293,9 +295,15 @@ export default function ContactPageManager() {
                         <p className="text-sm text-gray-500">Update the address, hours, and hero section of the Contact Us page.</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={() => { 
+                        <Button variant="outline" onClick={async () => { 
                             const siteDefaults = currentSite.id === 'dmlabs' ? DMLABS_CONTACT_DEFAULT : (currentSite.id === 'aitasol' ? AITASOL_CONTACT_DEFAULT : DEFAULT_DATA);
-                            if (window.confirm("Reset all content and form fields to agency defaults?")) setContent(siteDefaults); 
+                            const isConfirmed = await confirm({
+                                title: "Reset to Defaults",
+                                message: "Are you sure you want to reset all content and form fields to agency defaults? This cannot be undone.",
+                                variant: "warning",
+                                confirmLabel: "Reset Content"
+                            });
+                            if (isConfirmed) setContent(siteDefaults); 
                         }}>
                             Reset to Defaults
                         </Button>

@@ -11,6 +11,7 @@ import { Modal } from "@/components/ui/modal";
 import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
 import MediaLibrary from "@/components/common/MediaLibrary";
+import { useDialog } from "@/context/DialogContext";
 import {
     PencilIcon,
     TrashBinIcon,
@@ -73,6 +74,7 @@ const TEST_PRODUCTS: Partial<Product>[] = [
 
 export default function ProductManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -164,7 +166,14 @@ export default function ProductManager() {
     };
 
     const handleDelete = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this product?")) return;
+        const isConfirmed = await confirm({
+            title: "Delete Product",
+            message: "Are you sure you want to delete this product? This action cannot be undone.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (!isConfirmed) return;
 
         try {
             await FirestoreService.deleteProduct(currentSite.id, id);

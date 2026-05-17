@@ -14,6 +14,7 @@ import { useDialog } from "@/context/DialogContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { useDialog } from "@/context/DialogContext";
 import { storage } from "@/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { SEED_DATA } from "@/config/seedData";
@@ -140,11 +141,12 @@ export default function HeroManager() {
     // Function to migrate external images to Firebase
     const migrateImages = async () => {
         const isConfirmed = await confirm({
-            title: "Migrate Images",
-            message: "This will download all 'framerusercontent' images and re-upload them to your own storage settings. Continue?",
-            variant: "primary",
+            title: "Migrate External Images",
+            message: "This will download all \'framerusercontent\' images and re-upload them to your own storage settings. Continue?",
+            variant: "warning",
             confirmLabel: "Migrate"
         });
+
         if (!isConfirmed) return;
 
         setMigrating(true);
@@ -225,6 +227,7 @@ export default function HeroManager() {
             variant: "danger",
             confirmLabel: "Delete"
         });
+
         if (isConfirmed) {
             setSlides(slides.filter(s => s.id !== id));
         }

@@ -8,10 +8,12 @@ import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
+import { useDialog } from "@/context/DialogContext";
 import { SEED_DATA } from "@/config/seedData";
 
 export default function CrisisManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [resources, setResources] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -73,15 +75,29 @@ export default function CrisisManager() {
         setResources(newResources);
     };
 
-    const deleteResource = (index: number) => {
-        if (confirm("Are you sure you want to delete this item?")) {
+    const deleteResource = async (index: number) => {
+        const isConfirmed = await confirm({
+            title: "Delete Crisis Card",
+            message: "Are you sure you want to delete this resource card?",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             const newResources = resources.filter((_, i) => i !== index);
             setResources(newResources);
         }
     };
 
-    const seedDefaults = () => {
-        if (confirm("This will overwrite current items with default data. Are you sure?")) {
+    const seedDefaults = async () => {
+        const isConfirmed = await confirm({
+            title: "Restore Default Crisis Data",
+            message: "This will overwrite your current items with default data. Are you sure?",
+            variant: "warning",
+            confirmLabel: "Restore Defaults"
+        });
+
+        if (isConfirmed) {
             const siteData = SEED_DATA[currentSite.id as keyof typeof SEED_DATA];
             // @ts-ignore
             if (siteData?.crisis_support?.resources) {

@@ -11,6 +11,7 @@ import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import { Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import SEOEditor from "@/components/form/SEOEditor";
+import { useDialog } from "@/context/DialogContext";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -68,6 +69,7 @@ const DEFAULT_DATA = {
 
 export default function StrategicPlanManager() {
     const { currentSite } = useSite();
+    const { confirm } = useDialog();
     const [content, setContent] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -139,7 +141,18 @@ export default function StrategicPlanManager() {
                         <p className="text-sm text-gray-500">Manage the KMFW Strategic Plan page content and visibility.</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={() => { if (window.confirm("Reset to defaults?")) setContent(DEFAULT_DATA); }}>
+                        <Button 
+                            variant="outline" 
+                            onClick={async () => { 
+                                const isConfirmed = await confirm({
+                                    title: "Reset Defaults",
+                                    message: "Are you sure you want to reset to defaults? This will overwrite your current changes and cannot be undone.",
+                                    variant: "warning",
+                                    confirmLabel: "Reset Data"
+                                });
+                                if (isConfirmed) setContent(DEFAULT_DATA); 
+                            }}
+                        >
                             Reset Defaults & Seed
                         </Button>
                         <Button onClick={handleSave} disabled={saving}>

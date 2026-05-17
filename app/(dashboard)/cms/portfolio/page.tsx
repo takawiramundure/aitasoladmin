@@ -13,8 +13,8 @@ import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } 
 import { CSS } from "@dnd-kit/utilities";
 import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { SEED_DATA } from "@/config/seedData";
-import { Search } from 'lucide-react';
 import SEOEditor from "@/components/form/SEOEditor";
+import { useDialog } from "@/context/DialogContext";
 
 interface ProjectItem {
     id: string;
@@ -59,6 +59,7 @@ function SortableProjectItem({ id, children }: { id: string; children: React.Rea
 
 export default function PortfolioManager() {
     const { currentSite } = useSite();
+    const { confirm, alert: dialogAlert } = useDialog();
     const [content, setContent] = useState<PortfolioPageContent | null>(null);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -106,12 +107,14 @@ export default function PortfolioManager() {
         const projectsData = (siteSeed as any)?.projects;
         const defaultProjects = projectsData?.projects || projectsData || [];
         
-        if (!Array.isArray(defaultProjects) || defaultProjects.length === 0) {
-            setError("No seed data found for this site.");
-            return;
-        }
-
-        if (!confirm(`This will overwrite the current project list for "${currentSite.name}" with ${defaultProjects.length} seed projects. Continue?`)) return;
+        const isConfirmed = await confirm({
+            title: "Seed Portfolio Data",
+            message: `This will overwrite the current project list for "${currentSite.name}" with ${defaultProjects.length} seed projects. This cannot be undone.`,
+            variant: "warning",
+            confirmLabel: "Seed Data"
+        });
+        
+        if (!isConfirmed) return;
         
         setSaving(true);
         setError("");
@@ -178,8 +181,15 @@ export default function PortfolioManager() {
         setProjects(projects.map(p => p.id === id ? { ...p, [field]: value } : p));
     };
 
-    const removeProject = (id: string) => {
-        if (confirm("Delete this project from portfolio?")) {
+    const removeProject = async (id: string) => {
+        const isConfirmed = await confirm({
+            title: "Delete Project",
+            message: "Are you sure you want to delete this project from your portfolio? You will need to save changes to apply this permanently.",
+            variant: "danger",
+            confirmLabel: "Delete"
+        });
+
+        if (isConfirmed) {
             setProjects(projects.filter(p => p.id !== id));
         }
     };
