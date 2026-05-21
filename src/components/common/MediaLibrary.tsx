@@ -150,8 +150,8 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
         const files = Array.from(event.target.files || []);
         if (files.length === 0) return;
 
-        if (files.length > 5) {
-            setError("You can only upload a maximum of 5 files at a time.");
+        if (files.length > 10) {
+            setError("You can only upload a maximum of 10 files at a time.");
             event.target.value = "";
             return;
         }
@@ -422,8 +422,8 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
                                                     if (selectedUrls.includes(item.url)) {
                                                         setSelectedUrls(selectedUrls.filter(u => u !== item.url));
                                                     } else {
-                                                        if (selectedUrls.length >= 5) {
-                                                            setError("You can only select up to 5 images at a time.");
+                                                        if (selectedUrls.length >= 10) {
+                                                            setError("You can only select up to 10 images at a time.");
                                                             setTimeout(() => setError(""), 3000);
                                                             return;
                                                         }

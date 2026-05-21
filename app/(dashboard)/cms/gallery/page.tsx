@@ -8,6 +8,7 @@ import { useSite } from "@/context/SiteContext";
 import Button from "@/components/ui/button/Button";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
+import MediaLibrary from "@/components/common/MediaLibrary";
 import { Images, Plus, Trash2, GripVertical, ExternalLink } from 'lucide-react';
 import { useDialog } from "@/context/DialogContext";
 
@@ -35,6 +36,7 @@ export default function GalleryManager() {
     const [addingImage, setAddingImage] = useState(false);
     const [newImageUrl, setNewImageUrl] = useState('');
     const [categories, setCategories] = useState<string[]>([]);
+    const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
     useEffect(() => {
         loadData();
@@ -73,16 +75,19 @@ export default function GalleryManager() {
         }
     };
 
-    const addImage = (url: string) => {
-        if (!url) return;
-        const newImg: GalleryImage = {
+    const addMultipleImages = (urls: string[]) => {
+        const cleanUrls = urls.map(u => u.trim()).filter(Boolean);
+        if (cleanUrls.length === 0) return;
+        
+        const newImgs: GalleryImage[] = cleanUrls.map((url, i) => ({
             id: generateId(),
             url,
             caption: '',
             category: '',
-            order: images.length,
-        };
-        setImages(prev => [...prev, newImg]);
+            order: images.length + i,
+        }));
+        
+        setImages(prev => [...prev, ...newImgs]);
         setNewImageUrl('');
         setAddingImage(false);
     };
@@ -187,18 +192,46 @@ export default function GalleryManager() {
                     </div>
 
                     {addingImage && (
-                        <div className="pt-4 border-t border-gray-100 dark:border-gray-700">
-                            <p className="text-sm text-gray-500 mb-4">
-                                Select an image from the Media Library or paste a URL. It will be appended to the gallery.
+                        <div className="pt-4 border-t border-gray-100 dark:border-gray-700 space-y-4">
+                            <p className="text-sm text-gray-500">
+                                Select up to 10 images from the Media Library, or paste multiple image URLs (one per line, or comma-separated).
                             </p>
-                            <ImagePicker
-                                value={newImageUrl}
-                                onChange={setNewImageUrl}
-                                placeholder="Select or paste image URL..."
-                            />
-                            <div className="mt-4 flex gap-3">
-                                <Button onClick={() => addImage(newImageUrl)} disabled={!newImageUrl}>
-                                    Add to Gallery
+                            
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                                        Paste Image URL(s)
+                                    </label>
+                                    <textarea
+                                        rows={4}
+                                        value={newImageUrl}
+                                        onChange={(e) => setNewImageUrl(e.target.value)}
+                                        placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white font-mono"
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                                        Or Choose from Library
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsLibraryOpen(true)}
+                                        className="inline-flex items-center px-4 py-2.5 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-semibold rounded-lg border border-gray-300 dark:border-gray-600 transition-colors"
+                                    >
+                                        <Plus className="w-4 h-4 mr-2" />
+                                        Select from Media Library (Up to 10)
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mt-4 flex gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                <Button 
+                                    onClick={() => addMultipleImages(newImageUrl.split(/[\n,]+/))} 
+                                    disabled={!newImageUrl.trim()}
+                                >
+                                    Add Paste URL(s) to Gallery
                                 </Button>
                                 <button
                                     onClick={() => { setAddingImage(false); setNewImageUrl(''); }}
@@ -326,6 +359,13 @@ export default function GalleryManager() {
                     </Button>
                 </div>
             </div>
+
+            <MediaLibrary
+                isOpen={isLibraryOpen}
+                onClose={() => setIsLibraryOpen(false)}
+                multiSelect={true}
+                onSelectMultiple={addMultipleImages}
+            />
         </>
     );
 }
