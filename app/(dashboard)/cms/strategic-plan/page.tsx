@@ -67,6 +67,13 @@ const DEFAULT_DATA = {
     }
 };
 
+const STRATEGIC_PLAN_SECTIONS = [
+    { id: 'hero', label: 'Hero Section' },
+    { id: 'roadmap', label: 'Roadmap Section' },
+    { id: 'flyer', label: 'Strategic Plan Flyer (Full-Width Image)' },
+    { id: 'downloads', label: 'Downloads & Contact Cards' }
+];
+
 export default function StrategicPlanManager() {
     const { currentSite } = useSite();
     const { confirm } = useDialog();
@@ -76,6 +83,27 @@ export default function StrategicPlanManager() {
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
     const [expanded, setExpanded] = useState<Record<string, boolean>>({ hero: true, roadmap: true, flyer: false, downloads: false });
+
+    const moveSection = (index: number, direction: 'up' | 'down') => {
+        if (!content) return;
+        const currentOrder = content.sectionOrder || STRATEGIC_PLAN_SECTIONS.map(s => s.id);
+        const newOrder = [...currentOrder];
+        const swapIdx = direction === 'up' ? index - 1 : index + 1;
+        if (swapIdx < 0 || swapIdx >= newOrder.length) return;
+        [newOrder[index], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[index]];
+        set(['sectionOrder'], newOrder);
+    };
+
+    const currentOrder = content?.sectionOrder || STRATEGIC_PLAN_SECTIONS.map(s => s.id);
+    const fullOrder = [...currentOrder];
+    STRATEGIC_PLAN_SECTIONS.forEach(s => {
+        if (!fullOrder.includes(s.id)) {
+            fullOrder.push(s.id);
+        }
+    });
+    const sortedSections = fullOrder
+        .map(id => STRATEGIC_PLAN_SECTIONS.find(s => s.id === id))
+        .filter((s): s is typeof STRATEGIC_PLAN_SECTIONS[0] => !!s);
 
     useEffect(() => { loadContent(); }, [currentSite?.id]);
 
@@ -193,147 +221,180 @@ export default function StrategicPlanManager() {
                         </button>
                     </div>
 
-                    {/* HERO */}
-                    <Section id="hero" title="Hero Section" expanded={expanded.hero} onToggle={toggle}>
-                        <div className="grid gap-4">
-                            <div><Label>Subtitle (Tagline)</Label><Input value={content.hero.subtitle} onChange={e => set(['hero', 'subtitle'], e.target.value)} /></div>
-                            <div><Label>Main Title</Label><Input value={content.hero.title} onChange={e => set(['hero', 'title'], e.target.value)} /></div>
-                            <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl" rows={2} value={content.hero.description} onChange={e => set(['hero', 'description'], e.target.value)} /></div>
-                        </div>
-                    </Section>
-
-                    {/* ROADMAP */}
-                    <Section id="roadmap" title="Roadmap Section" expanded={expanded.roadmap} onToggle={toggle}>
-                        <div className="space-y-6">
-                            <div><Label>Section Title</Label><Input value={content.roadmap.title} onChange={e => set(['roadmap', 'title'], e.target.value)} /></div>
-
-                            <div>
-                                <Label>Intro Paragraphs</Label>
-                                <div className="space-y-2">
-                                    {content.roadmap.intro.map((para: string, i: number) => (
-                                        <div key={i} className="flex gap-2 items-start">
-                                            <textarea
-                                                className="w-full px-4 py-2 border rounded-xl text-sm"
-                                                rows={3}
-                                                value={para}
-                                                onChange={e => {
-                                                    const newIntro = [...content.roadmap.intro];
-                                                    newIntro[i] = e.target.value;
-                                                    set(['roadmap', 'intro'], newIntro);
-                                                }}
-                                            />
-                                            <button onClick={() => {
-                                                const newIntro = content.roadmap.intro.filter((_: any, idx: number) => idx !== i);
-                                                set(['roadmap', 'intro'], newIntro);
-                                            }} className="text-red-400 hover:text-red-600 mt-1 flex-shrink-0"><Trash2 size={16} /></button>
-                                        </div>
-                                    ))}
-                                    <Button variant="outline" size="sm" onClick={() => set(['roadmap', 'intro'], [...content.roadmap.intro, ''])}>
-                                        <Plus size={14} className="mr-1" /> Add Paragraph
-                                    </Button>
-                                </div>
-                            </div>
-
-                            <div>
-                                <Label>Strategic Pillars</Label>
-                                <div className="space-y-4 mt-2">
-                                    {content.roadmap.pillars.map((pillar: any, i: number) => (
-                                        <div key={i} className="p-4 border rounded-xl bg-gray-50/50">
-                                            <div className="flex justify-between mb-3">
-                                                <span className="text-xs font-bold uppercase text-gray-400">Pillar {i + 1}</span>
-                                                <button onClick={() => {
-                                                    const p = content.roadmap.pillars.filter((_: any, idx: number) => idx !== i);
-                                                    set(['roadmap', 'pillars'], p);
-                                                }} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
-                                            </div>
-                                            <div className="grid md:grid-cols-2 gap-4">
-                                                <div><Label>Title</Label><Input value={pillar.title} onChange={e => {
-                                                    const p = [...content.roadmap.pillars];
-                                                    p[i] = { ...p[i], title: e.target.value };
-                                                    set(['roadmap', 'pillars'], p);
-                                                }} /></div>
-                                                <div><Label>Icon (e.g. Target, Eye, CheckCircle)</Label><Input value={pillar.icon} onChange={e => {
-                                                    const p = [...content.roadmap.pillars];
-                                                    p[i] = { ...p[i], icon: e.target.value };
-                                                    set(['roadmap', 'pillars'], p);
-                                                }} /></div>
-                                                <div className="md:col-span-2"><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl text-sm" rows={3} value={pillar.desc} onChange={e => {
-                                                    const p = [...content.roadmap.pillars];
-                                                    p[i] = { ...p[i], desc: e.target.value };
-                                                    set(['roadmap', 'pillars'], p);
-                                                }} /></div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <Button variant="outline" size="sm" onClick={() => set(['roadmap', 'pillars'], [...content.roadmap.pillars, { icon: 'Star', color: 'bg-primary/10 text-primary', title: '', desc: '' }])}>
-                                        <Plus size={14} className="mr-1" /> Add Pillar
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    </Section>
-
-                    {/* FLYER / Full-Width Image */}
-                    <Section
-                        id="flyer"
-                        title="Strategic Plan Flyer (Full-Width Image)"
-                        expanded={expanded.flyer}
-                        onToggle={toggle}
-                        action={
-                            <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                                <span className="text-[10px] font-bold uppercase text-gray-400">{content.flyer.enabled ? 'Shown' : 'Hidden'}</span>
-                                <button onClick={() => set(['flyer', 'enabled'], !content.flyer.enabled)} className={`w-8 h-4 rounded-full relative transition-colors ${content.flyer.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
-                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.flyer.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                            </div>
-                        }
-                    >
-                        <div className="grid gap-4">
-                            <ImagePicker label="Flyer Image" value={content.flyer.image} onChange={url => set(['flyer', 'image'], url)} />
-                            <div><Label>Alt Text</Label><Input value={content.flyer.alt} onChange={e => set(['flyer', 'alt'], e.target.value)} /></div>
-                            {content.flyer.image && (
-                                <div className="rounded-xl overflow-hidden border border-gray-200">
-                                    <img src={content.flyer.image} alt={content.flyer.alt} className="w-full object-cover max-h-64" />
-                                </div>
+                    {sortedSections.map((config, index) => (
+                        <React.Fragment key={config.id}>
+                            {config.id === 'hero' && (
+                                <Section id="hero" title="Hero Section" expanded={expanded.hero} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection}>
+                                    <div className="grid gap-4">
+                                        <div><Label>Subtitle (Tagline)</Label><Input value={content.hero.subtitle} onChange={e => set(['hero', 'subtitle'], e.target.value)} /></div>
+                                        <div><Label>Main Title</Label><Input value={content.hero.title} onChange={e => set(['hero', 'title'], e.target.value)} /></div>
+                                        <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl" rows={2} value={content.hero.description} onChange={e => set(['hero', 'description'], e.target.value)} /></div>
+                                    </div>
+                                </Section>
                             )}
-                        </div>
-                    </Section>
 
-                    {/* DOWNLOADS */}
-                    <Section id="downloads" title="Downloads & Contact Cards" expanded={expanded.downloads} onToggle={toggle}>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="p-4 bg-gray-50 rounded-xl space-y-4">
-                                <h4 className="font-bold text-gray-700 text-sm uppercase tracking-wide">PDF Download Card</h4>
-                                <div><Label>Title</Label><Input value={content.downloads.pdf.title} onChange={e => set(['downloads', 'pdf', 'title'], e.target.value)} /></div>
-                                <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl text-sm" rows={3} value={content.downloads.pdf.description} onChange={e => set(['downloads', 'pdf', 'description'], e.target.value)} /></div>
-                                <div><Label>PDF URL</Label><Input value={content.downloads.pdf.link} onChange={e => set(['downloads', 'pdf', 'link'], e.target.value)} /></div>
-                            </div>
-                            <div className="p-4 bg-gray-50 rounded-xl space-y-4">
-                                <h4 className="font-bold text-gray-700 text-sm uppercase tracking-wide">Contact Card</h4>
-                                <div><Label>Title</Label><Input value={content.downloads.contact.title} onChange={e => set(['downloads', 'contact', 'title'], e.target.value)} /></div>
-                                <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl text-sm" rows={3} value={content.downloads.contact.description} onChange={e => set(['downloads', 'contact', 'description'], e.target.value)} /></div>
-                                <div><Label>Email</Label><Input value={content.downloads.contact.email} onChange={e => set(['downloads', 'contact', 'email'], e.target.value)} /></div>
-                            </div>
-                        </div>
-                    </Section>
+                            {config.id === 'roadmap' && (
+                                <Section id="roadmap" title="Roadmap Section" expanded={expanded.roadmap} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection}>
+                                    <div className="space-y-6">
+                                        <div><Label>Section Title</Label><Input value={content.roadmap.title} onChange={e => set(['roadmap', 'title'], e.target.value)} /></div>
+
+                                        <div>
+                                            <Label>Intro Paragraphs</Label>
+                                            <div className="space-y-2">
+                                                {content.roadmap.intro.map((para: string, i: number) => (
+                                                    <div key={i} className="flex gap-2 items-start">
+                                                        <textarea
+                                                            className="w-full px-4 py-2 border rounded-xl text-sm"
+                                                            rows={3}
+                                                            value={para}
+                                                            onChange={e => {
+                                                                const newIntro = [...content.roadmap.intro];
+                                                                newIntro[i] = e.target.value;
+                                                                set(['roadmap', 'intro'], newIntro);
+                                                            }}
+                                                        />
+                                                        <button onClick={() => {
+                                                            const newIntro = content.roadmap.intro.filter((_: any, idx: number) => idx !== i);
+                                                            set(['roadmap', 'intro'], newIntro);
+                                                        }} className="text-red-400 hover:text-red-600 mt-1 flex-shrink-0"><Trash2 size={16} /></button>
+                                                    </div>
+                                                ))}
+                                                <Button variant="outline" size="sm" onClick={() => set(['roadmap', 'intro'], [...content.roadmap.intro, ''])}>
+                                                    <Plus size={14} className="mr-1" /> Add Paragraph
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <Label>Strategic Pillars</Label>
+                                            <div className="space-y-4 mt-2">
+                                                {content.roadmap.pillars.map((pillar: any, i: number) => (
+                                                    <div key={i} className="p-4 border rounded-xl bg-gray-50/50">
+                                                        <div className="flex justify-between mb-3">
+                                                            <span className="text-xs font-bold uppercase text-gray-400">Pillar {i + 1}</span>
+                                                            <button onClick={() => {
+                                                                const p = content.roadmap.pillars.filter((_: any, idx: number) => idx !== i);
+                                                                set(['roadmap', 'pillars'], p);
+                                                            }} className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                                                        </div>
+                                                        <div className="grid md:grid-cols-2 gap-4">
+                                                            <div><Label>Title</Label><Input value={pillar.title} onChange={e => {
+                                                                const p = [...content.roadmap.pillars];
+                                                                p[i] = { ...p[i], title: e.target.value };
+                                                                set(['roadmap', 'pillars'], p);
+                                                            }} /></div>
+                                                            <div><Label>Icon (e.g. Target, Eye, CheckCircle)</Label><Input value={pillar.icon} onChange={e => {
+                                                                const p = [...content.roadmap.pillars];
+                                                                p[i] = { ...p[i], icon: e.target.value };
+                                                                set(['roadmap', 'pillars'], p);
+                                                            }} /></div>
+                                                            <div className="md:col-span-2"><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl text-sm" rows={3} value={pillar.desc} onChange={e => {
+                                                                const p = [...content.roadmap.pillars];
+                                                                p[i] = { ...p[i], desc: e.target.value };
+                                                                set(['roadmap', 'pillars'], p);
+                                                            }} /></div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <Button variant="outline" size="sm" onClick={() => set(['roadmap', 'pillars'], [...content.roadmap.pillars, { icon: 'Star', color: 'bg-primary/10 text-primary', title: '', desc: '' }])}>
+                                                    <Plus size={14} className="mr-1" /> Add Pillar
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Section>
+                            )}
+
+                            {config.id === 'flyer' && (
+                                <Section
+                                    id="flyer"
+                                    title="Strategic Plan Flyer (Full-Width Image)"
+                                    expanded={expanded.flyer}
+                                    onToggle={toggle}
+                                    index={index}
+                                    total={sortedSections.length}
+                                    onMove={moveSection}
+                                    action={
+                                        <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                                            <span className="text-[10px] font-bold uppercase text-gray-400">{content.flyer.enabled ? 'Shown' : 'Hidden'}</span>
+                                            <button onClick={() => set(['flyer', 'enabled'], !content.flyer.enabled)} className={`w-8 h-4 rounded-full relative transition-colors ${content.flyer.enabled ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.flyer.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                                            </button>
+                                        </div>
+                                    }
+                                >
+                                    <div className="grid gap-4">
+                                        <ImagePicker label="Flyer Image" value={content.flyer.image} onChange={url => set(['flyer', 'image'], url)} />
+                                        <div><Label>Alt Text</Label><Input value={content.flyer.alt} onChange={e => set(['flyer', 'alt'], e.target.value)} /></div>
+                                        {content.flyer.image && (
+                                            <div className="rounded-xl overflow-hidden border border-gray-200">
+                                                <img src={content.flyer.image} alt={content.flyer.alt} className="w-full object-cover max-h-64" />
+                                            </div>
+                                        )}
+                                    </div>
+                                </Section>
+                            )}
+
+                            {config.id === 'downloads' && (
+                                <Section id="downloads" title="Downloads & Contact Cards" expanded={expanded.downloads} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection}>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div className="p-4 bg-gray-50 rounded-xl space-y-4">
+                                            <h4 className="font-bold text-gray-700 text-sm uppercase tracking-wide">PDF Download Card</h4>
+                                            <div><Label>Title</Label><Input value={content.downloads.pdf.title} onChange={e => set(['downloads', 'pdf', 'title'], e.target.value)} /></div>
+                                            <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl text-sm" rows={3} value={content.downloads.pdf.description} onChange={e => set(['downloads', 'pdf', 'description'], e.target.value)} /></div>
+                                            <div><Label>PDF URL</Label><Input value={content.downloads.pdf.link} onChange={e => set(['downloads', 'pdf', 'link'], e.target.value)} /></div>
+                                        </div>
+                                        <div className="p-4 bg-gray-50 rounded-xl space-y-4">
+                                            <h4 className="font-bold text-gray-700 text-sm uppercase tracking-wide">Contact Card</h4>
+                                            <div><Label>Title</Label><Input value={content.downloads.contact.title} onChange={e => set(['downloads', 'contact', 'title'], e.target.value)} /></div>
+                                            <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl text-sm" rows={3} value={content.downloads.contact.description} onChange={e => set(['downloads', 'contact', 'description'], e.target.value)} /></div>
+                                            <div><Label>Email</Label><Input value={content.downloads.contact.email} onChange={e => set(['downloads', 'contact', 'email'], e.target.value)} /></div>
+                                        </div>
+                                    </div>
+                                </Section>
+                            )}
+                        </React.Fragment>
+                    ))}
                 </div>
             </div>
         </>
     );
 }
 
-function Section({ id, title, expanded, onToggle, action, children }: any) {
+function Section({ id, title, expanded, onToggle, action, children, index, total, onMove }: any) {
     return (
         <div className="border border-gray-100 rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors" onClick={() => onToggle(id)}>
                 <div className="flex items-center gap-4">
-                    <h3 className="font-bold text-gray-700">{title}</h3>
+                    {onMove && (
+                        <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                            <button
+                                type="button"
+                                disabled={index === 0}
+                                onClick={() => onMove(index, 'up')}
+                                className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
+                                title="Move Up"
+                            >
+                                <ChevronUp size={16} />
+                            </button>
+                            <button
+                                type="button"
+                                disabled={index === total - 1}
+                                onClick={() => onMove(index, 'down')}
+                                className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
+                                title="Move Down"
+                            >
+                                <ChevronDown size={16} />
+                            </button>
+                        </div>
+                    )}
+                    <h3 className="font-bold text-gray-700 dark:text-white">{title}</h3>
                     {action}
                 </div>
                 {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
             </div>
             {expanded && (
-                <div className="p-6 border-t border-gray-100">{children}</div>
+                <div className="p-6 border-t border-gray-100 dark:border-gray-800">{children}</div>
             )}
         </div>
     );

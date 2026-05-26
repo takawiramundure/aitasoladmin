@@ -18,6 +18,7 @@ import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { SEED_DATA } from "@/config/seedData";
 import { GridIcon } from "@/icons";
 import { useDialog } from "@/context/DialogContext";
+import { optimizeImage } from "@/utils/imageOptimizer";
 
 // ---- Sortable Item Component ----
 function SortableProgramItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -162,8 +163,10 @@ export default function ProgramsManager() {
 
         setUploading(programId);
         try {
-            const storageRef = ref(storage, `programs/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
+            const optimizedFile = await optimizeImage(file);
+            const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const storageRef = ref(storage, `programs/${Date.now()}_${cleanName}`);
+            const snapshot = await uploadBytes(storageRef, optimizedFile);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
             updateProgram(programId, 'imageUrl', downloadURL);

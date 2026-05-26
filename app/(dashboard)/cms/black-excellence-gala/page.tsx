@@ -11,12 +11,16 @@ import RichTextEditor from "@/components/form/RichTextEditor";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import LinkPicker from "@/components/form/LinkPicker";
+import FolderPicker from "@/components/form/FolderPicker";
 import { Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { nominees as defaultNominees, agenda as defaultAgenda, speakers as defaultSpeakers } from "@/data/fallbackNominees";
 import { useDialog } from "@/context/DialogContext";
 
 interface GalaSection extends SectionContent {
     enabled?: boolean;
+    useFolderMapping?: boolean;
+    folderPath?: string;
+    imagesLimit?: number;
     subheading?: string;
     subtitle?: string;
     date?: string;
@@ -49,14 +53,17 @@ const GALA_SECTIONS = [
     { id: 'hero', label: 'Gala Hero' },
     { id: 'mission', label: 'Gala Mission' },
     { id: 'speakers', label: 'Keynote & Panelists' },
+    { id: 'buffet', label: 'Gala Buffet (Dining)' },
     { id: 'agenda', label: 'Event Agenda' },
     { id: 'awards', label: 'Award Categories' },
     { id: 'nominees', label: 'Nominees Directory' },
     { id: 'winners', label: 'Award Winners (Post-Event)' },
     { id: 'nominations', label: 'Nominations CTA' },
     { id: 'sponsors', label: 'Sponsors' },
+    { id: 'networkingActivity', label: 'Professional Networking' },
     { id: 'network', label: 'Our Esteemed Network' },
     { id: 'testimonials', label: 'Testimonials' },
+    { id: 'galleryPictures', label: 'Gala Retrospective Gallery (Pictures)' },
     { id: 'finalCta', label: 'Final Call to Action' }
 ];
 
@@ -102,6 +109,29 @@ export default function GalaManager() {
                 // Merge defaults into existing data if fields are missing
                 const updatedSections: Record<string, GalaSection> = { ...data.sections as Record<string, GalaSection> };
                 
+                if (!updatedSections.buffet) {
+                    updatedSections.buffet = {
+                        heading: "Gourmet Halal Buffet",
+                        content: "Savour a premium selection of gourmet Halal dishes, thoughtfully curated to celebrate diverse flavours while honouring dietary requirements. An evening of fine dining and cultural richness that complements our celebration of excellence.",
+                        enabled: true
+                    };
+                }
+                if (!updatedSections.networkingActivity) {
+                    updatedSections.networkingActivity = {
+                        heading: "Professional Networking",
+                        content: "Connect with visionaries, leaders, and change-makers in a dedicated space designed to foster meaningful relationships. Whether you're an established professional or a rising leader, this is your opportunity to share ideas, find mentors, and explore collaborations within our vibrant community.",
+                        enabled: true
+                    };
+                }
+                if (!updatedSections.galleryPictures) {
+                    updatedSections.galleryPictures = {
+                        heading: "Gala Highlights",
+                        subtitle: "Relive the moments and memories of our inaugural celebration.",
+                        enabled: true,
+                        images: []
+                    };
+                }
+
                 if (updatedSections.mission) {
                     const mission = updatedSections.mission;
                     if (!mission.details || mission.details.length === 0) {
@@ -169,6 +199,30 @@ export default function GalaManager() {
                 initialSections.hero.buttonText2 = defaultHeroButtons.buttonText2;
                 initialSections.hero.link2 = defaultHeroButtons.link2;
                 
+                initialSections.buffet = {
+                    heading: "Gourmet Halal Buffet",
+                    content: "Savour a premium selection of gourmet Halal dishes, thoughtfully curated to celebrate diverse flavours while honouring dietary requirements. An evening of fine dining and cultural richness that complements our celebration of excellence.",
+                    enabled: true
+                };
+                initialSections.networkingActivity = {
+                    heading: "Professional Networking",
+                    content: "Connect with visionaries, leaders, and change-makers in a dedicated space designed to foster meaningful relationships. Whether you're an established professional or a rising leader, this is your opportunity to share ideas, find mentors, and explore collaborations within our vibrant community.",
+                    enabled: true
+                };
+                initialSections.galleryPictures = {
+                    heading: "Gala Highlights",
+                    subtitle: "Relive the moments and memories of our inaugural celebration.",
+                    enabled: true,
+                    images: [
+                        { url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800", alt: "Gala Dinner Setup" },
+                        { url: "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800", alt: "Keynote Presentation" },
+                        { url: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?q=80&w=800", alt: "Table Details and Centerpieces" },
+                        { url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=800", alt: "Professional Networking" },
+                        { url: "https://images.unsplash.com/photo-1519750157634-b6d493a0f77c?q=80&w=800", alt: "Awards Presentation Stage" },
+                        { url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800", alt: "Community Gathering and Celebrations" }
+                    ]
+                };
+
                 initialSections.network.networkPartners = defaultNetworkPartners;
                 initialSections.network.heading = "Our Esteemed Network";
                 
@@ -226,6 +280,19 @@ export default function GalaManager() {
 
     const toggleSection = (sectionId: string) => {
         setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
+    };
+
+    const moveSection = (index: number, direction: 'up' | 'down') => {
+        if (!content) return;
+        const currentOrder = content.sectionOrder || GALA_SECTIONS.map(s => s.id);
+        const newOrder = [...currentOrder];
+        const swapIdx = direction === 'up' ? index - 1 : index + 1;
+        if (swapIdx < 0 || swapIdx >= newOrder.length) return;
+        [newOrder[index], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[index]];
+        setContent({
+            ...content,
+            sectionOrder: newOrder
+        });
     };
 
     const seedGalaData = async () => {
@@ -295,6 +362,11 @@ export default function GalaManager() {
                     panelists: defaultSpeakers.panelists,
                     content: ""
                 } as any,
+                buffet: {
+                    heading: "Gourmet Halal Buffet",
+                    content: "Savour a premium selection of gourmet Halal dishes, thoughtfully curated to celebrate diverse flavours while honouring dietary requirements. An evening of fine dining and cultural richness that complements our celebration of excellence.",
+                    enabled: true
+                },
                 awards: {
                     heading: "Award Categories",
                     subtitle: "Celebrating the ongoing excellence across various domains. Here are the categories for our inaugural celebration.",
@@ -341,6 +413,11 @@ export default function GalaManager() {
                     enabled: true,
                     content: "" // Added to satisfy GalaSection interface
                 },
+                networkingActivity: {
+                    heading: "Professional Networking",
+                    content: "Connect with visionaries, leaders, and change-makers in a dedicated space designed to foster meaningful relationships. Whether you're an established professional or a rising leader, this is your opportunity to share ideas, find mentors, and explore collaborations within our vibrant community.",
+                    enabled: true
+                },
                 network: {
                     heading: "Our Esteemed Network",
                     enabled: true,
@@ -362,6 +439,20 @@ export default function GalaManager() {
                     ],
                     content: "", // Added to satisfy GalaSection interface
                     enabled: true // Added to satisfy GalaSection interface
+                },
+                galleryPictures: {
+                    heading: "Gala Highlights",
+                    subtitle: "Relive the moments and memories of our inaugural celebration.",
+                    images: [
+                        { url: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=800", alt: "Gala Dinner Setup" },
+                        { url: "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=800", alt: "Keynote Presentation" },
+                        { url: "https://images.unsplash.com/photo-1469371670807-013ccf25f16a?q=80&w=800", alt: "Table Details and Centerpieces" },
+                        { url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=800", alt: "Professional Networking" },
+                        { url: "https://images.unsplash.com/photo-1519750157634-b6d493a0f77c?q=80&w=800", alt: "Awards Presentation Stage" },
+                        { url: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800", alt: "Community Gathering and Celebrations" }
+                    ],
+                    enabled: true,
+                    content: ""
                 },
                 finalCta: {
                     heading: "Secure your *Legacy*",
@@ -400,24 +491,58 @@ export default function GalaManager() {
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
 
                 <div className="space-y-4">
-                    {GALA_SECTIONS.map((config) => {
-                        const section = (content?.sections[config.id] || { heading: config.label, enabled: true, content: '' }) as GalaSection;
-                        const isExpanded = expandedSections[config.id];
+                    {(() => {
+                        const currentOrder = content?.sectionOrder || GALA_SECTIONS.map(s => s.id);
+                        const fullOrder = [...currentOrder];
+                        GALA_SECTIONS.forEach(s => {
+                            if (!fullOrder.includes(s.id)) {
+                                fullOrder.push(s.id);
+                            }
+                        });
+                        const sortedSections = fullOrder
+                            .map(id => GALA_SECTIONS.find(s => s.id === id))
+                            .filter((s): s is typeof GALA_SECTIONS[0] => !!s);
 
-                        return (
-                            <div key={config.id} className="border border-gray-200 rounded-lg dark:border-gray-700 overflow-hidden">
-                                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 cursor-pointer" onClick={() => toggleSection(config.id)}>
-                                    <div className="flex items-center gap-3">
-                                        <button 
-                                            onClick={(e) => { e.stopPropagation(); handleSectionChange(config.id, 'enabled', !section.enabled); }}
-                                            className={`p-1 ${section.enabled ? 'text-green-500' : 'text-gray-400'}`}
-                                        >
-                                            {section.enabled ? <Eye size={18} /> : <EyeOff size={18} />}
-                                        </button>
-                                        <h3 className="font-bold text-gray-700 dark:text-white">{config.label}</h3>
+                        return sortedSections.map((config, index) => {
+                            const section = (content?.sections[config.id] || { heading: config.label, enabled: true, content: '' }) as GalaSection;
+                            const isExpanded = expandedSections[config.id];
+
+                            return (
+                                <div key={config.id} className="border border-gray-200 rounded-lg dark:border-gray-700 overflow-hidden">
+                                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 cursor-pointer" onClick={() => toggleSection(config.id)}>
+                                        <div className="flex items-center gap-3">
+                                            <button 
+                                                onClick={(e) => { e.stopPropagation(); handleSectionChange(config.id, 'enabled', !section.enabled); }}
+                                                className={`p-1 ${section.enabled ? 'text-green-500' : 'text-gray-400'}`}
+                                            >
+                                                {section.enabled ? <Eye size={18} /> : <EyeOff size={18} />}
+                                            </button>
+                                            
+                                            <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                                <button
+                                                    type="button"
+                                                    disabled={index === 0}
+                                                    onClick={() => moveSection(index, 'up')}
+                                                    className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                                    title="Move Up"
+                                                >
+                                                    <ChevronUp size={16} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    disabled={index === sortedSections.length - 1}
+                                                    onClick={() => moveSection(index, 'down')}
+                                                    className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                                    title="Move Down"
+                                                >
+                                                    <ChevronDown size={16} />
+                                                </button>
+                                            </div>
+
+                                            <h3 className="font-bold text-gray-700 dark:text-white">{config.label}</h3>
+                                        </div>
+                                        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                     </div>
-                                    {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                                </div>
 
                                 {isExpanded && (
                                     <div className="p-6 space-y-6 bg-white dark:bg-transparent border-t border-gray-100 dark:border-gray-800">
@@ -629,6 +754,20 @@ export default function GalaManager() {
                                             </div>
                                         )}
 
+                                        {config.id === 'buffet' && (
+                                            <div className="space-y-4">
+                                                <Label>Section Heading</Label>
+                                                <Input value={section.heading || ''} onChange={(e) => handleSectionChange('buffet', 'heading', e.target.value)} />
+                                                <Label>Buffet Description</Label>
+                                                <textarea 
+                                                    className="w-full p-3 rounded-lg border dark:bg-gray-800" 
+                                                    rows={4} 
+                                                    value={section.content || ''} 
+                                                    onChange={(e) => handleSectionChange('buffet', 'content', e.target.value)} 
+                                                />
+                                            </div>
+                                        )}
+
                                         {config.id === 'agenda' && (
                                             <div className="space-y-4">
                                                 <Label>Section Heading</Label><Input value={section.heading} onChange={(e) => handleSectionChange('agenda', 'heading', e.target.value)} />
@@ -718,6 +857,20 @@ export default function GalaManager() {
                                                         <Button variant="outline" size="sm" className="w-fit" onClick={() => handleSectionChange('sponsors', 'gold', [...(section.gold || []), {name: '', logo: ''}])}>+ Gold</Button>
                                                     </div>
                                                 </div>
+                                            </div>
+                                        )}
+
+                                        {config.id === 'networkingActivity' && (
+                                            <div className="space-y-4">
+                                                <Label>Section Heading</Label>
+                                                <Input value={section.heading || ''} onChange={(e) => handleSectionChange('networkingActivity', 'heading', e.target.value)} />
+                                                <Label>Networking Description</Label>
+                                                <textarea 
+                                                    className="w-full p-3 rounded-lg border dark:bg-gray-800" 
+                                                    rows={4} 
+                                                    value={section.content || ''} 
+                                                    onChange={(e) => handleSectionChange('networkingActivity', 'content', e.target.value)} 
+                                                />
                                             </div>
                                         )}
 
@@ -814,6 +967,127 @@ export default function GalaManager() {
                                                     </div>
                                                 ))}
                                                 <Button variant="outline" onClick={() => handleSectionChange('testimonials', 'items', [...(section.items || []), {quote: '', author: '', role: ''}])}>+ Testimonial</Button>
+                                            </div>
+                                        )}
+
+                                        {config.id === 'galleryPictures' && (
+                                            <div className="space-y-6">
+                                                <div className="grid gap-4 md:grid-cols-3">
+                                                    <div>
+                                                        <Label>Section Heading</Label>
+                                                        <Input value={section.heading || ''} onChange={(e) => handleSectionChange('galleryPictures', 'heading', e.target.value)} />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Section Subtitle</Label>
+                                                        <Input value={section.subtitle || ''} onChange={(e) => handleSectionChange('galleryPictures', 'subtitle', e.target.value)} />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Initial Display Limit</Label>
+                                                        <Input 
+                                                            type="number" 
+                                                            min={1} 
+                                                            value={section.imagesLimit !== undefined ? section.imagesLimit : ''} 
+                                                            onChange={(e) => {
+                                                                const val = parseInt(e.target.value, 10);
+                                                                handleSectionChange('galleryPictures', 'imagesLimit', isNaN(val) ? '' : val);
+                                                            }} 
+                                                            placeholder="Default is 12"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2 p-4 border rounded-xl bg-gray-50 dark:bg-gray-800/30">
+                                                    <Label>Gallery Image Mode</Label>
+                                                    <div className="flex gap-6 mt-1 mb-2">
+                                                        <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold">
+                                                            <input 
+                                                                type="radio" 
+                                                                name="gala-mapping-mode" 
+                                                                checked={!section.useFolderMapping}
+                                                                onChange={() => handleSectionChange('galleryPictures', 'useFolderMapping', false)}
+                                                                className="text-primary focus:ring-primary"
+                                                            />
+                                                            Manual Image Selection
+                                                        </label>
+                                                        <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold">
+                                                            <input 
+                                                                type="radio" 
+                                                                name="gala-mapping-mode" 
+                                                                checked={!!section.useFolderMapping}
+                                                                onChange={() => handleSectionChange('galleryPictures', 'useFolderMapping', true)}
+                                                                className="text-primary focus:ring-primary"
+                                                            />
+                                                            Link Folder from Media Library
+                                                        </label>
+                                                    </div>
+
+                                                    {section.useFolderMapping ? (
+                                                        <FolderPicker 
+                                                            value={section.folderPath || ""} 
+                                                            onChange={(val) => handleSectionChange('galleryPictures', 'folderPath', val)}
+                                                            helpText="Select or enter a folder path relative to the site root (e.g. 'gala'). The gallery will dynamically load all images uploaded inside this folder."
+                                                        />
+                                                    ) : null}
+                                                </div>
+                                                
+                                                {!section.useFolderMapping && (
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center justify-between">
+                                                            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-400">Gallery Images (Mosaic layout)</h4>
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm" 
+                                                                onClick={() => {
+                                                                    const newImages = [...(section.images || []), { url: '', alt: '' }];
+                                                                    handleSectionChange('galleryPictures', 'images', newImages);
+                                                                }}
+                                                            >
+                                                                <Plus size={16} className="mr-2" /> Add Image
+                                                            </Button>
+                                                        </div>
+                                                        
+                                                        <div className="grid gap-4 md:grid-cols-2">
+                                                            {(section.images || []).map((img, idx) => (
+                                                                <div key={idx} className="p-4 border rounded-xl bg-gray-50/50 relative space-y-4">
+                                                                    <button 
+                                                                        onClick={() => {
+                                                                            const newImages = (section.images || []).filter((_, i) => i !== idx);
+                                                                            handleSectionChange('galleryPictures', 'images', newImages);
+                                                                        }}
+                                                                        className="absolute top-2 right-2 text-red-500 hover:bg-red-50 p-1 rounded"
+                                                                    >
+                                                                        <Trash2 size={16} />
+                                                                    </button>
+                                                                    <div className="text-xs font-bold text-gray-400 mb-2">Image {idx + 1}</div>
+                                                                    
+                                                                    <div>
+                                                                        <Label>Select Image</Label>
+                                                                        <ImagePicker 
+                                                                            value={img.url} 
+                                                                            onChange={(url) => {
+                                                                                const newImages = [...(section.images || [])];
+                                                                                newImages[idx].url = url;
+                                                                                handleSectionChange('galleryPictures', 'images', newImages);
+                                                                            }} 
+                                                                        />
+                                                                    </div>
+                                                                    
+                                                                    <div>
+                                                                        <Label>Alt Text / Caption</Label>
+                                                                        <Input 
+                                                                            value={img.alt} 
+                                                                            onChange={(e) => {
+                                                                                const newImages = [...(section.images || [])];
+                                                                                newImages[idx].alt = e.target.value;
+                                                                                handleSectionChange('galleryPictures', 'images', newImages);
+                                                                            }} 
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
 
@@ -1122,7 +1396,8 @@ export default function GalaManager() {
                                 )}
                             </div>
                         );
-                    })}
+                    })
+                })()}
                 </div>
             </div>
         </>

@@ -14,8 +14,10 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { availableRoutes } from "@/utils/routes";
 import { GET_DEFAULT_NAV, GET_SITE_DEFAULTS } from "@/config/navigationDefaults";
 import { useDialog } from "@/context/DialogContext";
+import { optimizeImage } from "@/utils/imageOptimizer";
 
 import RichTextEditor from "@/components/form/RichTextEditor";
+import LinkPicker from "@/components/form/LinkPicker";
 
 type TabType = 'general' | 'navigation' | 'theme' | 'seo' | 'scripts' | 'payments' | 'retell';
 
@@ -177,8 +179,10 @@ export default function SiteSettingsManager() {
 
         setUploading(true);
         try {
-            const storageRef = ref(storage, `${currentSite.id}/branding/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
+            const optimizedFile = await optimizeImage(file);
+            const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const storageRef = ref(storage, `${currentSite.id}/branding/${Date.now()}_${cleanName}`);
+            const snapshot = await uploadBytes(storageRef, optimizedFile);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
             updateBranding('logo', downloadURL);
@@ -195,8 +199,10 @@ export default function SiteSettingsManager() {
         if (!settings || !currentSite) return;
         setIsAiLogoUploading(true);
         try {
-            const storageRef = ref(storage, `${currentSite.id}/ai-chat/logo/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
+            const optimizedFile = await optimizeImage(file);
+            const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const storageRef = ref(storage, `${currentSite.id}/ai-chat/logo/${Date.now()}_${cleanName}`);
+            const snapshot = await uploadBytes(storageRef, optimizedFile);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
             setSettings({
@@ -238,9 +244,12 @@ export default function SiteSettingsManager() {
             setIsCropperOpen(false);
             
             const fileName = `logo_${Date.now()}.png`;
-            const logoRef = ref(storage, `sites/${currentSite.id}/branding/${fileName}`);
+            const file = new File([croppedBlob], fileName, { type: croppedBlob.type });
+            const optimizedFile = await optimizeImage(file);
+            const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const logoRef = ref(storage, `sites/${currentSite.id}/branding/${cleanName}`);
             
-            await uploadBytes(logoRef, croppedBlob);
+            await uploadBytes(logoRef, optimizedFile);
             const downloadURL = await getDownloadURL(logoRef);
             
             updateBranding('logo', downloadURL);
@@ -767,13 +776,18 @@ export default function SiteSettingsManager() {
                                                             placeholder="Name"
                                                             className="px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                         />
-                                                        <input
-                                                            type="text"
+                                                        <LinkPicker
                                                             value={item.path}
-                                                            onChange={(e) => updateNavItem(item.id, { path: e.target.value })}
+                                                            onChange={(val) => {
+                                                                // Automatically set isExternal if it is a custom external link
+                                                                const isExternalLink = val !== "" && !val.startsWith('/') && !val.startsWith('#');
+                                                                updateNavItem(item.id, { 
+                                                                    path: val,
+                                                                    isExternal: isExternalLink
+                                                                });
+                                                            }}
                                                             placeholder="/path"
-                                                            list="route-options"
-                                                            className="px-3 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                            siteId={currentSite.id}
                                                         />
                                                         <div className="flex items-center gap-4">
                                                             <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
@@ -820,14 +834,14 @@ export default function SiteSettingsManager() {
                                                                         placeholder="Sub Item Name"
                                                                         className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                                     />
-                                                                    <input
-                                                                        type="text"
-                                                                        value={subItem.path}
-                                                                        onChange={(e) => updateSubItem(item.id, subItem.id, { path: e.target.value })}
-                                                                        placeholder="/path"
-                                                                        list="route-options"
-                                                                        className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                                                    />
+                                                                    <div className="flex-1">
+                                                                        <LinkPicker
+                                                                            value={subItem.path}
+                                                                            onChange={(val) => updateSubItem(item.id, subItem.id, { path: val })}
+                                                                            placeholder="/path"
+                                                                            siteId={currentSite.id}
+                                                                        />
+                                                                    </div>
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => updateSubItem(item.id, subItem.id, { isHidden: !subItem.isHidden })}

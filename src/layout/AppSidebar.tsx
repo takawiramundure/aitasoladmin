@@ -24,6 +24,8 @@ type NavItem = {
   icon: React.ReactNode;
   path?: string;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  pro?: boolean;
+  new?: boolean;
 };
 
 const AppSidebar: React.FC = () => {
@@ -155,6 +157,7 @@ const AppSidebar: React.FC = () => {
             { name: "Meet Our Team", path: "/cms/meet-our-team" },
             { name: "Strategic Plan", path: "/cms/strategic-plan" },
             { name: "Founder's Message", path: "/cms/founders-message" },
+            { name: "Celebrating 5 Years", path: "/cms/celebrating-5-years" },
             { name: "Contact Us", path: "/cms/contact" },
             { name: "Inbound Messages", path: "/cms/messages" },
           ],
@@ -539,10 +542,10 @@ const AppSidebar: React.FC = () => {
   );
   const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // const isActive = (path: string) => location.pathname === path;
+  // const isActive = (path: string) => location === path;
   const isActive = useCallback(
-    (path: string) => location.pathname === path,
-    [location.pathname]
+    (path: string) => location === path,
+    [location]
   );
 
   useEffect(() => {
@@ -573,7 +576,7 @@ const AppSidebar: React.FC = () => {
     if (!submenuMatched) {
       setOpenSubmenu(null);
     }
-  }, [location.pathname, navItems, isActive]);
+  }, [location, navItems, isActive]);
 
   useEffect(() => {
     if (openSubmenu !== null) {

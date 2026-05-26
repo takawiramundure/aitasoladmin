@@ -20,6 +20,7 @@ import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
 import { Search } from 'lucide-react';
 import { useDialog } from "@/context/DialogContext";
+import { optimizeImage } from "@/utils/imageOptimizer";
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -137,8 +138,10 @@ export default function ResourcesManager() {
 
         setUploading(resourceId);
         try {
-            const storageRef = ref(storage, `resources/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
+            const optimizedFile = await optimizeImage(file);
+            const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const storageRef = ref(storage, `resources/${Date.now()}_${cleanName}`);
+            const snapshot = await uploadBytes(storageRef, optimizedFile);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
             updateResource(resourceId, 'imageUrl', downloadURL);

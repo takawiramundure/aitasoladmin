@@ -194,6 +194,30 @@ export default function OurStoryManager() {
         setExpandedSections(prev => ({ ...prev, [sectionId]: !prev[sectionId] }));
     };
 
+    const moveSection = (index: number, direction: 'up' | 'down') => {
+        if (!content) return;
+        const currentOrder = content.sectionOrder || sectionsConfig.map(s => s.id);
+        const newOrder = [...currentOrder];
+        const swapIdx = direction === 'up' ? index - 1 : index + 1;
+        if (swapIdx < 0 || swapIdx >= newOrder.length) return;
+        [newOrder[index], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[index]];
+        setContent({
+            ...content,
+            sectionOrder: newOrder
+        });
+    };
+
+    const currentOrder = content?.sectionOrder || sectionsConfig.map(s => s.id);
+    const fullOrder = [...currentOrder];
+    sectionsConfig.forEach(s => {
+        if (!fullOrder.includes(s.id)) {
+            fullOrder.push(s.id);
+        }
+    });
+    const sortedSections = fullOrder
+        .map(id => sectionsConfig.find(s => s.id === id))
+        .filter((s): s is typeof sectionsConfig[0] => !!s);
+
     if (loading) return <div className="p-6">Loading...</div>;
 
     return (
@@ -227,7 +251,7 @@ export default function OurStoryManager() {
                 {successMsg && <div className="mb-4"><Alert variant="success" title="Success" message={successMsg} /></div>}
 
                 <div className="space-y-4">
-                    {sectionsConfig.map((config) => {
+                    {sortedSections.map((config, index) => {
                         const section = content?.sections[config.id] || { heading: config.label, content: "", enabled: true };
                         const isExpanded = expandedSections[config.id];
 
@@ -245,6 +269,29 @@ export default function OurStoryManager() {
                                         >
                                             {section.enabled ? <Eye size={20} /> : <EyeOff size={20} />}
                                         </button>
+
+                                        {/* Reorder Buttons */}
+                                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                                type="button"
+                                                disabled={index === 0}
+                                                onClick={() => moveSection(index, 'up')}
+                                                className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
+                                                title="Move Up"
+                                            >
+                                                <ChevronUp size={16} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                disabled={index === sortedSections.length - 1}
+                                                onClick={() => moveSection(index, 'down')}
+                                                className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
+                                                title="Move Down"
+                                            >
+                                                <ChevronDown size={16} />
+                                            </button>
+                                        </div>
+
                                         <h3 className={`font-medium ${section.enabled ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
                                             {config.label}
                                         </h3>

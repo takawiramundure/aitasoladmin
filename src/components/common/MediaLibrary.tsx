@@ -8,6 +8,7 @@ import { FolderIcon, TrashBinIcon, ArrowUpIcon, PlusIcon, VideoIcon, CopyIcon, P
 import { useSite } from "@/context/SiteContext";
 import { Modal } from "../ui/modal";
 import { useDialog } from "@/context/DialogContext";
+import { optimizeImage } from "@/utils/imageOptimizer";
 
 interface MediaLibraryProps {
     isOpen: boolean;
@@ -41,6 +42,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
     const [items, setItems] = useState<FileItem[]>([]);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState("");
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
     const [selectedUrls, setSelectedUrls] = useState<string[]>([]);
@@ -160,16 +162,25 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
         setError("");
         try {
             await Promise.all(files.map(async (file) => {
-                if (isVideo(file.name)) {
+                // If it is an image, compress/optimize it first if over 3MB
+                let fileToUpload = file;
+                const isImage = file.type.startsWith("image/") && !file.type.includes("svg") && !file.type.includes("gif");
+                
+                if (isImage && file.size > 3 * 1024 * 1024) {
+                    setUploadStatus(`Optimizing ${file.name}...`);
+                    fileToUpload = await optimizeImage(file);
+                }
+
+                if (isVideo(fileToUpload.name)) {
                     // Size Check (30MB Limit)
                     const MAX_SIZE = 30 * 1024 * 1024;
-                    if (file.size > MAX_SIZE) {
-                        throw new Error(`Video ${file.name} is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Max size is 30MB.`);
+                    if (fileToUpload.size > MAX_SIZE) {
+                        throw new Error(`Video ${fileToUpload.name} is too large (${(fileToUpload.size / (1024 * 1024)).toFixed(1)}MB). Max size is 30MB.`);
                     }
 
-                    const duration = await getVideoDuration(file);
+                    const duration = await getVideoDuration(fileToUpload);
                     if (duration > 180) {
-                        throw new Error(`Video ${file.name} exceeds max duration of 3 mins.`);
+                        throw new Error(`Video ${fileToUpload.name} exceeds max duration of 3 mins.`);
                     }
                     const totalDuration = await getTotalVideosDuration();
                     if (totalDuration + duration > 1800) {
@@ -177,10 +188,11 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
                     }
                 }
 
+                setUploadStatus(`Uploading ${fileToUpload.name}...`);
                 // Clean file name
-                const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+                const cleanName = fileToUpload.name.replace(/[^a-zA-Z0-9.-]/g, '_');
                 const storageRef = ref(storage, `${currentPath}/${cleanName}`);
-                await uploadBytes(storageRef, file);
+                await uploadBytes(storageRef, fileToUpload);
             }));
 
             setSuccessMsg(`Successfully uploaded ${files.length} file(s)!`);
@@ -192,6 +204,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
             setError(err.message || "Failed to upload file(s).");
         } finally {
             setUploading(false);
+            setUploadStatus("");
             event.target.value = "";
         }
     };
@@ -373,7 +386,7 @@ export function MediaLibraryContent({ onSelect, basePath = "", onUploadFinish, m
 
                         <label className={`cursor-pointer inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 ${uploading ? 'opacity-50' : ''}`}>
                             <PlusIcon className="w-4 h-4 mr-2" />
-                            {uploading ? "..." : "Upload Files"}
+                            {uploading ? (uploadStatus || "Uploading...") : "Upload Files"}
                             <input type="file" multiple accept="image/*,.webp,video/*,.pdf,.json,.csv,.zip" className="hidden" onChange={handleUpload} disabled={uploading} />
                         </label>
                     </div>

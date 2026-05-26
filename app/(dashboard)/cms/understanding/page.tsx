@@ -17,6 +17,7 @@ import RichTextEditor from "@/components/form/RichTextEditor";
 import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { GridIcon } from "@/icons";
 import { SEED_DATA } from "@/config/seedData";
+import { optimizeImage } from "@/utils/imageOptimizer";
 
 // ---- Sortable Item Component for Cards ----
 function SortableCardItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -183,8 +184,10 @@ export default function UnderstandingManager() {
 
         setUploading(cardId);
         try {
-            const storageRef = ref(storage, `understanding/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
+            const optimizedFile = await optimizeImage(file);
+            const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const storageRef = ref(storage, `understanding/${Date.now()}_${cleanName}`);
+            const snapshot = await uploadBytes(storageRef, optimizedFile);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
             updateCard(cardId, 'imageUrl', downloadURL);

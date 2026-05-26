@@ -14,10 +14,10 @@ import { useDialog } from "@/context/DialogContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useDialog } from "@/context/DialogContext";
 import { storage } from "@/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { SEED_DATA } from "@/config/seedData";
+import { optimizeImage } from "@/utils/imageOptimizer";
 
 // ---- Sortable Item Component for Slides ----
 function SortableSlideItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -125,8 +125,10 @@ export default function HeroManager() {
 
         setUploading(slideId);
         try {
-            const storageRef = ref(storage, `${currentSite.id}/hero_slider/${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
+            const optimizedFile = await optimizeImage(file);
+            const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const storageRef = ref(storage, `${currentSite.id}/hero_slider/${Date.now()}_${cleanName}`);
+            const snapshot = await uploadBytes(storageRef, optimizedFile);
             const downloadURL = await getDownloadURL(snapshot.ref);
 
             updateSlide(slideId, 'imageUrl', downloadURL);

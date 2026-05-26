@@ -16,7 +16,7 @@ import { Eye, EyeOff, ChevronDown, ChevronUp, Search, Trash2 } from 'lucide-reac
 import { SEED_DATA } from "@/config/seedData";
 
 import SEOEditor from "@/components/form/SEOEditor";
-import { useDialog } from "@/context/DialogContext";
+import FolderPicker from "@/components/form/FolderPicker";
 
 interface HomeSection extends SectionContent {
     enabled?: boolean;
@@ -426,6 +426,30 @@ export default function HomePageManager() {
     const sectionsConfig = getSectionsConfig(currentSite.id);
     const defaultContentForSite = getDefaultContent(currentSite.id);
 
+    const moveSection = (index: number, direction: 'up' | 'down') => {
+        if (!content) return;
+        const currentOrder = content.sectionOrder || sectionsConfig.map(s => s.id);
+        const newOrder = [...currentOrder];
+        const swapIdx = direction === 'up' ? index - 1 : index + 1;
+        if (swapIdx < 0 || swapIdx >= newOrder.length) return;
+        [newOrder[index], newOrder[swapIdx]] = [newOrder[swapIdx], newOrder[index]];
+        setContent({
+            ...content,
+            sectionOrder: newOrder
+        });
+    };
+
+    const currentOrder = content?.sectionOrder || sectionsConfig.map(s => s.id);
+    const fullOrder = [...currentOrder];
+    sectionsConfig.forEach(s => {
+        if (!fullOrder.includes(s.id)) {
+            fullOrder.push(s.id);
+        }
+    });
+    const sortedSections = fullOrder
+        .map(id => sectionsConfig.find(s => s.id === id))
+        .filter((s): s is typeof sectionsConfig[0] => !!s);
+
     useEffect(() => {
         loadContent();
     }, [currentSite]);
@@ -458,10 +482,14 @@ export default function HomePageManager() {
                 setContent({
                     ...mergedSections,
                     title: data.title || "Home",
-                    seo: data.seo || {}
+                    seo: data.seo || {},
+                    sectionOrder: data.sectionOrder || []
                 } as any);
             } else {
-                setContent(defaultContentForSite as any);
+                setContent({
+                    ...defaultContentForSite,
+                    sectionOrder: sectionsConfig.map(s => s.id)
+                } as any);
             }
         } catch (err: any) {
             console.error(err);
@@ -482,10 +510,11 @@ export default function HomePageManager() {
             let dataToSave: any = { ...content };
             
             if (modernSites.includes(currentSite.id)) {
-                const { title, seo, ...sections } = content as any;
+                const { title, seo, sectionOrder, ...sections } = content as any;
                 dataToSave = {
                     title: title || "Home",
                     seo: seo || {},
+                    sectionOrder: sectionOrder || [],
                     sections: sections
                 };
             }
@@ -641,7 +670,7 @@ export default function HomePageManager() {
                 </div>
 
                 <div className="space-y-4">
-                    {sectionsConfig.map((config) => {
+                    {sortedSections.map((config, index) => {
                         const section = (content as any)?.[config.id] || { heading: config.label, content: "", enabled: true };
                         const isExpanded = expandedSections[config.id];
 
@@ -660,6 +689,29 @@ export default function HomePageManager() {
                                         >
                                             {section.enabled ? <Eye size={20} /> : <EyeOff size={20} />}
                                         </button>
+                                        
+                                        {/* Reorder Buttons */}
+                                        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                                type="button"
+                                                disabled={index === 0}
+                                                onClick={() => moveSection(index, 'up')}
+                                                className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
+                                                title="Move Up"
+                                            >
+                                                <ChevronUp size={16} />
+                                            </button>
+                                            <button
+                                                type="button"
+                                                disabled={index === sortedSections.length - 1}
+                                                onClick={() => moveSection(index, 'down')}
+                                                className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
+                                                title="Move Down"
+                                            >
+                                                <ChevronDown size={16} />
+                                            </button>
+                                        </div>
+
                                         <h3 className={`font-medium ${section.enabled ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
                                             {config.label}
                                         </h3>
@@ -1220,60 +1272,96 @@ export default function HomePageManager() {
 
                                              {/* Slider & Slideshow Section - Gallery Images */}
                                             {(config.id === 'slider' || config.id === 'slideshow') && (
-                                                <div className="mt-4">
-                                                    <Label>Gallery Images</Label>
-                                                    <div className="space-y-3">
-                                                        {(section.images || []).map((img: { url: string; alt: string }, idx: number) => (
-                                                            <div key={idx} className="flex gap-4 items-end bg-white p-3 border rounded shadow-sm dark:bg-gray-800 dark:border-gray-700">
-                                                                <div className="flex-1">
-                                                                    <ImagePicker
-                                                                        label="Image URL"
-                                                                        value={img.url}
-                                                                        helpText="Recommended: 800x600px (4:3) or 800x800px (1:1)."
-                                                                        onChange={(url) => {
-                                                                            const newImages = [...(section.images || [])];
-                                                                            newImages[idx] = { ...newImages[idx], url };
-                                                                            handleSectionChange(config.id, "images", newImages);
-                                                                        }}
-                                                                    />
-                                                                </div>
-                                                                <div className="flex-1">
-                                                                    <Label className="text-xs mb-1">Alt Text</Label>
-                                                                    <Input
-                                                                        value={img.alt}
-                                                                        onChange={(e) => {
-                                                                            const newImages = [...(section.images || [])];
-                                                                            newImages[idx] = { ...newImages[idx], alt: e.target.value };
-                                                                            handleSectionChange(config.id, "images", newImages);
-                                                                        }}
-                                                                        placeholder="Image description"
-                                                                    />
-                                                                </div>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="text-red-500 border-red-200 hover:bg-red-50"
-                                                                    onClick={() => {
-                                                                        const newImages = [...(section.images || [])];
-                                                                        newImages.splice(idx, 1);
-                                                                        handleSectionChange(config.id, "images", newImages);
-                                                                    }}
-                                                                >
-                                                                    Remove
-                                                                </Button>
-                                                            </div>
-                                                        ))}
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => {
-                                                                const newImages = [...(section.images || []), { url: "", alt: "" }];
-                                                                handleSectionChange(config.id, "images", newImages);
-                                                            }}
-                                                        >
-                                                            + Add Image
-                                                        </Button>
+                                                <div className="mt-4 space-y-4">
+                                                    <div>
+                                                        <Label>Gallery Mode</Label>
+                                                        <div className="flex gap-4 mt-1">
+                                                            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                                <input
+                                                                    type="radio"
+                                                                    checked={!section.useFolderMapping}
+                                                                    onChange={() => handleSectionChange(config.id, "useFolderMapping", false)}
+                                                                    className="w-4 h-4 text-brand-500 border-gray-300 focus:ring-brand-500"
+                                                                />
+                                                                Manual Image Selection
+                                                            </label>
+                                                            <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                                                                <input
+                                                                    type="radio"
+                                                                    checked={!!section.useFolderMapping}
+                                                                    onChange={() => handleSectionChange(config.id, "useFolderMapping", true)}
+                                                                    className="w-4 h-4 text-brand-500 border-gray-300 focus:ring-brand-500"
+                                                                />
+                                                                Link Folder from Media Library
+                                                            </label>
+                                                        </div>
                                                     </div>
+
+                                                    {section.useFolderMapping ? (
+                                                        <div className="p-4 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-xl space-y-2">
+                                                            <Label>Media Library Folder</Label>
+                                                            <FolderPicker
+                                                                value={section.folderPath || ""}
+                                                                onChange={(path) => handleSectionChange(config.id, "folderPath", path)}
+                                                            />
+                                                            <p className="text-xs text-gray-500">
+                                                                Select a folder. All images uploaded to this folder will automatically render in this gallery.
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-3">
+                                                            {(section.images || []).map((img: { url: string; alt: string }, idx: number) => (
+                                                                <div key={idx} className="flex gap-4 items-end bg-white p-3 border rounded shadow-sm dark:bg-gray-800 dark:border-gray-700">
+                                                                    <div className="flex-1">
+                                                                        <ImagePicker
+                                                                            label="Image URL"
+                                                                            value={img.url}
+                                                                            helpText="Recommended: 800x600px (4:3) or 800x800px (1:1)."
+                                                                            onChange={(url) => {
+                                                                                const newImages = [...(section.images || [])];
+                                                                                newImages[idx] = { ...newImages[idx], url };
+                                                                                handleSectionChange(config.id, "images", newImages);
+                                                                            }}
+                                                                        />
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <Label className="text-xs mb-1">Alt Text</Label>
+                                                                        <Input
+                                                                            value={img.alt}
+                                                                            onChange={(e) => {
+                                                                                const newImages = [...(section.images || [])];
+                                                                                newImages[idx] = { ...newImages[idx], alt: e.target.value };
+                                                                                handleSectionChange(config.id, "images", newImages);
+                                                                            }}
+                                                                            placeholder="Image description"
+                                                                        />
+                                                                    </div>
+                                                                    <Button
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className="text-red-500 border-red-200 hover:bg-red-50"
+                                                                        onClick={() => {
+                                                                            const newImages = [...(section.images || [])];
+                                                                            newImages.splice(idx, 1);
+                                                                            handleSectionChange(config.id, "images", newImages);
+                                                                        }}
+                                                                    >
+                                                                        Remove
+                                                                    </Button>
+                                                                </div>
+                                                            ))}
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => {
+                                                                    const newImages = [...(section.images || []), { url: "", alt: "" }];
+                                                                    handleSectionChange(config.id, "images", newImages);
+                                                                }}
+                                                            >
+                                                                + Add Image
+                                                            </Button>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
 
