@@ -428,38 +428,6 @@ export default function FooterManager() {
                     </div>
                 </Section>
 
-                {/* Crisis Banner */}
-                <Section id="crisis" isOpen={openSection === 'crisis'} onToggle={() => setOpenSection(openSection === 'crisis' ? '' : 'crisis')}>
-                    <div className="flex items-center gap-3 mb-2">
-                        <input
-                            id="crisis-enabled"
-                            type="checkbox"
-                            checked={content.crisis_banner_enabled}
-                            onChange={e => set('crisis_banner_enabled', e.target.checked)}
-                            className="w-4 h-4 rounded text-blue-600"
-                        />
-                        <label htmlFor="crisis-enabled" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Enable Crisis Banner at top of footer
-                        </label>
-                    </div>
-                    <div className={!content.crisis_banner_enabled ? 'opacity-40 pointer-events-none space-y-4' : 'space-y-4'}>
-                        <div>
-                            <Label>Banner Text (left label)</Label>
-                            <Input value={content.crisis_banner_text} onChange={e => set('crisis_banner_text', e.target.value)} placeholder="IMMEDIATE CRISIS SUPPORT" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label>Phone Number (e.g. 988)</Label>
-                                <Input value={content.crisis_banner_number} onChange={e => set('crisis_banner_number', e.target.value)} placeholder="988" />
-                            </div>
-                            <div>
-                                <Label>Button Label</Label>
-                                <Input value={content.crisis_banner_label} onChange={e => set('crisis_banner_label', e.target.value)} placeholder="Call or Text 988" />
-                            </div>
-                        </div>
-                    </div>
-                </Section>
-
                 {/* Contact Info */}
                 <Section 
                     id="contact" 
