@@ -17,6 +17,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { storage } from "@/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { SEED_DATA } from "@/config/seedData";
+import FolderPicker from "@/components/form/FolderPicker";
 import { optimizeImage } from "@/utils/imageOptimizer";
 
 // ---- Sortable Item Component for Slides ----
@@ -59,6 +60,8 @@ export default function HeroManager() {
     const { currentSite } = useSite();
     const { confirm } = useDialog();
     const [slides, setSlides] = useState<HeroSlide[]>([]);
+    const [useFolderMapping, setUseFolderMapping] = useState(false);
+    const [folderPath, setFolderPath] = useState("");
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState<string | null>(null); // ID of slide being uploaded
@@ -91,10 +94,18 @@ export default function HeroManager() {
         setLoading(true);
         try {
             const data: any = await FirestoreService.getPageContent("hero_slider", currentSite.id);
-            if (data && data.slides && data.slides.length > 0) {
-                setSlides(data.slides);
+            if (data) {
+                if (data.slides && data.slides.length > 0) {
+                    setSlides(data.slides);
+                } else {
+                    setSlides(getDefaultSlides());
+                }
+                setUseFolderMapping(data.useFolderMapping || false);
+                setFolderPath(data.folderPath || "");
             } else {
                 setSlides(getDefaultSlides());
+                setUseFolderMapping(false);
+                setFolderPath("");
             }
         } catch (err) {
             console.error(err);
@@ -109,7 +120,7 @@ export default function HeroManager() {
         setError("");
         setSuccessMsg("");
         try {
-            await FirestoreService.savePageContent("hero_slider", { slides } as any, currentSite.id);
+            await FirestoreService.savePageContent("hero_slider", { slides, useFolderMapping, folderPath } as any, currentSite.id);
             setSuccessMsg("Hero slider updated successfully!");
         } catch (err) {
             console.error(err);
@@ -396,6 +407,34 @@ export default function HeroManager() {
                         )}
                         <li>Format: JPG or WebP. Max size: 2MB.</li>
                     </ul>
+                </div>
+
+                {/* Folder Mapping Settings */}
+                <div className="mb-6 p-5 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
+                    <h3 className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-3">Image Slider Source Settings</h3>
+                    <div className="flex items-center gap-3 mb-4">
+                        <input
+                            id="use-folder-mapping"
+                            type="checkbox"
+                            checked={useFolderMapping}
+                            onChange={(e) => setUseFolderMapping(e.target.checked)}
+                            className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
+                        />
+                        <label htmlFor="use-folder-mapping" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Use Firebase Storage folder for Hero images (overrides individual slide images)
+                        </label>
+                    </div>
+                    
+                    {useFolderMapping && (
+                        <div className="max-w-xl">
+                            <FolderPicker
+                                label="Select Media Folder"
+                                value={folderPath}
+                                onChange={(path) => setFolderPath(path)}
+                                helpText="Select a folder from the Media Library to use its images in the Hero slider."
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <DndContext
