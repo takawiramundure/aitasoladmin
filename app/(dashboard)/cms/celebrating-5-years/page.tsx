@@ -10,8 +10,11 @@ import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import RichTextEditor from "@/components/form/RichTextEditor";
 import Label from "@/components/form/Label";
+import Input from "@/components/form/input/InputField";
 import MediaLibrary from "@/components/common/MediaLibrary";
 import { useDialog } from "@/context/DialogContext";
+import { Modal } from "@/components/ui/modal";
+import InsertSidebar from "@/components/common/InsertSidebar";
 import { 
     Heart, 
     User, 
@@ -24,6 +27,9 @@ import {
     Trash2, 
     ChevronLeft, 
     ChevronRight,
+    ChevronUp,
+    ChevronDown,
+    Pin,
     Image as ImageIcon
 } from 'lucide-react';
 
@@ -48,7 +54,9 @@ interface Celebrating5YearsData {
             subtitle: string;
             content: string;
         };
+        [key: string]: any;
     };
+    sectionOrder?: string[];
 }
 
 const DEFAULT_DATA: Celebrating5YearsData = {
@@ -82,15 +90,79 @@ export default function Celebrating5YearsManager() {
     const { currentSite } = useSite();
     const { confirm } = useDialog();
     const [data, setData] = useState<Celebrating5YearsData>(DEFAULT_DATA);
-    const [activeTab, setActiveTab] = useState<'director' | 'partners' | 'invest'>('director');
+    const [activeTab, setActiveTab] = useState<'director' | 'partners' | 'invest' | 'custom'>('director');
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
+    const [isInsertSidebarOpen, setIsInsertSidebarOpen] = useState(false);
+    const [reusableComponents, setReusableComponents] = useState<any[]>([]);
+    const [tagReusableSectionId, setTagReusableSectionId] = useState<string | null>(null);
+    const [reusableLabel, setReusableLabel] = useState("");
+    const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+
+    const loadReusableComponents = async () => {
+        if (!currentSite?.id) return;
+        try {
+            const data = await FirestoreService.getReusableSections(currentSite.id);
+            setReusableComponents(data);
+        } catch (e) {
+            console.error("Error loading reusable components:", e);
+        }
+    };
+
+    const handleTagAsReusableClick = (sectionId: string, currentSection: any) => {
+        setTagReusableSectionId(sectionId);
+        setReusableLabel(currentSection.heading || sectionId);
+        setIsTagModalOpen(true);
+    };
+
+    const handleSaveTagAsReusable = async () => {
+        if (!tagReusableSectionId || !data) return;
+        const currentSection = data.sections?.[tagReusableSectionId];
+        if (!currentSection) return;
+
+        try {
+            await FirestoreService.saveReusableSection(currentSite.id, tagReusableSectionId, {
+                ...currentSection,
+                reusableLabel: reusableLabel || tagReusableSectionId
+            });
+            setStatus({ type: 'success', msg: `Section "${reusableLabel || tagReusableSectionId}" tagged as reusable!` });
+            setTimeout(() => setStatus(null), 3000);
+            setIsTagModalOpen(false);
+            await loadReusableComponents();
+        } catch (e: any) {
+            console.error("Error tagging section as reusable:", e);
+            setStatus({ type: 'error', msg: `Failed to save reusable section: ${e.message}` });
+        }
+    };
+
+    const handleInsertReusableSection = (reusableSec: any) => {
+        if (!data) return;
+        const newId = `${reusableSec.id.split('_')[0] || 'reusable'}_${Date.now()}`;
+        const clonedData = { ...reusableSec };
+        delete clonedData.reusableLabel;
+        delete clonedData.lastUpdated;
+
+        setData({
+            ...data,
+            sections: {
+                ...(data.sections || {}),
+                [newId]: clonedData
+            },
+            sectionOrder: [...(data.sectionOrder || ['directorMessage', 'partnerMessages', 'investInKmfw']), newId]
+        });
+        setActiveTab('custom');
+        setIsInsertSidebarOpen(false);
+        setStatus({ type: 'success', msg: `Added reusable component "${reusableSec.reusableLabel || reusableSec.heading || reusableSec.id}"! Remember to save changes.` });
+        setTimeout(() => setStatus(null), 3000);
+    };
+
     useEffect(() => {
         if (currentSite?.id) {
             loadData();
+            loadReusableComponents();
         }
     }, [currentSite?.id]);
 
@@ -99,22 +171,25 @@ export default function Celebrating5YearsManager() {
         try {
             const doc = await FirestoreService.getPageContent('celebrating-5-years', currentSite.id);
             if (doc) {
-                setData({
-                    sections: {
-                        directorMessage: {
-                            ...DEFAULT_DATA.sections.directorMessage,
-                            ...(doc.sections?.directorMessage || {})
-                        },
-                        partnerMessages: {
-                            ...DEFAULT_DATA.sections.partnerMessages,
-                            ...(doc.sections?.partnerMessages || {})
-                        },
-                        investInKmfw: {
-                            ...DEFAULT_DATA.sections.investInKmfw,
-                            ...(doc.sections?.investInKmfw || {})
-                        }
+                const mergedSections = {
+                    ...doc.sections,
+                    directorMessage: {
+                        ...DEFAULT_DATA.sections.directorMessage,
+                        ...(doc.sections?.directorMessage || {})
+                    },
+                    partnerMessages: {
+                        ...DEFAULT_DATA.sections.partnerMessages,
+                        ...(doc.sections?.partnerMessages || {})
+                    },
+                    investInKmfw: {
+                        ...DEFAULT_DATA.sections.investInKmfw,
+                        ...(doc.sections?.investInKmfw || {})
                     }
-                });
+                };
+                setData({
+                    ...doc,
+                    sections: mergedSections
+                } as any);
             } else {
                 setData(DEFAULT_DATA);
             }
@@ -306,6 +381,13 @@ export default function Celebrating5YearsManager() {
                             <RotateCcw className="w-4 h-4" />
                             Restore Defaults
                         </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsInsertSidebarOpen(true)}
+                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 animate-pulse hover:animate-none flex items-center gap-2"
+                        >
+                            + Add Component / Section
+                        </Button>
                         <Button 
                             onClick={handleSave} 
                             disabled={saving}
@@ -332,7 +414,8 @@ export default function Celebrating5YearsManager() {
                         {[
                             { id: 'director', name: "Director's Message", icon: Heart },
                             { id: 'partners', name: "Partner Wishes & Cards", icon: Handshake },
-                            { id: 'invest', name: "Invest in Future", icon: Gift }
+                            { id: 'invest', name: "Invest in Future", icon: Gift },
+                            { id: 'custom', name: "Additional Sections", icon: Sparkles }
                         ].map((tab) => {
                             const Icon = tab.icon;
                             const isActive = activeTab === tab.id;
@@ -359,9 +442,19 @@ export default function Celebrating5YearsManager() {
                     {/* Tab 1: Founding Director's Message */}
                     {activeTab === 'director' && (
                         <div className="space-y-6">
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-white border-b pb-3 mb-4">
-                                <User className="w-5 h-5 text-teal-600" />
-                                <h3 className="text-lg font-bold">Founding Director Message Fields</h3>
+                            <div className="flex items-center justify-between border-b pb-3 mb-4">
+                                <div className="flex items-center gap-2 text-gray-700 dark:text-white">
+                                    <User className="w-5 h-5 text-teal-600" />
+                                    <h3 className="text-lg font-bold">Founding Director Message Fields</h3>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => handleTagAsReusableClick('directorMessage', data.sections.directorMessage)}
+                                    className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors flex items-center gap-1.5 text-xs font-semibold"
+                                    title="Tag as Reusable"
+                                >
+                                    <Pin size={16} /> Tag as Reusable
+                                </button>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -439,9 +532,19 @@ export default function Celebrating5YearsManager() {
                     {/* Tab 2: Partner Wishes */}
                     {activeTab === 'partners' && (
                         <div className="space-y-6">
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-white border-b pb-3 mb-4">
-                                <Handshake className="w-5 h-5 text-teal-600" />
-                                <h3 className="text-lg font-bold">Partner Wishes & Congratulatory Cards</h3>
+                            <div className="flex items-center justify-between border-b pb-3 mb-4">
+                                <div className="flex items-center gap-2 text-gray-700 dark:text-white">
+                                    <Handshake className="w-5 h-5 text-teal-600" />
+                                    <h3 className="text-lg font-bold">Partner Wishes & Congratulatory Cards</h3>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => handleTagAsReusableClick('partnerMessages', data.sections.partnerMessages)}
+                                    className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors flex items-center gap-1.5 text-xs font-semibold"
+                                    title="Tag as Reusable"
+                                >
+                                    <Pin size={16} /> Tag as Reusable
+                                </button>
                             </div>
 
                             <div className="space-y-4">
@@ -548,9 +651,19 @@ export default function Celebrating5YearsManager() {
                     {/* Tab 3: Invest Section */}
                     {activeTab === 'invest' && (
                         <div className="space-y-6">
-                            <div className="flex items-center gap-2 text-gray-700 dark:text-white border-b pb-3 mb-4">
-                                <Gift className="w-5 h-5 text-teal-600" />
-                                <h3 className="text-lg font-bold">Invest in KMFW Future Content</h3>
+                            <div className="flex items-center justify-between border-b pb-3 mb-4">
+                                <div className="flex items-center gap-2 text-gray-700 dark:text-white">
+                                    <Gift className="w-5 h-5 text-teal-600" />
+                                    <h3 className="text-lg font-bold">Invest in KMFW Future Content</h3>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => handleTagAsReusableClick('investInKmfw', data.sections.investInKmfw)}
+                                    className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors flex items-center gap-1.5 text-xs font-semibold"
+                                    title="Tag as Reusable"
+                                >
+                                    <Pin size={16} /> Tag as Reusable
+                                </button>
                             </div>
 
                             <div className="space-y-4">
@@ -584,6 +697,194 @@ export default function Celebrating5YearsManager() {
                             </div>
                         </div>
                     )}
+
+                    {activeTab === 'custom' && (
+                        <div className="space-y-6">
+                            <div className="flex items-center gap-2 text-gray-700 dark:text-white border-b pb-3 mb-4">
+                                <Sparkles className="w-5 h-5 text-teal-600" />
+                                <h3 className="text-lg font-bold">Additional Custom Sections</h3>
+                            </div>
+
+                            {(() => {
+                                const customKeys = Object.keys(data.sections || {}).filter(
+                                    key => !['directorMessage', 'partnerMessages', 'investInKmfw'].includes(key)
+                                );
+                                const order = data.sectionOrder || [];
+                                const sortedCustomKeys = [...customKeys].sort((a, b) => {
+                                    const indexA = order.indexOf(a);
+                                    const indexB = order.indexOf(b);
+                                    if (indexA === -1 && indexB === -1) return 0;
+                                    if (indexA === -1) return 1;
+                                    if (indexB === -1) return -1;
+                                    return indexA - indexB;
+                                });
+
+                                if (sortedCustomKeys.length === 0) {
+                                    return (
+                                        <div className="text-center py-12 bg-gray-50 dark:bg-gray-900/30 rounded-xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                                            <Sparkles className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                            <h5 className="font-semibold text-gray-600 dark:text-gray-400">No additional sections added</h5>
+                                            <p className="text-xs text-gray-400 mt-1 mb-4">Click "+ Add Component / Section" at the top right to add dynamic custom sections or reusable components.</p>
+                                        </div>
+                                    );
+                                }
+
+                                const moveSection = (idx: number, direction: 'up' | 'down') => {
+                                    const newOrder = [...(data.sectionOrder || ['directorMessage', 'partnerMessages', 'investInKmfw', ...sortedCustomKeys])];
+                                    const globalIdx = newOrder.indexOf(sortedCustomKeys[idx]);
+                                    const targetGlobalIdx = direction === 'up' ? globalIdx - 1 : globalIdx + 1;
+                                    if (targetGlobalIdx < 0 || targetGlobalIdx >= newOrder.length) return;
+                                    [newOrder[globalIdx], newOrder[targetGlobalIdx]] = [newOrder[targetGlobalIdx], newOrder[globalIdx]];
+                                    setData(prev => ({ ...prev, sectionOrder: newOrder }));
+                                };
+
+                                return (
+                                    <div className="space-y-4">
+                                        {sortedCustomKeys.map((key, idx) => {
+                                            const section = data.sections[key] || {};
+                                            return (
+                                                <div key={key} className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-gray-50/50 space-y-4">
+                                                    <div className="flex justify-between items-center border-b pb-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                disabled={idx === 0}
+                                                                onClick={() => moveSection(idx, 'up')}
+                                                                className="p-1 hover:text-blue-500 disabled:opacity-30 transition-colors text-gray-400"
+                                                                title="Move Up"
+                                                            >
+                                                                <ChevronUp size={16} />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                disabled={idx === sortedCustomKeys.length - 1}
+                                                                onClick={() => moveSection(idx, 'down')}
+                                                                className="p-1 hover:text-blue-500 disabled:opacity-30 transition-colors text-gray-400"
+                                                                title="Move Down"
+                                                            >
+                                                                <ChevronDown size={16} />
+                                                            </button>
+                                                            <span className="font-bold text-sm text-gray-600 dark:text-white">
+                                                                {section.heading || key}
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleTagAsReusableClick(key, section)}
+                                                                className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                                title="Tag as Reusable"
+                                                            >
+                                                                <Pin size={16} />
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={async () => {
+                                                                    const isConfirmed = await confirm({
+                                                                        title: "Remove Section?",
+                                                                        message: `Are you sure you want to delete the custom section "${section.heading || key}"?`,
+                                                                        variant: "danger",
+                                                                        confirmLabel: "Delete"
+                                                                    });
+                                                                    if (isConfirmed) {
+                                                                        setData(prev => {
+                                                                            const newSections = { ...prev.sections };
+                                                                            delete newSections[key];
+                                                                            const newOrder = (prev.sectionOrder || []).filter(id => id !== key);
+                                                                            return {
+                                                                                ...prev,
+                                                                                sections: newSections,
+                                                                                sectionOrder: newOrder
+                                                                            };
+                                                                        });
+                                                                    }
+                                                                }}
+                                                                className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                                title="Delete Section"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="grid gap-4">
+                                                        <div>
+                                                            <Label>Heading</Label>
+                                                            <Input 
+                                                                value={section.heading || ""} 
+                                                                onChange={e => setData(prev => ({
+                                                                    ...prev,
+                                                                    sections: {
+                                                                        ...prev.sections,
+                                                                        [key]: { ...prev.sections[key], heading: e.target.value }
+                                                                    }
+                                                                }))} 
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <Label>Subtitle / Secondary Heading</Label>
+                                                            <Input 
+                                                                value={section.subtitle || ""} 
+                                                                onChange={e => setData(prev => ({
+                                                                    ...prev,
+                                                                    sections: {
+                                                                        ...prev.sections,
+                                                                        [key]: { ...prev.sections[key], subtitle: e.target.value }
+                                                                    }
+                                                                }))} 
+                                                            />
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-4">
+                                                            <div>
+                                                                <Label>Button Text (Optional)</Label>
+                                                                <Input 
+                                                                    value={section.buttonText || ""} 
+                                                                    onChange={e => setData(prev => ({
+                                                                        ...prev,
+                                                                        sections: {
+                                                                            ...prev.sections,
+                                                                            [key]: { ...prev.sections[key], buttonText: e.target.value }
+                                                                        }
+                                                                    }))} 
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <Label>Button URL / Action (Optional)</Label>
+                                                                <Input 
+                                                                    value={section.buttonUrl || ""} 
+                                                                    onChange={e => setData(prev => ({
+                                                                        ...prev,
+                                                                        sections: {
+                                                                            ...prev.sections,
+                                                                            [key]: { ...prev.sections[key], buttonUrl: e.target.value }
+                                                                        }
+                                                                    }))} 
+                                                                    placeholder="/contact or https://..."
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            <div className="mb-2"><Label>Body Content</Label></div>
+                                                            <RichTextEditor 
+                                                                value={section.content || ""} 
+                                                                onChange={val => setData(prev => ({
+                                                                    ...prev,
+                                                                    sections: {
+                                                                        ...prev.sections,
+                                                                        [key]: { ...prev.sections[key], content: val }
+                                                                    }
+                                                                }))} 
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -593,6 +894,60 @@ export default function Celebrating5YearsManager() {
                 multiSelect={true}
                 onSelectMultiple={addMultiplePartnerImages}
             />
+
+            <InsertSidebar
+                isOpen={isInsertSidebarOpen}
+                onClose={() => setIsInsertSidebarOpen(false)}
+                reusableComponents={reusableComponents}
+                onAddReusable={handleInsertReusableSection}
+                onAddBlankSection={(title) => {
+                    if (!data) return;
+                    const id = title.trim().toLowerCase().replace(/\s+/g, "_");
+                    setData({
+                        ...data,
+                        sections: {
+                            ...(data.sections || {}),
+                            [id]: {
+                                heading: title,
+                                content: "",
+                                enabled: true
+                            }
+                        },
+                        sectionOrder: [...(data.sectionOrder || ['directorMessage', 'partnerMessages', 'investInKmfw']), id]
+                    });
+                    setActiveTab('custom');
+                    setIsInsertSidebarOpen(false);
+                    setStatus({ type: 'success', msg: `Added blank section "${title}"!` });
+                    setTimeout(() => setStatus(null), 3000);
+                }}
+            />
+
+            {/* Tag as Reusable Modal */}
+            <Modal isOpen={isTagModalOpen} onClose={() => setIsTagModalOpen(false)} className="max-w-md">
+                <div className="p-6 bg-white rounded-xl dark:bg-gray-900">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+                        <Pin size={18} className="text-blue-600" />
+                        Tag Section as Reusable
+                    </h3>
+                    <p className="text-xs text-gray-400 mb-4">Give this component a descriptive label so you can easily identify it when adding it to other pages.</p>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Component Label / Name</Label>
+                            <Input
+                                value={reusableLabel}
+                                onChange={(e) => setReusableLabel(e.target.value)}
+                                placeholder="e.g. Director Letter, Investment Inset"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <Button variant="outline" onClick={() => setIsTagModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveTagAsReusable} disabled={!reusableLabel.trim()}>Tag Component</Button>
+                    </div>
+                </div>
+            </Modal>
         </>
     );
 }

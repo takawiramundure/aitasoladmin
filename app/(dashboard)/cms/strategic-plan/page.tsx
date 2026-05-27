@@ -9,9 +9,13 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
-import { Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp, Search, Pin } from 'lucide-react';
+import { FilePicker } from "@/components/form/FilePicker";
 import SEOEditor from "@/components/form/SEOEditor";
+import { Modal } from "@/components/ui/modal";
 import { useDialog } from "@/context/DialogContext";
+import InsertSidebar from "@/components/common/InsertSidebar";
+import RichTextEditor from "@/components/form/RichTextEditor";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -84,6 +88,68 @@ export default function StrategicPlanManager() {
     const [successMsg, setSuccessMsg] = useState("");
     const [expanded, setExpanded] = useState<Record<string, boolean>>({ hero: true, roadmap: true, flyer: false, downloads: false });
 
+    // Reusable tag modal states
+    const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+    const [tagReusableSectionId, setTagReusableSectionId] = useState<string | null>(null);
+    const [reusableLabel, setReusableLabel] = useState("");
+    const [isInsertSidebarOpen, setIsInsertSidebarOpen] = useState(false);
+    const [reusableComponents, setReusableComponents] = useState<any[]>([]);
+
+    const loadReusableComponents = async () => {
+        if (!currentSite?.id) return;
+        try {
+            const data = await FirestoreService.getReusableSections(currentSite.id);
+            setReusableComponents(data);
+        } catch (e) {
+            console.error("Error loading reusable components:", e);
+        }
+    };
+
+    const handleTagAsReusableClick = (sectionId: string, currentSection: any) => {
+        setTagReusableSectionId(sectionId);
+        setReusableLabel(currentSection.heading || currentSection.title || sectionId);
+        setIsTagModalOpen(true);
+    };
+
+    const handleSaveTagAsReusable = async () => {
+        if (!tagReusableSectionId || !content) return;
+        const currentSection = content[tagReusableSectionId];
+        if (!currentSection) return;
+
+        try {
+            await FirestoreService.saveReusableSection(currentSite.id, tagReusableSectionId, {
+                ...currentSection,
+                reusableLabel: reusableLabel || tagReusableSectionId
+            });
+            setSuccessMsg(`Section "${reusableLabel || tagReusableSectionId}" tagged as reusable!`);
+            setTimeout(() => setSuccessMsg(""), 3000);
+            setIsTagModalOpen(false);
+        } catch (e: any) {
+            console.error("Error tagging section as reusable:", e);
+            setError(`Failed to save reusable section: ${e.message}`);
+        }
+    };
+
+    const handleInsertReusableSection = (reusableSec: any) => {
+        if (!content) return;
+        const newId = `${reusableSec.id.split('_')[0] || 'reusable'}_${Date.now()}`;
+        const clonedData = { ...reusableSec };
+        delete clonedData.reusableLabel;
+        delete clonedData.lastUpdated;
+        
+        const newOrder = [...(content.sectionOrder || STRATEGIC_PLAN_SECTIONS.map(s => s.id))];
+        newOrder.push(newId);
+
+        setContent({
+            ...content,
+            [newId]: clonedData,
+            sectionOrder: newOrder
+        });
+        setIsInsertSidebarOpen(false);
+        setSuccessMsg(`Added reusable component "${reusableSec.reusableLabel || reusableSec.heading || reusableSec.id}"! Remember to save changes.`);
+        setTimeout(() => setSuccessMsg(""), 3000);
+    };
+
     const moveSection = (index: number, direction: 'up' | 'down') => {
         if (!content) return;
         const currentOrder = content.sectionOrder || STRATEGIC_PLAN_SECTIONS.map(s => s.id);
@@ -101,11 +167,21 @@ export default function StrategicPlanManager() {
             fullOrder.push(s.id);
         }
     });
+    if (content) {
+        Object.keys(content).forEach(key => {
+            if (key !== 'title' && key !== 'seo' && key !== 'id' && key !== 'sections' && key !== 'enabled' && key !== 'sectionOrder' && !fullOrder.includes(key)) {
+                fullOrder.push(key);
+            }
+        });
+    }
     const sortedSections = fullOrder
-        .map(id => STRATEGIC_PLAN_SECTIONS.find(s => s.id === id))
-        .filter((s): s is typeof STRATEGIC_PLAN_SECTIONS[0] => !!s);
+        .map(id => STRATEGIC_PLAN_SECTIONS.find(s => s.id === id) || { id, label: content?.[id]?.heading || content?.[id]?.title || id })
+        .filter(Boolean);
 
-    useEffect(() => { loadContent(); }, [currentSite?.id]);
+    useEffect(() => { 
+        loadContent(); 
+        loadReusableComponents();
+    }, [currentSite?.id]);
 
     const loadContent = async () => {
         setLoading(true);
@@ -183,6 +259,13 @@ export default function StrategicPlanManager() {
                         >
                             Reset Defaults & Seed
                         </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsInsertSidebarOpen(true)}
+                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 animate-pulse hover:animate-none"
+                        >
+                            + Add Component / Section
+                        </Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}
                         </Button>
@@ -224,7 +307,7 @@ export default function StrategicPlanManager() {
                     {sortedSections.map((config, index) => (
                         <React.Fragment key={config.id}>
                             {config.id === 'hero' && (
-                                <Section id="hero" title="Hero Section" expanded={expanded.hero} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection}>
+                                <Section id="hero" title="Hero Section" expanded={expanded.hero} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection} onTagReusable={() => handleTagAsReusableClick('hero', content.hero)}>
                                     <div className="grid gap-4">
                                         <div><Label>Subtitle (Tagline)</Label><Input value={content.hero.subtitle} onChange={e => set(['hero', 'subtitle'], e.target.value)} /></div>
                                         <div><Label>Main Title</Label><Input value={content.hero.title} onChange={e => set(['hero', 'title'], e.target.value)} /></div>
@@ -234,7 +317,7 @@ export default function StrategicPlanManager() {
                             )}
 
                             {config.id === 'roadmap' && (
-                                <Section id="roadmap" title="Roadmap Section" expanded={expanded.roadmap} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection}>
+                                <Section id="roadmap" title="Roadmap Section" expanded={expanded.roadmap} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection} onTagReusable={() => handleTagAsReusableClick('roadmap', content.roadmap)}>
                                     <div className="space-y-6">
                                         <div><Label>Section Title</Label><Input value={content.roadmap.title} onChange={e => set(['roadmap', 'title'], e.target.value)} /></div>
 
@@ -314,6 +397,7 @@ export default function StrategicPlanManager() {
                                     index={index}
                                     total={sortedSections.length}
                                     onMove={moveSection}
+                                    onTagReusable={() => handleTagAsReusableClick('flyer', content.flyer)}
                                     action={
                                         <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                                             <span className="text-[10px] font-bold uppercase text-gray-400">{content.flyer.enabled ? 'Shown' : 'Hidden'}</span>
@@ -336,13 +420,19 @@ export default function StrategicPlanManager() {
                             )}
 
                             {config.id === 'downloads' && (
-                                <Section id="downloads" title="Downloads & Contact Cards" expanded={expanded.downloads} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection}>
+                                <Section id="downloads" title="Downloads & Contact Cards" expanded={expanded.downloads} onToggle={toggle} index={index} total={sortedSections.length} onMove={moveSection} onTagReusable={() => handleTagAsReusableClick('downloads', content.downloads)}>
                                     <div className="grid md:grid-cols-2 gap-6">
                                         <div className="p-4 bg-gray-50 rounded-xl space-y-4">
                                             <h4 className="font-bold text-gray-700 text-sm uppercase tracking-wide">PDF Download Card</h4>
                                             <div><Label>Title</Label><Input value={content.downloads.pdf.title} onChange={e => set(['downloads', 'pdf', 'title'], e.target.value)} /></div>
                                             <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl text-sm" rows={3} value={content.downloads.pdf.description} onChange={e => set(['downloads', 'pdf', 'description'], e.target.value)} /></div>
-                                            <div><Label>PDF URL</Label><Input value={content.downloads.pdf.link} onChange={e => set(['downloads', 'pdf', 'link'], e.target.value)} /></div>
+                                            <FilePicker
+                                                 label="PDF Document"
+                                                 value={content.downloads.pdf.link}
+                                                 onChange={url => set(['downloads', 'pdf', 'link'], url)}
+                                                 placeholder="Paste a URL or browse the media library"
+                                                 description="Upload a PDF to the media library, or paste an external link."
+                                             />
                                         </div>
                                         <div className="p-4 bg-gray-50 rounded-xl space-y-4">
                                             <h4 className="font-bold text-gray-700 text-sm uppercase tracking-wide">Contact Card</h4>
@@ -353,41 +443,156 @@ export default function StrategicPlanManager() {
                                     </div>
                                 </Section>
                             )}
+
+                            {!STRATEGIC_PLAN_SECTIONS.some(s => s.id === config.id) && (
+                                <Section 
+                                    id={config.id} 
+                                    title={config.label || config.id} 
+                                    expanded={expanded[config.id]} 
+                                    onToggle={toggle} 
+                                    index={index} 
+                                    total={sortedSections.length} 
+                                    onMove={moveSection} 
+                                    onTagReusable={() => handleTagAsReusableClick(config.id, content[config.id])}
+                                    onDelete={async () => {
+                                        const isConfirmed = await confirm({
+                                            title: "Remove Section",
+                                            message: `Are you sure you want to remove the custom section "${config.label || config.id}"?`,
+                                            variant: "danger",
+                                            confirmLabel: "Delete"
+                                        });
+                                        if (isConfirmed) {
+                                            const newContent = { ...content };
+                                            delete newContent[config.id];
+                                            const newOrder = (content.sectionOrder || []).filter((id: string) => id !== config.id);
+                                            newContent.sectionOrder = newOrder;
+                                            setContent(newContent);
+                                        }
+                                    }}
+                                >
+                                    <div className="grid gap-4">
+                                        <div><Label>Heading</Label><Input value={content[config.id]?.heading || ""} onChange={e => set([config.id, 'heading'], e.target.value)} /></div>
+                                        <div><Label>Subtitle / Secondary Heading</Label><Input value={content[config.id]?.subtitle || ""} onChange={e => set([config.id, 'subtitle'], e.target.value)} /></div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div><Label>Button Text (Optional)</Label><Input value={content[config.id]?.buttonText || ""} onChange={e => set([config.id, 'buttonText'], e.target.value)} /></div>
+                                            <div><Label>Button URL / Action (Optional)</Label><Input value={content[config.id]?.buttonUrl || ""} onChange={e => set([config.id, 'buttonUrl'], e.target.value)} placeholder="/contact or https://..." /></div>
+                                        </div>
+                                        <div>
+                                            <div className="mb-2"><Label>Body Content</Label></div>
+                                            <RichTextEditor label="" value={content[config.id]?.content || ""} onChange={val => set([config.id, 'content'], val)} />
+                                        </div>
+                                    </div>
+                                </Section>
+                            )}
                         </React.Fragment>
                     ))}
                 </div>
             </div>
+
+            <InsertSidebar
+                isOpen={isInsertSidebarOpen}
+                onClose={() => setIsInsertSidebarOpen(false)}
+                reusableComponents={reusableComponents}
+                onAddReusable={handleInsertReusableSection}
+                onAddBlankSection={(title) => {
+                    if (!content) return;
+                    const id = title.trim().toLowerCase().replace(/\s+/g, "_");
+                    const newOrder = [...(content.sectionOrder || STRATEGIC_PLAN_SECTIONS.map(s => s.id))];
+                    newOrder.push(id);
+                    setContent({
+                        ...content,
+                        [id]: {
+                            heading: title,
+                            content: "",
+                            enabled: true
+                        },
+                        sectionOrder: newOrder
+                    });
+                    setIsInsertSidebarOpen(false);
+                    setSuccessMsg(`Added blank section "${title}"!`);
+                    setTimeout(() => setSuccessMsg(""), 3000);
+                }}
+            />
+
+            {/* Tag as Reusable Modal */}
+            <Modal isOpen={isTagModalOpen} onClose={() => setIsTagModalOpen(false)} className="max-w-md">
+                <div className="p-6 bg-white rounded-xl dark:bg-gray-900">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+                        <Pin size={18} className="text-blue-600" />
+                        Tag Section as Reusable
+                    </h3>
+                    <p className="text-xs text-gray-400 mb-4">Give this component a descriptive label so you can easily identify it when adding it to other pages.</p>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Component Label / Name</Label>
+                            <Input
+                                value={reusableLabel}
+                                onChange={(e) => setReusableLabel(e.target.value)}
+                                placeholder="e.g. Strategic Plan Road Map, Hero Carousel"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <Button variant="outline" onClick={() => setIsTagModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveTagAsReusable} disabled={!reusableLabel.trim()}>Tag Component</Button>
+                    </div>
+                </div>
+            </Modal>
         </>
     );
 }
 
-function Section({ id, title, expanded, onToggle, action, children, index, total, onMove }: any) {
+function Section({ id, title, expanded, onToggle, action, children, index, total, onMove, onTagReusable, onDelete }: any) {
     return (
         <div className="border border-gray-100 rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between p-4 bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors" onClick={() => onToggle(id)}>
                 <div className="flex items-center gap-4">
-                    {onMove && (
-                        <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                        {onMove && (
+                            <>
+                                <button
+                                    type="button"
+                                    disabled={index === 0}
+                                    onClick={() => onMove(index, 'up')}
+                                    className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
+                                    title="Move Up"
+                                >
+                                    <ChevronUp size={16} />
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={index === total - 1}
+                                    onClick={() => onMove(index, 'down')}
+                                    className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
+                                    title="Move Down"
+                                >
+                                    <ChevronDown size={16} />
+                                </button>
+                            </>
+                        )}
+                        {onTagReusable && (
                             <button
                                 type="button"
-                                disabled={index === 0}
-                                onClick={() => onMove(index, 'up')}
-                                className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
-                                title="Move Up"
+                                onClick={onTagReusable}
+                                className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                title="Tag as Reusable"
                             >
-                                <ChevronUp size={16} />
+                                <Pin size={16} />
                             </button>
+                        )}
+                        {onDelete && (
                             <button
                                 type="button"
-                                disabled={index === total - 1}
-                                onClick={() => onMove(index, 'down')}
-                                className="p-1 hover:text-blue-500 disabled:opacity-30 disabled:pointer-events-none transition-colors text-gray-400 hover:text-gray-700"
-                                title="Move Down"
+                                onClick={onDelete}
+                                className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                title="Delete Custom Section"
                             >
-                                <ChevronDown size={16} />
+                                <Trash2 size={16} />
                             </button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                     <h3 className="font-bold text-gray-700 dark:text-white">{title}</h3>
                     {action}
                 </div>

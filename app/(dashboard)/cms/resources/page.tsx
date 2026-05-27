@@ -15,6 +15,7 @@ import { storage } from "@/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import RichTextEditor from "@/components/form/RichTextEditor";
 import MediaPickerModal from "@/components/common/MediaPickerModal";
+import { FilePicker } from "@/components/form/FilePicker";
 import { GridIcon } from "@/icons";
 import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
@@ -298,13 +299,13 @@ export default function ResourcesManager() {
                                                             onChange={(e) => updateResource(resource.id, 'type', e.target.value)}
                                                         />
                                                     </div>
-                                                    <div>
-                                                        <Label>External Link / PDF</Label>
-                                                        <Input
-                                                            type="text"
-                                                            placeholder="https://..."
+                                                    <div onPointerDown={e => e.stopPropagation()}>
+                                                        <FilePicker
+                                                            label="External Link / PDF"
                                                             value={resource.link}
-                                                            onChange={(e) => updateResource(resource.id, 'link', e.target.value)}
+                                                            onChange={url => updateResource(resource.id, 'link', url)}
+                                                            placeholder="https:// or browse media library"
+                                                            description="Link to an external page, or upload a PDF from the media library."
                                                         />
                                                     </div>
                                                 </div>

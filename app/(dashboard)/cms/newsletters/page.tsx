@@ -10,6 +10,7 @@ import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
 import { PlusIcon, TrashBinIcon, CalenderIcon, PencilIcon, FolderIcon } from "@/icons";
 import MediaPickerModal from "@/components/common/MediaPickerModal";
+import { FilePicker } from "@/components/form/FilePicker";
 import MediaLibrary from "@/components/common/MediaLibrary";
 import { Modal } from "@/components/ui/modal";
 import RichTextEditor from "@/components/form/RichTextEditor";
@@ -309,11 +310,12 @@ export default function NewslettersManager() {
                                             <Input value={item.title} onChange={(e) => updateNewsletter(index, "title", e.target.value)} />
                                         </div>
                                         <div className="md:col-span-1">
-                                            <Label>PDF URL</Label>
-                                            <div className="flex gap-2">
-                                                <Input value={item.pdfUrl} onChange={(e) => updateNewsletter(index, "pdfUrl", e.target.value)} />
-                                                <Button variant="outline" size="sm" onClick={() => { setActiveIndex(index); setShowMediaPicker(true); }}>Select</Button>
-                                            </div>
+                                            <FilePicker
+                                                label="PDF Document"
+                                                value={item.pdfUrl}
+                                                onChange={(url) => updateNewsletter(index, "pdfUrl", url)}
+                                                placeholder="Paste a URL or browse the media library"
+                                            />
                                         </div>
                                         <div className="flex items-center gap-4">
                                             <div className="flex-1 text-xs">
@@ -368,8 +370,7 @@ export default function NewslettersManager() {
                 )}
 
                 {/* Modals */}
-                <MediaPickerModal isOpen={showMediaPicker} onClose={() => setShowMediaPicker(false)} onSelect={(url) => activeIndex !== null && updateNewsletter(activeIndex, 'pdfUrl', url)} />
-                
+
                 <Modal isOpen={isArticleModalOpen} onClose={() => setIsArticleModalOpen(false)} className="max-w-4xl h-[90vh]">
                     <div className="p-6 border-b border-gray-200 flex justify-between items-center"><h2 className="text-xl font-bold">{currentArticleId ? "Edit Feature" : "New Feature"}</h2><button onClick={() => setIsArticleModalOpen(false)} className="text-2xl">&times;</button></div>
                     <div className="flex-1 overflow-y-auto p-6 bg-gray-50 space-y-4">

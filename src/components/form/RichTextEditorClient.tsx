@@ -88,6 +88,12 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
         }
     };
 
+    const handleEditorChange = useCallback((content: string) => {
+        if (content !== value) {
+            onChange(content);
+        }
+    }, [onChange, value]);
+
     return (
         <div className="flex flex-col gap-2 relative max-w-full">
             <style dangerouslySetInnerHTML={{ __html: quillStyles }} />
@@ -97,7 +103,7 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
                     ref={quillRef}
                     theme="snow"
                     value={value}
-                    onChange={onChange}
+                    onChange={handleEditorChange}
                     modules={modules}
                     formats={formats}
                     className="h-64 mb-12 text-gray-900 dark:text-gray-100 max-w-full" 

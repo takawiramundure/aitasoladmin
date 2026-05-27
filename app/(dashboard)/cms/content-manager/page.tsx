@@ -1,7 +1,7 @@
 "use client";
 
 import PageMeta from "@/components/common/PageMeta";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { FirestoreService, PageContent, SectionContent } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
@@ -15,15 +15,19 @@ import { FilePicker } from "@/components/form/FilePicker";
 
 import { Modal } from "@/components/ui/modal";
 import Alert from "@/components/ui/alert/Alert";
-import { Trash2, ArrowUp, ArrowDown, Leaf } from "lucide-react";
+import { Trash2, ArrowUp, ArrowDown, Leaf, Pin, Copy, Plus, Folder } from "lucide-react";
+import FolderPicker from "@/components/form/FolderPicker";
 import MediaLibrary from "@/components/common/MediaLibrary";
+import InsertSidebar from "@/components/common/InsertSidebar";
 import { SEED_DATA } from "@/config/seedData";
 
 export default function ContentManager() {
     const params = useParams();
     const location = usePathname();
-    // Derive pageId from URL path when route is hardcoded (e.g. /cms/careers not /cms/:pageId)
-    const pageId = params.pageId || location.pathname.split('/').filter(Boolean).pop();
+    const searchParams = useSearchParams();
+    
+    // Prioritize search param pageId (e.g. ?pageId=our-story), then route param, then fallback to path split
+    const pageId = searchParams.get('pageId') || params?.pageId || (location ? location.split('/').filter(Boolean).pop() : "");
     const { currentSite } = useSite();
     const [content, setContent] = useState<PageContent | null>(null);
     const [loading, setLoading] = useState(false);
@@ -48,6 +52,13 @@ export default function ContentManager() {
     const [newSectionId, setNewSectionId] = useState("");
     const [multiSelectOpenForSection, setMultiSelectOpenForSection] = useState<string | null>(null);
     const [sectionToDelete, setSectionToDelete] = useState<string | null>(null);
+
+    // Reusable components library states
+    const [isInsertSidebarOpen, setIsInsertSidebarOpen] = useState(false);
+    const [reusableComponents, setReusableComponents] = useState<any[]>([]);
+    const [tagReusableSectionId, setTagReusableSectionId] = useState<string | null>(null);
+    const [reusableLabel, setReusableLabel] = useState("");
+    const [isTagModalOpen, setIsTagModalOpen] = useState(false);
 
     // Map pageId to human readable title
     const pageTitles: Record<string, string> = {
@@ -90,10 +101,21 @@ export default function ContentManager() {
 
     const title = pageTitles[pageId || ""] || "Content Manager";
 
+    const loadReusableComponents = async () => {
+        if (!currentSite?.id) return;
+        try {
+            const data = await FirestoreService.getReusableSections(currentSite.id);
+            setReusableComponents(data);
+        } catch (e) {
+            console.error("Error loading reusable components:", e);
+        }
+    };
+
     useEffect(() => {
         if (pageId) {
             loadContent(pageId);
         }
+        loadReusableComponents();
     }, [pageId, currentSite?.id]);
 
     const loadContent = async (id: string) => {
@@ -260,6 +282,55 @@ export default function ContentManager() {
         });
         setNewSectionId("");
         setIsModalOpen(false);
+    };
+
+    const handleTagAsReusableClick = (sectionId: string, currentSection: any) => {
+        setTagReusableSectionId(sectionId);
+        setReusableLabel(currentSection.heading || sectionId);
+        setIsTagModalOpen(true);
+    };
+
+    const handleSaveTagAsReusable = async () => {
+        if (!tagReusableSectionId || !content) return;
+        const currentSection = content.sections?.[tagReusableSectionId];
+        if (!currentSection) return;
+
+        try {
+            await FirestoreService.saveReusableSection(currentSite.id, tagReusableSectionId, {
+                ...currentSection,
+                reusableLabel: reusableLabel || tagReusableSectionId
+            });
+            setSuccessMsg(`Section "${reusableLabel || tagReusableSectionId}" tagged as reusable!`);
+            setIsTagModalOpen(false);
+            setTagReusableSectionId(null);
+            setTimeout(() => setSuccessMsg(""), 3000);
+            await loadReusableComponents();
+        } catch (e) {
+            console.error("Error saving reusable section:", e);
+            setError("Failed to tag section as reusable.");
+        }
+    };
+
+    const handleInsertReusableSection = (reusableSec: any) => {
+        if (!content) return;
+        const newId = `${reusableSec.id.split('_')[0] || 'reusable'}_${Date.now()}`;
+        const maxOrder = Math.max(0, ...Object.values(content.sections || {}).map(s => s.order ?? 0));
+        
+        const clonedData = { ...reusableSec };
+        delete clonedData.reusableLabel;
+        delete clonedData.lastUpdated;
+        clonedData.order = maxOrder + 10;
+
+        setContent({
+            ...content,
+            sections: {
+                ...(content.sections || {}),
+                [newId]: clonedData
+            }
+        });
+        setIsInsertSidebarOpen(false);
+        setSuccessMsg(`Added reusable component "${reusableSec.reusableLabel || reusableSec.heading || reusableSec.id}"! Remember to save changes.`);
+        setTimeout(() => setSuccessMsg(""), 3000);
     };
 
     const seedAboutUs = () => {
@@ -1190,8 +1261,8 @@ export default function ContentManager() {
                             </Button>
                         )}
 
-                        <Button variant="outline" onClick={() => setIsModalOpen(true)}>
-                            + Add Section
+                        <Button variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 animate-pulse hover:animate-none" onClick={() => setIsInsertSidebarOpen(true)}>
+                            + Add Component / Section
                         </Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}
@@ -1273,6 +1344,14 @@ export default function ContentManager() {
                                                 title="Move Down"
                                             >
                                                 <ArrowDown size={16} />
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={(e) => { e.preventDefault(); handleTagAsReusableClick(key, section); }}
+                                                className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                title="Tag as Reusable"
+                                            >
+                                                <Pin size={16} />
                                             </button>
                                             <button 
                                                 type="button"
@@ -1435,61 +1514,93 @@ export default function ContentManager() {
 
                                     {key !== 'hero' && (
                                         <div className="flex flex-col gap-4 p-4 border rounded-xl bg-gray-50/50 dark:bg-gray-800/50 dark:border-gray-700">
-                                            <div className="flex items-center justify-between">
-                                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Section Images (Supports single Focal Image or Gallery block Arrays)</Label>
+                                            <div className="flex items-center justify-between border-b pb-2 mb-2 border-gray-200 dark:border-gray-700">
+                                                <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300 !mb-0">Section Images & Gallery Settings</Label>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-xs text-gray-500">Use Storage Folder (Gallery)</span>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!section.useFolderMapping}
+                                                        onChange={(e) => handleSectionChange(key, "useFolderMapping", e.target.checked)}
+                                                        className="w-4 h-4 text-primary rounded border-gray-300 focus:ring-primary"
+                                                    />
+                                                </div>
                                             </div>
 
-                                            {/* List all existing images */}
-                                            {(section.images || []).map((img, imgIdx) => (
-                                                <div key={imgIdx} className="flex gap-4 items-start border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0 last:pb-0">
-                                                    <div className="flex-grow">
-                                                        <ImagePicker
-                                                            label={imgIdx === 0 ? "Focal Image (Primary)" : `Gallery Image ${imgIdx + 1}`}
-                                                            value={img.url || ""}
-                                                            onChange={(url) => {
-                                                                const newImages = [...(section.images || [])];
-                                                                newImages[imgIdx] = { url, alt: section.heading || "Image" };
-                                                                handleSectionChange(key, "images", newImages);
-                                                            }}
-                                                            placeholder="Select or upload an image..."
+                                            {section.useFolderMapping ? (
+                                                <div className="grid gap-4 md:grid-cols-2">
+                                                    <div className="md:col-span-2">
+                                                        <FolderPicker
+                                                            label="Firebase Storage Folder Path"
+                                                            value={section.folderPath || ""}
+                                                            onChange={(path) => handleSectionChange(key, "folderPath", path)}
+                                                            helpText={`Select a folder containing images under the '${currentSite.id}' root folder.`}
                                                         />
                                                     </div>
-                                                    <button 
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.preventDefault();
-                                                            const newImages = [...(section.images || [])];
-                                                            newImages.splice(imgIdx, 1);
-                                                            handleSectionChange(key, "images", newImages);
-                                                        }}
-                                                        className="mt-8 p-2 text-red-500 hover:bg-red-50 rounded transition-colors"
-                                                        title="Remove Image"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
+                                                    <div>
+                                                        <Label>Max Images Limit</Label>
+                                                        <Input
+                                                            type="number"
+                                                            value={section.imagesLimit !== undefined ? section.imagesLimit : 12}
+                                                            onChange={(e) => handleSectionChange(key, "imagesLimit", e.target.value === '' ? '' : Number(e.target.value))}
+                                                        />
+                                                    </div>
                                                 </div>
-                                            ))}
+                                            ) : (
+                                                <>
+                                                    {/* List all existing images */}
+                                                    {(section.images || []).map((img, imgIdx) => (
+                                                        <div key={imgIdx} className="flex gap-4 items-start border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0 last:pb-0">
+                                                            <div className="flex-grow">
+                                                                <ImagePicker
+                                                                    label={imgIdx === 0 ? "Focal Image (Primary)" : `Gallery Image ${imgIdx + 1}`}
+                                                                    value={img.url || ""}
+                                                                    onChange={(url) => {
+                                                                        const newImages = [...(section.images || [])];
+                                                                        newImages[imgIdx] = { url, alt: section.heading || "Image" };
+                                                                        handleSectionChange(key, "images", newImages);
+                                                                    }}
+                                                                    placeholder="Select or upload an image..."
+                                                                />
+                                                            </div>
+                                                            <button 
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    const newImages = [...(section.images || [])];
+                                                                    newImages.splice(imgIdx, 1);
+                                                                    handleSectionChange(key, "images", newImages);
+                                                                }}
+                                                                className="mt-8 p-2 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                                title="Remove Image"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                    ))}
 
-                                            <div className="pt-2 flex gap-3 flex-wrap items-center">
-                                                <Button 
-                                                    variant="outline" 
-                                                    onClick={() => {
-                                                        const newImages = [...(section.images || []), { url: "", alt: "" }];
-                                                        handleSectionChange(key, "images", newImages);
-                                                    }}
-                                                >
-                                                    + Add Image Input (Manual)
-                                                </Button>
-                                                <Button 
-                                                    onClick={() => setMultiSelectOpenForSection(key)}
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md border-0"
-                                                >
-                                                    + Bulk Add Images from Library (Max 5)
-                                                </Button>
-                                            </div>
+                                                    <div className="pt-2 flex gap-3 flex-wrap items-center">
+                                                        <Button 
+                                                            variant="outline" 
+                                                            onClick={() => {
+                                                                const newImages = [...(section.images || []), { url: "", alt: "" }];
+                                                                handleSectionChange(key, "images", newImages);
+                                                            }}
+                                                        >
+                                                            + Add Image Input (Manual)
+                                                        </Button>
+                                                        <Button 
+                                                            onClick={() => setMultiSelectOpenForSection(key)}
+                                                            className="bg-blue-600 hover:bg-blue-700 text-white shadow-md border-0"
+                                                        >
+                                                            + Bulk Add Images from Library (Max 5)
+                                                        </Button>
+                                                    </div>
+                                                </>
+                                            )}
 
-                                            {/* Image Alignment settings only appear if there is at least one established image */}
-                                            {((section.images || []).length > 0 && section.images?.[0]?.url) && (
+                                            {/* Image Alignment settings only appear if there is at least one established image and not using folder mapping */}
+                                            {(!section.useFolderMapping && (section.images || []).length > 0 && section.images?.[0]?.url) && (
                                                 <div className="flex gap-4 items-center pt-4 border-t border-gray-200 dark:border-gray-700">
                                                     <Label className="flex-shrink-0">Image Alignment (Applies to First Image)</Label>
                                                     <select 
@@ -1525,26 +1636,6 @@ export default function ContentManager() {
                 </div>
             </div >
 
-            <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} className="max-w-md">
-                <div className="p-6 bg-white rounded-xl dark:bg-gray-900">
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">Add New Section</h3>
-                    <div className="mb-4">
-                        <Label>New Section Title (ID will be generated automatically)</Label>
-                        <Input
-                            type="text"
-                            placeholder="e.g. Hero Section"
-                            value={newSectionId}
-                            onChange={(e) => setNewSectionId(e.target.value)}
-                        />
-                    </div>
-                    <div className="flex justify-end gap-3">
-                        <Button variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                        <Button onClick={handleAddSection}>Create</Button>
-                    </div>
-                </div>
-            </Modal>
-
-            {/* Media Library Bulk Picker */}
             <MediaLibrary 
                 isOpen={!!multiSelectOpenForSection}
                 onClose={() => setMultiSelectOpenForSection(null)}
@@ -1563,6 +1654,59 @@ export default function ContentManager() {
                     setMultiSelectOpenForSection(null);
                 }}
             />
+
+            <InsertSidebar
+                isOpen={isInsertSidebarOpen}
+                onClose={() => setIsInsertSidebarOpen(false)}
+                reusableComponents={reusableComponents}
+                onAddReusable={handleInsertReusableSection}
+                onAddBlankSection={(title) => {
+                    if (!content) return;
+                    const id = title.trim().toLowerCase().replace(/\s+/g, "_");
+                    const maxOrder = Math.max(0, ...Object.values(content.sections || {}).map(s => s.order ?? 0));
+                    setContent({
+                        ...content,
+                        sections: {
+                            ...(content.sections || {}),
+                            [id]: {
+                                heading: title,
+                                content: "",
+                                order: maxOrder + 10
+                            }
+                        }
+                    });
+                    setIsInsertSidebarOpen(false);
+                    setSuccessMsg(`Added blank section "${title}"!`);
+                    setTimeout(() => setSuccessMsg(""), 3000);
+                }}
+            />
+
+            {/* Tag as Reusable Modal */}
+            <Modal isOpen={isTagModalOpen} onClose={() => setIsTagModalOpen(false)} className="max-w-md">
+                <div className="p-6 bg-white rounded-xl dark:bg-gray-900">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+                        <Pin size={18} className="text-blue-600" />
+                        Tag Section as Reusable
+                    </h3>
+                    <p className="text-xs text-gray-400 mb-4">Give this component a descriptive label so you can easily identify it when adding it to other pages.</p>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Component Label / Name</Label>
+                            <Input
+                                value={reusableLabel}
+                                onChange={(e) => setReusableLabel(e.target.value)}
+                                placeholder="e.g. Advocacy FAQ Accordion, Main Slider"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <Button variant="outline" onClick={() => setIsTagModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveTagAsReusable} disabled={!reusableLabel.trim()}>Tag Component</Button>
+                    </div>
+                </div>
+            </Modal>
 
             {/* Delete Confirmation Modal */}
             <Modal isOpen={!!sectionToDelete} onClose={() => setSectionToDelete(null)} className="max-w-sm">

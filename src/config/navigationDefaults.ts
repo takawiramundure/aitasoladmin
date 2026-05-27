@@ -65,6 +65,7 @@ export const GET_DEFAULT_NAV = (siteId: string): NavigationItem[] => {
                     { id: 'nav-serv-advocacy', name: 'Advocacy, Training & Education', path: '/services/advocacy-education', order: 4 },
                     { id: 'nav-serv-community', name: 'Community Support & Engagement', path: '/services/community-support', order: 5 },
                     { id: 'nav-serv-system', name: 'System Navigation', path: '/services/system-navigation', order: 6 },
+                    { id: 'nav-res-phac', name: 'PHAC Child Welfare', path: '/research/phac-child-welfare', order: 7 },
                 ] },
                 { id: 'nav-impact', name: 'Impact', path: '/impact', order: 4, subItems: [
                     { id: 'nav-impact-gate', name: 'Impact Gateway', path: '/impact', order: 1 },
@@ -78,8 +79,7 @@ export const GET_DEFAULT_NAV = (siteId: string): NavigationItem[] => {
                 { id: 'nav-research', name: 'Research', path: '/research', order: 6, subItems: [
                     { id: 'nav-res-gate', name: 'Research Gateway', path: '/research', order: 1 },
                     { id: 'nav-res-wellness', name: 'Black Wellness Project', path: '/research/black-wellness', order: 2 },
-                    { id: 'nav-res-phac', name: 'PHAC Child Welfare', path: '/research/phac-child-welfare', order: 3 },
-                    { id: 'nav-res-umoja', name: 'Umoja Neurodivergent Program', path: '/research/umoja-neurodivergent', order: 4 },
+                    { id: 'nav-res-umoja', name: 'Umoja Neurodivergent Program', path: '/research/umoja-neurodivergent', order: 3 },
                 ] },
                 { id: 'nav-join', name: 'Join Us', path: '/join', order: 7, subItems: [
                     { id: 'nav-join-get', name: 'Get Involved', path: '/join', order: 1 },
@@ -92,6 +92,11 @@ export const GET_DEFAULT_NAV = (siteId: string): NavigationItem[] => {
             ];
         case 'nspc':
         default:
+            return [
+                { id: 'nav-home', name: 'Home', path: '/', order: 1 },
+                { id: 'nav-about', name: 'About Us', path: '/about', order: 2 },
+                { id: 'nav-contact', name: 'Contact Us', path: '/contact', order: 3 },
+            ];
     }
 };
 
@@ -121,6 +126,128 @@ export const GET_SITE_DEFAULTS = (siteId: string, siteName: string) => {
             return {
                 description: `${siteName} - Professional agency site powered by Digital Maples Agency.`,
                 keywords: `${siteName}, agency, web development, digital solutions`
+            };
+    }
+};
+
+export const GET_SITE_THEME_DEFAULTS = (siteId: string) => {
+    switch (siteId) {
+        case 'kmfw':
+            return {
+                primary: '#1b771b', // Corporate Green requested by the user
+                secondary: '#84CC16',
+                accent: '#7C3AED',
+                textDark: '#1C1917',
+                textLight: '#78716C',
+                brandColor: '#D97706',
+                brandColorDark: '#1C1917',
+                brandColorLight: '#FFFBEB',
+                topBarBg: '#1C1917',
+                headerBg: '#FFFFFF'
+            };
+        case 'nspc':
+            return {
+                primary: '#00A8B4',
+                secondary: '#2C3E50',
+                accent: '#A5C93F',
+                textDark: '#1A1A1A',
+                textLight: '#FFFFFF',
+                brandColor: '#00A8B4',
+                brandColorDark: '#2C3E50',
+                brandColorLight: '#F0F9FA',
+                topBarBg: '#2C3E50',
+                headerBg: '#FFFFFF'
+            };
+        case 'bweic':
+            return {
+                primary: '#BA9731',
+                secondary: '#DACE84',
+                accent: '#8E7324',
+                textDark: '#0D0D0D',
+                textLight: '#cbd5e1',
+                brandColor: '#BA9731',
+                brandColorDark: '#8E7324',
+                brandColorLight: '#FEFEFE',
+                topBarBg: '#0D0D0D',
+                headerBg: '#FEFEFE'
+            };
+        case 'elwg':
+            return {
+                primary: '#71220B',
+                secondary: '#A57C1E',
+                accent: '#D4AF37',
+                textDark: '#1C1C1C',
+                textLight: '#7F7F7F',
+                brandColor: '#71220B',
+                brandColorDark: '#511808',
+                brandColorLight: '#FAF9F6',
+                topBarBg: '#71220B',
+                headerBg: '#FAF9F6'
+            };
+        case 'noel':
+            return {
+                primary: '#2E7D32',
+                secondary: '#A5D6A7',
+                accent: '#F9F6F1',
+                textDark: '#1C1C1C',
+                textLight: '#78716C',
+                brandColor: '#2E7D32',
+                brandColorDark: '#1B5E20',
+                brandColorLight: '#F9F6F1',
+                topBarBg: '#1C1C1C',
+                headerBg: '#FFFFFF'
+            };
+        case 'dmlabs':
+            return {
+                primary: '#22c55e',
+                secondary: '#1a3673',
+                accent: '#FF0000',
+                textDark: '#FFFFFF',
+                textLight: 'rgba(255, 255, 255, 0.7)',
+                brandColor: '#22c55e',
+                brandColorDark: '#0C1F47',
+                brandColorLight: '#1a3673',
+                topBarBg: '#0C1F47',
+                headerBg: '#0C1F47'
+            };
+        case 'aitasol':
+            return {
+                primary: '#1E3A5F',
+                secondary: '#2D5F9E',
+                accent: '#F59E0B',
+                textDark: '#111827',
+                textLight: '#6B7280',
+                brandColor: '#1E3A5F',
+                brandColorDark: '#11223F',
+                brandColorLight: '#FAFAF9',
+                topBarBg: '#1E3A5F',
+                headerBg: '#FFFFFF'
+            };
+        case 'phcg':
+            return {
+                primary: '#1B4FD8',
+                secondary: '#0F2057',
+                accent: '#F59E0B',
+                textDark: '#6B7280',
+                textLight: '#9CA3AF',
+                brandColor: '#1B4FD8',
+                brandColorDark: '#0F2057',
+                brandColorLight: '#EFF4FF',
+                topBarBg: '#0F2057',
+                headerBg: '#FFFFFF'
+            };
+        default:
+            return {
+                primary: '#3C50E0',
+                secondary: '#80CAEE',
+                accent: '#F2F4F7',
+                textDark: '#1C2434',
+                textLight: '#64748B',
+                brandColor: '#3C50E0',
+                brandColorDark: '#1A233A',
+                brandColorLight: '#E2E8F0',
+                topBarBg: '#1C2434',
+                headerBg: '#FFFFFF'
             };
     }
 };

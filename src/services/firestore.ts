@@ -878,5 +878,50 @@ export const FirestoreService = {
             console.error("Error deleting form:", error);
             throw error;
         }
+    },
+
+    // Reusable Sections / Components Management
+    getReusableSections: async (siteId: string): Promise<any[]> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_reusable_sections` : 'reusable_sections';
+            const colRef = collection(dbInstance, collectionName);
+            const snapshot = await getDocs(colRef);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error("Error fetching reusable sections:", error);
+            return [];
+        }
+    },
+
+    saveReusableSection: async (siteId: string, sectionId: string, data: any): Promise<void> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_reusable_sections` : 'reusable_sections';
+            const docRef = doc(dbInstance, collectionName, sectionId);
+            await setDoc(docRef, {
+                ...data,
+                id: sectionId,
+                lastUpdated: new Date().toISOString()
+            });
+        } catch (error) {
+            console.error("Error saving reusable section:", error);
+            throw error;
+        }
+    },
+
+    deleteReusableSection: async (siteId: string, sectionId: string): Promise<void> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_reusable_sections` : 'reusable_sections';
+            const docRef = doc(dbInstance, collectionName, sectionId);
+            await deleteDoc(docRef);
+        } catch (error) {
+            console.error("Error deleting reusable section:", error);
+            throw error;
+        }
     }
 };

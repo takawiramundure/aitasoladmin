@@ -12,9 +12,11 @@ import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import LinkPicker from "@/components/form/LinkPicker";
 import FolderPicker from "@/components/form/FolderPicker";
-import { Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2, Pin } from 'lucide-react';
 import { nominees as defaultNominees, agenda as defaultAgenda, speakers as defaultSpeakers } from "@/data/fallbackNominees";
 import { useDialog } from "@/context/DialogContext";
+import { Modal } from "@/components/ui/modal";
+import InsertSidebar from "@/components/common/InsertSidebar";
 
 interface GalaSection extends SectionContent {
     enabled?: boolean;
@@ -77,8 +79,72 @@ export default function GalaManager() {
     const [successMsg, setSuccessMsg] = useState("");
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ hero: true });
 
+    // Reusable tag modal states
+    const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+    const [tagReusableSectionId, setTagReusableSectionId] = useState<string | null>(null);
+    const [reusableLabel, setReusableLabel] = useState("");
+    const [isInsertSidebarOpen, setIsInsertSidebarOpen] = useState(false);
+    const [reusableComponents, setReusableComponents] = useState<any[]>([]);
+
+    const loadReusableComponents = async () => {
+        if (!currentSite?.id) return;
+        try {
+            const data = await FirestoreService.getReusableSections(currentSite.id);
+            setReusableComponents(data);
+        } catch (e) {
+            console.error("Error loading reusable components:", e);
+        }
+    };
+
+    const handleInsertReusableSection = (reusableSec: any) => {
+        if (!content) return;
+        const newId = `${reusableSec.id.split('_')[0] || 'reusable'}_${Date.now()}`;
+        const clonedData = { ...reusableSec };
+        delete clonedData.reusableLabel;
+        delete clonedData.lastUpdated;
+
+        setContent({
+            ...content,
+            sections: {
+                ...(content.sections || {}),
+                [newId]: clonedData
+            },
+            sectionOrder: [...(content.sectionOrder || GALA_SECTIONS.map(s => s.id)), newId]
+        });
+        setIsInsertSidebarOpen(false);
+        setSuccessMsg(`Added reusable component "${reusableSec.reusableLabel || reusableSec.heading || reusableSec.id}"! Remember to save changes.`);
+        setTimeout(() => setSuccessMsg(""), 3000);
+    };
+
+    const handleTagAsReusableClick = (sectionId: string, currentSection: any) => {
+        setTagReusableSectionId(sectionId);
+        setReusableLabel(currentSection.heading || sectionId);
+        setIsTagModalOpen(true);
+    };
+
+    const handleSaveTagAsReusable = async () => {
+        if (!tagReusableSectionId || !content) return;
+        const currentSection = content.sections?.[tagReusableSectionId];
+        if (!currentSection) return;
+
+        try {
+            await FirestoreService.saveReusableSection(currentSite.id, tagReusableSectionId, {
+                ...currentSection,
+                reusableLabel: reusableLabel || tagReusableSectionId
+            });
+            setSuccessMsg(`Section "${reusableLabel || tagReusableSectionId}" tagged as reusable!`);
+            setTimeout(() => setSuccessMsg(""), 3000);
+            setIsTagModalOpen(false);
+            await loadReusableComponents();
+        } catch (e: any) {
+            console.error("Error tagging section as reusable:", e);
+            setError(`Failed to save reusable section: ${e.message}`);
+        }
+    };
+
     useEffect(() => {
         loadContent();
+        loadReusableComponents();
     }, [currentSite?.id]);
 
     const loadContent = async () => {
@@ -483,6 +549,13 @@ export default function GalaManager() {
                     </div>
                     <div className="flex gap-3">
                         <Button variant="outline" onClick={seedGalaData}>Seed Data</Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsInsertSidebarOpen(true)}
+                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 animate-pulse hover:animate-none"
+                        >
+                            + Add Component / Section
+                        </Button>
                         <Button onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</Button>
                     </div>
                 </div>
@@ -499,9 +572,16 @@ export default function GalaManager() {
                                 fullOrder.push(s.id);
                             }
                         });
+                        if (content?.sections) {
+                            Object.keys(content.sections).forEach(key => {
+                                if (!fullOrder.includes(key)) {
+                                    fullOrder.push(key);
+                                }
+                            });
+                        }
                         const sortedSections = fullOrder
-                            .map(id => GALA_SECTIONS.find(s => s.id === id))
-                            .filter((s): s is typeof GALA_SECTIONS[0] => !!s);
+                            .map(id => GALA_SECTIONS.find(s => s.id === id) || { id, label: content?.sections?.[id]?.heading || id })
+                            .filter(Boolean);
 
                         return sortedSections.map((config, index) => {
                             const section = (content?.sections[config.id] || { heading: config.label, enabled: true, content: '' }) as GalaSection;
@@ -537,6 +617,41 @@ export default function GalaManager() {
                                                 >
                                                     <ChevronDown size={16} />
                                                 </button>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => handleTagAsReusableClick(config.id, section)}
+                                                    className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                                                    title="Tag as Reusable"
+                                                >
+                                                    <Pin size={16} />
+                                                </button>
+                                                {!GALA_SECTIONS.some(s => s.id === config.id) && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={async () => {
+                                                            const isConfirmed = await confirm({
+                                                                title: "Remove Section",
+                                                                message: `Are you sure you want to remove the custom section "${config.label || config.id}"?`,
+                                                                variant: "danger",
+                                                                confirmLabel: "Delete"
+                                                            });
+                                                            if (isConfirmed && content) {
+                                                                const newSections = { ...content.sections };
+                                                                delete newSections[config.id];
+                                                                const newOrder = (content.sectionOrder || []).filter((id: string) => id !== config.id);
+                                                                setContent({
+                                                                    ...content,
+                                                                    sections: newSections,
+                                                                    sectionOrder: newOrder
+                                                                });
+                                                            }
+                                                        }}
+                                                        className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors"
+                                                        title="Delete Custom Section"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
                                             </div>
 
                                             <h3 className="font-bold text-gray-700 dark:text-white">{config.label}</h3>
@@ -1392,6 +1507,21 @@ export default function GalaManager() {
                                                 </div>
                                             </div>
                                         )}
+
+                                        {!GALA_SECTIONS.some(s => s.id === config.id) && (
+                                            <div className="space-y-4">
+                                                <div><Label>Heading</Label><Input value={section.heading || ""} onChange={(e) => handleSectionChange(config.id, 'heading', e.target.value)} /></div>
+                                                <div><Label>Subtitle / Secondary Heading</Label><Input value={section.subtitle || ""} onChange={(e) => handleSectionChange(config.id, 'subtitle', e.target.value)} /></div>
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div><Label>Button Text (Optional)</Label><Input value={section.buttonText || ""} onChange={(e) => handleSectionChange(config.id, 'buttonText', e.target.value)} /></div>
+                                                    <div><Label>Button URL / Action (Optional)</Label><Input value={section.buttonUrl || ""} onChange={(e) => handleSectionChange(config.id, 'buttonUrl', e.target.value)} placeholder="/contact or https://..." /></div>
+                                                </div>
+                                                <div>
+                                                    <div className="mb-2"><Label>Body Content</Label></div>
+                                                    <RichTextEditor label="" value={section.content || ""} onChange={(val) => handleSectionChange(config.id, 'content', val)} />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -1400,6 +1530,59 @@ export default function GalaManager() {
                 })()}
                 </div>
             </div>
+
+            <InsertSidebar
+                isOpen={isInsertSidebarOpen}
+                onClose={() => setIsInsertSidebarOpen(false)}
+                reusableComponents={reusableComponents}
+                onAddReusable={handleInsertReusableSection}
+                onAddBlankSection={(title) => {
+                    if (!content) return;
+                    const id = title.trim().toLowerCase().replace(/\s+/g, "_");
+                    setContent({
+                        ...content,
+                        sections: {
+                            ...(content.sections || {}),
+                            [id]: {
+                                heading: title,
+                                content: "",
+                                enabled: true
+                            }
+                        },
+                        sectionOrder: [...(content.sectionOrder || GALA_SECTIONS.map(s => s.id)), id]
+                    });
+                    setIsInsertSidebarOpen(false);
+                    setSuccessMsg(`Added blank section "${title}"!`);
+                    setTimeout(() => setSuccessMsg(""), 3000);
+                }}
+            />
+
+            {/* Tag as Reusable Modal */}
+            <Modal isOpen={isTagModalOpen} onClose={() => setIsTagModalOpen(false)} className="max-w-md">
+                <div className="p-6 bg-white rounded-xl dark:bg-gray-900">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+                        <Pin size={18} className="text-blue-600" />
+                        Tag Section as Reusable
+                    </h3>
+                    <p className="text-xs text-gray-400 mb-4">Give this component a descriptive label so you can easily identify it when adding it to other pages.</p>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Component Label / Name</Label>
+                            <Input
+                                value={reusableLabel}
+                                onChange={(e) => setReusableLabel(e.target.value)}
+                                placeholder="e.g. Nominees Directory, Sponsors Slider"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <Button variant="outline" onClick={() => setIsTagModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveTagAsReusable} disabled={!reusableLabel.trim()}>Tag Component</Button>
+                    </div>
+                </div>
+            </Modal>
         </>
     );
 }

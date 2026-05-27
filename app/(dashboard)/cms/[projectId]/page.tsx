@@ -40,7 +40,11 @@ const ProjectPageManager: React.FC = () => {
         const loadData = async () => {
             if (!projectId) return;
             try {
-                const pageId = projectId.startsWith('project-') ? projectId : `project-${projectId}`;
+                // If it's one of the generic static pages, we do NOT prefix 'project-'
+                const staticPages = ['join-us', 'funders', 'volunteer'];
+                const pageId = staticPages.includes(projectId) || projectId.startsWith('project-') 
+                    ? projectId 
+                    : `project-${projectId}`;
                 const res = await FirestoreService.getPageContent(pageId, currentSite.id);
                 // For the UI and defaults, we prefer the clean ID without the prefix
                 const cleanId = projectId.replace('project-', '');
@@ -132,7 +136,10 @@ const ProjectPageManager: React.FC = () => {
         setSuccessMsg("");
         setError("");
         try {
-            const pageId = projectId.startsWith('project-') ? projectId : `project-${projectId}`;
+            const staticPages = ['join-us', 'funders', 'volunteer'];
+            const pageId = staticPages.includes(projectId) || projectId.startsWith('project-') 
+                ? projectId 
+                : `project-${projectId}`;
             await FirestoreService.savePageContent(pageId, data, currentSite.id);
             setSuccessMsg("Project content saved successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);

@@ -90,7 +90,18 @@ export default function PagesManager() {
 
     const handleEdit = (page: any) => {
         const template = page.template || page.id;
-        router.push(`/cms/${template}?slug=${page.id}`);
+        const genericPages = [
+            'our-story', 'meet-our-team', 'services', 'grounded-counseling', 'educational-programs',
+            'advocacy-education', 'community-support', 'system-navigation', 'research',
+            'project-black-wellness', 'project-phac-child-welfare', 'project-umoja-neurodivergent',
+            'impact', 'success-stories', 'join-us', 'funders', 'volunteer', 'careers'
+        ];
+        
+        if (currentSite.id === 'kmfw' && genericPages.includes(template)) {
+            router.push(`/cms/content-manager?pageId=${template}&slug=${page.id}`);
+        } else {
+            router.push(`/cms/${template}?slug=${page.id}`);
+        }
     };
 
     if (loading) return <div className="p-6">Loading pages...</div>;

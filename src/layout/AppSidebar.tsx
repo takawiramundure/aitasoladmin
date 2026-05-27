@@ -52,6 +52,12 @@ const AppSidebar: React.FC = () => {
         name: "Forms Manager",
         path: "/cms/forms",
         new: true,
+      },
+      {
+        icon: <PlugInIcon />,
+        name: "Reusable Components",
+        path: "/cms/reusable-components",
+        new: true,
       }
     ];
 
@@ -153,8 +159,8 @@ const AppSidebar: React.FC = () => {
           icon: <UserCircleIcon />,
           subItems: [
             { name: "About Us", path: "/cms/about" },
-            { name: "Our Story", path: "/cms/our-story" },
-            { name: "Meet Our Team", path: "/cms/meet-our-team" },
+            { name: "Our Story", path: "/cms/content-manager?pageId=our-story" },
+            { name: "Meet Our Team", path: "/cms/content-manager?pageId=meet-our-team" },
             { name: "Strategic Plan", path: "/cms/strategic-plan" },
             { name: "Founder's Message", path: "/cms/founders-message" },
             { name: "Celebrating 5 Years", path: "/cms/celebrating-5-years" },
@@ -166,19 +172,19 @@ const AppSidebar: React.FC = () => {
           name: "Services & Programs",
           icon: <PageIcon />,
           subItems: [
-            { name: "Services Gateway", path: "/cms/services" },
-            { name: "Grounded Counseling", path: "/cms/grounded-counseling" },
-            { name: "Educational Programs", path: "/cms/educational-programs" },
-            { name: "Advocacy & Education", path: "/cms/advocacy-education" },
-            { name: "Community Support", path: "/cms/community-support" },
-            { name: "System Navigation", path: "/cms/system-navigation" },
+            { name: "Services Gateway", path: "/cms/content-manager?pageId=services" },
+            { name: "Grounded Counseling", path: "/cms/content-manager?pageId=grounded-counseling" },
+            { name: "Educational Programs", path: "/cms/content-manager?pageId=educational-programs" },
+            { name: "Advocacy & Education", path: "/cms/content-manager?pageId=advocacy-education" },
+            { name: "Community Support", path: "/cms/content-manager?pageId=community-support" },
+            { name: "System Navigation", path: "/cms/content-manager?pageId=system-navigation" },
           ],
         },
         {
           name: "Research",
           icon: <PageIcon />,
           subItems: [
-            { name: "Research Gateway", path: "/cms/research" },
+            { name: "Research Gateway", path: "/cms/content-manager?pageId=research" },
             { name: "Black Wellness", path: "/cms/project-black-wellness" },
             { name: "PHAC Welfare", path: "/cms/project-phac-child-welfare" },
             { name: "Umoja Program", path: "/cms/project-umoja-neurodivergent" },
@@ -188,11 +194,11 @@ const AppSidebar: React.FC = () => {
           name: "Impact",
           icon: <PageIcon />,
           subItems: [
-            { name: "Impact Gateway", path: "/cms/impact" },
+            { name: "Impact Gateway", path: "/cms/content-manager?pageId=impact" },
             { name: "Upcoming Events", path: "/cms/upcoming-events" },
             { name: "Black Excellence Gala", path: "/cms/black-excellence-gala" },
             { name: "Newsletters", path: "/cms/newsletters" },
-            { name: "Success Stories", path: "/cms/success-stories" },
+            { name: "Success Stories", path: "/cms/content-manager?pageId=success-stories" },
             { name: "Gallery", path: "/cms/gallery" },
           ]
         },
@@ -200,11 +206,11 @@ const AppSidebar: React.FC = () => {
           name: "Join Us",
           icon: <BoxCubeIcon />,
           subItems: [
-            { name: "Join Us Gateway", path: "/cms/join-us" },
-            { name: "Funders & Sponsors", path: "/cms/funders" },
+            { name: "Join Us Gateway", path: "/cms/content-manager?pageId=join-us" },
+            { name: "Funders & Sponsors", path: "/cms/content-manager?pageId=funders" },
             { name: "Partners", path: "/cms/partners" },
-            { name: "Careers", path: "/cms/careers" },
-            { name: "Volunteering", path: "/cms/volunteer" },
+            { name: "Careers", path: "/cms/content-manager?pageId=careers" },
+            { name: "Volunteering", path: "/cms/content-manager?pageId=volunteer" },
           ]
         },
         {

@@ -10,11 +10,13 @@ import Input from "@/components/form/input/InputField";
 import RichTextEditor from "@/components/form/RichTextEditor";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
-import { Eye, EyeOff, ChevronDown, ChevronUp, Trash2, Search } from 'lucide-react';
+import { Eye, EyeOff, ChevronDown, ChevronUp, Trash2, Search, Pin } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
 import { useDialog } from "@/context/DialogContext";
+import InsertSidebar from "@/components/common/InsertSidebar";
+import { Modal } from "@/components/ui/modal";
 
 interface AboutSection extends SectionContent {
     enabled?: boolean;
@@ -260,11 +262,83 @@ export default function AboutPageManager() {
     const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
     const { confirm } = useDialog();
 
+    const [isInsertSidebarOpen, setIsInsertSidebarOpen] = useState(false);
+    const [reusableComponents, setReusableComponents] = useState<any[]>([]);
+    const [tagReusableSectionId, setTagReusableSectionId] = useState<string | null>(null);
+    const [reusableLabel, setReusableLabel] = useState("");
+    const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+
+    const loadReusableComponents = async () => {
+        if (!currentSite?.id) return;
+        try {
+            const data = await FirestoreService.getReusableSections(currentSite.id);
+            setReusableComponents(data);
+        } catch (e) {
+            console.error("Error loading reusable components:", e);
+        }
+    };
+
+    const handleTagAsReusableClick = (sectionId: string, currentSection: any) => {
+        setTagReusableSectionId(sectionId);
+        setReusableLabel(currentSection.heading || sectionId);
+        setIsTagModalOpen(true);
+    };
+
+    const handleSaveTagAsReusable = async () => {
+        if (!tagReusableSectionId || !content) return;
+        const currentSection = content.sections?.[tagReusableSectionId];
+        if (!currentSection) return;
+
+        try {
+            await FirestoreService.saveReusableSection(currentSite.id, tagReusableSectionId, {
+                ...currentSection,
+                reusableLabel: reusableLabel || tagReusableSectionId
+            });
+            setSuccessMsg(`Section "${reusableLabel || tagReusableSectionId}" tagged as reusable!`);
+            setIsTagModalOpen(false);
+            setTagReusableSectionId(null);
+            setTimeout(() => setSuccessMsg(""), 3000);
+            await loadReusableComponents();
+        } catch (e) {
+            console.error("Error saving reusable section:", e);
+            setError("Failed to tag section as reusable.");
+        }
+    };
+
+    const handleInsertReusableSection = (reusableSec: any) => {
+        if (!content) return;
+        const newId = `${reusableSec.id.split('_')[0] || 'reusable'}_${Date.now()}`;
+        const clonedData = { ...reusableSec };
+        delete clonedData.reusableLabel;
+        delete clonedData.lastUpdated;
+
+        setContent({
+            ...content,
+            sections: {
+                ...(content.sections || {}),
+                [newId]: clonedData
+            }
+        });
+        setIsInsertSidebarOpen(false);
+        setSuccessMsg(`Added reusable component "${reusableSec.reusableLabel || reusableSec.heading || reusableSec.id}"! Remember to save changes.`);
+        setTimeout(() => setSuccessMsg(""), 3000);
+    };
+
     const sectionsConfig = getSectionsConfig(currentSite.id);
     const defaultContentForSite = getDefaultContent(currentSite.id);
 
+    const activeSectionsConfig = [...sectionsConfig];
+    if (content?.sections) {
+        Object.keys(content.sections).forEach(key => {
+            if (!activeSectionsConfig.some(s => s.id === key)) {
+                activeSectionsConfig.push({ id: key, label: content.sections[key]?.heading || key });
+            }
+        });
+    }
+
     useEffect(() => {
         loadContent();
+        loadReusableComponents();
     }, [currentSite]);
 
     const loadContent = async () => {
@@ -407,6 +481,13 @@ export default function AboutPageManager() {
                                 🌱 Seed Default Data
                             </Button>
                         )}
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsInsertSidebarOpen(true)}
+                            className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 animate-pulse hover:animate-none"
+                        >
+                            + Add Component / Section
+                        </Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}
                         </Button>
@@ -429,7 +510,7 @@ export default function AboutPageManager() {
                 </div>
 
                 <div className="space-y-4">
-                    {sectionsConfig.map((config) => {
+                    {activeSectionsConfig.map((config) => {
                         const section = content?.sections[config.id] || { heading: config.label, content: "", enabled: true };
                         const isExpanded = expandedSections[config.id];
 
@@ -447,6 +528,40 @@ export default function AboutPageManager() {
                                         >
                                             {section.enabled ? <Eye size={20} /> : <EyeOff size={20} />}
                                         </button>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); handleTagAsReusableClick(config.id, section); }}
+                                            className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
+                                            title="Tag as Reusable"
+                                        >
+                                            <Pin size={18} />
+                                        </button>
+                                        {!sectionsConfig.some(s => s.id === config.id) && (
+                                            <button
+                                                type="button"
+                                                onClick={async (e) => {
+                                                    e.stopPropagation();
+                                                    const isConfirmed = await confirm({
+                                                        title: "Remove Section",
+                                                        message: `Are you sure you want to remove the custom section "${config.label}"?`,
+                                                        variant: "danger",
+                                                        confirmLabel: "Delete"
+                                                    });
+                                                    if (isConfirmed && content) {
+                                                        const newSections = { ...content.sections };
+                                                        delete newSections[config.id];
+                                                        setContent({
+                                                            ...content,
+                                                            sections: newSections
+                                                        });
+                                                    }
+                                                }}
+                                                className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                                title="Delete Custom Section"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        )}
                                         <h3 className={`font-medium ${section.enabled ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500'}`}>
                                             {config.label}
                                         </h3>
@@ -468,7 +583,7 @@ export default function AboutPageManager() {
                                                 />
                                             </div>
 
-                                            {['header', 'hero', 'values'].includes(config.id) && (
+                                            {(!sectionsConfig.some(s => s.id === config.id) || ['header', 'hero', 'values'].includes(config.id)) && (
                                                 <div>
                                                     <Label>Subtitle / Secondary Heading</Label>
                                                     <Input
@@ -479,7 +594,29 @@ export default function AboutPageManager() {
                                                 </div>
                                             )}
 
-                                            {['header', 'strategicPlan', 'mission', 'approach', 'hero', 'team', 'values', 'ai_for_good'].includes(config.id) && (
+                                            {!sectionsConfig.some(s => s.id === config.id) && (
+                                                <div className="grid grid-cols-2 gap-4">
+                                                    <div>
+                                                        <Label>Button Text (Optional)</Label>
+                                                        <Input
+                                                            type="text"
+                                                            value={section.buttonText || ""}
+                                                            onChange={(e) => handleSectionChange(config.id, "buttonText", e.target.value)}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label>Button URL / Action (Optional)</Label>
+                                                        <Input
+                                                            type="text"
+                                                            value={section.buttonUrl || ""}
+                                                            onChange={(e) => handleSectionChange(config.id, "buttonUrl", e.target.value)}
+                                                            placeholder="/contact or https://..."
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {(!sectionsConfig.some(s => s.id === config.id) || ['header', 'strategicPlan', 'mission', 'approach', 'hero', 'team', 'values', 'ai_for_good'].includes(config.id)) && (
                                                 <div>
                                                     <div className="mb-2"><Label>Body Content</Label></div>
                                                     <RichTextEditor
@@ -652,6 +789,57 @@ export default function AboutPageManager() {
                 </div>
             </div>
 
+            <InsertSidebar
+                isOpen={isInsertSidebarOpen}
+                onClose={() => setIsInsertSidebarOpen(false)}
+                reusableComponents={reusableComponents}
+                onAddReusable={handleInsertReusableSection}
+                onAddBlankSection={(title) => {
+                    if (!content) return;
+                    const id = title.trim().toLowerCase().replace(/\s+/g, "_");
+                    setContent({
+                        ...content,
+                        sections: {
+                            ...(content.sections || {}),
+                            [id]: {
+                                heading: title,
+                                content: "",
+                                enabled: true
+                            }
+                        }
+                    });
+                    setIsInsertSidebarOpen(false);
+                    setSuccessMsg(`Added blank section "${title}"!`);
+                    setTimeout(() => setSuccessMsg(""), 3000);
+                }}
+            />
+
+            {/* Tag as Reusable Modal */}
+            <Modal isOpen={isTagModalOpen} onClose={() => setIsTagModalOpen(false)} className="max-w-md">
+                <div className="p-6 bg-white rounded-xl dark:bg-gray-900">
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-2 flex items-center gap-2">
+                        <Pin size={18} className="text-blue-600" />
+                        Tag Section as Reusable
+                    </h3>
+                    <p className="text-xs text-gray-400 mb-4">Give this component a descriptive label so you can easily identify it when adding it to other pages.</p>
+                    
+                    <div className="space-y-4">
+                        <div>
+                            <Label>Component Label / Name</Label>
+                            <Input
+                                value={reusableLabel}
+                                onChange={(e) => setReusableLabel(e.target.value)}
+                                placeholder="e.g. History Summary, Philosophy Inset"
+                            />
+                        </div>
+                    </div>
+                    
+                    <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100 dark:border-gray-800">
+                        <Button variant="outline" onClick={() => setIsTagModalOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSaveTagAsReusable} disabled={!reusableLabel.trim()}>Tag Component</Button>
+                    </div>
+                </div>
+            </Modal>
         </>
     );
 }

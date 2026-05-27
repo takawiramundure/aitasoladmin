@@ -33,14 +33,11 @@ export default function CareersPageManager() {
     useEffect(() => { loadContent(); }, [currentSite.id]);
 
     const loadContent = async () => {
-        if (currentSite.id !== 'phcg') {
-            setError("This editor is currently only configured for PHCG.");
-            setLoading(false);
-            return;
-        }
         setLoading(true);
+        setError("");
         try {
-            const data = await FirestoreService.getPageContent('career', currentSite.id);
+            const pageDocId = currentSite.id === 'kmfw' ? 'careers' : 'career';
+            const data = await FirestoreService.getPageContent(pageDocId, currentSite.id);
             setContent(data || DEFAULT_DATA);
         } catch (err: any) {
             console.error(err);
@@ -56,7 +53,8 @@ export default function CareersPageManager() {
         setSaving(true);
         setSuccessMsg(""); setError("");
         try {
-            await FirestoreService.savePageContent('career', content, currentSite.id);
+            const pageDocId = currentSite.id === 'kmfw' ? 'careers' : 'career';
+            await FirestoreService.savePageContent(pageDocId, content, currentSite.id);
             setSuccessMsg("Careers page saved successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err: any) {
@@ -77,10 +75,6 @@ export default function CareersPageManager() {
     };
 
     if (loading) return <div className="p-6 text-gray-500">Loading careers settings...</div>;
-
-    if (currentSite.id !== 'phcg') {
-        return <div className="p-6 text-gray-500">This editor is currently only configured for PHCG.</div>;
-    }
 
     return (
         <>
