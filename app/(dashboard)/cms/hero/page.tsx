@@ -439,11 +439,7 @@ export default function HeroManager() {
                 <div className="mb-6 p-4 bg-blue-50 text-blue-800 rounded-lg text-sm border border-blue-100">
                     <h4 className="font-semibold mb-1">Image Guidelines:</h4>
                     <ul className="list-disc pl-5 space-y-1">
-                        {currentSite.id === 'kmfw' ? (
-                            <li>Recommended resolution: <strong>800x800 px</strong> (Square 1:1 format). Image will be cropped into a decorative bordered container.</li>
-                        ) : (
-                            <li>Recommended resolution: <strong>1920x1080 px</strong> (16:9 aspect ratio)</li>
-                        )}
+                        <li>Recommended resolution: <strong>1920x1080 px</strong> (16:9 aspect ratio)</li>
                         <li>Format: JPG or WebP. Max size: 2MB.</li>
                     </ul>
                 </div>

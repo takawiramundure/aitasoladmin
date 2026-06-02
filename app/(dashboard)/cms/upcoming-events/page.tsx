@@ -43,7 +43,7 @@ export default function EventsManager() {
     const { confirm, alert } = useDialog();
 
     // Limits
-    const MAX_DESCRIPTION_LENGTH = 400;
+    const MAX_DESCRIPTION_LENGTH = 1000;
 
     const getCleanLength = (html: string) => {
         const doc = new DOMParser().parseFromString(html, 'text/html');

@@ -11,11 +11,72 @@ import SiteSelector from "@/components/header/SiteSelector";
 import { db } from "@/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
 
+import { useSite } from "@/context/SiteContext";
+
 const AppHeader: React.FC = () => {
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const [supportLink, setSupportLink] = useState("");
+  const { currentSite } = useSite();
+  const [publishing, setPublishing] = useState(false);
+  const [isDraftMode, setIsDraftMode] = useState(true);
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mode = localStorage.getItem('cms_draft_mode') !== 'false';
+      setIsDraftMode(mode);
+    }
+  }, []);
+
+  const toggleDraftMode = () => {
+    const nextMode = !isDraftMode;
+    localStorage.setItem('cms_draft_mode', String(nextMode));
+    setIsDraftMode(nextMode);
+    window.location.reload();
+  };
+
+  const getPageIdFromUrl = () => {
+    if (typeof window === 'undefined') return null;
+    const searchParams = new URLSearchParams(window.location.search);
+    const pageIdParam = searchParams.get('pageId');
+    if (pageIdParam) return pageIdParam;
+
+    const pathname = window.location.pathname;
+    const parts = pathname.split('/').filter(Boolean);
+    const lastPart = parts[parts.length - 1];
+    if (!lastPart || lastPart === 'cms' || lastPart === 'dashboard') return null;
+    if (lastPart === 'home-settings') return 'home';
+    return lastPart;
+  };
+
+  const handlePublish = async () => {
+    const pageId = getPageIdFromUrl();
+    if (!pageId || !currentSite?.id) {
+      alert("No active page found to publish.");
+      return;
+    }
+    setPublishing(true);
+    try {
+      const { FirestoreService } = await import("@/services/firestore");
+      // Force load the draft content
+      const draftContent = await FirestoreService.getPageContent(pageId, currentSite.id, 'draft');
+      if (draftContent) {
+        // Force save to live
+        await FirestoreService.savePageContent(pageId, draftContent, currentSite.id, 'live');
+        // Also update draft so they are identical
+        await FirestoreService.savePageContent(pageId, draftContent, currentSite.id, 'draft');
+        alert("Published draft to Live successfully!");
+      } else {
+        alert("No draft content found to publish.");
+      }
+    } catch (error) {
+      console.error("Publish error:", error);
+      alert("Failed to publish: " + (error as any).message);
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   useEffect(() => {
     const fetchSupportLink = async () => {
@@ -176,6 +237,32 @@ const AppHeader: React.FC = () => {
             } items-center justify-between w-full gap-4 px-5 py-4 lg:flex shadow-theme-md lg:justify-end lg:px-0 lg:shadow-none`}
         >
           <div className="flex items-center gap-2 2xsm:gap-3">
+            {/* Draft/Live Mode Switcher */}
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+              <span className={`text-[10px] font-extrabold ${isDraftMode ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400'}`}>DRAFT</span>
+              <button
+                type="button"
+                onClick={toggleDraftMode}
+                className={`w-7 h-4 rounded-full transition-colors relative ${isDraftMode ? 'bg-amber-500' : 'bg-green-600'}`}
+                title="Toggle Draft/Live mode"
+              >
+                <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${isDraftMode ? 'translate-x-0' : 'translate-x-3'}`} />
+              </button>
+              <span className={`text-[10px] font-extrabold ${!isDraftMode ? 'text-green-600 dark:text-green-400' : 'text-gray-400'}`}>LIVE</span>
+            </div>
+
+            {/* Publish button (only shown in Draft Mode on editable pages) */}
+            {isDraftMode && getPageIdFromUrl() && (
+              <button
+                type="button"
+                onClick={handlePublish}
+                disabled={publishing}
+                className="px-3 py-1.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition-all"
+              >
+                {publishing ? "Publishing..." : "🚀 Publish"}
+              </button>
+            )}
+
             <SiteSelector />
             {supportLink && (
               <a

@@ -91,13 +91,23 @@ export interface ThemeSettings {
 
 export const FirestoreService = {
     // Fetch content for a specific page with siteId
-    getPageContent: async (pageId: string, siteId: string): Promise<PageContent | null> => {
+    getPageContent: async (pageId: string, siteId: string, forceMode?: 'live' | 'draft'): Promise<PageContent | null> => {
         try {
+            const isDraftMode = forceMode === 'draft' || (forceMode !== 'live' && typeof window !== 'undefined' && localStorage.getItem('cms_draft_mode') !== 'false');
+            const targetPageId = isDraftMode && !pageId.endsWith('_draft') ? `${pageId}_draft` : pageId;
+
             const site = getSiteById(siteId);
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
-            const docRef = doc(dbInstance, collectionName, pageId);
-            const docSnap = await getDoc(docRef);
+            
+            let docRef = doc(dbInstance, collectionName, targetPageId);
+            let docSnap = await getDoc(docRef);
+
+            // Fall back to live document if draft is requested but doesn't exist
+            if (!docSnap.exists() && isDraftMode && !forceMode) {
+                const liveDocRef = doc(dbInstance, collectionName, pageId);
+                docSnap = await getDoc(liveDocRef);
+            }
 
             if (docSnap.exists()) {
                 return docSnap.data() as PageContent;
@@ -142,13 +152,15 @@ export const FirestoreService = {
     },
 
 
-    // Update or Create content for a specific page with siteId
-    savePageContent: async (pageId: string, data: PageContent, siteId: string) => {
+    savePageContent: async (pageId: string, data: PageContent, siteId: string, forceMode?: 'live' | 'draft') => {
         try {
+            const isDraftMode = forceMode === 'draft' || (forceMode !== 'live' && typeof window !== 'undefined' && localStorage.getItem('cms_draft_mode') !== 'false');
+            const targetPageId = isDraftMode && !pageId.endsWith('_draft') ? `${pageId}_draft` : pageId;
+
             const site = getSiteById(siteId);
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
-            const docRef = doc(dbInstance, collectionName, pageId);
+            const docRef = doc(dbInstance, collectionName, targetPageId);
             await setDoc(docRef, {
                 ...data,
                 siteId, // Store siteId for reference

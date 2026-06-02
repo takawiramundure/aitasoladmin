@@ -178,6 +178,7 @@ const AppSidebar: React.FC = () => {
             { name: "Advocacy & Education", path: "/cms/content-manager?pageId=advocacy-education" },
             { name: "Community Support", path: "/cms/content-manager?pageId=community-support" },
             { name: "System Navigation", path: "/cms/content-manager?pageId=system-navigation" },
+            { name: "PHAC Welfare", path: "/cms/content-manager?pageId=project-phac-child-welfare" },
           ],
         },
         {
@@ -186,7 +187,6 @@ const AppSidebar: React.FC = () => {
           subItems: [
             { name: "Research Gateway", path: "/cms/content-manager?pageId=research" },
             { name: "Black Wellness", path: "/cms/project-black-wellness" },
-            { name: "PHAC Welfare", path: "/cms/project-phac-child-welfare" },
             { name: "Umoja Program", path: "/cms/project-umoja-neurodivergent" },
           ]
         },

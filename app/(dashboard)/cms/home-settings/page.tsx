@@ -1519,7 +1519,7 @@ export default function HomePageManager() {
                                                          <ImagePicker
                                                              label="Feature Image (Fallback)"
                                                              value={section.images?.[0]?.url || ""}
-                                                             helpText="Recommended: 800x1000px portrait."
+                                                             helpText="Recommended: 1920x1080px."
                                                              onChange={(url) => {
                                                                  const newImages = [...(section.images || [])];
                                                                  if (!newImages[0]) newImages[0] = { url: "", alt: "" };
@@ -1527,6 +1527,39 @@ export default function HomePageManager() {
                                                                  handleSectionChange(config.id, "images", newImages);
                                                              }}
                                                          />
+                                                     </div>
+                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                         <div>
+                                                             <Label>Banner Height</Label>
+                                                             <Input 
+                                                                 type="text" 
+                                                                 placeholder="e.g. 600px, 700px, 80vh" 
+                                                                 value={section.containerHeight || ""} 
+                                                                 onChange={(e) => handleSectionChange(config.id, "containerHeight", e.target.value)}
+                                                             />
+                                                             <p className="text-[11px] text-gray-400 mt-1">Specify height (e.g. 600px, 750px). Default is 600px on desktop.</p>
+                                                         </div>
+                                                         <div>
+                                                             <Label>Image Focus Point (Vertical Alignment)</Label>
+                                                             <select
+                                                                 className="w-full rounded-lg border border-gray-300 bg-transparent py-3 px-4 text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:text-white dark:bg-gray-800"
+                                                                 value={section.objectPosition || "center"}
+                                                                 onChange={(e) => handleSectionChange(config.id, "objectPosition", e.target.value)}
+                                                             >
+                                                                 <option value="center">Center</option>
+                                                                 <option value="center top">Top</option>
+                                                                 <option value="center bottom">Bottom</option>
+                                                                 <option value="center 10%">Top 10%</option>
+                                                                 <option value="center 20%">Top 20% (Move Image Down)</option>
+                                                                 <option value="center 30%">Top 30%</option>
+                                                                 <option value="center 40%">Top 40%</option>
+                                                                 <option value="center 60%">Bottom 60%</option>
+                                                                 <option value="center 70%">Bottom 70% (Move Image Up)</option>
+                                                                 <option value="center 80%">Bottom 80%</option>
+                                                                 <option value="center 90%">Bottom 90%</option>
+                                                             </select>
+                                                             <p className="text-[11px] text-gray-400 mt-1">Controls which vertical area of the image remains centered/visible.</p>
+                                                         </div>
                                                      </div>
                                                  </div>
                                             )}

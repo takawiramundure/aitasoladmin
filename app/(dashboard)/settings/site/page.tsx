@@ -12,7 +12,7 @@ import ImageCropperModal from "@/components/common/ImageCropperModal";
 import { storage } from "@/firebaseConfig";
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { availableRoutes } from "@/utils/routes";
-import { GET_DEFAULT_NAV, GET_SITE_DEFAULTS } from "@/config/navigationDefaults";
+import { GET_DEFAULT_NAV, GET_SITE_DEFAULTS, GET_SITE_THEME_DEFAULTS } from "@/config/navigationDefaults";
 import { useDialog } from "@/context/DialogContext";
 import { optimizeImage } from "@/utils/imageOptimizer";
 
@@ -66,29 +66,32 @@ export default function SiteSettingsManager() {
             const siteDefaults = GET_SITE_DEFAULTS(currentSite.id, currentSite.name);
 
             if (data && data.navigation && data.navigation.length > 0) {
-                // Perform a merge so that default sub-items are populated if they are missing in Firestore
-                // This ensures the Admin UI matches the actual frontend rendering logic.
-                data.navigation = data.navigation.map((firestoreItem: any) => {
-                    const defaultItem = defaultNav.find(
-                        d => d.path === firestoreItem.path || d.name === firestoreItem.name
-                    );
-                    
-                    // If no matching default item or it has no sub-items, keep firestore item as is
-                    if (!defaultItem || !defaultItem.subItems || defaultItem.subItems.length === 0) {
-                        return firestoreItem;
-                    }
-
-                    // Identify sub-items present in defaultNav but missing in Firestore
-                    const firestoreSubPaths = new Set((firestoreItem.subItems || []).map((s: any) => s.path));
-                    const missingSubItems = defaultItem.subItems.filter(s => !firestoreSubPaths.has(s.path));
-
-                    return {
-                        ...firestoreItem,
-                        subItems: [...(firestoreItem.subItems || []), ...missingSubItems]
-                    };
-                });
+                // Firestore is the single source of truth for navigation.
+                // Do NOT re-inject default sub-items that are missing — the admin may have
+                // intentionally moved or removed them. Trust what is saved in Firestore.
+                // (No merge needed here; the admin UI renders exactly what Firestore holds.)
             } else if (data && (!data.navigation || data.navigation.length <= 1)) {
                 data.navigation = defaultNav;
+            }
+
+            if (data && data.theme) {
+                const defaultTheme = GET_SITE_THEME_DEFAULTS(currentSite.id);
+                // If the primary color is black or missing, we treat it as an unconfigured default
+                const isUnconfigured = data.theme.primary === '#000' || data.theme.primary === '#000000' || !data.theme.primary;
+                if (isUnconfigured) {
+                    data.theme = {
+                        ...defaultTheme,
+                        ...data.theme,
+                        primary: data.theme.primary && data.theme.primary !== '#000' && data.theme.primary !== '#000000' ? data.theme.primary : defaultTheme.primary,
+                        secondary: data.theme.secondary && data.theme.secondary !== '#000' && data.theme.secondary !== '#000000' ? data.theme.secondary : defaultTheme.secondary,
+                        accent: data.theme.accent && data.theme.accent !== '#000' && data.theme.accent !== '#000000' ? data.theme.accent : defaultTheme.accent,
+                        brandColor: data.theme.brandColor && data.theme.brandColor !== '#000' && data.theme.brandColor !== '#000000' ? data.theme.brandColor : defaultTheme.brandColor,
+                        brandColorLight: data.theme.brandColorLight && data.theme.brandColorLight !== '#000' && data.theme.brandColorLight !== '#000000' ? data.theme.brandColorLight : defaultTheme.brandColorLight,
+                        brandColorDark: data.theme.brandColorDark && data.theme.brandColorDark !== '#000' && data.theme.brandColorDark !== '#000000' ? data.theme.brandColorDark : defaultTheme.brandColorDark,
+                        topBarBg: data.theme.topBarBg && data.theme.topBarBg !== '#000' && data.theme.topBarBg !== '#000000' ? data.theme.topBarBg : defaultTheme.topBarBg,
+                        textDark: data.theme.textDark && data.theme.textDark !== '#000' && data.theme.textDark !== '#000000' ? data.theme.textDark : defaultTheme.textDark,
+                    };
+                }
             }
 
             // Auto-initialize if no data found
@@ -101,18 +104,7 @@ export default function SiteSettingsManager() {
                     siteName: currentSite.name, 
                     logo: '' 
                 },
-                theme: { 
-                    primary: '#3C50E0', 
-                    secondary: '#80CAEE', 
-                    accent: '#F2F4F7', 
-                    textDark: '#1C2434', 
-                    textLight: '#64748B', 
-                    brandColor: '#3C50E0', 
-                    brandColorDark: '#1A233A', 
-                    brandColorLight: '#E2E8F0', 
-                    topBarBg: '#1C2434', 
-                    headerBg: '#FFFFFF' 
-                },
+                theme: GET_SITE_THEME_DEFAULTS(currentSite.id),
                 navigation: defaultNav,
                 maintenanceMode: false,
                 emergencyBar: {

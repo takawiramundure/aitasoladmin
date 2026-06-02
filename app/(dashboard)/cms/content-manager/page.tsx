@@ -34,6 +34,12 @@ export default function ContentManager() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
+    const [isDraftMode, setIsDraftMode] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('cms_draft_mode') !== 'false';
+        }
+        return true;
+    });
     
     // Expose for automation/debugging
     useEffect(() => {
@@ -80,6 +86,7 @@ export default function ContentManager() {
         "advocacy-education": "Advocacy & Education",
         "community-support": "Community Support",
         "system-navigation": "System Navigation",
+        "project-phac-child-welfare": "PHAC Child Welfare",
         impact: "Impact Gateway",
         newsletters: "Newsletters",
         "success-stories": "Success Stories",
@@ -113,19 +120,27 @@ export default function ContentManager() {
 
     useEffect(() => {
         if (pageId) {
-            loadContent(pageId);
+            loadContent(pageId, isDraftMode);
         }
         loadReusableComponents();
-    }, [pageId, currentSite?.id]);
+    }, [pageId, currentSite?.id, isDraftMode]);
 
-    const loadContent = async (id: string) => {
+    const loadContent = async (id: string, useDraft: boolean = isDraftMode) => {
         // Only set hard loading if we don't have content for this page yet
         if (!content || content.title !== pageTitles[id]) {
             setLoading(true);
         }
         setError("");
         try {
-            const data = await FirestoreService.getPageContent(id, currentSite.id);
+            // If useDraft is true, try to load from the draft document first
+            const docId = useDraft ? `${id}_draft` : id;
+            let data = await FirestoreService.getPageContent(docId, currentSite.id);
+
+            // If loading draft and it doesn't exist, fall back to the live document as baseline
+            if (!data && useDraft) {
+                data = await FirestoreService.getPageContent(id, currentSite.id);
+            }
+
             if (data) {
                 // ... (Services gateway logic preserved)
                 if (id === 'services') {
@@ -198,15 +213,38 @@ export default function ContentManager() {
         setSuccessMsg("");
         setError("");
         try {
-            console.log(`[CMS] Saving content for page: ${pageId} on site: ${currentSite.id}`);
+            const targetDocId = isDraftMode ? `${pageId}_draft` : pageId;
+            console.log(`[CMS] Saving content for page: ${targetDocId} on site: ${currentSite.id}`);
             // Clean content to ensure it's serializable
             const cleanContent = JSON.parse(JSON.stringify(content));
-            await FirestoreService.savePageContent(pageId, cleanContent, currentSite.id);
-            setSuccessMsg("Content saved successfully!");
+            await FirestoreService.savePageContent(targetDocId, cleanContent, currentSite.id);
+            setSuccessMsg(isDraftMode ? "Draft saved successfully!" : "Live content saved successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err: any) {
             console.error("[CMS] Save Error:", err);
             setError(`Failed to save content: ${err.message || 'Unknown error'}`);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handlePublish = async () => {
+        if (!pageId || !content) return;
+        setSaving(true);
+        setSuccessMsg("");
+        setError("");
+        try {
+            console.log(`[CMS] Publishing draft content for page: ${pageId} on site: ${currentSite.id}`);
+            const cleanContent = JSON.parse(JSON.stringify(content));
+            // Save current state to the live page document
+            await FirestoreService.savePageContent(pageId, cleanContent, currentSite.id);
+            // Also update draft to keep them in sync
+            await FirestoreService.savePageContent(`${pageId}_draft`, cleanContent, currentSite.id);
+            setSuccessMsg("Draft published to Live successfully!");
+            setTimeout(() => setSuccessMsg(""), 3000);
+        } catch (err: any) {
+            console.error("[CMS] Publish Error:", err);
+            setError(`Failed to publish: ${err.message || 'Unknown error'}`);
         } finally {
             setSaving(false);
         }
@@ -515,13 +553,19 @@ export default function ContentManager() {
         setContent({
             title: "Success Stories",
             sections: {
-                intro: {
-                    heading: "Voices of Resilience",
-                    content: "<p>Real stories from individuals and families who have found strength and support through KMFW programs.</p>"
+                hero: {
+                    enabled: true,
+                    heading: "Celebrating our Successes with our Community:\nSuccess Story Spotlight",
+                    content: "Join us as we kick off our Success Story Spotlight series! We are thrilled to share the many successes we have had at KMFW and in our local communities."
                 },
                 story_1: {
-                    heading: "Finding a Path to Healing",
-                    content: "<p>'KMFW didn't just provide counseling; they provided a community that understood my cultural context...' - Sarah J.</p>"
+                    enabled: true,
+                    heading: "“I’m seen, I’m heard, and I’m understood” – Successes in KMFW’s Afrocentric Counselling",
+                    content: `<p>The mission of Kind Minds Family Wellness (KMFW), from the start, has been “to transform personal narratives of Black persons, support and empower them as they navigate systems in order to attain positive self-actualization and holistic wellness” (KMFW Brochure). KMFW does this through many different services and programs run by our staff and volunteers. One service that empowers clients of KMFW is Afrocentric counselling.</p><p>Many Black Canadians face unique barriers while accessing mental health services. One of the ways to facilitate accessing mental health services among Black Canadians has been concerted efforts to deliver culturally competent care like Afrocentric counselling, which is different than typical counselling. Afrocentric counselling is culturally adapted care by trained professionals who are racially, culturally, and spiritually equipped to perform adequate and supportive treatment. Adapting counselling to fit the unique needs of a cultural context is important. Treatment is more beneficial when care is tailored to the user’s cultural context and that users are more prone to continue care as they find it fits their needs better than typical counselling. At KMFW, all the Afrocentric counselling is done by loving, caring professionals who center the needs of those who they serve and can support their unique experiences as black individuals through their own lived experiences and shared identities.</p><p>A counsellor at KMFW explains that clients are happy to be working with Kind Minds Family Wellness during very vulnerable times in their lives because they do not have to explain nuances about themselves to their clinicians. This was the story of one client who sought out KMFW’s counselling services because of her experiences with white clinicians who were not able to care for her needs. Coming to KMFW she found that her counsellor already knew and understood the nuances that came with being Black. She no longer felt invisible. And instead of the counsellor only focusing on treating the trauma, they focused on other areas of her life. The client told the counsellor that, “I come because I am getting something from this.”</p><p>Another success story is about a client who was court-appointed to attend therapy. Before meeting with his counsellor, the client was apprehensive of going to therapy and had preconceived notions that his counsellor would not be able to help or understand them. Instead, he got the exact opposite. He felt that therapy was like, “sitting down, talking to my Auntie.” He continued to seek counselling well past his court mandated sessions because his experience at KMFW was different than what he thought it would be and was helpful. KMFW was able to provide a space for this client to be themselves, a place where they did not have to hold back, created space for race and authenticity without the need to act differently. With help from his counsellor, he has been able to move towards increased self-sufficiency and independence.</p><blockquote class="border-l-4 border-primary pl-6 py-2 my-10 text-2xl text-charcoal font-bold italic">“This is a place where I am comfortable, where I can be who I am, and they see me”</blockquote><p>By offering culturally adapted care through knowledgeable and empathetic professionals, KMFW ensures that clients feel seen, heard, and understood. This Afrocentric counselling not only addresses the unique challenges faced by Black individuals but also creates a therapeutic environment where clients can authentically engage in their healing process. As evidenced by client testimonials, KMFW's commitment to cultural sensitivity and compassionate care transcends typical therapeutic experiences, resulting in meaningful transformations and lasting empowerment within the community it serves.</p><p><strong>References:</strong></p><ul class="list-disc pl-6 space-y-2 mt-4 text-sm"><li>Fante-Coleman, T., Jackson-Best, F. Barriers and Facilitators to Accessing Mental Healthcare in Canada for Black Youth: A Scoping Review. Adolescent Res Rev 5, 115–136 (2020). <a href="https://doi.org/10.1007/s40894-020-00133-2" target="_blank" class="text-primary hover:underline">https://doi.org/10.1007/s40894-020-00133-2</a></li><li>Bent-Goodley, T., Fairfax, C. N., & Carlton-LaNey, I. (2017). The significance of African-centered social work for social work practice. Journal of Human Behavior in the Social Environment, 27(1–2), 1–6. <a href="https://doi.org/10.1080/10911359.2016.1273682" target="_blank" class="text-primary hover:underline">https://doi.org/10.1080/10911359.2016.1273682</a></li><li>Lateef, H., Amoako, E. O., Nartey, P., Tan, J., & Joe, S. (2022). Black Youth and African-Centered Interventions: A Systematic Review. Research on Social Work Practice, 32(1), 3-12. <a href="https://doi.org/10.1177/10497315211003322" target="_blank" class="text-primary hover:underline">https://doi.org/10.1177/10497315211003322</a></li><li>Ward, E. C., & Brown, R. L. (2015). A culturally adapted depression intervention for African American adults experiencing depression: Oh Happy Day. The American journal of orthopsychiatry, 85(1), 11–22. <a href="https://doi.org/10.1037/ort0000027" target="_blank" class="text-primary hover:underline">https://doi.org/10.1037/ort0000027</a></li></ul>`,
+                    images: [{ url: "/assets/illustrations/community_wellness.png", alt: "Community Wellness" }],
+                    imageAlignment: "banner",
+                    containerHeight: "450px",
+                    objectPosition: "center 20%"
                 }
             }
         });
@@ -582,7 +626,11 @@ export default function ContentManager() {
                     content: `
                         <p>At KMFW, we ensure that program and service needs are effectively addressed and that room for subsequent meetings is left open to our clients. We are very passionate about the services we provide and are committed to ensuring that service recipients observe and experience this commitment.</p>
                         <p>Our clients are offered tailored services and ongoing opportunities to evaluate and modify their personalized expected outcomes as needed. We are passionate about fostering services that are evidence-informed and targeted to clients' needs. Therefore, we encourage and appreciate clients' constructive feedback as it ensures that our services are exceptionally delivered.</p>
-                    `
+                    `,
+                    images: [{ url: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=1200", alt: "Counseling Session" }],
+                    imageAlignment: "banner",
+                    containerHeight: "450px",
+                    objectPosition: "center"
                 },
                 referral_process: {
                     heading: "Referral Process for Counseling",
@@ -597,6 +645,44 @@ export default function ContentManager() {
             }
         });
         setSuccessMsg("Seeded Grounded Counseling data!");
+    };
+
+    const seedPhacChildWelfare = () => {
+        setContent({
+            title: "PHAC Child Welfare",
+            sections: {
+                hero: {
+                    heading: "Strengthening Child Welfare Response",
+                    subtitle: "PHAC Funded Initiative",
+                    content: "A Black-led, culturally grounded intervention in Waterloo Region."
+                },
+                overview: {
+                    heading: "Initiative Overview",
+                    content: "This project will strengthen how service providers prevent, recognize, and respond to child maltreatment within Black communities. Working with Black caregivers, youth, and service providers, we will co-design culturally grounded training and tools that help organizations respond more effectively to the needs of Black families.\n\nGrounded in Afrocentric and trauma-informed approaches, the project will support organizations across Waterloo Region to integrate culturally responsive practices and address systemic barriers that impact Black families."
+                },
+                details: {
+                    heading: "Project Details",
+                    timeline: "April 2026 - March 2030",
+                    status: "Coming Soon",
+                    content: "Timeline: April 2026 - March 2030\nStatus: Coming Soon"
+                },
+                objectives: {
+                    heading: "Core Objectives",
+                    items: [
+                        "Strengthen prevention and response to child maltreatment",
+                        "Co-design culturally grounded training and tools",
+                        "Address systemic barriers impacting Black families"
+                    ]
+                },
+                partners: {
+                    heading: "Partners & Support",
+                    items: [
+                        { name: "Public Health Agency of Canada (PHAC)", role: "Funder" }
+                    ]
+                }
+            }
+        });
+        setSuccessMsg("Seeded PHAC Child Welfare data!");
     };
 
     const seedEducationalPrograms = () => {
@@ -794,6 +880,29 @@ export default function ContentManager() {
                     list: [
                         { name: "Placeholder Mentor 1", role: "Role Description", bio: "Bio information...", image: "" },
                         { name: "Placeholder Mentor 2", role: "Role Description", bio: "Bio information...", image: "" }
+                    ]
+                },
+                portfolio: {
+                    heading: "Meet the Team",
+                    subtitle: "Our Dedicated Staff",
+                    content: "Our staff brings diverse backgrounds and a shared passion for delivering culturally responsive care.",
+                    enabled: true,
+                    order: 30,
+                    items: [
+                        {
+                            name: "Jane Doe",
+                            role: "Founder & Executive Director",
+                            bio: "Jane Doe is the Founder and Executive Director of Kind Minds Family Wellness. She has over 15 years of experience in clinical social work and community advocacy. She holds a Master of Social Work and is passionate about Afrocentric mental health services.",
+                            image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80",
+                            linkedin: "https://linkedin.com"
+                        },
+                        {
+                            name: "John Smith",
+                            role: "Director of Operations",
+                            bio: "John Smith oversees the daily operations and strategic partnerships at KMFW. With a background in public health administration, John ensures that all programs are delivered efficiently and align with community needs.",
+                            image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=600&q=80",
+                            linkedin: "https://linkedin.com"
+                        }
                     ]
                 }
             }
@@ -1200,6 +1309,11 @@ export default function ContentManager() {
                                 Seed Counseling
                             </Button>
                         )}
+                        {pageId === 'project-phac-child-welfare' && (
+                            <Button variant="outline" onClick={seedPhacChildWelfare}>
+                                Seed PHAC Child Welfare
+                            </Button>
+                        )}
                         {pageId === 'educational-programs' && (
                             <Button variant="outline" onClick={seedEducationalPrograms}>
                                 Seed Educational Programs
@@ -1260,6 +1374,8 @@ export default function ContentManager() {
                                 Seed Volunteering
                             </Button>
                         )}
+
+
 
                         <Button variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 animate-pulse hover:animate-none" onClick={() => setIsInsertSidebarOpen(true)}>
                             + Add Component / Section
@@ -1599,21 +1715,160 @@ export default function ContentManager() {
                                                 </>
                                             )}
 
-                                            {/* Image Alignment settings only appear if there is at least one established image and not using folder mapping */}
+                                            {/* Image Alignment and Focal Point settings only appear if there is at least one established image and not using folder mapping */}
                                             {(!section.useFolderMapping && (section.images || []).length > 0 && section.images?.[0]?.url) && (
-                                                <div className="flex gap-4 items-center pt-4 border-t border-gray-200 dark:border-gray-700">
-                                                    <Label className="flex-shrink-0">Image Alignment (Applies to First Image)</Label>
-                                                    <select 
-                                                        value={section.imageAlignment || 'top'} 
-                                                        onChange={(e) => handleSectionChange(key, "imageAlignment", e.target.value)}
-                                                        className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 w-full sm:w-auto text-sm"
-                                                    >
-                                                        <option value="top">Top (Stacked)</option>
-                                                        <option value="left">Image on Left (Side-by-Side)</option>
-                                                        <option value="right">Image on Right (Side-by-Side)</option>
-                                                    </select>
+                                                <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-4">
+                                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                        <div>
+                                                            <Label>Image Alignment (Applies to First Image)</Label>
+                                                            <select 
+                                                                value={section.imageAlignment || 'top'} 
+                                                                onChange={(e) => handleSectionChange(key, "imageAlignment", e.target.value)}
+                                                                className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 text-sm"
+                                                            >
+                                                                <option value="top">Top (Stacked)</option>
+                                                                <option value="left">Image on Left (Side-by-Side)</option>
+                                                                <option value="right">Image on Right (Side-by-Side)</option>
+                                                                <option value="banner">Banner (Full-Width / Leading Image)</option>
+                                                            </select>
+                                                        </div>
+                                                        <div>
+                                                            <Label>Banner Height</Label>
+                                                            <Input 
+                                                                type="text" 
+                                                                placeholder="e.g. 450px, 600px" 
+                                                                value={section.containerHeight || ""} 
+                                                                onChange={(e) => handleSectionChange(key, "containerHeight", e.target.value)}
+                                                                disabled={section.imageAlignment !== 'banner'}
+                                                            />
+                                                            <p className="text-[10px] text-gray-400 mt-1">Specify height (e.g., 400px, 45vh) only if Alignment is Banner.</p>
+                                                        </div>
+                                                        <div>
+                                                            <Label>Image Focus Point (Vertical)</Label>
+                                                            <select
+                                                                className="w-full rounded-lg border border-gray-300 bg-white py-2 px-3 text-sm text-gray-800 outline-none focus:border-brand-500 dark:border-gray-700 dark:text-white dark:bg-gray-800"
+                                                                value={section.objectPosition || "center"}
+                                                                onChange={(e) => handleSectionChange(key, "objectPosition", e.target.value)}
+                                                                disabled={section.imageAlignment !== 'banner'}
+                                                            >
+                                                                <option value="center">Center</option>
+                                                                <option value="center top">Top</option>
+                                                                <option value="center bottom">Bottom</option>
+                                                                <option value="center 10%">Top 10%</option>
+                                                                <option value="center 20%">Top 20% (Move Image Down)</option>
+                                                                <option value="center 30%">Top 30%</option>
+                                                                <option value="center 40%">Top 40%</option>
+                                                                <option value="center 60%">Bottom 60%</option>
+                                                                <option value="center 70%">Bottom 70% (Move Image Up)</option>
+                                                                <option value="center 80%">Bottom 80%</option>
+                                                                <option value="center 90%">Bottom 90%</option>
+                                                            </select>
+                                                            <p className="text-[10px] text-gray-400 mt-1">Specify vertical position offset only if Alignment is Banner.</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
+                                        </div>
+                                    )}
+
+                                    {(key === 'portfolio' || key === 'mentors' || section.items || section.list) && (
+                                        <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50/50 dark:bg-white/[0.01] space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <h4 className="text-sm font-semibold text-brand-700 dark:text-brand-400">List Items (Team Members / Mentors)</h4>
+                                            </div>
+                                            <div className="space-y-4">
+                                                {((section.items || section.list || []) as any[]).map((item, idx) => (
+                                                    <div key={idx} className="p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800/50 space-y-3">
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs font-bold text-gray-400 uppercase">Item #{idx + 1}</span>
+                                                            <button 
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    const newList = [...(section.items || section.list || [])];
+                                                                    newList.splice(idx, 1);
+                                                                    handleSectionChange(key, section.items ? "items" : "list", newList);
+                                                                }}
+                                                                className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 dark:hover:bg-red-950/20 rounded"
+                                                            >
+                                                                <Trash2 size={16} />
+                                                            </button>
+                                                        </div>
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div>
+                                                                <Label>Name</Label>
+                                                                <Input 
+                                                                    type="text" 
+                                                                    value={item.name || ""} 
+                                                                    onChange={(e) => {
+                                                                        const newList = [...(section.items || section.list || [])];
+                                                                        newList[idx] = { ...newList[idx], name: e.target.value };
+                                                                        handleSectionChange(key, section.items ? "items" : "list", newList);
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <Label>Role</Label>
+                                                                <Input 
+                                                                    type="text" 
+                                                                    value={item.role || ""} 
+                                                                    onChange={(e) => {
+                                                                        const newList = [...(section.items || section.list || [])];
+                                                                        newList[idx] = { ...newList[idx], role: e.target.value };
+                                                                        handleSectionChange(key, section.items ? "items" : "list", newList);
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <ImagePicker 
+                                                                    label="Photo" 
+                                                                    value={item.image || ""} 
+                                                                    onChange={(url) => {
+                                                                        const newList = [...(section.items || section.list || [])];
+                                                                        newList[idx] = { ...newList[idx], image: url };
+                                                                        handleSectionChange(key, section.items ? "items" : "list", newList);
+                                                                    }} 
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <Label>LinkedIn URL</Label>
+                                                                <Input 
+                                                                    type="text" 
+                                                                    placeholder="https://linkedin.com/in/..."
+                                                                    value={item.linkedin || ""} 
+                                                                    onChange={(e) => {
+                                                                        const newList = [...(section.items || section.list || [])];
+                                                                        newList[idx] = { ...newList[idx], linkedin: e.target.value };
+                                                                        handleSectionChange(key, section.items ? "items" : "list", newList);
+                                                                    }}
+                                                                />
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <Label>Biography</Label>
+                                                                <textarea 
+                                                                    className="w-full px-4 py-2 border rounded-xl bg-transparent text-gray-800 dark:text-white dark:border-gray-700 focus:border-brand-500 outline-none" 
+                                                                    rows={3} 
+                                                                    value={item.bio || ""} 
+                                                                    onChange={(e) => {
+                                                                        const newList = [...(section.items || section.list || [])];
+                                                                        newList[idx] = { ...newList[idx], bio: e.target.value };
+                                                                        handleSectionChange(key, section.items ? "items" : "list", newList);
+                                                                    }} 
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="sm" 
+                                                    onClick={() => {
+                                                        const newList = [...(section.items || section.list || []), { name: "", role: "", bio: "", image: "", linkedin: "" }];
+                                                        handleSectionChange(key, section.items ? "items" : "list", newList);
+                                                    }}
+                                                >
+                                                    + Add Item
+                                                </Button>
+                                            </div>
                                         </div>
                                     )}
 
