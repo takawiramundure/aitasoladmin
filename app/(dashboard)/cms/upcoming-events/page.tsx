@@ -35,6 +35,7 @@ interface Event {
     description: string;
     registrationUrl: string;
     isDone?: boolean;
+    alwaysActive?: boolean;
 }
 
 export default function EventsManager() {
@@ -69,6 +70,7 @@ export default function EventsManager() {
         imageUrl: "",
         description: "",
         isDone: false,
+        alwaysActive: false,
         date: new Date(),
     });
 
@@ -166,6 +168,7 @@ export default function EventsManager() {
             imageUrl: "",
             description: "",
             isDone: false,
+            alwaysActive: false,
             date: new Date(),
         });
         setIsModalOpen(true);
@@ -345,9 +348,14 @@ export default function EventsManager() {
                                                 DONE
                                             </div>
                                         )}
-                                        {event.date?.seconds && (new Date(event.date.seconds * 1000) < new Date()) && !event.isDone && (
+                                        {event.date?.seconds && (new Date(event.date.seconds * 1000) < new Date()) && !event.isDone && !event.alwaysActive && (
                                             <div className="bg-gray-500 text-white px-2 py-1 rounded text-xs font-bold shadow-sm">
                                                 PAST
+                                            </div>
+                                        )}
+                                        {event.alwaysActive && (
+                                            <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-bold shadow-sm">
+                                                ALWAYS ACTIVE
                                             </div>
                                         )}
                                     </div>
@@ -407,15 +415,26 @@ export default function EventsManager() {
                         </div>
 
                         <div className="col-span-1 md:col-span-2 flex items-center gap-2 bg-gray-100 p-3 rounded-xl dark:bg-gray-800">
-                            <input 
-                                type="checkbox" 
-                                id="isDone" 
-                                checked={formData.isDone} 
-                                onChange={(e) => setFormData({ ...formData, isDone: e.target.checked })}
-                                className="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                            />
-                            <Label htmlFor="isDone" className="mb-0 cursor-pointer">Mark as Completed / Done</Label>
-                        </div>
+                                            <input 
+                                                type="checkbox" 
+                                                id="isDone" 
+                                                checked={formData.isDone} 
+                                                onChange={(e) => setFormData({ ...formData, isDone: e.target.checked })}
+                                                className="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                                            />
+                                            <Label htmlFor="isDone" className="mb-0 cursor-pointer">Mark as Completed / Done</Label>
+                                        </div>
+
+                                        <div className="col-span-1 md:col-span-2 flex items-center gap-2 bg-gray-100 p-3 rounded-xl dark:bg-gray-800">
+                                            <input 
+                                                type="checkbox" 
+                                                id="alwaysActive" 
+                                                checked={formData.alwaysActive} 
+                                                onChange={(e) => setFormData({ ...formData, alwaysActive: e.target.checked })}
+                                                className="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                                            />
+                                            <Label htmlFor="alwaysActive" className="mb-0 cursor-pointer">Always Active (Keep as Upcoming even after date passes)</Label>
+                                        </div>
 
                         <div>
                             <Label>Date & Time (Sort Order)</Label>

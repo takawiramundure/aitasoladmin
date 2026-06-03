@@ -39,7 +39,7 @@ export default function GalleryManager() {
     const [categories, setCategories] = useState<string[]>([]);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [useFolderMapping, setUseFolderMapping] = useState(false);
-    const [folderPath, setFolderPath] = useState('');
+    const [folderPaths, setFolderPaths] = useState<string[]>([]);
 
     useEffect(() => {
         loadData();
@@ -51,7 +51,13 @@ export default function GalleryManager() {
             const doc = await FirestoreService.getPageContent('gallery', currentSite.id);
             if (doc) {
                 setUseFolderMapping(!!doc.useFolderMapping);
-                setFolderPath(doc.folderPath || '');
+                if (doc.folderPaths) {
+                    setFolderPaths(doc.folderPaths);
+                } else if (doc.folderPath) {
+                    setFolderPaths([doc.folderPath]);
+                } else {
+                    setFolderPaths([]);
+                }
                 if (doc.images) {
                     const sorted = [...doc.images].sort((a: GalleryImage, b: GalleryImage) => (a.order ?? 0) - (b.order ?? 0));
                     setImages(sorted);
@@ -77,7 +83,8 @@ export default function GalleryManager() {
             await FirestoreService.savePageContent('gallery', {
                 images: ordered,
                 useFolderMapping,
-                folderPath
+                folderPaths,
+                folderPath: folderPaths[0] || ''
             }, currentSite.id);
             setStatus({ type: 'success', msg: `Gallery saved successfully!` });
         } catch (e) {
@@ -219,16 +226,53 @@ export default function GalleryManager() {
                     </div>
 
                     {useFolderMapping && (
-                        <div className="mt-4 p-4 bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900 rounded-xl space-y-2 max-w-2xl">
-                            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 block">
-                                Choose Media Library Folder
-                            </label>
-                            <FolderPicker
-                                value={folderPath}
-                                onChange={(path) => setFolderPath(path)}
-                            />
+                        <div className="mt-4 p-4 bg-purple-50/50 dark:bg-purple-950/20 border border-purple-100 dark:border-purple-900 rounded-xl space-y-4 max-w-2xl">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider block">
+                                    Linked Media Library Folders
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setFolderPaths(prev => [...prev, ''])}
+                                    className="text-xs text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1 cursor-pointer"
+                                >
+                                    <Plus className="w-3.5 h-3.5" />
+                                    Add Folder
+                                </button>
+                            </div>
+                            
+                            {folderPaths.length === 0 ? (
+                                <p className="text-sm text-gray-400 italic">No folders linked yet. Click "Add Folder" to link a folder.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {folderPaths.map((path, idx) => (
+                                        <div key={idx} className="flex items-end gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                            <div className="flex-1">
+                                                <FolderPicker
+                                                    value={path}
+                                                    onChange={(newPath) => {
+                                                        const updated = [...folderPaths];
+                                                        updated[idx] = newPath;
+                                                        setFolderPaths(updated);
+                                                    }}
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFolderPaths(prev => prev.filter((_, i) => i !== idx));
+                                                }}
+                                                className="p-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors border border-transparent hover:border-red-100 cursor-pointer"
+                                                title="Remove folder link"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                             <p className="text-xs text-gray-500">
-                                All images inside this folder in Firebase Storage (relative to your site's folder, e.g. <code>kmfw/your-folder</code>) will automatically render on the live website's gallery.
+                                All images inside these folders in Firebase Storage (relative to your site's folder, e.g. <code>kmfw/your-folder</code>) will automatically render on the live website's gallery.
                             </p>
                         </div>
                     )}

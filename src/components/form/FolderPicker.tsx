@@ -31,10 +31,27 @@ export default function FolderPicker({
         setLoading(true);
         const siteRef = ref(storage, siteId);
         listAll(siteRef)
-            .then((res) => {
-                // Filter out standard paths or non-folder things if needed
-                const folderNames = res.prefixes.map(p => p.name);
-                setFolders(folderNames);
+            .then(async (res) => {
+                // Filter prefixes to check which ones have at least one picture
+                const folderChecks = await Promise.all(
+                    res.prefixes.map(async (prefixRef) => {
+                        try {
+                            const subRes = await listAll(prefixRef);
+                            const hasPictures = subRes.items.some((item) => {
+                                const ext = item.name.split('.').pop()?.toLowerCase();
+                                return ext ? ['jpg', 'jpeg', 'png', 'webp', 'svg', 'gif', 'heic', 'bmp', 'tiff'].includes(ext) : false;
+                            });
+                            return { name: prefixRef.name, hasPictures };
+                        } catch (err) {
+                            console.error(`Error checking folder ${prefixRef.name}:`, err);
+                            return { name: prefixRef.name, hasPictures: false };
+                        }
+                    })
+                );
+                const validFolders = folderChecks
+                    .filter((c) => c.hasPictures)
+                    .map((c) => c.name);
+                setFolders(validFolders);
             })
             .catch(err => {
                 console.error("Error listing folders in Storage:", err);
