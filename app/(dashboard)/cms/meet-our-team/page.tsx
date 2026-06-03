@@ -96,7 +96,24 @@ export default function MeetOurTeamManager() {
         try {
             const data = await FirestoreService.getPageContent('meet-our-team', currentSite.id);
             if (data) {
-                setContent(data);
+                // Ensure all default properties exist by merging
+                const merged = {
+                    enabled: data.enabled ?? DEFAULT_TEAM_DATA.enabled,
+                    hero: {
+                        title: data.hero?.title ?? DEFAULT_TEAM_DATA.hero.title,
+                        subtitle: data.hero?.subtitle ?? DEFAULT_TEAM_DATA.hero.subtitle,
+                        description: data.hero?.description ?? DEFAULT_TEAM_DATA.hero.description,
+                    },
+                    teams: data.teams || DEFAULT_TEAM_DATA.teams,
+                    mentors: {
+                        enabled: data.mentors?.enabled ?? DEFAULT_TEAM_DATA.mentors.enabled,
+                        title: data.mentors?.title ?? DEFAULT_TEAM_DATA.mentors.title,
+                        subtitle: data.mentors?.subtitle ?? DEFAULT_TEAM_DATA.mentors.subtitle,
+                        description: data.mentors?.description ?? DEFAULT_TEAM_DATA.mentors.description,
+                        list: data.mentors?.list || DEFAULT_TEAM_DATA.mentors.list,
+                    }
+                };
+                setContent(merged);
             } else {
                 setContent(DEFAULT_TEAM_DATA);
             }
