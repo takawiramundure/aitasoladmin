@@ -159,7 +159,7 @@ const AppSidebar: React.FC = () => {
           icon: <UserCircleIcon />,
           subItems: [
             { name: "About Us", path: "/cms/about" },
-            { name: "Our Story", path: "/cms/content-manager?pageId=our-story" },
+            { name: "Our Story", path: "/cms/our-story" },
             { name: "Meet Our Team", path: "/cms/meet-our-team" },
             { name: "Strategic Plan", path: "/cms/strategic-plan" },
             { name: "Founder's Message", path: "/cms/founders-message" },
@@ -172,7 +172,7 @@ const AppSidebar: React.FC = () => {
           name: "Services & Programs",
           icon: <PageIcon />,
           subItems: [
-            { name: "Services Gateway", path: "/cms/content-manager?pageId=services" },
+            { name: "Services Gateway", path: "/cms/services" },
             { name: "Grounded Counseling", path: "/cms/content-manager?pageId=grounded-counseling" },
             { name: "Educational Programs", path: "/cms/content-manager?pageId=educational-programs" },
             { name: "Advocacy & Education", path: "/cms/content-manager?pageId=advocacy-education" },
@@ -185,7 +185,7 @@ const AppSidebar: React.FC = () => {
           name: "Research",
           icon: <PageIcon />,
           subItems: [
-            { name: "Research Gateway", path: "/cms/content-manager?pageId=research" },
+            { name: "Research Gateway", path: "/cms/research" },
             { name: "Black Wellness", path: "/cms/project-black-wellness" },
             { name: "Umoja Program", path: "/cms/project-umoja-neurodivergent" },
           ]
@@ -209,8 +209,8 @@ const AppSidebar: React.FC = () => {
             { name: "Join Us Gateway", path: "/cms/content-manager?pageId=join-us" },
             { name: "Funders & Sponsors", path: "/cms/content-manager?pageId=funders" },
             { name: "Partners", path: "/cms/partners" },
-            { name: "Careers", path: "/cms/content-manager?pageId=careers" },
-            { name: "Volunteering", path: "/cms/content-manager?pageId=volunteer" },
+            { name: "Careers", path: "/cms/careers" },
+            { name: "Volunteering", path: "/cms/volunteer" },
           ]
         },
         {

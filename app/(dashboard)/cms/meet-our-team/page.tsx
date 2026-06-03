@@ -15,10 +15,12 @@ import { useDialog } from "@/context/DialogContext";
 const DEFAULT_TEAM_DATA = {
     enabled: true,
     hero: {
+        enabled: true,
         title: "The Heart of Our Mission",
         subtitle: "Meet Our Team",
         description: "A collective of professionals, practitioners, and community leaders dedicated to culturally grounded wellness."
     },
+    teamsEnabled: true,
     teams: [
         {
             id: 'board',
@@ -100,10 +102,12 @@ export default function MeetOurTeamManager() {
                 const merged = {
                     enabled: data.enabled ?? DEFAULT_TEAM_DATA.enabled,
                     hero: {
+                        enabled: data.hero?.enabled ?? true,
                         title: data.hero?.title ?? DEFAULT_TEAM_DATA.hero.title,
                         subtitle: data.hero?.subtitle ?? DEFAULT_TEAM_DATA.hero.subtitle,
                         description: data.hero?.description ?? DEFAULT_TEAM_DATA.hero.description,
                     },
+                    teamsEnabled: data.teamsEnabled ?? true,
                     teams: data.teams || DEFAULT_TEAM_DATA.teams,
                     mentors: {
                         enabled: data.mentors?.enabled ?? DEFAULT_TEAM_DATA.mentors.enabled,
@@ -220,6 +224,19 @@ export default function MeetOurTeamManager() {
                         title="Hero Section" 
                         expanded={expandedSections.hero} 
                         onToggle={toggleSection}
+                        action={
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                <span className="text-[10px] font-bold uppercase text-gray-400">
+                                    {content.hero?.enabled !== false ? 'Enabled' : 'Disabled'}
+                                </span>
+                                <button 
+                                    onClick={() => updateNestedField('hero', 'enabled', content.hero?.enabled === false ? true : false)}
+                                    className={`w-8 h-4 rounded-full relative transition-colors ${content.hero?.enabled !== false ? 'bg-highlight' : 'bg-gray-300'}`}
+                                >
+                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.hero?.enabled !== false ? 'translate-x-4' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
+                        }
                     >
                         <div className="grid gap-4">
                             <div><Label>Subtitle (Tagline)</Label><Input value={content.hero.subtitle} onChange={(e) => updateNestedField('hero', 'subtitle', e.target.value)} /></div>
@@ -234,6 +251,19 @@ export default function MeetOurTeamManager() {
                         title="Team Categories" 
                         expanded={expandedSections.teams} 
                         onToggle={toggleSection}
+                        action={
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                <span className="text-[10px] font-bold uppercase text-gray-400">
+                                    {content.teamsEnabled !== false ? 'Enabled' : 'Disabled'}
+                                </span>
+                                <button 
+                                    onClick={() => setContent((prev: any) => ({ ...prev, teamsEnabled: prev.teamsEnabled === false ? true : false }))}
+                                    className={`w-8 h-4 rounded-full relative transition-colors ${content.teamsEnabled !== false ? 'bg-highlight' : 'bg-gray-300'}`}
+                                >
+                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.teamsEnabled !== false ? 'translate-x-4' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
+                        }
                     >
                         <div className="space-y-4">
                             {content.teams.map((team: any, idx: number) => (
