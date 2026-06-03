@@ -39,7 +39,7 @@ export default function GalleryManager() {
     const [categories, setCategories] = useState<string[]>([]);
     const [isLibraryOpen, setIsLibraryOpen] = useState(false);
     const [useFolderMapping, setUseFolderMapping] = useState(false);
-    const [folderPaths, setFolderPaths] = useState<string[]>([]);
+    const [folderPaths, setFolderPaths] = useState<any[]>([]);
 
     useEffect(() => {
         loadData();
@@ -52,9 +52,15 @@ export default function GalleryManager() {
             if (doc) {
                 setUseFolderMapping(!!doc.useFolderMapping);
                 if (doc.folderPaths) {
-                    setFolderPaths(doc.folderPaths);
+                    const normalized = doc.folderPaths.map((p: any) => {
+                        if (typeof p === 'string') {
+                            return { path: p, name: p };
+                        }
+                        return { path: p.path || '', name: p.name || '' };
+                    });
+                    setFolderPaths(normalized);
                 } else if (doc.folderPath) {
-                    setFolderPaths([doc.folderPath]);
+                    setFolderPaths([{ path: doc.folderPath, name: doc.folderPath }]);
                 } else {
                     setFolderPaths([]);
                 }
@@ -84,7 +90,7 @@ export default function GalleryManager() {
                 images: ordered,
                 useFolderMapping,
                 folderPaths,
-                folderPath: folderPaths[0] || ''
+                folderPath: folderPaths[0]?.path || ''
             }, currentSite.id);
             setStatus({ type: 'success', msg: `Gallery saved successfully!` });
         } catch (e) {
@@ -233,7 +239,7 @@ export default function GalleryManager() {
                                 </label>
                                 <button
                                     type="button"
-                                    onClick={() => setFolderPaths(prev => [...prev, ''])}
+                                    onClick={() => setFolderPaths(prev => [...prev, { path: '', name: '' }])}
                                     className="text-xs text-purple-600 hover:text-purple-700 font-bold flex items-center gap-1 cursor-pointer"
                                 >
                                     <Plus className="w-3.5 h-3.5" />
@@ -245,16 +251,32 @@ export default function GalleryManager() {
                                 <p className="text-sm text-gray-400 italic">No folders linked yet. Click "Add Folder" to link a folder.</p>
                             ) : (
                                 <div className="space-y-3">
-                                    {folderPaths.map((path, idx) => (
-                                        <div key={idx} className="flex items-end gap-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    {folderPaths.map((pathObj, idx) => (
+                                        <div key={idx} className="flex flex-col md:flex-row items-stretch md:items-end gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                                             <div className="flex-1">
                                                 <FolderPicker
-                                                    value={path}
+                                                    label="Select Library Folder"
+                                                    value={pathObj.path || ''}
                                                     onChange={(newPath) => {
                                                         const updated = [...folderPaths];
-                                                        updated[idx] = newPath;
+                                                        updated[idx] = { ...updated[idx], path: newPath };
                                                         setFolderPaths(updated);
                                                     }}
+                                                />
+                                            </div>
+                                            <div className="w-full md:w-1/3">
+                                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5 block">
+                                                    Category Caption / Display Name
+                                                </label>
+                                                <input
+                                                    className={inputClass}
+                                                    value={pathObj.name || ''}
+                                                    onChange={(e) => {
+                                                        const updated = [...folderPaths];
+                                                        updated[idx] = { ...updated[idx], name: e.target.value };
+                                                        setFolderPaths(updated);
+                                                    }}
+                                                    placeholder="e.g. Black Excellence Gala 2026"
                                                 />
                                             </div>
                                             <button
@@ -262,7 +284,7 @@ export default function GalleryManager() {
                                                 onClick={() => {
                                                     setFolderPaths(prev => prev.filter((_, i) => i !== idx));
                                                 }}
-                                                className="p-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors border border-transparent hover:border-red-100 cursor-pointer"
+                                                className="p-2.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors border border-transparent hover:border-red-100 cursor-pointer self-end mb-0.5"
                                                 title="Remove folder link"
                                             >
                                                 <Trash2 className="w-4 h-4" />

@@ -75,6 +75,13 @@ const DEFAULT_TEAM_DATA = {
                 bio: 'An entrepreneur committed to helping young people discover their potential and build businesses that create lasting impact.'
             }
         ]
+    },
+    joinCtaEnabled: true,
+    joinCta: {
+        heading: "Want to Join Our Team?",
+        description: "Whether as a volunteer, staff member, or board advisor — we are always looking for passionate individuals committed to Black wellness.",
+        buttonText: "Get in Touch",
+        buttonUrl: "mailto:info@kindmindsfamilywellness.org"
     }
 };
 
@@ -86,7 +93,7 @@ export default function MeetOurTeamManager() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
     const [successMsg, setSuccessMsg] = useState("");
-    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ hero: true, teams: true, mentors: true });
+    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({ hero: true, teams: true, mentors: true, joinCta: false });
 
     useEffect(() => {
         loadContent();
@@ -115,6 +122,13 @@ export default function MeetOurTeamManager() {
                         subtitle: data.mentors?.subtitle ?? DEFAULT_TEAM_DATA.mentors.subtitle,
                         description: data.mentors?.description ?? DEFAULT_TEAM_DATA.mentors.description,
                         list: data.mentors?.list || DEFAULT_TEAM_DATA.mentors.list,
+                    },
+                    joinCtaEnabled: data.joinCtaEnabled ?? DEFAULT_TEAM_DATA.joinCtaEnabled,
+                    joinCta: {
+                        heading: data.joinCta?.heading ?? DEFAULT_TEAM_DATA.joinCta.heading,
+                        description: data.joinCta?.description ?? DEFAULT_TEAM_DATA.joinCta.description,
+                        buttonText: data.joinCta?.buttonText ?? DEFAULT_TEAM_DATA.joinCta.buttonText,
+                        buttonUrl: data.joinCta?.buttonUrl ?? DEFAULT_TEAM_DATA.joinCta.buttonUrl,
                     }
                 };
                 setContent(merged);
@@ -231,9 +245,9 @@ export default function MeetOurTeamManager() {
                                 </span>
                                 <button 
                                     onClick={() => updateNestedField('hero', 'enabled', content.hero?.enabled === false ? true : false)}
-                                    className={`w-8 h-4 rounded-full relative transition-colors ${content.hero?.enabled !== false ? 'bg-highlight' : 'bg-gray-300'}`}
+                                    className={`w-12 h-6 rounded-full relative transition-colors ${content.hero?.enabled !== false ? 'bg-primary' : 'bg-gray-300'}`}
                                 >
-                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.hero?.enabled !== false ? 'translate-x-4' : 'translate-x-0'}`} />
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${content.hero?.enabled !== false ? 'translate-x-6' : 'translate-x-0'}`} />
                                 </button>
                             </div>
                         }
@@ -258,9 +272,9 @@ export default function MeetOurTeamManager() {
                                 </span>
                                 <button 
                                     onClick={() => setContent((prev: any) => ({ ...prev, teamsEnabled: prev.teamsEnabled === false ? true : false }))}
-                                    className={`w-8 h-4 rounded-full relative transition-colors ${content.teamsEnabled !== false ? 'bg-highlight' : 'bg-gray-300'}`}
+                                    className={`w-12 h-6 rounded-full relative transition-colors ${content.teamsEnabled !== false ? 'bg-primary' : 'bg-gray-300'}`}
                                 >
-                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.teamsEnabled !== false ? 'translate-x-4' : 'translate-x-0'}`} />
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${content.teamsEnabled !== false ? 'translate-x-6' : 'translate-x-0'}`} />
                                 </button>
                             </div>
                         }
@@ -314,9 +328,9 @@ export default function MeetOurTeamManager() {
                                 </span>
                                 <button 
                                     onClick={() => updateNestedField('mentors', 'enabled', !content.mentors.enabled)}
-                                    className={`w-8 h-4 rounded-full relative transition-colors ${content.mentors.enabled ? 'bg-highlight' : 'bg-gray-300'}`}
+                                    className={`w-12 h-6 rounded-full relative transition-colors ${content.mentors.enabled ? 'bg-primary' : 'bg-gray-300'}`}
                                 >
-                                    <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full transition-transform ${content.mentors.enabled ? 'translate-x-4' : 'translate-x-0'}`} />
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${content.mentors.enabled ? 'translate-x-6' : 'translate-x-0'}`} />
                                 </button>
                             </div>
                         }
@@ -372,6 +386,34 @@ export default function MeetOurTeamManager() {
                             <Button variant="outline" size="sm" onClick={() => updateNestedField('mentors', 'list', [...content.mentors.list, { name: '', role: '', bio: '' }])}>
                                 <Plus size={16} className="mr-2" /> Add Mentor
                             </Button>
+                        </div>
+                    </SectionBox>
+
+                    {/* Join CTA Section */}
+                    <SectionBox 
+                        id="joinCta" 
+                        title="Join CTA Section" 
+                        expanded={expandedSections.joinCta} 
+                        onToggle={toggleSection}
+                        action={
+                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                                <span className="text-[10px] font-bold uppercase text-gray-400">
+                                    {content.joinCtaEnabled !== false ? 'Enabled' : 'Disabled'}
+                                </span>
+                                <button 
+                                    onClick={() => setContent((prev: any) => ({ ...prev, joinCtaEnabled: prev.joinCtaEnabled === false ? true : false }))}
+                                    className={`w-12 h-6 rounded-full relative transition-colors ${content.joinCtaEnabled !== false ? 'bg-primary' : 'bg-gray-300'}`}
+                                >
+                                    <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${content.joinCtaEnabled !== false ? 'translate-x-6' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
+                        }
+                    >
+                        <div className="grid gap-4">
+                            <div><Label>Heading</Label><Input value={content.joinCta?.heading || ""} onChange={(e) => updateNestedField('joinCta', 'heading', e.target.value)} /></div>
+                            <div><Label>Description</Label><textarea className="w-full px-4 py-2 border rounded-xl" rows={3} value={content.joinCta?.description || ""} onChange={(e) => updateNestedField('joinCta', 'description', e.target.value)} /></div>
+                            <div><Label>Button Text</Label><Input value={content.joinCta?.buttonText || ""} onChange={(e) => updateNestedField('joinCta', 'buttonText', e.target.value)} /></div>
+                            <div><Label>Button URL / Email</Label><Input value={content.joinCta?.buttonUrl || ""} onChange={(e) => updateNestedField('joinCta', 'buttonUrl', e.target.value)} /></div>
                         </div>
                     </SectionBox>
                 </div>

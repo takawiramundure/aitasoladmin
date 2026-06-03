@@ -418,7 +418,7 @@ export default function EventsManager() {
                                             <input 
                                                 type="checkbox" 
                                                 id="isDone" 
-                                                checked={formData.isDone} 
+                                                checked={!!formData.isDone} 
                                                 onChange={(e) => setFormData({ ...formData, isDone: e.target.checked })}
                                                 className="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                                             />
@@ -429,7 +429,7 @@ export default function EventsManager() {
                                             <input 
                                                 type="checkbox" 
                                                 id="alwaysActive" 
-                                                checked={formData.alwaysActive} 
+                                                checked={!!formData.alwaysActive} 
                                                 onChange={(e) => setFormData({ ...formData, alwaysActive: e.target.checked })}
                                                 className="w-5 h-5 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
                                             />
