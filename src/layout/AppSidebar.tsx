@@ -160,7 +160,7 @@ const AppSidebar: React.FC = () => {
           subItems: [
             { name: "About Us", path: "/cms/about" },
             { name: "Our Story", path: "/cms/content-manager?pageId=our-story" },
-            { name: "Meet Our Team", path: "/cms/content-manager?pageId=meet-our-team" },
+            { name: "Meet Our Team", path: "/cms/meet-our-team" },
             { name: "Strategic Plan", path: "/cms/strategic-plan" },
             { name: "Founder's Message", path: "/cms/founders-message" },
             { name: "Celebrating 5 Years", path: "/cms/celebrating-5-years" },
