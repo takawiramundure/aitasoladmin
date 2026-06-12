@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
 import PageMeta from "@/components/common/PageMeta";
 import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";

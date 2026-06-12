@@ -750,10 +750,22 @@ export const SEED_DATA: any = {
                     category: 'Exterior Work',
                     title: 'Precision Exterior Solutions',
                     description: 'Protect and beautify your home with premium siding, windows, and structural enhancements.',
-                    fullDescription: 'Beyond mere aesthetics, our exterior solutions focus on building a resilient envelope for your home. We specialize in high-performance siding installations, energy-efficient window replacements, and structural enhancements that protect against the harsh Canadian seasons. Our approach combines modern materials with architectural integrity, ensure your home stays maintenance-free for decades while significantly boosting its curb appeal.',
+                    fullDescription: "A home's exterior envelope is its first line of defense. We don't just hang siding; we build a fully integrated rainscreen system. Our process includes installing Tyvek housewrap with taped seams, custom-fabricated aluminum window flashings to shed water, and heavy-duty fiber cement or premium cedar siding. We focus on proper drainage cavities and ventilation at the soffits and starter strips to prevent trapped moisture, mold, and dry rot.",
                     image: '/project-exterior.png',
-                    beforeImage: 'https://images.unsplash.com/photo-1590060419632-68c37ed55f26?q=80&w=800&auto=format&fit=crop', // Dated exterior
-                    afterImage: 'https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?q=80&w=800&auto=format&fit=crop', // Modern exterior
+                    beforeImage: 'https://images.unsplash.com/photo-1590060419632-68c37ed55f26?q=80&w=800&auto=format&fit=crop',
+                    afterImage: 'https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?q=80&w=800&auto=format&fit=crop',
+                    struggles: [
+                        "Incorrectly installed housewrap causing moisture entrapment and frame rot.",
+                        "Improper window flashing resulting in hidden sill leaks and drywall damage.",
+                        "Warped or buckled siding due to tight nailing and lack of thermal expansion gaps.",
+                        "Poor soffit ventilation leading to ice damming and attic condensation in winter."
+                    ],
+                    processSteps: [
+                        { step: "01", title: "Site Prep & Teardown", desc: "Strip old siding, inspect the sheathing for rot, and repair structural framing." },
+                        { step: "02", title: "Weatherization", desc: "Install premium weather-resistant barriers and seal all window/door penetrations with flashing tape." },
+                        { step: "03", title: "Framing Rainscreen", desc: "Attach vertical furring strips to create a dedicated 3/4-inch drainage and ventilation cavity." },
+                        { step: "04", title: "Siding Installation", desc: "Fasten premium siding with stainless steel fasteners and seal joints with color-matched sealant." }
+                    ],
                     order: 1,
                     isActive: true
                 },
@@ -762,10 +774,22 @@ export const SEED_DATA: any = {
                     category: 'Sustainability',
                     title: 'Food Security & Gardens',
                     description: 'Specialized vegetable gardens and custom yard setups for fresh seasonal produce.',
-                    fullDescription: 'Embrace self-sufficiency with a custom-designed edible landscape. We build high-yield cedar garden beds, integrated irrigation systems, and optimized greenhouse structures. Our designs consider soil health, sun orientation, and ease of maintenance, allowing you to harvest fresh, organic produce right in your backyard. We bridge the gap between traditional gardening and expert construction to help you achieve true food sovereignty.',
+                    fullDescription: "Growing your own food requires more than just soil; it requires built-to-last agricultural carpentry. We construct high-yield raised beds using rot-resistant rough-sawn 2-inch Western Red Cedar, held together with heavy-duty structural timber screws. We line each bed with non-woven geotextile fabric to prevent weed invasion while maintaining optimal drainage. Our setups include integrated drip irrigation lines with automatic solar-powered timers and custom pest-barrier fencing.",
                     image: '/service-gardens.png',
-                    beforeImage: 'https://images.unsplash.com/photo-1558905619-172542012737?q=80&w=800&auto=format&fit=crop', // Empty yard
-                    afterImage: 'https://images.unsplash.com/photo-1592150621344-22d7688860bc?q=80&w=800&fit=crop', // Garden beds
+                    beforeImage: 'https://images.unsplash.com/photo-1558905619-172542012737?q=80&w=800&auto=format&fit=crop',
+                    afterImage: 'https://images.unsplash.com/photo-1592150621344-22d7688860bc?q=80&w=800&fit=crop',
+                    struggles: [
+                        "Soil pressure bowing and cracking thin, stapled pine garden boxes within one season.",
+                        "Direct ground contact leading to premature timber rot and chemical leaching into soil.",
+                        "Uneven watering cycles drying out root zones or drowning crops in poor draining clay.",
+                        "Pests like rabbits, deer, and voles destroying entire seasonal yields overnight."
+                    ],
+                    processSteps: [
+                        { step: "01", title: "Site Survey & Grading", desc: "Analyze sun patterns, test soil drainage, and grade the lawn area flat." },
+                        { step: "02", title: "Timber Fabrication", desc: "Pre-cut rough-sawn Western Red Cedar timbers and build heavy-duty corner-braced frames." },
+                        { step: "03", title: "Irrigation & Barrier Setup", desc: "Lay weed-barrier fabrics, hook up subterranean drip lines, and install steel wire mesh." },
+                        { step: "04", title: "Soil Seeding", desc: "Fill beds with a custom organic blend of triple-mix compost, peat moss, and vermiculite." }
+                    ],
                     order: 2,
                     isActive: true
                 },
@@ -774,10 +798,22 @@ export const SEED_DATA: any = {
                     category: 'Decks & Patios',
                     title: 'Outdoor Luxury Living',
                     description: 'Custom-designed decks using the finest materials, built to withstand the elements.',
-                    fullDescription: 'A Noel Construction deck is an extension of your primary living space. We use premium cedar and sustainable composite materials to craft multi-level outdoor oasis spaces. Our signature includes hidden fastenting systems, custom-built stairs, and integrated ambient lighting. Every joint is precision-cut to ensure your outdoor sanctuary remains structural and stunning through generations of seasonal changes.',
+                    fullDescription: "A Noel Construction deck is an extension of your primary living space. We use premium cedar and sustainable composite materials to craft multi-level outdoor oasis spaces. Our signature includes hidden fastening systems, custom-built stairs, and integrated ambient lighting. Every joint is precision-cut to ensure your outdoor sanctuary remains structural and stunning through generations of seasonal changes.",
                     image: '/service-decks.png',
-                    beforeImage: 'https://images.unsplash.com/photo-1591825729269-caeb344f6df2?q=80&w=800&auto=format&fit=crop', // Old deck
-                    afterImage: 'https://images.unsplash.com/photo-1590060419632-68c37ed55f26?q=80&w=800&fit=crop', // New deck
+                    beforeImage: 'https://images.unsplash.com/photo-1591825729269-caeb344f6df2?q=80&w=800&auto=format&fit=crop',
+                    afterImage: 'https://images.unsplash.com/photo-1590060419632-68c37ed55f26?q=80&w=800&fit=crop',
+                    struggles: [
+                        "Shallow deck footings shifting and heaving during winter freeze-thaw cycles.",
+                        "Water pooling on top of flat joists causing joist rot and loose deck boards.",
+                        "Warped deck surfaces and split wood ends from cheap top-screwing techniques.",
+                        "Corrosion of standard fasteners causing structural connection failure over time."
+                    ],
+                    processSteps: [
+                        { step: "01", title: "Frost-Line Footings", desc: "Dig footings to 4-foot depths, install Sonotubes, and pour structural concrete piers." },
+                        { step: "02", title: "Ledger & Joist Framing", desc: "Mount ledger boards with heavy-duty lag shields and flash them to prevent wall rot." },
+                        { step: "03", title: "Joist Protection", desc: "Apply asphalt flashing tape along the tops of all joists to prevent water intrusion." },
+                        { step: "04", title: "Hidden Fastening", desc: "Install premium cedar or composite boards with hidden clips for a smooth, high-end finish." }
+                    ],
                     order: 3,
                     isActive: true
                 },
@@ -786,10 +822,22 @@ export const SEED_DATA: any = {
                     category: 'Stairs & Railings',
                     title: 'Architectural Staircases',
                     description: 'Custom-built stairs and railings that blend structural integrity with artistic design.',
-                    fullDescription: 'Bespoke staircases are the centerpieces of any high-end interior. We specialize in grand architectural stairs and precision railings that combine solid hardwood with modern glass or steel elements. Our process involves detailed structural engineering and traditional joinery techniques, resulting in a safe, silent, and visually arresting transition between the levels of your home.',
+                    fullDescription: "Bespoke staircases are the centerpieces of any high-end interior. We specialize in grand architectural stairs and precision railings that combine solid hardwood with modern glass or steel elements. Our process involves detailed structural engineering and traditional joinery techniques, resulting in a safe, silent, and visually arresting transition between the levels of your home.",
                     image: '/project-stairs.png',
-                    beforeImage: 'https://images.unsplash.com/photo-1581850518616-bcb81881443e?q=80&w=800&auto=format&fit=crop', // Carpeted stairs
-                    afterImage: 'https://images.unsplash.com/photo-1506974210746-9b43936660dc?q=80&w=800&auto=format&fit=crop', // Modern oak stairs
+                    beforeImage: 'https://images.unsplash.com/photo-1581850518616-bcb81881443e?q=80&w=800&auto=format&fit=crop',
+                    afterImage: 'https://images.unsplash.com/photo-1506974210746-9b43936660dc?q=80&w=800&auto=format&fit=crop',
+                    struggles: [
+                        "Squeaking and creaking stairs caused by dry wood joints rubbing against unglued nails.",
+                        "Wobbly handrails and loose balusters from direct mounting onto drywall or thin subfloors.",
+                        "Uneven riser heights leading to dangerous trip hazards and failed building inspections.",
+                        "Cracked treads from selecting soft woods or failing to allow for humidity changes."
+                    ],
+                    processSteps: [
+                        { step: "01", title: "Digital Layout", desc: "Measure total rise and run, calculate exact tread-riser ratios, and route stringers." },
+                        { step: "02", title: "Under-Structure Carriage", desc: "Install double structural center stringers to eliminate any middle sag or deflection." },
+                        { step: "03", title: "Assembly & Joinery", desc: "Pocket-glue, wedge, and screw treads and risers together to create a monolithic wood structure." },
+                        { step: "04", title: "Railing Anchor", desc: "Thru-bolt newel posts directly into floor joists for rock-solid railing stability." }
+                    ],
                     order: 4,
                     isActive: true
                 },
@@ -798,10 +846,22 @@ export const SEED_DATA: any = {
                     category: 'Renovations',
                     title: 'Whole-Home Modernization',
                     description: 'Comprehensive renovation services including basement upgrades and interior remodels.',
-                    fullDescription: 'Our full-home renovations are holistic transformations. We manage the entire lifecycle from structural modifications to fine interior finishes. Whether it\'s expanding a basement into a luxury executive suite or modernizing a heritage home, we maintain the integrity of the original structure while introducing contemporary efficiencies, high-end materials, and premium aesthetics tailored to your lifestyle.',
+                    fullDescription: "Our full-home renovations are holistic transformations. We manage the entire lifecycle from structural modifications to fine interior finishes. Whether it's expanding a basement into a luxury executive suite or modernizing a heritage home, we maintain the integrity of the original structure while introducing contemporary efficiencies, high-end materials, and premium aesthetics tailored to your lifestyle.",
                     image: '/service-renovations.png',
-                    beforeImage: 'https://images.unsplash.com/photo-1581850518616-bcb81881443e?q=80&w=800&auto=format&fit=crop', // Gutted room
-                    afterImage: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800&auto=format&fit=crop', // Finished kitchen
+                    beforeImage: 'https://images.unsplash.com/photo-1581850518616-bcb81881443e?q=80&w=800&auto=format&fit=crop',
+                    afterImage: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?q=80&w=800&auto=format&fit=crop',
+                    struggles: [
+                        "Sagging ceilings and cracked door frames from removing load-bearing walls without proper support.",
+                        "Undiagnosed mold, water damage, or structural rot covered up by hasty cosmetic updates.",
+                        "Drafty rooms and high utility bills due to cheap fiberglass insulation and poor vapor seals.",
+                        "Wavy walls and visible drywall joints from rushed mudding and sanding work."
+                    ],
+                    processSteps: [
+                        { step: "01", title: "Structural Demo", desc: "Erect temporary shoring walls, strip drywall, and remove old structural partitions." },
+                        { step: "02", title: "Load Transfers", desc: "Hoist and bolt Laminated Veneer Lumber (LVL) beams and install support columns." },
+                        { step: "03", title: "Mechanical Rough-ins", desc: "Coordinate licensed plumbing, electrical, HVAC layouts, and add soundproofing insulation." },
+                        { step: "04", title: "Drywall & Finish Trim", desc: "Install mold-resistant drywall, mud to Level 4 finish, and nail premium baseboards." }
+                    ],
                     order: 5,
                     isActive: true
                 },
@@ -810,10 +870,22 @@ export const SEED_DATA: any = {
                     category: 'Sustainability',
                     title: 'Traditional Woodworking',
                     description: 'Custom cabinetry and built-in units that add timeless value to your home.',
-                    fullDescription: 'True custom cabinetry is about more than just storage; it\'s about defining the soul of a residence. We specialize in traditional dovetail joinery, hand-turned details, and bespoke finishes that highlight the natural grain of premium timbers. From heirloom-quality libraries to modern minimalist kitchens, our woodwork is tailored to the exact dimensions of your life and home.',
+                    fullDescription: "True custom cabinetry is about more than just storage; it's about defining the soul of a residence. We specialize in traditional dovetail joinery, hand-turned details, and bespoke finishes that highlight the natural grain of premium timbers. From heirloom-quality libraries to modern minimalist kitchens, our woodwork is tailored to the exact dimensions of your life and home.",
                     image: '/service-woodworking.png',
-                    beforeImage: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=800&auto=format&fit=crop', // Raw lumber
-                    afterImage: 'https://images.unsplash.com/photo-1505691938895-1758d7eaa511?q=80&w=800&auto=format&fit=crop', // Finished library
+                    beforeImage: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?q=80&w=800&auto=format&fit=crop',
+                    afterImage: 'https://images.unsplash.com/photo-1505691938895-1758d7eaa511?q=80&w=800&auto=format&fit=crop',
+                    struggles: [
+                        "Bending and sagging cabinet shelves due to thin particleboard materials and wide spans.",
+                        "Sticking drawers and doors that sag over time from cheap roller slides and hinge hardware.",
+                        "Chipping, peeling, and yellowing finishes from using standard wall paint on cabinetry.",
+                        "Built-in units that don't fit flush against uneven plaster walls and crooked floors."
+                    ],
+                    processSteps: [
+                        { step: "01", title: "Precision Measurement", desc: "Use laser levels to map wall plumbness, floor levelness, and cabinet boundaries." },
+                        { step: "02", title: "Cabinet Bench-Build", desc: "Construct cabinet cases using dado joints and assemble solid-wood drawer boxes." },
+                        { step: "03", title: "Shop Lacquer Finish", desc: "Sand wood surfaces and apply two coats of high-durability catalyzed lacquer finish." },
+                        { step: "04", title: "Scribe & Installation", desc: "Fit cabinet units on-site, scribing face frames to sit perfectly flush against crooked walls." }
+                    ],
                     order: 6,
                     isActive: true
                 }
