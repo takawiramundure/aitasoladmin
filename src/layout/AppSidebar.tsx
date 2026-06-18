@@ -209,8 +209,8 @@ const AppSidebar: React.FC = () => {
             { name: "Join Us Gateway", path: "/cms/content-manager?pageId=join-us" },
             { name: "Funders & Sponsors", path: "/cms/content-manager?pageId=funders" },
             { name: "Partners", path: "/cms/partners" },
-            { name: "Careers", path: "/cms/careers" },
-            { name: "Volunteering", path: "/cms/volunteer" },
+            { name: "Careers", path: "/cms/content-manager?pageId=careers" },
+            { name: "Volunteering", path: "/cms/content-manager?pageId=volunteer" },
           ]
         },
         {

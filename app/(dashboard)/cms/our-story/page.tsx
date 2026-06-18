@@ -104,7 +104,23 @@ export default function OurStoryManager() {
                 const sections = data.sections;
                 Object.keys(sections).forEach(key => {
                     if (mergedSections[key]) {
-                        mergedSections[key] = { ...mergedSections[key], ...sections[key] };
+                        const defaultSec = mergedSections[key];
+                        const dbSec = sections[key];
+                        const mergedSec = { ...defaultSec, ...dbSec };
+                        
+                        // Merge items arrays to ensure defaults fill any missing slots
+                        if (defaultSec.items && Array.isArray(defaultSec.items)) {
+                            const dbItems = Array.isArray(dbSec.items) ? dbSec.items : [];
+                            mergedSec.items = defaultSec.items.map((defItem, i) => {
+                                return dbItems[i] && dbItems[i].title ? dbItems[i] : defItem;
+                            });
+                            // If there are more items in DB than default, append them
+                            if (dbItems.length > defaultSec.items.length) {
+                                mergedSec.items = [...mergedSec.items, ...dbItems.slice(defaultSec.items.length)];
+                            }
+                        }
+                        
+                        mergedSections[key] = mergedSec;
                     } else {
                         mergedSections[key] = sections[key];
                     }

@@ -142,7 +142,22 @@ export default function ContentManager() {
             }
 
             if (data) {
-                // ... (Services gateway logic preserved)
+                // Normalize schema: if data was stored at root level (without sections wrapper), wrap it under sections
+                if (!data.sections && (data.hero || Object.keys(data).some(k => k.startsWith('job_') || k.startsWith('quote_')))) {
+                    const sections: Record<string, any> = {};
+                    Object.keys(data).forEach(key => {
+                        if (key !== 'title' && key !== 'siteId' && key !== 'lastUpdated' && key !== 'enabled') {
+                            sections[key] = data[key];
+                        }
+                    });
+                    data = {
+                        title: data.title || pageTitles[id] || "Content Page",
+                        enabled: data.enabled !== false,
+                        sections
+                    };
+                }
+
+                // If loading services, ensure navigator_cta exists
                 if (id === 'services') {
                     const sections = data.sections || {};
                     if (!sections.navigator_cta) {

@@ -17,12 +17,14 @@ if (Quill && !Quill.imports['modules/blotFormatter']) {
 // Custom styles to prevent editor content from overflowing
 const quillStyles = `
   .ql-container {
+    height: 200px !important;
     font-size: 16px;
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
+    background: #ffffff;
   }
   .ql-editor {
-    min-height: 200px;
+    height: 100%;
     max-width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
@@ -39,6 +41,17 @@ const quillStyles = `
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     background: #f9fafb;
+  }
+  /* Fix for global SVG styles stretching Quill toolbar icons */
+  .quill svg {
+    display: inline !important;
+    width: 18px !important;
+    height: 18px !important;
+  }
+  .quill .ql-picker-label svg {
+    display: inline !important;
+    width: 18px !important;
+    height: 18px !important;
   }
 `;
 
@@ -201,7 +214,7 @@ export default function RichTextEditor({ label, value, onChange }: RichTextEdito
                     onChange={handleEditorChange}
                     modules={modules}
                     formats={formats}
-                    className="h-64 mb-12 text-gray-900 dark:text-gray-100 max-w-full" 
+                    className="text-gray-900 dark:text-gray-100 max-w-full" 
                 />
             </div>
 
