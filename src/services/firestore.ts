@@ -1,4 +1,4 @@
-import { getDb } from "@/firebaseConfig";
+import { getDb, auth } from "@/firebaseConfig";
 import { getSiteById } from "@/config/sites";
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, deleteDoc } from "firebase/firestore";
 import { SiteSettings } from "@/types/siteSettings";
@@ -161,12 +161,34 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
             const docRef = doc(dbInstance, collectionName, targetPageId);
-            await setDoc(docRef, {
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous page content for history:", e);
+            }
+
+            const cleanData = {
                 ...data,
                 siteId, // Store siteId for reference
                 lastUpdated: new Date().toISOString(),
-            }); // No merge — full overwrite so deleted sections are removed
+            };
 
+            await setDoc(docRef, cleanData); // No merge — full overwrite so deleted sections are removed
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'content',
+                targetPageId,
+                previousData ? 'update' : 'create',
+                previousData,
+                cleanData
+            );
         } catch (error) {
             console.error("Error saving page content:", error);
             throw error;
@@ -198,7 +220,7 @@ export const FirestoreService = {
             
             const originalData = docSnap.data() as PageContent;
             const newDocRef = doc(dbInstance, collectionName, newPageId);
-            await setDoc(newDocRef, {
+            const cleanData = {
                 ...originalData,
                 title: newTitle,
                 slug: newPageId,
@@ -206,7 +228,18 @@ export const FirestoreService = {
                 template: originalData.template || pageId,
                 siteId,
                 lastUpdated: new Date().toISOString(),
-            });
+            };
+
+            await setDoc(newDocRef, cleanData);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'content',
+                newPageId,
+                'create',
+                null,
+                cleanData
+            );
         } catch (error) {
             console.error("Error cloning page:", error);
             throw error;
@@ -219,7 +252,29 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
             const docRef = doc(dbInstance, collectionName, pageId);
-            await updateDoc(docRef, { status, lastUpdated: new Date().toISOString() });
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous page visibility for history:", e);
+            }
+
+            const updateData = { status, lastUpdated: new Date().toISOString() };
+            await updateDoc(docRef, updateData);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'content',
+                pageId,
+                'update',
+                previousData,
+                previousData ? { ...previousData, ...updateData } : updateData
+            );
         } catch (error) {
             console.error("Error updating page visibility:", error);
             throw error;
@@ -276,14 +331,37 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
             const docRef = doc(dbInstance, collectionName, "config");
-            await setDoc(docRef, {
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous site settings for history:", e);
+            }
+
+            const cleanData = {
                 ...settings,
                 siteId,
                 metadata: {
                     lastUpdated: new Date().toISOString(),
                     updatedBy: settings.metadata?.updatedBy || 'system',
                 }
-            }, { merge: true });
+            };
+
+            await setDoc(docRef, cleanData, { merge: true });
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'settings',
+                'config',
+                previousData ? 'update' : 'create',
+                previousData,
+                cleanData
+            );
         } catch (error) {
             console.error("Error saving site settings:", error);
             throw error;
@@ -315,20 +393,51 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_events` : 'events';
             
+            let previousData = null;
+            const timestamp = new Date().toISOString();
+
             if (eventId) {
-                // Upsert: Create or Update with specific ID
                 const docRef = doc(dbInstance, collectionName, eventId);
-                await setDoc(docRef, { 
+                try {
+                    const prevSnap = await getDoc(docRef);
+                    if (prevSnap.exists()) {
+                        previousData = prevSnap.data();
+                    }
+                } catch (e) {
+                    console.error("Failed to read previous event settings:", e);
+                }
+
+                const cleanData = { 
                     ...event,
-                    updatedAt: new Date().toISOString()
-                }, { merge: true });
+                    updatedAt: timestamp
+                };
+                await setDoc(docRef, cleanData, { merge: true });
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'events',
+                    eventId,
+                    'update',
+                    previousData,
+                    cleanData
+                );
             } else {
-                // Create with Auto-ID
                 const collectionRef = collection(dbInstance, collectionName);
-                await addDoc(collectionRef, {
+                const cleanData = {
                     ...event,
-                    createdAt: new Date().toISOString()
-                });
+                    createdAt: timestamp,
+                    updatedAt: timestamp
+                };
+                const docRef = await addDoc(collectionRef, cleanData);
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'events',
+                    docRef.id,
+                    'create',
+                    null,
+                    cleanData
+                );
             }
         } catch (error) {
             console.error("Error saving event:", error);
@@ -342,7 +451,28 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_events` : 'events';
             const docRef = doc(dbInstance, collectionName, eventId);
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous event for history:", e);
+            }
+
             await deleteDoc(docRef);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'events',
+                eventId,
+                'delete',
+                previousData,
+                null
+            );
         } catch (error) {
             console.error("Error deleting event:", error);
             throw error;
@@ -373,22 +503,50 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_articles` : 'articles';
             const timestamp = new Date().toISOString();
+            let previousData = null;
 
             if (articleId) {
-                // Upsert with a specific ID — setDoc creates if missing, merges if exists
                 const docRef = doc(dbInstance, collectionName, articleId);
-                await setDoc(docRef, {
+                try {
+                    const prevSnap = await getDoc(docRef);
+                    if (prevSnap.exists()) {
+                        previousData = prevSnap.data();
+                    }
+                } catch (e) {
+                    console.error("Failed to read previous article settings:", e);
+                }
+
+                const cleanData = {
                     ...article,
                     updatedAt: timestamp
-                }, { merge: true });
+                };
+                await setDoc(docRef, cleanData, { merge: true });
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'articles',
+                    articleId,
+                    'update',
+                    previousData,
+                    cleanData
+                );
             } else {
-                // Auto-ID — add new document
                 const collectionRef = collection(dbInstance, collectionName);
-                await addDoc(collectionRef, {
+                const cleanData = {
                     ...article,
                     createdAt: timestamp,
                     updatedAt: timestamp
-                });
+                };
+                const docRef = await addDoc(collectionRef, cleanData);
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'articles',
+                    docRef.id,
+                    'create',
+                    null,
+                    cleanData
+                );
             }
         } catch (error) {
             console.error("Error saving article:", error);
@@ -402,7 +560,28 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_articles` : 'articles';
             const docRef = doc(dbInstance, collectionName, articleId);
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous article for history:", e);
+            }
+
             await deleteDoc(docRef);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'articles',
+                articleId,
+                'delete',
+                previousData,
+                null
+            );
         } catch (error) {
             console.error("Error deleting article:", error);
             throw error;
@@ -433,22 +612,50 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_videos` : 'videos';
             const timestamp = new Date().toISOString();
+            let previousData = null;
 
             if (videoId) {
-                // Update
                 const docRef = doc(dbInstance, collectionName, videoId);
-                await updateDoc(docRef, {
+                try {
+                    const prevSnap = await getDoc(docRef);
+                    if (prevSnap.exists()) {
+                        previousData = prevSnap.data();
+                    }
+                } catch (e) {
+                    console.error("Failed to read previous video settings:", e);
+                }
+
+                const cleanData = {
                     ...video,
                     updatedAt: timestamp
-                });
+                };
+                await updateDoc(docRef, cleanData);
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'videos',
+                    videoId,
+                    'update',
+                    previousData,
+                    cleanData
+                );
             } else {
-                // Add
                 const collectionRef = collection(dbInstance, collectionName);
-                await addDoc(collectionRef, {
+                const cleanData = {
                     ...video,
                     createdAt: timestamp,
                     updatedAt: timestamp
-                });
+                };
+                const docRef = await addDoc(collectionRef, cleanData);
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'videos',
+                    docRef.id,
+                    'create',
+                    null,
+                    cleanData
+                );
             }
         } catch (error) {
             console.error("Error saving video:", error);
@@ -462,7 +669,28 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_videos` : 'videos';
             const docRef = doc(dbInstance, collectionName, videoId);
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous video for history:", e);
+            }
+
             await deleteDoc(docRef);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'videos',
+                videoId,
+                'delete',
+                previousData,
+                null
+            );
         } catch (error) {
             console.error("Error deleting video:", error);
             throw error;
@@ -493,22 +721,50 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_partners` : 'partners';
             const timestamp = new Date().toISOString();
+            let previousData = null;
 
             if (partnerId) {
-                // Update
                 const docRef = doc(dbInstance, collectionName, partnerId);
-                await updateDoc(docRef, {
+                try {
+                    const prevSnap = await getDoc(docRef);
+                    if (prevSnap.exists()) {
+                        previousData = prevSnap.data();
+                    }
+                } catch (e) {
+                    console.error("Failed to read previous partner settings:", e);
+                }
+
+                const cleanData = {
                     ...partner,
                     updatedAt: timestamp
-                });
+                };
+                await updateDoc(docRef, cleanData);
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'partners',
+                    partnerId,
+                    'update',
+                    previousData,
+                    cleanData
+                );
             } else {
-                // Add
                 const collectionRef = collection(dbInstance, collectionName);
-                await addDoc(collectionRef, {
+                const cleanData = {
                     ...partner,
                     createdAt: timestamp,
                     updatedAt: timestamp
-                });
+                };
+                const docRef = await addDoc(collectionRef, cleanData);
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'partners',
+                    docRef.id,
+                    'create',
+                    null,
+                    cleanData
+                );
             }
         } catch (error) {
             console.error("Error saving partner:", error);
@@ -522,7 +778,28 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_partners` : 'partners';
             const docRef = doc(dbInstance, collectionName, partnerId);
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous partner for history:", e);
+            }
+
             await deleteDoc(docRef);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'partners',
+                partnerId,
+                'delete',
+                previousData,
+                null
+            );
         } catch (error) {
             console.error("Error deleting partner:", error);
             throw error;
@@ -553,22 +830,50 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_products` : 'products';
             const timestamp = new Date().toISOString();
+            let previousData = null;
 
             if (productId) {
-                // Update
                 const docRef = doc(dbInstance, collectionName, productId);
-                await updateDoc(docRef, {
+                try {
+                    const prevSnap = await getDoc(docRef);
+                    if (prevSnap.exists()) {
+                        previousData = prevSnap.data();
+                    }
+                } catch (e) {
+                    console.error("Failed to read previous product settings:", e);
+                }
+
+                const cleanData = {
                     ...product,
                     updatedAt: timestamp
-                });
+                };
+                await updateDoc(docRef, cleanData);
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'products',
+                    productId,
+                    'update',
+                    previousData,
+                    cleanData
+                );
             } else {
-                // Add
                 const collectionRef = collection(dbInstance, collectionName);
-                await addDoc(collectionRef, {
+                const cleanData = {
                     ...product,
                     createdAt: timestamp,
                     updatedAt: timestamp
-                });
+                };
+                const docRef = await addDoc(collectionRef, cleanData);
+
+                await FirestoreService.recordHistory(
+                    siteId,
+                    'products',
+                    docRef.id,
+                    'create',
+                    null,
+                    cleanData
+                );
             }
         } catch (error) {
             console.error("Error saving product:", error);
@@ -582,7 +887,28 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_products` : 'products';
             const docRef = doc(dbInstance, collectionName, productId);
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous product for history:", e);
+            }
+
             await deleteDoc(docRef);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'products',
+                productId,
+                'delete',
+                previousData,
+                null
+            );
         } catch (error) {
             console.error("Error deleting product:", error);
             throw error;
@@ -610,7 +936,28 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
             const docRef = doc(dbInstance, collectionName, "seo");
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous SEO settings for history:", e);
+            }
+
             await setDoc(docRef, seoData);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'settings',
+                'seo',
+                previousData ? 'update' : 'create',
+                previousData,
+                seoData
+            );
         } catch (error) {
             console.error("Error saving SEO data:", error);
             throw error;
@@ -638,7 +985,29 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
             const docRef = doc(dbInstance, collectionName, 'footer');
-            await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() });
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous footer settings for history:", e);
+            }
+
+            const cleanData = { ...data, lastUpdated: new Date().toISOString() };
+            await setDoc(docRef, cleanData);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'settings',
+                'footer',
+                previousData ? 'update' : 'create',
+                previousData,
+                cleanData
+            );
         } catch (error) {
             console.error("Error saving footer data:", error);
             throw error;
@@ -666,7 +1035,29 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
             const docRef = doc(dbInstance, collectionName, 'theme');
-            await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() });
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous theme settings for history:", e);
+            }
+
+            const cleanData = { ...data, lastUpdated: new Date().toISOString() };
+            await setDoc(docRef, cleanData);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'settings',
+                'theme',
+                previousData ? 'update' : 'create',
+                previousData,
+                cleanData
+            );
         } catch (error) {
             console.error("Error saving theme settings:", error);
             throw error;
@@ -694,7 +1085,29 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
             const docRef = doc(dbInstance, collectionName, docId);
-            await setDoc(docRef, { ...data, lastUpdated: new Date().toISOString() }, { merge: true });
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error(`Failed to read previous ${docId} settings for history:`, e);
+            }
+
+            const cleanData = { ...data, lastUpdated: new Date().toISOString() };
+            await setDoc(docRef, cleanData, { merge: true });
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'settings',
+                docId,
+                previousData ? 'update' : 'create',
+                previousData,
+                cleanData
+            );
         } catch (error) {
             console.error(`Error saving ${docId} settings:`, error);
             throw error;
@@ -871,10 +1284,33 @@ export const FirestoreService = {
         try {
             const dbInstance = getDb(siteId);
             const docRef = doc(dbInstance, "forms", formId);
-            await setDoc(docRef, {
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous form settings:", e);
+            }
+
+            const cleanData = {
                 ...data,
                 updatedAt: new Date().toISOString()
-            }, { merge: true });
+            };
+
+            await setDoc(docRef, cleanData, { merge: true });
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'forms',
+                formId,
+                previousData ? 'update' : 'create',
+                previousData,
+                cleanData
+            );
         } catch (error) {
             console.error("Error saving form:", error);
             throw error;
@@ -885,7 +1321,28 @@ export const FirestoreService = {
         try {
             const dbInstance = getDb(siteId);
             const docRef = doc(dbInstance, "forms", formId);
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous form for history:", e);
+            }
+
             await deleteDoc(docRef);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'forms',
+                formId,
+                'delete',
+                previousData,
+                null
+            );
         } catch (error) {
             console.error("Error deleting form:", error);
             throw error;
@@ -913,11 +1370,34 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_reusable_sections` : 'reusable_sections';
             const docRef = doc(dbInstance, collectionName, sectionId);
-            await setDoc(docRef, {
+
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous reusable section settings:", e);
+            }
+
+            const cleanData = {
                 ...data,
                 id: sectionId,
                 lastUpdated: new Date().toISOString()
-            });
+            };
+
+            await setDoc(docRef, cleanData);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'reusable_sections',
+                sectionId,
+                previousData ? 'update' : 'create',
+                previousData,
+                cleanData
+            );
         } catch (error) {
             console.error("Error saving reusable section:", error);
             throw error;
@@ -930,9 +1410,171 @@ export const FirestoreService = {
             const dbInstance = getDb(siteId);
             const collectionName = site?.usePrefix !== false ? `${siteId}_reusable_sections` : 'reusable_sections';
             const docRef = doc(dbInstance, collectionName, sectionId);
+            
+            // Get previous data
+            let previousData = null;
+            try {
+                const prevSnap = await getDoc(docRef);
+                if (prevSnap.exists()) {
+                    previousData = prevSnap.data();
+                }
+            } catch (e) {
+                console.error("Failed to read previous data for history:", e);
+            }
+
             await deleteDoc(docRef);
+
+            await FirestoreService.recordHistory(
+                siteId,
+                'reusable_sections',
+                sectionId,
+                'delete',
+                previousData,
+                null
+            );
         } catch (error) {
             console.error("Error deleting reusable section:", error);
+            throw error;
+        }
+    },
+
+    recordHistory: async (
+        siteId: string,
+        logicalCollection: string,
+        documentId: string,
+        action: 'create' | 'update' | 'delete',
+        previousData: any | null,
+        newData: any | null
+    ): Promise<void> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_history` : 'history';
+            const historyRef = collection(dbInstance, collectionName);
+            const userEmail = auth.currentUser?.email || 'system';
+            await addDoc(historyRef, {
+                documentId,
+                collectionName: logicalCollection,
+                action,
+                previousData,
+                newData,
+                timestamp: new Date().toISOString(),
+                updatedBy: userEmail,
+            });
+        } catch (error) {
+            console.error("Error recording history:", error);
+        }
+    },
+
+    getHistory: async (siteId: string, limitCount: number = 100): Promise<any[]> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_history` : 'history';
+            const historyRef = collection(dbInstance, collectionName);
+            const snapshot = await getDocs(historyRef);
+            return snapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+                .slice(0, limitCount);
+        } catch (error) {
+            console.error("Error fetching history:", error);
+            return [];
+        }
+    },
+
+    rollbackDocument: async (siteId: string, logicalCollection: string, documentId: string, data: any): Promise<void> => {
+        try {
+            if (data === null) {
+                const site = getSiteById(siteId);
+                const dbInstance = getDb(siteId);
+                switch (logicalCollection) {
+                    case 'content': {
+                        const collectionName = site?.usePrefix !== false ? `${siteId}_content` : 'content';
+                        const docRef = doc(dbInstance, collectionName, documentId);
+                        await deleteDoc(docRef);
+                        await FirestoreService.recordHistory(siteId, 'content', documentId, 'delete', null, null);
+                        break;
+                    }
+                    case 'settings': {
+                        const collectionName = site?.usePrefix !== false ? `${siteId}_settings` : 'settings';
+                        const docRef = doc(dbInstance, collectionName, documentId);
+                        await deleteDoc(docRef);
+                        await FirestoreService.recordHistory(siteId, 'settings', documentId, 'delete', null, null);
+                        break;
+                    }
+                    case 'events':
+                        await FirestoreService.deleteEvent(siteId, documentId);
+                        break;
+                    case 'articles':
+                        await FirestoreService.deleteArticle(siteId, documentId);
+                        break;
+                    case 'videos':
+                        await FirestoreService.deleteVideo(siteId, documentId);
+                        break;
+                    case 'partners':
+                        await FirestoreService.deletePartner(siteId, documentId);
+                        break;
+                    case 'products':
+                        await FirestoreService.deleteProduct(siteId, documentId);
+                        break;
+                    case 'forms':
+                        await FirestoreService.deleteForm(siteId, documentId);
+                        break;
+                    case 'reusable_sections':
+                        await FirestoreService.deleteReusableSection(siteId, documentId);
+                        break;
+                    default:
+                        throw new Error(`Unsupported rollback delete collection: ${logicalCollection}`);
+                }
+                return;
+            }
+
+            switch (logicalCollection) {
+                case 'content':
+                    const isDraft = documentId.endsWith('_draft');
+                    const cleanPageId = isDraft ? documentId.replace('_draft', '') : documentId;
+                    await FirestoreService.savePageContent(cleanPageId, data, siteId, isDraft ? 'draft' : 'live');
+                    break;
+                case 'settings':
+                    if (documentId === 'config') {
+                        await FirestoreService.saveSiteSettings(siteId, data);
+                    } else if (documentId === 'theme') {
+                        await FirestoreService.saveThemeSettings(data, siteId);
+                    } else if (documentId === 'seo') {
+                        await FirestoreService.saveSEOData(siteId, data);
+                    } else if (documentId === 'footer') {
+                        await FirestoreService.saveFooterData(data, siteId);
+                    } else {
+                        await FirestoreService.saveSettings(siteId, documentId, data);
+                    }
+                    break;
+                case 'events':
+                    await FirestoreService.saveEvent(siteId, data, documentId);
+                    break;
+                case 'articles':
+                    await FirestoreService.saveArticle(siteId, data, documentId);
+                    break;
+                case 'videos':
+                    await FirestoreService.saveVideo(siteId, data, documentId);
+                    break;
+                case 'partners':
+                    await FirestoreService.savePartner(siteId, data, documentId);
+                    break;
+                case 'products':
+                    await FirestoreService.saveProduct(siteId, data, documentId);
+                    break;
+                case 'forms':
+                    await FirestoreService.saveForm(siteId, documentId, data);
+                    break;
+                case 'reusable_sections':
+                    await FirestoreService.saveReusableSection(siteId, documentId, data);
+                    break;
+                default:
+                    throw new Error(`Unsupported rollback collection: ${logicalCollection}`);
+            }
+        } catch (error) {
+            console.error("Error executing rollback:", error);
             throw error;
         }
     }

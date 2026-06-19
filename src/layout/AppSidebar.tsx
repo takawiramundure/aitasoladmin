@@ -533,6 +533,11 @@ const AppSidebar: React.FC = () => {
           icon: <PlugInIcon />,
           name: "System Settings",
           path: "/settings",
+        },
+        {
+          icon: <HorizontaLDots />,
+          name: "Rollback Manager",
+          path: "/settings/rollback",
         }
       );
     }
