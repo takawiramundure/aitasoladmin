@@ -70,6 +70,7 @@ export default function HeroManager() {
     const [globalTicketCta, setGlobalTicketCta] = useState("");
     const [globalTicketCtaLink, setGlobalTicketCtaLink] = useState("");
     const [globalShowTicketCta, setGlobalShowTicketCta] = useState(true);
+    const [gradientLevel, setGradientLevel] = useState(70);
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState<string | null>(null); // ID of slide being uploaded
@@ -119,6 +120,7 @@ export default function HeroManager() {
                 setGlobalTicketCta(data.globalTicketCta !== undefined ? data.globalTicketCta : (firstSlide.ticketCta || ""));
                 setGlobalTicketCtaLink(data.globalTicketCtaLink !== undefined ? data.globalTicketCtaLink : (firstSlide.ticketCtaLink || ""));
                 setGlobalShowTicketCta(data.globalShowTicketCta !== undefined ? data.globalShowTicketCta : (firstSlide.showTicketCta !== false));
+                setGradientLevel(data.gradientLevel !== undefined ? Number(data.gradientLevel) : 70);
             } else {
                 const defaults = getDefaultSlides();
                 setSlides(defaults);
@@ -133,6 +135,7 @@ export default function HeroManager() {
                 setGlobalTicketCta(firstSlide.ticketCta || "");
                 setGlobalTicketCtaLink(firstSlide.ticketCtaLink || "");
                 setGlobalShowTicketCta(firstSlide.showTicketCta !== false);
+                setGradientLevel(70);
             }
         } catch (err) {
             console.error(err);
@@ -158,7 +161,8 @@ export default function HeroManager() {
                 globalLink,
                 globalTicketCta,
                 globalTicketCtaLink,
-                globalShowTicketCta
+                globalShowTicketCta,
+                gradientLevel
             } as any, currentSite.id);
             setSuccessMsg("Hero slider updated successfully!");
         } catch (err) {
@@ -470,6 +474,31 @@ export default function HeroManager() {
                             />
                         </div>
                     )}
+                </div>
+
+                {/* Hero Overlay Style Settings */}
+                <div className="mb-6 p-5 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
+                    <h3 className="text-sm font-semibold text-gray-800 dark:text-white/90 mb-3">Hero Overlay Style Settings</h3>
+                    <div className="max-w-xl">
+                        <Label>Gradient Overlay Opacity (Darkness level)</Label>
+                        <div className="flex items-center gap-4 mt-2">
+                            <input
+                                type="range"
+                                min="0"
+                                max="100"
+                                step="5"
+                                value={gradientLevel}
+                                onChange={(e) => setGradientLevel(Number(e.target.value))}
+                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-blue-600"
+                            />
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 w-12 text-right">
+                                {gradientLevel}%
+                            </span>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">
+                            Adjust how dark the overlay is on background images. Lower values make images brighter; higher values increase text contrast. Set to 0% to turn off completely.
+                        </p>
+                    </div>
                 </div>
 
                 {useFolderMapping ? (
