@@ -71,6 +71,12 @@ export default function HeroManager() {
     const [globalTicketCtaLink, setGlobalTicketCtaLink] = useState("");
     const [globalShowTicketCta, setGlobalShowTicketCta] = useState(true);
     const [gradientLevel, setGradientLevel] = useState(70);
+    const [showTrustInfo, setShowTrustInfo] = useState(true);
+    const [trustText, setTrustText] = useState("");
+    const [trustColor1, setTrustColor1] = useState("#D4AF37");
+    const [trustColor2, setTrustColor2] = useState("#0D9488");
+    const [trustColor3, setTrustColor3] = useState("#D4AF37");
+    const [trustColor4, setTrustColor4] = useState("#0D9488");
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState<string | null>(null); // ID of slide being uploaded
@@ -121,6 +127,12 @@ export default function HeroManager() {
                 setGlobalTicketCtaLink(data.globalTicketCtaLink !== undefined ? data.globalTicketCtaLink : (firstSlide.ticketCtaLink || ""));
                 setGlobalShowTicketCta(data.globalShowTicketCta !== undefined ? data.globalShowTicketCta : (firstSlide.showTicketCta !== false));
                 setGradientLevel(data.gradientLevel !== undefined ? Number(data.gradientLevel) : 70);
+                setShowTrustInfo(data.showTrustInfo !== undefined ? data.showTrustInfo : true);
+                setTrustText(data.trustText !== undefined ? data.trustText : "Joined by 200+ families in our community");
+                setTrustColor1(data.trustColor1 || "#D4AF37");
+                setTrustColor2(data.trustColor2 || "#0D9488");
+                setTrustColor3(data.trustColor3 || "#D4AF37");
+                setTrustColor4(data.trustColor4 || "#0D9488");
             } else {
                 const defaults = getDefaultSlides();
                 setSlides(defaults);
@@ -136,6 +148,12 @@ export default function HeroManager() {
                 setGlobalTicketCtaLink(firstSlide.ticketCtaLink || "");
                 setGlobalShowTicketCta(firstSlide.showTicketCta !== false);
                 setGradientLevel(70);
+                setShowTrustInfo(true);
+                setTrustText("Joined by 200+ families in our community");
+                setTrustColor1("#D4AF37");
+                setTrustColor2("#0D9488");
+                setTrustColor3("#D4AF37");
+                setTrustColor4("#0D9488");
             }
         } catch (err) {
             console.error(err);
@@ -162,7 +180,13 @@ export default function HeroManager() {
                 globalTicketCta,
                 globalTicketCtaLink,
                 globalShowTicketCta,
-                gradientLevel
+                gradientLevel,
+                showTrustInfo,
+                trustText,
+                trustColor1,
+                trustColor2,
+                trustColor3,
+                trustColor4
             } as any, currentSite.id);
             setSuccessMsg("Hero slider updated successfully!");
         } catch (err) {
@@ -500,6 +524,116 @@ export default function HeroManager() {
                         </p>
                     </div>
                 </div>
+
+                {/* KMFW-specific Trust Settings */}
+                {currentSite.id === 'kmfw' && (
+                    <div className="mb-6 p-5 border border-gray-200 rounded-xl bg-gray-50 dark:bg-white/[0.02] dark:border-gray-700">
+                        <div className="flex items-center justify-between border-b pb-3 mb-4">
+                            <h3 className="text-sm font-semibold text-gray-800 dark:text-white/90">Community Trust Settings</h3>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs text-gray-500">{showTrustInfo ? 'Enabled' : 'Disabled'}</span>
+                                <button
+                                    onClick={() => setShowTrustInfo(prev => !prev)}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showTrustInfo ? 'bg-blue-600' : 'bg-gray-300'}`}
+                                >
+                                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showTrustInfo ? 'translate-x-6' : 'translate-x-1'}`} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {showTrustInfo && (
+                            <div className="space-y-4">
+                                <div className="max-w-xl">
+                                    <Label>Trust Badge Text</Label>
+                                    <Input
+                                        type="text"
+                                        placeholder="e.g. Joined by 200+ families in our community"
+                                        value={trustText}
+                                        onChange={(e) => setTrustText(e.target.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <Label className="mb-2">Trust Circle Colors</Label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-xl">
+                                        <div className="space-y-1">
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Circle 1</span>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="color"
+                                                    value={trustColor1}
+                                                    onChange={(e) => setTrustColor1(e.target.value)}
+                                                    className="w-10 h-10 border border-gray-200 rounded cursor-pointer"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={trustColor1}
+                                                    onChange={(e) => setTrustColor1(e.target.value)}
+                                                    className="w-full text-xs font-mono p-1 border border-gray-200 rounded dark:bg-gray-900 dark:border-gray-800 dark:text-white"
+                                                    placeholder="#D4AF37"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Circle 2</span>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="color"
+                                                    value={trustColor2}
+                                                    onChange={(e) => setTrustColor2(e.target.value)}
+                                                    className="w-10 h-10 border border-gray-200 rounded cursor-pointer"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={trustColor2}
+                                                    onChange={(e) => setTrustColor2(e.target.value)}
+                                                    className="w-full text-xs font-mono p-1 border border-gray-200 rounded dark:bg-gray-900 dark:border-gray-800 dark:text-white"
+                                                    placeholder="#0D9488"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Circle 3</span>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="color"
+                                                    value={trustColor3}
+                                                    onChange={(e) => setTrustColor3(e.target.value)}
+                                                    className="w-10 h-10 border border-gray-200 rounded cursor-pointer"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={trustColor3}
+                                                    onChange={(e) => setTrustColor3(e.target.value)}
+                                                    className="w-full text-xs font-mono p-1 border border-gray-200 rounded dark:bg-gray-900 dark:border-gray-800 dark:text-white"
+                                                    placeholder="#D4AF37"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1">
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Circle 4</span>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="color"
+                                                    value={trustColor4}
+                                                    onChange={(e) => setTrustColor4(e.target.value)}
+                                                    className="w-10 h-10 border border-gray-200 rounded cursor-pointer"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={trustColor4}
+                                                    onChange={(e) => setTrustColor4(e.target.value)}
+                                                    className="w-full text-xs font-mono p-1 border border-gray-200 rounded dark:bg-gray-900 dark:border-gray-800 dark:text-white"
+                                                    placeholder="#0D9488"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
 
                 {useFolderMapping ? (
                     <div className="p-6 border border-gray-200 rounded-xl bg-white dark:bg-white/[0.02] dark:border-gray-800 space-y-4">
