@@ -10,7 +10,88 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Button from "@/components/ui/button/Button";
 import Alert from "@/components/ui/alert/Alert";
 import { Modal } from "@/components/ui/modal";
-import { History, Eye, RotateCcw, Filter, Calendar, User, Database, Globe, RefreshCw } from 'lucide-react';
+import { History, Eye, RotateCcw, Filter, Calendar, User, Database, Globe, RefreshCw, Info } from 'lucide-react';
+
+interface ChangeSummary {
+    type: 'create' | 'delete' | 'update' | 'none' | 'unknown';
+    description: string;
+    added?: string[];
+    removed?: string[];
+    modified?: string[];
+}
+
+function getChangeSummary(item: any): ChangeSummary {
+    if (!item) return { type: 'unknown', description: 'No active item selected.' };
+    const { action, previousData, newData } = item;
+    
+    if (action === 'create') {
+        const fieldCount = newData ? Object.keys(newData).length : 0;
+        return {
+            type: 'create',
+            description: `Created a new document containing ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`,
+            added: newData ? Object.keys(newData) : []
+        };
+    }
+    
+    if (action === 'delete') {
+        const fieldCount = previousData ? Object.keys(previousData).length : 0;
+        return {
+            type: 'delete',
+            description: `Deleted the document containing ${fieldCount} field${fieldCount === 1 ? '' : 's'}.`,
+            removed: previousData ? Object.keys(previousData) : []
+        };
+    }
+    
+    if (action === 'update' || (!action && previousData && newData)) {
+        const prev = previousData || {};
+        const next = newData || {};
+        
+        const prevKeys = Object.keys(prev);
+        const nextKeys = Object.keys(next);
+        
+        const added: string[] = [];
+        const removed: string[] = [];
+        const modified: string[] = [];
+        
+        const allKeys = Array.from(new Set([...prevKeys, ...nextKeys]));
+        
+        allKeys.forEach(key => {
+            const hasPrev = key in prev;
+            const hasNext = key in next;
+            if (!hasPrev && hasNext) {
+                added.push(key);
+            } else if (hasPrev && !hasNext) {
+                removed.push(key);
+            } else if (hasPrev && hasNext) {
+                if (JSON.stringify(prev[key]) !== JSON.stringify(next[key])) {
+                    modified.push(key);
+                }
+            }
+        });
+        
+        if (added.length === 0 && removed.length === 0 && modified.length === 0) {
+            return {
+                type: 'none',
+                description: "No changes detected. The document contents are identical."
+            };
+        }
+        
+        const descParts: string[] = [];
+        if (added.length > 0) descParts.push(`added ${added.length} field${added.length === 1 ? '' : 's'}`);
+        if (removed.length > 0) descParts.push(`removed ${removed.length} field${removed.length === 1 ? '' : 's'}`);
+        if (modified.length > 0) descParts.push(`modified ${modified.length} field${modified.length === 1 ? '' : 's'}`);
+        
+        return {
+            type: 'update',
+            description: `Updated document: ${descParts.join(', ')}.`,
+            added,
+            removed,
+            modified
+        };
+    }
+    
+    return { type: 'unknown', description: "Unknown activity type or no change data available." };
+}
 
 function VisualDiff({ prev, next }: { prev: any; next: any }) {
     if (!prev && !next) return <div className="text-gray-500 italic py-4">No data to compare.</div>;
@@ -460,6 +541,51 @@ export default function RollbackManager() {
                                 <span className="font-semibold text-gray-800 dark:text-gray-200">{activeItem.updatedBy || 'system'}</span>
                             </div>
                         </div>
+
+                        {/* Change Summary Card */}
+                        {(() => {
+                            const summary = getChangeSummary(activeItem);
+                            const hasChanges = (summary.added?.length || 0) > 0 || (summary.removed?.length || 0) > 0 || (summary.modified?.length || 0) > 0;
+                            
+                            return (
+                                <div className="space-y-2">
+                                    <h4 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Change Summary</h4>
+                                    <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-950/10">
+                                        <div className="flex gap-3">
+                                            <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+                                            <div className="space-y-2 flex-1">
+                                                <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                                                    {summary.description}
+                                                </p>
+                                                
+                                                {summary.type === 'update' && hasChanges && (
+                                                    <div className="flex flex-wrap gap-2.5 mt-2 text-xs">
+                                                        {summary.added && summary.added.length > 0 && (
+                                                            <div className="flex items-center gap-1.5 bg-green-50 text-green-700 dark:bg-green-950/40 dark:text-green-400 border border-green-200/50 dark:border-green-900/30 px-2.5 py-1 rounded-lg">
+                                                                <span className="font-semibold">Added:</span>
+                                                                <span className="font-mono">{summary.added.join(', ')}</span>
+                                                            </div>
+                                                        )}
+                                                        {summary.modified && summary.modified.length > 0 && (
+                                                            <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/50 dark:border-amber-900/30 px-2.5 py-1 rounded-lg">
+                                                                <span className="font-semibold">Modified:</span>
+                                                                <span className="font-mono">{summary.modified.join(', ')}</span>
+                                                            </div>
+                                                        )}
+                                                        {summary.removed && summary.removed.length > 0 && (
+                                                            <div className="flex items-center gap-1.5 bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200/50 dark:border-red-900/30 px-2.5 py-1 rounded-lg">
+                                                                <span className="font-semibold">Removed:</span>
+                                                                <span className="font-mono">{summary.removed.join(', ')}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
 
                         {/* Diff Render */}
                         <div className="space-y-2">
