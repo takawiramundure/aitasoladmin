@@ -102,7 +102,8 @@ export default function SiteSettingsManager() {
                 siteKeywords: siteDefaults.keywords,
                 branding: { 
                     siteName: currentSite.name, 
-                    logo: '' 
+                    logo: '',
+                    favicon: '/favicon.ico'
                 },
                 theme: GET_SITE_THEME_DEFAULTS(currentSite.id),
                 navigation: defaultNav,
@@ -182,6 +183,28 @@ export default function SiteSettingsManager() {
         } catch (error) {
             console.error('Logo upload error:', error);
             setStatus({ type: 'error', msg: 'Failed to upload logo. Please try again.' });
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleFaviconUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !settings) return;
+
+        setUploading(true);
+        try {
+            const optimizedFile = await optimizeImage(file);
+            const cleanName = optimizedFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+            const storageRef = ref(storage, `${currentSite.id}/branding/${Date.now()}_${cleanName}`);
+            const snapshot = await uploadBytes(storageRef, optimizedFile);
+            const downloadURL = await getDownloadURL(snapshot.ref);
+
+            updateBranding('favicon', downloadURL);
+            setStatus({ type: 'success', msg: 'Favicon uploaded successfully!' });
+        } catch (error) {
+            console.error('Favicon upload error:', error);
+            setStatus({ type: 'error', msg: 'Failed to upload favicon. Please try again.' });
         } finally {
             setUploading(false);
         }
@@ -951,8 +974,58 @@ export default function SiteSettingsManager() {
                                             </div>
                                         )}
                                     </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Favicon URL
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={settings.branding.favicon || ''}
+                                                onChange={(e) => updateBranding('favicon', e.target.value)}
+                                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                placeholder="/favicon.ico"
+                                            />
+                                            {settings.branding.logo && (
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    onClick={() => updateBranding('favicon', settings.branding.logo)}
+                                                    className="px-3"
+                                                >
+                                                    Use Logo
+                                                </Button>
+                                            )}
+                                            <label className={`cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                                <Upload className="w-4 h-4 mr-2" />
+                                                {uploading ? 'Uploading...' : 'Upload'}
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    className="hidden"
+                                                    onChange={handleFaviconUpload}
+                                                    disabled={uploading}
+                                                />
+                                            </label>
+                                        </div>
+                                        {settings.branding.favicon && (
+                                            <div className="mt-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800/50 max-w-max">
+                                                <div className="flex items-center gap-4">
+                                                    <img
+                                                        src={settings.branding.favicon}
+                                                        alt="Favicon preview"
+                                                        className="w-8 h-8 object-contain border rounded p-1 bg-white"
+                                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                                    />
+                                                    <span className="text-xs text-gray-500 dark:text-gray-400">Favicon Preview (32x32px)</span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
+
 
                             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                                 <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Theme Colors</h2>
