@@ -21,6 +21,7 @@ export default function UserInfoCard() {
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
   const [role, setRole] = useState("Super Admin"); // Default, could fetch actual role
+  const [mfaSetupComplete, setMfaSetupComplete] = useState<boolean>(false);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"success" | "error" | "warning">("success");
@@ -51,6 +52,7 @@ export default function UserInfoCard() {
             if (data.phone) setPhone(data.phone);
             if (data.bio) setBio(data.bio);
             if (data.role) setRole(data.role === 'super_admin' ? 'Super Admin' : 'Editor');
+            if (data.mfaSetupComplete !== undefined) setMfaSetupComplete(data.mfaSetupComplete);
           }
         } catch (err) {
           console.error("Failed to fetch user extra data", err);
@@ -159,7 +161,7 @@ export default function UserInfoCard() {
                 Two-Factor Auth (MFA)
               </p>
               <p className="text-sm font-medium">
-                {profile?.mfaSetupComplete ? (
+                {mfaSetupComplete || profile?.mfaSetupComplete ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     Verified via SMS
