@@ -28,6 +28,8 @@ const permissions = [
     { name: "View Content", editor: true, super_admin: true },
     { name: "Edit Content", editor: true, super_admin: true },
     { name: "Manage Media", editor: true, super_admin: true },
+    { name: "Site Settings", editor: true, super_admin: true },
+    { name: "Page SEO", editor: true, super_admin: true },
     { name: "Manage Users", editor: false, super_admin: true },
     { name: "Delete Users", editor: false, super_admin: true },
     { name: "System Settings", editor: false, super_admin: true },

@@ -509,15 +509,6 @@ const AppSidebar: React.FC = () => {
         name: "Internal Analytics",
         path: "/analytics",
       });
-    }
-
-    if (isSuperAdmin) {
-      items.unshift({
-        icon: <UserCircleIcon />,
-        name: "Users",
-        path: "/users",
-      });
-      
       items.push(
         {
           icon: <PlugInIcon />,
@@ -528,7 +519,18 @@ const AppSidebar: React.FC = () => {
           icon: <GridIcon />,
           name: "Page SEO Manager",
           path: "/settings/seo",
-        },
+        }
+      );
+    }
+
+    if (isSuperAdmin) {
+      items.unshift({
+        icon: <UserCircleIcon />,
+        name: "Users",
+        path: "/users",
+      });
+      
+      items.push(
         {
           icon: <PlugInIcon />,
           name: "System Settings",
