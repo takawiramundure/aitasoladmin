@@ -889,27 +889,39 @@ export default function BlogManager() {
                         </div>
 
                         <div>
-                            <Label>Published Status</Label>
-                            <div className="flex items-center gap-4 mt-2">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        checked={formData.published === true}
-                                        onChange={() => setFormData({ ...formData, published: true })}
-                                        className="w-4 h-4"
-                                    />
-                                    <span className="text-sm">Published</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        checked={formData.published === false}
-                                        onChange={() => setFormData({ ...formData, published: false })}
-                                        className="w-4 h-4"
-                                    />
-                                    <span className="text-sm">Draft</span>
-                                </label>
-                            </div>
+                            <Label>Publishing Status</Label>
+                            <select
+                                className="mt-2 block w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-brand-500 focus:ring-brand-500"
+                                value={
+                                    !formData.published 
+                                        ? "draft" 
+                                        : (formData.date && new Date(formData.date) > new Date()) 
+                                            ? "scheduled" 
+                                            : "published"
+                                }
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === 'draft') {
+                                        setFormData({ ...formData, published: false });
+                                    } else if (val === 'published') {
+                                        // Set published true and date to now if it was scheduled in the future
+                                        const now = new Date();
+                                        setFormData({ 
+                                            ...formData, 
+                                            published: true,
+                                            date: (formData.date && new Date(formData.date) > now) ? now : formData.date 
+                                        });
+                                    } else if (val === 'scheduled') {
+                                        // Set published true but ensure the date is in the future
+                                        // The user will pick the future date in the Publish Date field
+                                        setFormData({ ...formData, published: true });
+                                    }
+                                }}
+                            >
+                                <option value="draft">Draft (Hidden)</option>
+                                <option value="published">Published (Live Now)</option>
+                                <option value="scheduled">Scheduled (Publishes at Date)</option>
+                            </select>
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
