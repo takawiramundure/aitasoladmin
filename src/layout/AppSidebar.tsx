@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { MessageSquare } from "lucide-react";
 
 // Assume these icons are imported from an icon library
 import {
@@ -40,6 +41,11 @@ const AppSidebar: React.FC = () => {
         icon: <GridIcon />,
         name: "Dashboard",
         path: "/",
+      },
+      {
+        icon: <MessageSquare size={20} />,
+        name: "Leads & Forms",
+        path: "/cms/leads",
       },
       {
         icon: <PageIcon />,

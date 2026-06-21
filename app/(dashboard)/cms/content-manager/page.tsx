@@ -15,7 +15,7 @@ import { FilePicker } from "@/components/form/FilePicker";
 
 import { Modal } from "@/components/ui/modal";
 import Alert from "@/components/ui/alert/Alert";
-import { Trash2, ArrowUp, ArrowDown, Leaf, Pin, Copy, Plus, Folder } from "lucide-react";
+import { Trash2, ArrowUp, ArrowDown, Leaf, Pin, Copy, Plus, Folder, History, RotateCcw, Clock } from "lucide-react";
 import FolderPicker from "@/components/form/FolderPicker";
 import MediaLibrary from "@/components/common/MediaLibrary";
 import InsertSidebar from "@/components/common/InsertSidebar";
@@ -65,6 +65,11 @@ export default function ContentManager() {
     const [tagReusableSectionId, setTagReusableSectionId] = useState<string | null>(null);
     const [reusableLabel, setReusableLabel] = useState("");
     const [isTagModalOpen, setIsTagModalOpen] = useState(false);
+
+    // Version History
+    const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+    const [historyLogs, setHistoryLogs] = useState<any[]>([]);
+    const [loadingHistory, setLoadingHistory] = useState(false);
 
     // Map pageId to human readable title
     const pageTitles: Record<string, string> = {
@@ -241,6 +246,33 @@ export default function ContentManager() {
         } finally {
             setSaving(false);
         }
+    };
+
+    const handleOpenHistory = async () => {
+        setIsHistoryModalOpen(true);
+        setLoadingHistory(true);
+        try {
+            const targetDocId = isDraftMode ? `${pageId}_draft` : pageId;
+            const logs = await FirestoreService.getDocumentHistory(currentSite.id, 'content', targetDocId);
+            setHistoryLogs(logs);
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingHistory(false);
+        }
+    };
+
+    const handleRestoreVersion = async (logId: string, oldData: any) => {
+        if (!oldData) return;
+        
+        // Use a simple native confirm to prevent adding too much UI complexity
+        if (!window.confirm("Are you sure you want to restore this version? This will overwrite your current unsaved changes in the editor.")) {
+            return;
+        }
+
+        setContent(oldData);
+        setSuccessMsg("Restored version in editor. Click 'Save Changes' to apply.");
+        setIsHistoryModalOpen(false);
     };
 
     const handlePublish = async () => {
@@ -1395,6 +1427,9 @@ export default function ContentManager() {
                         <Button variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800 animate-pulse hover:animate-none" onClick={() => setIsInsertSidebarOpen(true)}>
                             + Add Component / Section
                         </Button>
+                        <Button variant="outline" onClick={handleOpenHistory} className="flex items-center gap-2">
+                            <History size={16} /> Version History
+                        </Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}
                         </Button>
@@ -1990,6 +2025,49 @@ export default function ContentManager() {
                         <Button variant="outline" className="flex-1" onClick={() => setSectionToDelete(null)}>Cancel</Button>
                         <Button onClick={confirmRemoveSection} className="flex-1 bg-red-600 hover:bg-red-700 text-white border-none">Delete</Button>
                     </div>
+                </div>
+            </Modal>
+
+            {/* Version History Modal */}
+            <Modal isOpen={isHistoryModalOpen} onClose={() => setIsHistoryModalOpen(false)} title="Version History" className="max-w-3xl">
+                <div className="space-y-4">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">View and restore previous versions of this page's content.</p>
+                    {loadingHistory ? (
+                        <div className="py-12 flex justify-center">
+                            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-brand-500"></div>
+                        </div>
+                    ) : historyLogs.length === 0 ? (
+                        <div className="py-12 text-center text-gray-500 border border-dashed rounded-xl border-gray-200 dark:border-gray-800">
+                            <Clock className="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600" />
+                            <p>No version history available for this page.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+                            {historyLogs.map((log: any) => {
+                                const logDate = log.timestamp?.seconds ? new Date(log.timestamp.seconds * 1000) : new Date(log.timestamp);
+                                const dateStr = isNaN(logDate.getTime()) ? 'Unknown Date' : logDate.toLocaleString();
+                                const isUpdate = log.action === 'update';
+                                
+                                return (
+                                    <div key={log.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-800">
+                                        <div>
+                                            <p className="font-medium text-gray-900 dark:text-white capitalize">{log.action}</p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1 mt-1">
+                                                <Clock size={12} /> {dateStr}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            {log.previousData && (
+                                                <Button size="sm" variant="outline" onClick={() => handleRestoreVersion(log.id, log.previousData)} className="flex items-center gap-2">
+                                                    <RotateCcw size={14} /> Restore
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             </Modal>
         </>

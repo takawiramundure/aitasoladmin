@@ -1478,10 +1478,64 @@ export const FirestoreService = {
                 .sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
                 .slice(0, limitCount);
         } catch (error) {
-            console.error("Error fetching history:", error);
+            console.error("Error getting history:", error);
             return [];
         }
     },
+
+    getLeads: async (siteId: string): Promise<any[]> => {
+        try {
+            const dbInstance = getDb(siteId);
+            const collectionsToFetch = ['form_submissions', 'messages', 'subscribers'];
+            let allLeads: any[] = [];
+
+            for (const colName of collectionsToFetch) {
+                const colRef = collection(dbInstance, colName);
+                try {
+                    const snapshot = await getDocs(colRef);
+                    const leads = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        collectionSource: colName,
+                        ...doc.data()
+                    }));
+                    allLeads = [...allLeads, ...leads];
+                } catch (e) {
+                    // Collection might not exist or permission denied, skip it
+                    console.warn(`Could not fetch collection ${colName} for site ${siteId}`, e);
+                }
+            }
+
+            // Sort by createdAt or timestamp descending
+            return allLeads.sort((a, b) => {
+                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : (a.timestamp ? new Date(a.timestamp).getTime() : 0);
+                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : (b.timestamp ? new Date(b.timestamp).getTime() : 0);
+                return dateB - dateA;
+            });
+        } catch (error) {
+            console.error("Error getting leads:", error);
+            return [];
+        }
+    },
+    getDocumentHistory: async (siteId: string, logicalCollection: string, documentId: string): Promise<any[]> => {
+        try {
+            const site = getSiteById(siteId);
+            const dbInstance = getDb(siteId);
+            const collectionName = site?.usePrefix !== false ? `${siteId}_history` : 'history';
+            const historyRef = collection(dbInstance, collectionName);
+            const q = query(
+                historyRef,
+                where('collectionName', '==', logicalCollection),
+                where('documentId', '==', documentId),
+                orderBy('timestamp', 'desc')
+            );
+            const snapshot = await getDocs(q);
+            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        } catch (error) {
+            console.error("Error getting document history:", error);
+            return [];
+        }
+    },
+
 
     rollbackDocument: async (siteId: string, logicalCollection: string, documentId: string, data: any): Promise<void> => {
         try {
