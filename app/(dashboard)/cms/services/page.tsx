@@ -14,6 +14,7 @@ import { CSS } from "@dnd-kit/utilities";
 import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { SEED_DATA } from "@/config/seedData";
 import { GridIcon } from "@/icons";
+import { Search, PlusIcon, LayoutIcon, Trash2Icon } from "lucide-react";
 import SEOEditor from "@/components/form/SEOEditor";
 import { useDialog } from "@/context/DialogContext";
 import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
