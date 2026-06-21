@@ -17,6 +17,7 @@ import { SEED_DATA } from "@/config/seedData";
 import { GridIcon } from "@/icons";
 import SEOEditor from "@/components/form/SEOEditor";
 import { useDialog } from "@/context/DialogContext";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface ServiceItem {
     id: string;
@@ -242,6 +243,7 @@ export default function ServicesManager() {
                         <p className="text-sm text-gray-500 mt-1">Manage the core offerings displayed on the website.</p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
+                        <VersionHistoryManager documentId="services" siteId={currentSite.id} />
                         <Button requireSuperAdmin variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                             🌱 Seed Default Data
                         </Button>

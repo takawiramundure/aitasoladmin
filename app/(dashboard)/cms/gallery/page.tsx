@@ -12,6 +12,7 @@ import MediaLibrary from "@/components/common/MediaLibrary";
 import { Images, Plus, Trash2, GripVertical, ExternalLink } from 'lucide-react';
 import { useDialog } from "@/context/DialogContext";
 import FolderPicker from "@/components/form/FolderPicker";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface GalleryImage {
     id: string;
@@ -175,6 +176,7 @@ export default function GalleryManager() {
                             <ExternalLink className="w-4 h-4" />
                             Preview Gallery
                         </a>
+                        <VersionHistoryManager documentId="gallery" siteId={currentSite.id} />
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? 'Saving...' : 'Save Gallery'}
                         </Button>

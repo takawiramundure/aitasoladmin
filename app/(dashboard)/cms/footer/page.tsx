@@ -10,6 +10,7 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import { Plus, Trash2, Save, Zap, Link, ChevronDown, ChevronRight } from "lucide-react";
 import { FirestoreService } from "@/services/firestore";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface FooterLink { label: string; url: string; }
 interface NavColumn { heading: string; links: FooterLink[]; }
@@ -238,6 +239,7 @@ const Section = ({ id, isOpen, onToggle, isVisible, onVisibilityToggle, children
     return (
         <div className={sectionCls}>
             <div className="flex items-center">
+                <VersionHistoryManager documentId="footer" siteId={currentSite.id} />
                 <button className={headerCls} onClick={onToggle}>
                     <span className="font-semibold text-gray-800 dark:text-white">{SECTION_LABELS[id]}</span>
                     {isOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}

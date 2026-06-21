@@ -17,6 +17,7 @@ import { nominees as defaultNominees, agenda as defaultAgenda, speakers as defau
 import { useDialog } from "@/context/DialogContext";
 import { Modal } from "@/components/ui/modal";
 import InsertSidebar from "@/components/common/InsertSidebar";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface GalaSection extends SectionContent {
     enabled?: boolean;
@@ -548,6 +549,7 @@ export default function GalaManager() {
                         <p className="text-sm text-gray-500 mt-1 italic text-primary">Manage the specialized Gala page components.</p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="gala" siteId={currentSite.id} />
                         <Button requireSuperAdmin variant="outline" onClick={seedGalaData}>Seed Data</Button>
                         <Button
                             variant="outline"

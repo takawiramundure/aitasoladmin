@@ -15,6 +15,7 @@ import MediaLibrary from "@/components/common/MediaLibrary";
 import { Modal } from "@/components/ui/modal";
 import RichTextEditor from "@/components/form/RichTextEditor";
 import { useDialog } from "@/context/DialogContext";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface Article {
     id: string;
@@ -254,6 +255,7 @@ export default function NewslettersManager() {
 
                 {/* Tabs Selection */}
                 <div className="flex border-b border-gray-200 dark:border-gray-700 mb-8 overflow-x-auto no-scrollbar">
+                    <VersionHistoryManager documentId="newsletters" siteId={currentSite.id} />
                     <button 
                         onClick={() => setActiveTab('pdfs')}
                         className={`pb-4 px-6 font-semibold transition-colors border-b-2 ${activeTab === 'pdfs' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}

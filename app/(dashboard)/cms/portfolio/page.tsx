@@ -16,6 +16,7 @@ import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
 import { useDialog } from "@/context/DialogContext";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface ProjectItem {
     id: string;
@@ -219,6 +220,7 @@ export default function PortfolioManager() {
                         <p className="text-sm text-gray-500 mt-1">Showcase your high-end renovations with before/after comparisons.</p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
+                        <VersionHistoryManager documentId="projects" siteId={currentSite.id} />
                         <Button requireSuperAdmin variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                             🌱 Seed Default Data
                         </Button>

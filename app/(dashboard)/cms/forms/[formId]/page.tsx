@@ -9,6 +9,7 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import { Eye, Save, Plus, Trash2, Mail } from 'lucide-react';
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 const DEFAULT_DATA = {
     title: "New Form",
@@ -115,6 +116,7 @@ export default function DynamicFormEditor({ params }: { params: Promise<{ formId
                         <p className="text-sm text-gray-500">Update the fields and text for this dynamic form.</p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="forms" siteId={currentSite.id} />
                         <Button onClick={handleSave} disabled={saving}>
                             <Save className="w-4 h-4 mr-2" />
                             {saving ? "Saving..." : "Save Changes"}

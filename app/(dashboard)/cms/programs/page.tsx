@@ -19,6 +19,7 @@ import { SEED_DATA } from "@/config/seedData";
 import { GridIcon } from "@/icons";
 import { useDialog } from "@/context/DialogContext";
 import { optimizeImage } from "@/utils/imageOptimizer";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 // ---- Sortable Item Component ----
 function SortableProgramItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -263,6 +264,7 @@ export default function ProgramsManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="programs" siteId={currentSite.id} />
                         <Button requireSuperAdmin variant="outline" onClick={seedDefaults}>Seed Defaults</Button>
                         <Button variant="outline" onClick={addProgram}>+ Add Program</Button>
                         <Button onClick={handleSave} disabled={saving}>

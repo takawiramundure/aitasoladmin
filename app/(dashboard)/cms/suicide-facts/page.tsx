@@ -12,6 +12,7 @@ import { useDialog } from "@/context/DialogContext";
 import { DndContext, closestCenter, DragEndEvent, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, arrayMove, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 // ---- Sortable Item Component ----
 function SortableFactItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -271,6 +272,7 @@ export default function SuicideFactsManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="suicide_facts" siteId={currentSite.id} />
                         <Button requireSuperAdmin variant="secondary" onClick={handleSeedDefaults}>Seed Defaults</Button>
                         <Button variant="outline" onClick={addFact}>+ Add Fact</Button>
                         <Button onClick={handleSave} disabled={saving}>

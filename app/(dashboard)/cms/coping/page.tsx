@@ -16,6 +16,7 @@ import { SEED_DATA } from "@/config/seedData";
 import SEOEditor from "@/components/form/SEOEditor";
 import { Search } from 'lucide-react';
 import { useDialog } from "@/context/DialogContext";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -178,6 +179,7 @@ export default function CopingManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="coping" siteId={currentSite.id} />
                         <Button requireSuperAdmin variant="outline" onClick={async () => {
                             const isConfirmed = await confirm({
                                 title: "Seed Defaults",

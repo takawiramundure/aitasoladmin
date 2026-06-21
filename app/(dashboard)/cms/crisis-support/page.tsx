@@ -10,6 +10,7 @@ import { FirestoreService } from "@/services/firestore";
 import { useSite } from "@/context/SiteContext";
 import { useDialog } from "@/context/DialogContext";
 import { SEED_DATA } from "@/config/seedData";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 export default function CrisisManager() {
     const { currentSite } = useSite();
@@ -127,6 +128,7 @@ export default function CrisisManager() {
                         <p className="text-sm text-gray-500 mt-1">Manage the crisis support cards displayed on the website.</p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="crisis_support" siteId={currentSite.id} />
                         <Button requireSuperAdmin variant="outline" onClick={seedDefaults}>
                             Seed Defaults
                         </Button>

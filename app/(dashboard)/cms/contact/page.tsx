@@ -12,6 +12,7 @@ import { Eye, EyeOff, Save, Clock, MapPin, Trash2, Plus, Mail, Search } from 'lu
 import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import SEOEditor from "@/components/form/SEOEditor";
 import { useDialog } from "@/context/DialogContext";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -295,6 +296,7 @@ export default function ContactPageManager() {
                         <p className="text-sm text-gray-500">Update the address, hours, and hero section of the Contact Us page.</p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="contact" siteId={currentSite.id} />
                         <Button variant="outline" onClick={async () => { 
                             const siteDefaults = currentSite.id === 'dmlabs' ? DMLABS_CONTACT_DEFAULT : (currentSite.id === 'aitasol' ? AITASOL_CONTACT_DEFAULT : DEFAULT_DATA);
                             const isConfirmed = await confirm({

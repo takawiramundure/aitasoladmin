@@ -24,6 +24,7 @@ import {
     FolderIcon,
     PlusIcon,
 } from "@/icons";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface Article {
     id: string;
@@ -684,6 +685,7 @@ export default function BlogManager() {
                                 <Search size={20} className="text-indigo-500" />
                                 <h3 className="text-lg font-bold text-gray-800 dark:text-white">Blog Search SEO</h3>
                             </div>
+                            <VersionHistoryManager documentId="blog" siteId={currentSite.id} />
                             <Button size="sm" onClick={handlePageSave} loading={pageSaving}>Save SEO</Button>
                         </div>
                         <SEOEditor 

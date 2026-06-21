@@ -15,6 +15,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Search } from 'lucide-react';
 import SEOEditor from "@/components/form/SEOEditor";
 import { SEED_DATA } from "@/config/seedData";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface ReviewItem {
     id: string;
@@ -210,6 +211,7 @@ export default function ReviewsManager() {
                         <p className="text-sm text-gray-500 mt-1">Manage the feedback displayed on your website.</p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="reviews" siteId={currentSite.id} />
                         <Button variant="outline" onClick={addReview}>+ Add Review</Button>
                         <Button onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Changes"}</Button>
                     </div>

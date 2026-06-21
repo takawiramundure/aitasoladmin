@@ -32,6 +32,7 @@ import {
     Pin,
     Image as ImageIcon
 } from 'lucide-react';
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface Celebrating5YearsData {
     sections: {
@@ -373,6 +374,7 @@ export default function Celebrating5YearsManager() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
+                        <VersionHistoryManager documentId="celebrating-5-years" siteId={currentSite.id} />
                         <Button 
                             variant="outline" 
                             onClick={handleRestoreDefaults}

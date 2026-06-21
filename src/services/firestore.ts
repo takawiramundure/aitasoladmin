@@ -1,6 +1,6 @@
 import { getDb, auth } from "@/firebaseConfig";
 import { getSiteById } from "@/config/sites";
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, deleteDoc, query, where, orderBy } from "firebase/firestore";
 import { SiteSettings } from "@/types/siteSettings";
 
 export interface PageContent {

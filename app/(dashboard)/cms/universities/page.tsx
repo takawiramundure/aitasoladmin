@@ -16,6 +16,7 @@ import { SEED_DATA } from "@/config/seedData";
 import { GridIcon } from "@/icons";
 import { Search, PlusIcon, Trash2Icon, GlobeIcon, LayoutIcon, GraduationCap } from 'lucide-react';
 import SEOEditor from "@/components/form/SEOEditor";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface UniversityItem {
     id: string;
@@ -185,6 +186,7 @@ export default function UniversitiesManager() {
                         <p className="text-sm text-gray-500 mt-1">Manage the institutions partnered with {currentSite.name}.</p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
+                        <VersionHistoryManager documentId="universities" siteId={currentSite.id} />
                         <Button requireSuperAdmin variant="outline" onClick={handleSeedData} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                             🌱 Load Defaults
                         </Button>

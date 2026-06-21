@@ -22,6 +22,7 @@ import SEOEditor from "@/components/form/SEOEditor";
 import { Search } from 'lucide-react';
 import { useDialog } from "@/context/DialogContext";
 import { optimizeImage } from "@/utils/imageOptimizer";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 // ---- Sortable Item Component ----
 function SortableResourceItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -214,6 +215,8 @@ export default function ResourcesManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+
+                        <VersionHistoryManager documentId="resources" siteId={currentSite.id} />
 
                         <Button variant="outline" onClick={addResource}>+ Add Resource</Button>
                         <Button onClick={handleSave} disabled={saving}>

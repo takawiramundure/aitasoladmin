@@ -11,6 +11,7 @@ import ImagePicker from "@/components/form/ImagePicker";
 import RichTextEditor from "@/components/form/RichTextEditor";
 import Label from "@/components/form/Label";
 import { Quote, User } from 'lucide-react';
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface FoundersMessageData {
     founderName: string;
@@ -97,6 +98,7 @@ export default function FoundersMessageManager() {
                             Edit the message displayed on the /about/founders-message page.
                         </p>
                     </div>
+                    <VersionHistoryManager documentId="founders-message" siteId={currentSite.id} />
                     <Button onClick={handleSave} disabled={saving}>
                         {saving ? 'Saving...' : 'Save Changes'}
                     </Button>

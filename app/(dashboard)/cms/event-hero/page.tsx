@@ -10,6 +10,7 @@ import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import { Eye, EyeOff, Zap, Clock, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface EventHeroData {
     enabled: boolean;
@@ -114,6 +115,7 @@ export default function EventHeroManager() {
                             When enabled, this replaces the main hero on the homepage with a full-screen event announcement including a live countdown timer.
                         </p>
                     </div>
+                    <VersionHistoryManager documentId="event_hero" siteId={currentSite.id} />
                     <Button onClick={handleSave} disabled={saving}>
                         {saving ? 'Saving...' : 'Save Changes'}
                     </Button>

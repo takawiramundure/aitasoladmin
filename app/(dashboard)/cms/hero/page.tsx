@@ -19,6 +19,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { SEED_DATA } from "@/config/seedData";
 import FolderPicker from "@/components/form/FolderPicker";
 import { optimizeImage } from "@/utils/imageOptimizer";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 // ---- Sortable Item Component for Slides ----
 function SortableSlideItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -437,9 +438,12 @@ export default function HeroManager() {
                     </div>
                     <div className="flex gap-3 flex-wrap">
                         {currentSite.id === 'kmfw' && (
-                            <Button requireSuperAdmin variant="outline" onClick={seedKMFWHero}>
-                                Seed KMFW Hero Content
-                            </Button>
+                            <>
+                                <VersionHistoryManager documentId="hero_slider" siteId={currentSite.id} />
+                                <Button requireSuperAdmin variant="outline" onClick={seedKMFWHero}>
+                                    Seed KMFW Hero Content
+                                </Button>
+                            </>
                         )}
                         {currentSite.id === 'noel' && (
                             <Button requireSuperAdmin variant="outline" onClick={seedNoelHero}>

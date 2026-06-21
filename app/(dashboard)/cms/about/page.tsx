@@ -17,6 +17,7 @@ import SEOEditor from "@/components/form/SEOEditor";
 import { useDialog } from "@/context/DialogContext";
 import InsertSidebar from "@/components/common/InsertSidebar";
 import { Modal } from "@/components/ui/modal";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface AboutSection extends SectionContent {
     enabled?: boolean;
@@ -477,9 +478,12 @@ export default function AboutPageManager() {
                     </div>
                     <div className="flex gap-3 flex-wrap">
                         {['dmlabs', 'noel', 'aitasol', 'phcg'].includes(currentSite.id) && (
-                            <Button requireSuperAdmin variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
-                                🌱 Seed Default Data
-                            </Button>
+                            <>
+                                <VersionHistoryManager documentId="about" siteId={currentSite.id} />
+                                <Button requireSuperAdmin variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                                    🌱 Seed Default Data
+                                </Button>
+                            </>
                         )}
                         <Button
                             variant="outline"

@@ -9,6 +9,7 @@ import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import { Eye, Save, Plus, Trash2, Mail } from 'lucide-react';
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -124,6 +125,7 @@ export default function ApplicationFormManager() {
                         <p className="text-sm text-gray-500">Update the fields and text for the application form used across the site.</p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="application_form" siteId={currentSite.id} />
                         <Button onClick={handleSave} disabled={saving}>
                             <Save className="w-4 h-4 mr-2" />
                             {saving ? "Saving..." : "Save Changes"}

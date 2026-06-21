@@ -10,7 +10,7 @@ interface VersionHistoryManagerProps {
     documentId: string;
     siteId: string;
     collection?: string;
-    onRestore: (oldData: any) => void;
+    onRestore?: (oldData: any) => void;
 }
 
 export default function VersionHistoryManager({
@@ -43,7 +43,17 @@ export default function VersionHistoryManager({
             return;
         }
 
-        onRestore(oldData);
+        if (onRestore) {
+            onRestore(oldData);
+        } else {
+            try {
+                await FirestoreService.savePageContent(documentId, oldData, siteId);
+                window.location.reload();
+            } catch (e) {
+                console.error("Failed to restore directly:", e);
+                alert("Failed to restore version. Check console.");
+            }
+        }
         setIsHistoryModalOpen(false);
     };
 

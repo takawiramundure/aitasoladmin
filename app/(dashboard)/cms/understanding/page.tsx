@@ -18,6 +18,7 @@ import MediaPickerModal from "@/components/common/MediaPickerModal";
 import { GridIcon } from "@/icons";
 import { SEED_DATA } from "@/config/seedData";
 import { optimizeImage } from "@/utils/imageOptimizer";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 // ---- Sortable Item Component for Cards ----
 function SortableCardItem({ id, children }: { id: string; children: React.ReactNode }) {
@@ -278,6 +279,7 @@ export default function UnderstandingManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="understanding" siteId={currentSite.id} />
                         <Button variant="outline" onClick={addCard}>+ Add Card</Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}

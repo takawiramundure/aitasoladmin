@@ -16,6 +16,7 @@ import { Modal } from "@/components/ui/modal";
 import { useDialog } from "@/context/DialogContext";
 import InsertSidebar from "@/components/common/InsertSidebar";
 import RichTextEditor from "@/components/form/RichTextEditor";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -245,6 +246,7 @@ export default function StrategicPlanManager() {
                         <p className="text-sm text-gray-500">Manage the KMFW Strategic Plan page content and visibility.</p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="strategic-plan" siteId={currentSite.id} />
                         <Button 
                             variant="outline" 
                             onClick={async () => { 

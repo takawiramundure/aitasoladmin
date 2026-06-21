@@ -16,6 +16,7 @@ import {
     TrashBinIcon,
     PlusIcon,
 } from "@/icons";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface Video {
     id: string;
@@ -150,6 +151,7 @@ export default function VideoManager() {
 
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold dark:text-white">Video Manager</h1>
+                <VersionHistoryManager documentId="videos" siteId={currentSite.id} />
                 <Button onClick={openModal} className="flex items-center gap-2">
                     <PlusIcon className="w-4 h-4" /> Add Video
                 </Button>

@@ -10,6 +10,7 @@ import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
 import { Eye, Save, Search, Plus, Trash2 } from 'lucide-react';
 import SEOEditor from "@/components/form/SEOEditor";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 const DEFAULT_DATA = {
     enabled: true,
@@ -109,6 +110,7 @@ export default function FAQPageManager() {
                         <p className="text-sm text-gray-500">Update the hero section and FAQ list of the FAQ page.</p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager documentId="faq" siteId={currentSite.id} />
                         <Button variant="outline" onClick={() => {
                             setContent(JSON.parse(JSON.stringify(DEFAULT_DATA)));
                             setSuccessMsg("Default data loaded into editor!");

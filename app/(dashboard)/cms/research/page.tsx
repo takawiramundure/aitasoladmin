@@ -11,6 +11,7 @@ import RichTextEditor from "@/components/form/RichTextEditor";
 import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import { Eye, EyeOff, ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface ResearchSection extends SectionContent {
     enabled?: boolean;
@@ -184,6 +185,7 @@ export default function ResearchPageManager() {
             <div key={id} className={`border rounded-lg transition-all duration-200 ${section.enabled ? 'border-gray-200 bg-gray-50' : 'border-gray-200 bg-gray-100 opacity-75'}`}>
                 <div className="flex items-center justify-between p-4 cursor-pointer" onClick={() => toggleSection(id)}>
                     <div className="flex items-center gap-3">
+                        <VersionHistoryManager documentId="research" siteId={currentSite.id} />
                         <button
                             type="button"
                             onClick={(e) => {

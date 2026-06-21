@@ -11,6 +11,7 @@ import Alert from "@/components/ui/alert/Alert";
 import ImagePicker from "@/components/form/ImagePicker";
 import { Eye, EyeOff, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { useDialog } from "@/context/DialogContext";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 const DEFAULT_TEAM_DATA = {
     enabled: true,
@@ -187,6 +188,7 @@ export default function MeetOurTeamManager() {
                         <p className="text-sm text-gray-500">Manage the KMFW team structure and invisibility.</p>
                     </div>
                     <div className="flex items-center gap-3">
+                        <VersionHistoryManager documentId="meet-our-team" siteId={currentSite.id} />
                         <Button 
                             variant="outline" 
                             onClick={async () => {
