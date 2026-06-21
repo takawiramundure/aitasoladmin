@@ -46,8 +46,20 @@ const AppHeader: React.FC = () => {
     const parts = pathname.split('/').filter(Boolean);
     const lastPart = parts[parts.length - 1];
     if (!lastPart || lastPart === 'cms' || lastPart === 'dashboard') return null;
-    if (lastPart === 'home-settings') return 'home';
-    return lastPart;
+    const docMap: Record<string, string> = {
+      'home-settings': 'home',
+      'hero': 'hero_slider',
+      'event-hero': 'event_hero',
+      'portfolio': 'projects',
+      'black-excellence-gala': 'gala',
+      'appointment-form': 'appointment_form',
+      'application-form': 'application_form',
+      'suicide-facts': 'suicide_facts',
+      'crisis-support': 'crisis_support',
+      'noel-services': 'services',
+    };
+
+    return docMap[lastPart] || lastPart;
   };
 
   const handlePublish = async () => {
