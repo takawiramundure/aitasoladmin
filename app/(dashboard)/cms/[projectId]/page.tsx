@@ -202,7 +202,7 @@ const ProjectPageManager: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                            <Button
+                            <Button requireSuperAdmin
                                 variant="secondary"
                                 onClick={handleSeed}
                                 startIcon={<Database className="w-5 h-5" />}

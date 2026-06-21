@@ -263,7 +263,7 @@ export default function ProgramsManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={seedDefaults}>Seed Defaults</Button>
+                        <Button requireSuperAdmin variant="outline" onClick={seedDefaults}>Seed Defaults</Button>
                         <Button variant="outline" onClick={addProgram}>+ Add Program</Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}

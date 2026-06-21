@@ -254,7 +254,7 @@ export default function PartnerManager() {
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
                 <h1 className="text-2xl font-bold dark:text-white">Partner Manager</h1>
                 <div className="flex gap-3">
-                    <Button variant="outline" onClick={seedPartners} disabled={isSeeding}>
+                    <Button requireSuperAdmin variant="outline" onClick={seedPartners} disabled={isSeeding}>
                         {isSeeding ? "Seeding..." : "Seed Partners"}
                     </Button>
                     <Button onClick={openModal} className="flex items-center gap-2">

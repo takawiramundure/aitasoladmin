@@ -437,17 +437,17 @@ export default function HeroManager() {
                     </div>
                     <div className="flex gap-3 flex-wrap">
                         {currentSite.id === 'kmfw' && (
-                            <Button variant="outline" onClick={seedKMFWHero}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedKMFWHero}>
                                 Seed KMFW Hero Content
                             </Button>
                         )}
                         {currentSite.id === 'noel' && (
-                            <Button variant="outline" onClick={seedNoelHero}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedNoelHero}>
                                 Seed Noel Hero Content
                             </Button>
                         )}
                         {currentSite.id === 'phcg' && (
-                            <Button variant="outline" onClick={seedPHCGHero}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedPHCGHero}>
                                 Seed PHCG Hero Content
                             </Button>
                         )}

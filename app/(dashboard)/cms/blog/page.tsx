@@ -736,7 +736,7 @@ export default function BlogManager() {
                         <p className="text-gray-500 mt-1">Manage individual blog posts below.</p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
-                        <Button variant="outline" onClick={handleSeedArticles} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                        <Button requireSuperAdmin variant="outline" onClick={handleSeedArticles} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                             🌱 Seed Default Articles
                         </Button>
                         <Button onClick={openNewArticleModal} startIcon={<PlusIcon className="w-5 h-5" />}>
@@ -763,7 +763,7 @@ export default function BlogManager() {
                 ) : articles.length === 0 ? (
                     <div className="text-center py-12 bg-gray-50 rounded-lg border border-dashed border-gray-300">
                         <p className="text-gray-500 mb-4">No articles found. Click "New Article" to create one, or seed the default articles.</p>
-                        <Button variant="outline" onClick={handleSeedArticles} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                        <Button requireSuperAdmin variant="outline" onClick={handleSeedArticles} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                             🌱 Seed Default Articles
                         </Button>
                     </div>

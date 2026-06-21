@@ -477,7 +477,7 @@ export default function AboutPageManager() {
                     </div>
                     <div className="flex gap-3 flex-wrap">
                         {['dmlabs', 'noel', 'aitasol', 'phcg'].includes(currentSite.id) && (
-                            <Button variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                            <Button requireSuperAdmin variant="outline" onClick={handleSeedData} disabled={saving} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                                 🌱 Seed Default Data
                             </Button>
                         )}

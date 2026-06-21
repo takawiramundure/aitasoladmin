@@ -227,7 +227,7 @@ export default function EventsManager() {
                         <p className="text-gray-500 mt-1">Manage upcoming events, workshops, and gatherings.</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={async () => {
+                        <Button requireSuperAdmin variant="outline" onClick={async () => {
                             const isConfirmed = await confirm({
                                 title: "Seed Events",
                                 message: "This will add the new Global Cooking Classes and other sample events. Continue?",

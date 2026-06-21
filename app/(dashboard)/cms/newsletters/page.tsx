@@ -277,7 +277,7 @@ export default function NewslettersManager() {
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-gray-700 dark:text-gray-200">Quarterly PDF Releases</h3>
                             <div className="flex gap-3">
-                                <Button variant="outline" onClick={async () => {
+                                <Button requireSuperAdmin variant="outline" onClick={async () => {
                                     const isConfirmed = await confirm({
                                         title: "Seed Newsletters",
                                         message: "Seed authentic KMFW newsletters? This will add them to your current list.",
@@ -338,7 +338,7 @@ export default function NewslettersManager() {
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-gray-700 dark:text-gray-200">Media Features & Breaking News</h3>
                             <div className="flex gap-3">
-                                <Button variant="outline" onClick={seedNews} disabled={savingNews}>Seed News</Button>
+                                <Button requireSuperAdmin variant="outline" onClick={seedNews} disabled={savingNews}>Seed News</Button>
                                 <Button onClick={openNewArticleModal} startIcon={<PlusIcon className="w-4 h-4" />}>New News Item</Button>
                             </div>
                         </div>

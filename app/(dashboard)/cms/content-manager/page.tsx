@@ -1275,67 +1275,67 @@ export default function ContentManager() {
                     <div className="flex gap-3">
                         {currentSite.id === 'elwg' && (
                             <>
-                                {pageId === 'elwg-home' && <Button variant="outline" size="sm" onClick={seedElwgHome}>Seed Home</Button>}
-                                {pageId === 'elwg-about' && <Button variant="outline" size="sm" onClick={seedElwgAbout}>Seed About</Button>}
-                                {pageId === 'elwg-programs' && <Button variant="outline" size="sm" onClick={seedElwgPrograms}>Seed Programs</Button>}
-                                {pageId === 'elwg-volunteers' && <Button variant="outline" size="sm" onClick={seedElwgVolunteers}>Seed Volunteers</Button>}
-                                {pageId === 'elwg-contact' && <Button variant="outline" size="sm" onClick={seedElwgContact}>Seed Contact</Button>}
-                                {pageId === 'elwg-donate' && <Button variant="outline" size="sm" onClick={seedElwgDonate}>Seed Donate</Button>}
+                                {pageId === 'elwg-home' && <Button requireSuperAdmin variant="outline" size="sm" onClick={seedElwgHome}>Seed Home</Button>}
+                                {pageId === 'elwg-about' && <Button requireSuperAdmin variant="outline" size="sm" onClick={seedElwgAbout}>Seed About</Button>}
+                                {pageId === 'elwg-programs' && <Button requireSuperAdmin variant="outline" size="sm" onClick={seedElwgPrograms}>Seed Programs</Button>}
+                                {pageId === 'elwg-volunteers' && <Button requireSuperAdmin variant="outline" size="sm" onClick={seedElwgVolunteers}>Seed Volunteers</Button>}
+                                {pageId === 'elwg-contact' && <Button requireSuperAdmin variant="outline" size="sm" onClick={seedElwgContact}>Seed Contact</Button>}
+                                {pageId === 'elwg-donate' && <Button requireSuperAdmin variant="outline" size="sm" onClick={seedElwgDonate}>Seed Donate</Button>}
                             </>
                         )}
                         {pageId === 'footer' && (
-                            <Button variant="outline" onClick={seedFooter}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedFooter}>
                                 Seed Footer
                             </Button>
                         )}
                         
                         {/* Generic Seed from config button for modern sites */}
                         {(currentSite.id === 'dmlabs' || currentSite.id === 'noel' || currentSite.id === 'nspc' || currentSite.id === 'aitasol') && (
-                            <Button variant="outline" size="sm" onClick={seedFromConfig} className="gap-2">
+                            <Button requireSuperAdmin variant="outline" size="sm" onClick={seedFromConfig} className="gap-2">
                                 <Leaf size={14} className="text-green-600" />
                                 Seed Defaults
                             </Button>
                         )}
 
                         {pageId === 'about' && currentSite.id === 'kmfw' && (
-                            <Button variant="outline" onClick={seedAboutUs}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedAboutUs}>
                                 Seed About Us
                             </Button>
                         )}
                         {pageId === 'impact' && currentSite.id === 'kmfw' && (
-                            <Button variant="outline" onClick={seedImpact}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedImpact}>
                                 Seed Impact
                             </Button>
                         )}
                         {pageId === 'success-stories' && (
-                            <Button variant="outline" onClick={seedSuccessStories}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedSuccessStories}>
                                 Seed Success Stories
                             </Button>
                         )}
                         
                         {/* Services Seeding */}
                         {pageId === 'services' && (
-                            <Button variant="outline" onClick={seedServicesGateway}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedServicesGateway}>
                                 Seed Services Gateway
                             </Button>
                         )}
                         {pageId === 'grounded-counseling' && (
-                            <Button variant="outline" onClick={seedGroundedCounseling}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedGroundedCounseling}>
                                 Seed Counseling
                             </Button>
                         )}
                         {pageId === 'project-phac-child-welfare' && (
-                            <Button variant="outline" onClick={seedPhacChildWelfare}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedPhacChildWelfare}>
                                 Seed PHAC Child Welfare
                             </Button>
                         )}
                         {pageId === 'educational-programs' && (
-                            <Button variant="outline" onClick={seedEducationalPrograms}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedEducationalPrograms}>
                                 Seed Educational Programs
                             </Button>
                         )}
                         {pageId === 'careers' && (
-                            <Button
+                            <Button requireSuperAdmin
                                 id="seed-save-careers-btn"
                                 variant="outline"
                                 onClick={async () => {
@@ -1349,43 +1349,43 @@ export default function ContentManager() {
                             </Button>
                         )}
                         {pageId === 'advocacy-education' && (
-                            <Button variant="outline" onClick={seedAdvocacyEducation}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedAdvocacyEducation}>
                                 Seed Advocacy & Education
                             </Button>
                         )}
                         {pageId === 'community-support' && (
-                            <Button variant="outline" onClick={seedCommunitySupport}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedCommunitySupport}>
                                 Seed Community Support
                             </Button>
                         )}
                         {pageId === 'system-navigation' && (
-                            <Button variant="outline" onClick={seedSystemNavigation}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedSystemNavigation}>
                                 Seed System Navigation
                             </Button>
                         )}
                         {pageId === 'meet-our-team' && (
-                            <Button variant="outline" onClick={seedMeetOurTeam}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedMeetOurTeam}>
                                 Seed Meet Our Team
                             </Button>
                         )}
                         {pageId === 'funders' && (
-                            <Button variant="outline" onClick={seedFundersSponsors}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedFundersSponsors}>
                                 Seed Funders & Sponsors
                             </Button>
                         )}
                         {pageId === 'partners' && (
-                            <Button variant="outline" onClick={seedPartners}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedPartners}>
                                 Seed Partners
                             </Button>
                         )}
                         {pageId === 'join-us' && (
-                            <Button variant="outline" onClick={seedJoinUs}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedJoinUs}>
                                 Seed Join Us
                             </Button>
                         )}
 
                         {pageId === 'volunteer' && (
-                            <Button variant="outline" onClick={seedVolunteer}>
+                            <Button requireSuperAdmin variant="outline" onClick={seedVolunteer}>
                                 Seed Volunteering
                             </Button>
                         )}

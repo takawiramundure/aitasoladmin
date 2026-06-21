@@ -222,7 +222,7 @@ export default function ProductManager() {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold dark:text-white">Product Manager</h1>
                 <div className="flex gap-2">
-                    <Button onClick={handleSeed} variant="outline" disabled={saving || products.length > 0}>
+                    <Button requireSuperAdmin onClick={handleSeed} variant="outline" disabled={saving || products.length > 0}>
                         {saving ? "Adding..." : "Seed Test Products"}
                     </Button>
                     <Button onClick={openModal} className="flex items-center gap-2">

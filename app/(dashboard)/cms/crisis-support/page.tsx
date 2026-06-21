@@ -127,7 +127,7 @@ export default function CrisisManager() {
                         <p className="text-sm text-gray-500 mt-1">Manage the crisis support cards displayed on the website.</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={seedDefaults}>
+                        <Button requireSuperAdmin variant="outline" onClick={seedDefaults}>
                             Seed Defaults
                         </Button>
                         <Button variant="outline" onClick={addResource}>
@@ -202,7 +202,7 @@ export default function CrisisManager() {
                     {resources.length === 0 && (
                         <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                             <p className="text-gray-500 mb-4">No crisis resources found.</p>
-                            <Button variant="outline" onClick={seedDefaults}>Load Default Data</Button>
+                            <Button requireSuperAdmin variant="outline" onClick={seedDefaults}>Load Default Data</Button>
                         </div>
                     )}
                 </div>

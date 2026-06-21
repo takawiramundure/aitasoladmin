@@ -2,6 +2,8 @@
 
 import { ReactNode } from "react";
 
+import { useAuth } from "@/context/AuthContext";
+
 interface ButtonProps {
   children: ReactNode;
   size?: "sm" | "md";
@@ -15,6 +17,7 @@ interface ButtonProps {
   type?: "button" | "submit" | "reset";
   id?: string;
   'aria-label'?: string;
+  requireSuperAdmin?: boolean; // Hides button if user is not super_admin
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -30,7 +33,15 @@ const Button: React.FC<ButtonProps> = ({
   type = "button",
   id,
   'aria-label': ariaLabel,
+  requireSuperAdmin = false,
 }) => {
+  const { profile } = useAuth();
+
+  // Return null if this button requires super_admin but the user is not one
+  if (requireSuperAdmin && profile?.role !== 'super_admin') {
+    return null;
+  }
+
   // Size Classes
   const sizeClasses = {
     sm: "px-4 py-3 text-sm",

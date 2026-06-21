@@ -178,7 +178,7 @@ export default function CopingManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={async () => {
+                        <Button requireSuperAdmin variant="outline" onClick={async () => {
                             const isConfirmed = await confirm({
                                 title: "Seed Defaults",
                                 message: "This will overwrite current changes with default data. Are you sure?",

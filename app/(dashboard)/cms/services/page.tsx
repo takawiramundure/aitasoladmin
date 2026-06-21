@@ -198,7 +198,7 @@ export default function ServicesManager() {
                         <p className="text-sm text-gray-500 mt-1">Manage the core offerings displayed on {currentSite.name}.</p>
                     </div>
                     <div className="flex gap-3 flex-wrap">
-                        <Button variant="outline" onClick={handleSeedData} className="border-blue-300 text-blue-600 hover:bg-blue-50">
+                        <Button requireSuperAdmin variant="outline" onClick={handleSeedData} className="border-blue-300 text-blue-600 hover:bg-blue-50">
                             🌱 Load Defaults
                         </Button>
                         <Button variant="outline" onClick={addService}><PlusIcon size={18} className="mr-1" /> Add Service</Button>

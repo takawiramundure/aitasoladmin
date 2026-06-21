@@ -548,7 +548,7 @@ export default function GalaManager() {
                         <p className="text-sm text-gray-500 mt-1 italic text-primary">Manage the specialized Gala page components.</p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={seedGalaData}>Seed Data</Button>
+                        <Button requireSuperAdmin variant="outline" onClick={seedGalaData}>Seed Data</Button>
                         <Button
                             variant="outline"
                             onClick={() => setIsInsertSidebarOpen(true)}

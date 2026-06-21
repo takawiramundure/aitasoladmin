@@ -271,7 +271,7 @@ export default function SuicideFactsManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
-                        <Button variant="secondary" onClick={handleSeedDefaults}>Seed Defaults</Button>
+                        <Button requireSuperAdmin variant="secondary" onClick={handleSeedDefaults}>Seed Defaults</Button>
                         <Button variant="outline" onClick={addFact}>+ Add Fact</Button>
                         <Button onClick={handleSave} disabled={saving}>
                             {saving ? "Saving..." : "Save Changes"}
