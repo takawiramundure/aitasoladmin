@@ -10,6 +10,7 @@ import UserDropdown from "@/components/header/UserDropdown";
 import SiteSelector from "@/components/header/SiteSelector";
 import { db } from "@/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
+import Alert from "@/components/ui/alert/Alert";
 
 import { useSite } from "@/context/SiteContext";
 
@@ -19,6 +20,14 @@ const AppHeader: React.FC = () => {
   const { currentSite } = useSite();
   const [publishing, setPublishing] = useState(false);
   const [isDraftMode, setIsDraftMode] = useState(true);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error">("success");
+
+  const showToast = (message: string, type: "success" | "error") => {
+    setToastMessage(message);
+    setToastType(type);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
@@ -65,7 +74,7 @@ const AppHeader: React.FC = () => {
   const handlePublish = async () => {
     const pageId = getPageIdFromUrl();
     if (!pageId || !currentSite?.id) {
-      alert("No active page found to publish.");
+      showToast("No active page found to publish.", "error");
       return;
     }
     setPublishing(true);
@@ -78,13 +87,13 @@ const AppHeader: React.FC = () => {
         await FirestoreService.savePageContent(pageId, draftContent, currentSite.id, 'live');
         // Also update draft so they are identical
         await FirestoreService.savePageContent(pageId, draftContent, currentSite.id, 'draft');
-        alert("Published draft to Live successfully!");
+        showToast("Published draft to Live successfully!", "success");
       } else {
-        alert("No draft content found to publish.");
+        showToast("No draft content found to publish.", "warning" as any);
       }
     } catch (error) {
       console.error("Publish error:", error);
-      alert("Failed to publish: " + (error as any).message);
+      showToast("Error publishing. Check console.", "error");
     } finally {
       setPublishing(false);
     }
@@ -134,7 +143,18 @@ const AppHeader: React.FC = () => {
   }, []);
 
   return (
-    <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">
+    <header className="sticky top-0 z-999 flex w-full border-b border-gray-200 bg-white/80 backdrop-blur-md dark:border-white/[0.05] dark:bg-gray-900/80">
+      {/* Toast Notification Overlay */}
+      {toastMessage && (
+        <div className="fixed top-20 right-4 z-[9999] animate-in fade-in slide-in-from-top-4 duration-300 shadow-xl max-w-sm">
+          <Alert 
+            variant={toastType as any} 
+            title={toastType === "success" ? "Success" : toastType === "warning" ? "Warning" : "Error"} 
+            message={toastMessage} 
+          />
+        </div>
+      )}
+
       <div className="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
         <div className="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4">
           <button
