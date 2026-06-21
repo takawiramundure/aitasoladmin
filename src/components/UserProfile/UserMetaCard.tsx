@@ -12,25 +12,10 @@ import { db } from "@/firebaseConfig";
 
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const { user } = useAuth();
-  const [role, setRole] = useState("Loading...");
+  const { user, profile } = useAuth();
   const [fullName, setFullName] = useState("");
 
-  useEffect(() => {
-    const fetchRole = async () => {
-      if (user) {
-        const docRef = doc(db, "users", user.uid);
-        const snap = await getDoc(docRef);
-        if (snap.exists()) {
-          const data = snap.data();
-          setRole(data.role === 'super_admin' ? 'Super Admin' : 'Editor');
-        } else {
-          setRole("User");
-        }
-      }
-    };
-    fetchRole();
-  }, [user]);
+  const role = profile?.role === 'super_admin' ? 'Super Admin' : 'Editor';
 
   const handleSave = () => {
     // Handle save logic here
@@ -40,9 +25,9 @@ export default function UserMetaCard() {
 
   if (!user) return null;
 
-  const displayName = user.displayName || "Admin User";
-  const email = user.email || "";
-  const photoURL = user.photoURL || "/images/user/owner.jpg";
+  const displayName = profile?.displayName || user?.displayName || "Admin User";
+  const email = profile?.email || user?.email || "";
+  const photoURL = user?.photoURL || "/images/user/owner.jpg";
 
   useEffect(() => {
     if (displayName) setFullName(displayName);
@@ -59,7 +44,7 @@ export default function UserMetaCard() {
                 alt="user"
                 className="h-full w-full object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=" + displayName;
+                  (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName);
                 }}
               />
             </div>

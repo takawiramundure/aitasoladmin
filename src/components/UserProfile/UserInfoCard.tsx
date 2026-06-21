@@ -13,7 +13,7 @@ import { db } from "@/firebaseConfig"; // Ensure correct import
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const { user } = useAuth();
+  const { user, profile, isImpersonating } = useAuth();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -23,17 +23,18 @@ export default function UserInfoCard() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (user) {
-        // Setup names from Auth Profile
-        if (user.displayName) {
-          const names = user.displayName.split(" ");
+      if (profile) {
+        // Setup names from effective profile
+        const effName = profile.displayName || user?.displayName;
+        if (effName) {
+          const names = effName.split(" ");
           setFirstName(names[0]);
           setLastName(names.length > 1 ? names.slice(1).join(" ") : "");
         }
 
-        // Fetch extra data from Firestore
+        // Fetch extra data from Firestore using effective profile ID
         try {
-          const docRef = doc(db, "users", user.uid);
+          const docRef = doc(db, "users", profile.uid);
           const snap = await getDoc(docRef);
           if (snap.exists()) {
             const data = snap.data();
@@ -47,19 +48,23 @@ export default function UserInfoCard() {
       }
     };
     fetchUserData();
-  }, [user]);
+  }, [profile, user]);
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!profile) return;
     try {
-      // Update Auth Profile (Display Name)
       const newDisplayName = `${firstName} ${lastName}`.trim();
-      await updateProfile(user, { displayName: newDisplayName });
+      
+      // Only update Firebase Auth Profile if we are editing our OWN profile
+      if (!isImpersonating && user) {
+        await updateProfile(user, { displayName: newDisplayName });
+      }
 
-      // Update Firestore Profile (Phone, Bio)
-      await setDoc(doc(db, "users", user.uid), {
+      // Always update Firestore profile (this works for both own and impersonated)
+      await setDoc(doc(db, "users", profile.uid), {
         phone,
-        bio
+        bio,
+        displayName: newDisplayName
       }, { merge: true });
 
       alert("Profile updated!");
@@ -70,11 +75,10 @@ export default function UserInfoCard() {
     }
   };
 
-  if (!user) return null;
+  if (!user || !profile) return null;
 
-  // Display values (derived from state for immediate feedback if desired, or stay synced with user prop)
-  // We'll use the user prop for the 'display' view, and state for the 'edit' view.
-  const email = user.email || "";
+  // Display values (derived from effective profile)
+  const email = profile.email || user.email || "";
 
   return (
     <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">

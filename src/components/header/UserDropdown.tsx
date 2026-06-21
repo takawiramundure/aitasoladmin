@@ -10,7 +10,7 @@ import { auth } from "@/firebaseConfig"; // Ensure this path is correct based on
 
 export default function UserDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const router = useRouter();
 
   function toggleDropdown() {
@@ -33,8 +33,8 @@ export default function UserDropdown() {
 
   if (!user) return null; // Or return a login button/placeholder
 
-  const displayName = user.displayName || "Admin User";
-  const email = user.email || "No Email";
+  const displayName = profile?.displayName || user.displayName || "Admin User";
+  const email = profile?.email || user.email || "No Email";
   const photoURL = user.photoURL || "/images/user/owner.jpg"; // Fallback to default or use a placeholder generator
 
   return (
