@@ -136,7 +136,9 @@ export default function UserManagement() {
         if (isConfirmed) {
             try {
                 const auth = getAuth();
-                await sendPasswordResetEmail(auth, email);
+                await sendPasswordResetEmail(auth, email, {
+                    url: window.location.origin + '/reset-password',
+                });
                 await dialogAlert({
                     title: "Email Sent",
                     message: `A password reset email has been sent to ${email}.`,
