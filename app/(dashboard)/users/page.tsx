@@ -11,8 +11,8 @@ import { useAuth } from "@/context/AuthContext";
 import { doc, setDoc } from "firebase/firestore";
 import { db, firebaseConfig } from "@/firebaseConfig";
 import { initializeApp, deleteApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { EyeIcon, PencilIcon, XIcon, AlertTriangleIcon } from "lucide-react";
+import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "firebase/auth";
+import { EyeIcon, PencilIcon, XIcon, AlertTriangleIcon, KeyRoundIcon } from "lucide-react";
 import { SITES } from "@/config/sites";
 import { useDialog } from "@/context/DialogContext";
 
@@ -44,7 +44,6 @@ export default function UserManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editUser, setEditUser] = useState<User | null>(null);
     const [newUserEmail, setNewUserEmail] = useState("");
-    const [newUserPassword, setNewUserPassword] = useState("");
     const [newUserRole, setNewUserRole] = useState<'editor' | 'super_admin'>('editor');
     const [selectedSites, setSelectedSites] = useState<string[]>([]);
     const [creating, setCreating] = useState(false);
@@ -97,7 +96,6 @@ export default function UserManagement() {
     const openCreateModal = () => {
         setEditUser(null);
         setNewUserEmail("");
-        setNewUserPassword("");
         setNewUserRole("editor"); // Default to editor
         setSelectedSites([]);
         setIsModalOpen(true);
@@ -116,11 +114,48 @@ export default function UserManagement() {
         setShowImpersonationModal(true);
     }
 
+    const generatePassword = () => {
+        const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+        let password = "";
+        for (let i = 0; i < 16; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    };
+
+    const handleSendResetLink = async (email: string) => {
+        const isConfirmed = await confirm({
+            title: "Send Password Reset Link",
+            message: `Are you sure you want to send a password reset link to ${email}?`,
+            variant: "warning",
+            confirmLabel: "Send Link"
+        });
+
+        if (isConfirmed) {
+            try {
+                const auth = getAuth();
+                await sendPasswordResetEmail(auth, email);
+                await dialogAlert({
+                    title: "Email Sent",
+                    message: `A password reset email has been sent to ${email}.`,
+                    variant: "success"
+                });
+            } catch (error: any) {
+                console.error("Error sending reset email:", error);
+                await dialogAlert({
+                    title: "Failed to Send",
+                    message: "Failed to send reset email: " + error.message,
+                    variant: "danger"
+                });
+            }
+        }
+    };
+
     const handleSaveUser = async () => {
-        if (!editUser && (!newUserEmail || !newUserPassword)) {
+        if (!editUser && !newUserEmail) {
             await dialogAlert({
                 title: "Validation Error",
-                message: "Email and Password are required for new users.",
+                message: "Email is required for new users.",
                 variant: "warning"
             });
             return;
@@ -163,10 +198,12 @@ export default function UserManagement() {
                 });
             } else {
                 // CREATE new
+                const randomPassword = generatePassword();
                 const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
                 const secondaryAuth = getAuth(secondaryApp);
-                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newUserEmail, newUserPassword);
+                const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newUserEmail, randomPassword);
                 const newUid = userCredential.user.uid;
+                await sendPasswordResetEmail(secondaryAuth, newUserEmail);
                 await signOut(secondaryAuth);
                 await deleteApp(secondaryApp);
 
@@ -179,7 +216,7 @@ export default function UserManagement() {
                 });
                 await dialogAlert({
                     title: "User Created",
-                    message: `User created successfully! Password: ${newUserPassword}`,
+                    message: `User created successfully! A password reset email has been sent to ${newUserEmail} so they can set their own password.`,
                     variant: "success"
                 });
             }
@@ -349,6 +386,15 @@ export default function UserManagement() {
                                             >
                                                 <EyeIcon size={18} />
                                             </button>
+                                            {profile?.role === 'super_admin' && (
+                                                <button
+                                                    title="Send Password Reset Link"
+                                                    onClick={() => handleSendResetLink(user.email)}
+                                                    className="p-1 hover:text-yellow-600 transition-colors"
+                                                >
+                                                    <KeyRoundIcon size={18} />
+                                                </button>
+                                            )}
                                             <button
                                                 title="Edit"
                                                 onClick={() => openEditModal(user)}
@@ -388,22 +434,12 @@ export default function UserManagement() {
                                 value={newUserEmail}
                                 onChange={(e) => setNewUserEmail(e.target.value)}
                             />
-                        </div>
-                        {/* Password - Only for new users */}
-                        {!editUser && (
-                            <div>
-                                <Label>Temporary Password</Label>
-                                <Input
-                                    type="text"
-                                    placeholder="e.g. TempPass123!"
-                                    value={newUserPassword}
-                                    onChange={(e) => setNewUserPassword(e.target.value)}
-                                />
+                            {!editUser && (
                                 <p className="text-xs text-gray-500 mt-1">
-                                    Must be at least 6 characters. User can change this later.
+                                    An email will be sent immediately prompting the user to set their password.
                                 </p>
-                            </div>
-                        )}
+                            )}
+                        </div>
 
                         {/* Role - Locked for Editor */}
                         {profile?.role === 'super_admin' ? (
@@ -453,7 +489,7 @@ export default function UserManagement() {
 
                         <div className="flex justify-end gap-3 pt-2">
                             <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={creating}>Cancel</Button>
-                            <Button onClick={handleSaveUser} disabled={(!editUser && (!newUserEmail || !newUserPassword)) || creating}>
+                            <Button onClick={handleSaveUser} disabled={(!editUser && !newUserEmail) || creating}>
                                 {creating ? "Saving..." : (editUser ? "Update User" : "Create User")}
                             </Button>
                         </div>
