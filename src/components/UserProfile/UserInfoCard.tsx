@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { updateProfile } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/firebaseConfig"; // Ensure correct import
+import Alert from "@/components/ui/alert/Alert";
 
 export default function UserInfoCard() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -20,6 +21,15 @@ export default function UserInfoCard() {
   const [phone, setPhone] = useState("");
   const [bio, setBio] = useState("");
   const [role, setRole] = useState("Super Admin"); // Default, could fetch actual role
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error" | "warning">("success");
+
+  const showToast = (message: string, type: "success" | "error" | "warning") => {
+    setToastMessage(message);
+    setToastType(type);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -67,11 +77,11 @@ export default function UserInfoCard() {
         displayName: newDisplayName
       }, { merge: true });
 
-      alert("Profile updated!");
+      showToast("Profile updated!", "success");
       closeModal();
     } catch (error) {
       console.error("Failed to update profile", error);
-      alert("Failed to update profile.");
+      showToast("Failed to update profile.", "error");
     }
   };
 
@@ -81,8 +91,18 @@ export default function UserInfoCard() {
   const email = profile.email || user.email || "";
 
   return (
-    <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+    <>
+      {toastMessage && (
+        <div className="fixed top-20 right-5 z-[99999] w-80">
+          <Alert 
+            variant={toastType as any} 
+            title={toastType === "success" ? "Success" : toastType === "warning" ? "Warning" : "Error"} 
+            message={toastMessage} 
+          />
+        </div>
+      )}
+      <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h4 className="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
             Personal Information
@@ -216,5 +236,6 @@ export default function UserInfoCard() {
         </div>
       </Modal>
     </div>
+    </>
   );
 }

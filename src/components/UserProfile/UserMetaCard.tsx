@@ -8,6 +8,7 @@ import Label from "../form/Label";
 import { useAuth } from "@/context/AuthContext";
 import { useEffect, useState, useRef } from "react";
 import { doc, getDoc } from "firebase/firestore";
+import Alert from "@/components/ui/alert/Alert";
 
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
@@ -15,6 +16,15 @@ export default function UserMetaCard() {
   const [fullName, setFullName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toastType, setToastType] = useState<"success" | "error" | "warning">("success");
+
+  const showToast = (message: string, type: "success" | "error" | "warning") => {
+    setToastMessage(message);
+    setToastType(type);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const role = profile?.role === 'super_admin' ? 'Super Admin' : 'Editor';
 
@@ -48,10 +58,10 @@ export default function UserMetaCard() {
       }
 
       await setDoc(doc(db, "users", profile.uid), { photoURL: url }, { merge: true });
-      alert("Profile picture updated!");
+      showToast("Profile picture updated!", "success");
     } catch (err) {
       console.error(err);
-      alert("Failed to upload image.");
+      showToast("Failed to upload image.", "error");
     } finally {
       setUploading(false);
     }
@@ -70,6 +80,15 @@ export default function UserMetaCard() {
 
   return (
     <>
+      {toastMessage && (
+        <div className="fixed top-20 right-5 z-[99999] w-80">
+          <Alert 
+            variant={toastType as any} 
+            title={toastType === "success" ? "Success" : toastType === "warning" ? "Warning" : "Error"} 
+            message={toastMessage} 
+          />
+        </div>
+      )}
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
