@@ -13,6 +13,7 @@ import ImagePicker from "@/components/form/ImagePicker";
 import VideoPicker from "@/components/form/VideoPicker";
 import { Eye, EyeOff, ChevronDown, ChevronUp, Video } from 'lucide-react';
 import { useDialog } from "@/context/DialogContext";
+import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 interface OurStorySection extends SectionContent {
     enabled?: boolean;
@@ -254,6 +255,14 @@ export default function OurStoryManager() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <VersionHistoryManager 
+                            documentId="our-story" 
+                            siteId={currentSite.id} 
+                            onRestore={(data) => {
+                                setContent(data as OurStoryPageContent);
+                                setSuccessMsg("Restored version in editor. Click 'Save Changes' to apply.");
+                            }} 
+                        />
                         <Button onClick={handleRestoreDefaults} variant="outline" className="border-red-200 text-red-600 hover:bg-red-50" disabled={saving}>
                             Restore Original Layout
                         </Button>
