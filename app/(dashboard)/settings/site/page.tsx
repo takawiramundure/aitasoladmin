@@ -30,6 +30,7 @@ export default function SiteSettingsManager() {
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+    const [mediaPickerTarget, setMediaPickerTarget] = useState<'logo' | 'favicon' | 'aiLogo' | null>(null);
     const [isCropperOpen, setIsCropperOpen] = useState(false);
     const [isAiLogoUploading, setIsAiLogoUploading] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
@@ -241,6 +242,23 @@ export default function SiteSettingsManager() {
         });
         setStatus({ type: 'success', msg: 'AI Logo selected from library!' });
         setIsMediaPickerOpen(false);
+        setMediaPickerTarget(null);
+    };
+
+    const handleMediaPickerSelect = (url: string) => {
+        if (!settings) return;
+        if (mediaPickerTarget === 'logo') {
+            updateBranding('logo', url);
+            setStatus({ type: 'success', msg: 'Logo selected from media library!' });
+        } else if (mediaPickerTarget === 'favicon') {
+            updateBranding('favicon', url);
+            setStatus({ type: 'success', msg: 'Favicon selected from media library!' });
+        } else if (mediaPickerTarget === 'aiLogo') {
+            handleAiLogoSelect(url);
+            return;
+        }
+        setIsMediaPickerOpen(false);
+        setMediaPickerTarget(null);
     };
 
     const updateTheme = (key: keyof SiteTheme, value: string) => {
@@ -924,6 +942,15 @@ export default function SiteSettingsManager() {
                                                 className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                                 placeholder="/logo.png"
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => { setMediaPickerTarget('logo'); setIsMediaPickerOpen(true); }}
+                                                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                title="Pick from media library"
+                                            >
+                                                <ImageIcon className="w-4 h-4 mr-1.5" />
+                                                Library
+                                            </button>
                                             <label className={`cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                                 <Upload className="w-4 h-4 mr-2" />
                                                 {uploading ? 'Uploading...' : 'Upload'}
@@ -997,6 +1024,15 @@ export default function SiteSettingsManager() {
                                                     Use Logo
                                                 </Button>
                                             )}
+                                            <button
+                                                type="button"
+                                                onClick={() => { setMediaPickerTarget('favicon'); setIsMediaPickerOpen(true); }}
+                                                className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600 transition-colors"
+                                                title="Pick from media library"
+                                            >
+                                                <ImageIcon className="w-4 h-4 mr-1.5" />
+                                                Library
+                                            </button>
                                             <label className={`cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                                 <Upload className="w-4 h-4 mr-2" />
                                                 {uploading ? 'Uploading...' : 'Upload'}
@@ -1265,7 +1301,7 @@ export default function SiteSettingsManager() {
                                                         </label>
                                                         <button 
                                                             type="button"
-                                                            onClick={() => setIsMediaPickerOpen(true)}
+                                                            onClick={() => { setMediaPickerTarget('aiLogo'); setIsMediaPickerOpen(true); }}
                                                             className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold transition-all"
                                                         >
                                                             <Search size={16} />
@@ -1291,9 +1327,9 @@ export default function SiteSettingsManager() {
                                     </div>
 
                                     <MediaPickerModal 
-                                        isOpen={isMediaPickerOpen}
-                                        onClose={() => setIsMediaPickerOpen(false)}
-                                        onSelect={handleAiLogoSelect}
+                                        isOpen={isMediaPickerOpen && mediaPickerTarget === 'aiLogo'}
+                                        onClose={() => { setIsMediaPickerOpen(false); setMediaPickerTarget(null); }}
+                                        onSelect={handleMediaPickerSelect}
                                     />
 
                                     <div>
@@ -1395,6 +1431,14 @@ export default function SiteSettingsManager() {
                     onClose={() => setIsCropperOpen(false)}
                     onCropComplete={handleCropComplete}
                     aspect={null} // Default to 'Free Form' in our new enhanced modal
+                />
+            )}
+            {/* Global Media Library Picker — for Logo and Favicon fields */}
+            {isMediaPickerOpen && mediaPickerTarget !== 'aiLogo' && (
+                <MediaPickerModal
+                    isOpen={isMediaPickerOpen}
+                    onClose={() => { setIsMediaPickerOpen(false); setMediaPickerTarget(null); }}
+                    onSelect={handleMediaPickerSelect}
                 />
             )}
         </>
