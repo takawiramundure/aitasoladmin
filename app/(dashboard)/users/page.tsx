@@ -207,7 +207,9 @@ export default function UserManagement() {
                 const secondaryAuth = getAuth(secondaryApp);
                 const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newUserEmail, randomPassword);
                 const newUid = userCredential.user.uid;
-                await sendPasswordResetEmail(secondaryAuth, newUserEmail);
+                await sendPasswordResetEmail(secondaryAuth, newUserEmail, {
+                    url: window.location.origin + '/reset-password',
+                });
                 await signOut(secondaryAuth);
                 await deleteApp(secondaryApp);
 
