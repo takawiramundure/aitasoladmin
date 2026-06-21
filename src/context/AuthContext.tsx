@@ -7,6 +7,7 @@ import { auth } from "@/firebaseConfig";
 export interface UserProfile {
     email: string;
     displayName?: string;
+    photoURL?: string;
     role: 'super_admin' | 'editor';
     allowedSites?: string[];
     uid: string;

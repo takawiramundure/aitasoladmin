@@ -6,14 +6,15 @@ import Button from "../ui/button/Button";
 import Input from "../form/input/InputField";
 import Label from "../form/Label";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/firebaseConfig";
 
 export default function UserMetaCard() {
   const { isOpen, openModal, closeModal } = useModal();
-  const { user, profile } = useAuth();
+  const { user, profile, isImpersonating } = useAuth();
   const [fullName, setFullName] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   const role = profile?.role === 'super_admin' ? 'Super Admin' : 'Editor';
 
@@ -23,11 +24,45 @@ export default function UserMetaCard() {
     closeModal();
   };
 
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile) return;
+    setUploading(true);
+    try {
+      const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+      const { storage } = await import("@/firebaseConfig");
+      const { doc, setDoc } = await import("firebase/firestore");
+      const { db } = await import("@/firebaseConfig");
+
+      const storageRef = ref(storage, `users/${profile.uid}/profile_${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+
+      if (!isImpersonating && user) {
+        const { updateProfile } = await import("firebase/auth");
+        await updateProfile(user, { photoURL: url });
+      }
+
+      await setDoc(doc(db, "users", profile.uid), { photoURL: url }, { merge: true });
+      alert("Profile picture updated!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to upload image.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   if (!user) return null;
 
   const displayName = profile?.displayName || user?.displayName || "Admin User";
   const email = profile?.email || user?.email || "";
-  const photoURL = user?.photoURL || "/images/user/owner.jpg";
+  // Check profile photoURL first, then user, then default
+  const photoURL = profile?.photoURL || user?.photoURL || "/images/user/owner.jpg";
 
   useEffect(() => {
     if (displayName) setFullName(displayName);
@@ -38,14 +73,30 @@ export default function UserMetaCard() {
       <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
           <div className="flex flex-col items-center w-full gap-6 xl:flex-row">
-            <div className="w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
+            <div 
+              className="relative w-20 h-20 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800 cursor-pointer group"
+              onClick={handleImageClick}
+            >
               <img
                 src={photoURL}
                 alt="user"
-                className="h-full w-full object-cover"
+                className={`h-full w-full object-cover transition-opacity ${uploading ? 'opacity-50' : 'group-hover:opacity-75'}`}
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(displayName);
                 }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/30 transition-opacity">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                className="hidden" 
+                accept="image/*" 
+                onChange={handleImageChange}
               />
             </div>
             <div className="order-3 xl:order-2">
