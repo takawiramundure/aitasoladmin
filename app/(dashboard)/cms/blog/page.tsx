@@ -783,9 +783,15 @@ export default function BlogManager() {
                                     )}
                                     <div className="absolute top-2 right-2 flex gap-2">
                                         {article.published ? (
-                                            <div className="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                                                Published
-                                            </div>
+                                            (article.date && new Date(article.date?.toDate ? article.date.toDate() : article.date) > new Date()) ? (
+                                                <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                                                    Scheduled
+                                                </div>
+                                            ) : (
+                                                <div className="bg-green-500 text-white px-2 py-1 rounded text-xs font-semibold">
+                                                    Published
+                                                </div>
+                                            )
                                         ) : (
                                             <div className="bg-gray-500 text-white px-2 py-1 rounded text-xs font-semibold">
                                                 Draft

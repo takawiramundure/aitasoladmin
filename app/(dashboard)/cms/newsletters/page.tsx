@@ -139,6 +139,14 @@ export default function NewslettersManager() {
     };
 
     // Article Logic
+    const formatDateForInput = (date: any) => {
+        if (!date) return "";
+        const d = date.toDate ? date.toDate() : new Date(date);
+        if (isNaN(d.getTime())) return "";
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    };
+
     const openNewArticleModal = () => {
         setCurrentArticleId(null);
         setArticleFormData({ title: "", author: "", category: "News", imageUrl: "", excerpt: "", content: "", published: true, date: new Date() });
@@ -350,7 +358,20 @@ export default function NewslettersManager() {
                                 <div key={article.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm flex flex-col">
                                     <div className="h-40 bg-gray-100 relative">
                                         <img src={article.imageUrl || 'https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=400&q=80'} className="w-full h-full object-cover" />
-                                        <div className="absolute top-2 left-2 bg-primary/90 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">{article.category}</div>
+                                        <div className="absolute top-2 left-2 flex gap-2">
+                                            <div className="bg-primary/90 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">{article.category}</div>
+                                        </div>
+                                        <div className="absolute top-2 right-2 flex gap-2">
+                                            {article.published ? (
+                                                (article.date && new Date(article.date?.seconds ? article.date.seconds * 1000 : article.date) > new Date()) ? (
+                                                    <div className="bg-blue-500 text-white px-2 py-1 rounded text-[10px] font-bold uppercase">Scheduled</div>
+                                                ) : (
+                                                    <div className="bg-green-500 text-white px-2 py-1 rounded text-[10px] font-bold uppercase">Published</div>
+                                                )
+                                            ) : (
+                                                <div className="bg-gray-500 text-white px-2 py-1 rounded text-[10px] font-bold uppercase">Draft</div>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="p-4 flex-1 flex flex-col">
                                         <h4 className="font-bold text-gray-900 dark:text-white line-clamp-1 mb-1">{article.title}</h4>
@@ -377,6 +398,48 @@ export default function NewslettersManager() {
                     <div className="p-6 border-b border-gray-200 flex justify-between items-center"><h2 className="text-xl font-bold">{currentArticleId ? "Edit Feature" : "New Feature"}</h2><button onClick={() => setIsArticleModalOpen(false)} className="text-2xl">&times;</button></div>
                     <div className="flex-1 overflow-y-auto p-6 bg-gray-50 space-y-4">
                         <Label>Title</Label><Input value={articleFormData.title} onChange={(e) => setArticleFormData({...articleFormData, title: e.target.value})} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <Label>Status</Label>
+                                <select
+                                    className="w-full bg-white dark:bg-black/50 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary/50 transition-all text-sm font-medium"
+                                    value={
+                                        !articleFormData.published 
+                                            ? "draft" 
+                                            : (articleFormData.date && new Date(articleFormData.date) > new Date()) 
+                                                ? "scheduled" 
+                                                : "published"
+                                    }
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (val === 'draft') {
+                                            setArticleFormData({ ...articleFormData, published: false });
+                                        } else if (val === 'published') {
+                                            const now = new Date();
+                                            setArticleFormData({ 
+                                                ...articleFormData, 
+                                                published: true,
+                                                date: (articleFormData.date && new Date(articleFormData.date) > now) ? now : articleFormData.date 
+                                            });
+                                        } else if (val === 'scheduled') {
+                                            setArticleFormData({ ...articleFormData, published: true });
+                                        }
+                                    }}
+                                >
+                                    <option value="draft">Draft (Hidden)</option>
+                                    <option value="published">Published (Live Now)</option>
+                                    <option value="scheduled">Scheduled (Publishes at Date)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <Label>Publish Date</Label>
+                                <Input
+                                    type="datetime-local"
+                                    value={formatDateForInput(articleFormData.date)}
+                                    onChange={(e) => setArticleFormData({ ...articleFormData, date: new Date(e.target.value) })}
+                                />
+                            </div>
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div><Label>Author</Label><Input value={articleFormData.author || ''} onChange={(e) => setArticleFormData({...articleFormData, author: e.target.value})} /></div>
                             <div><Label>Category</Label><Input value={articleFormData.category || ''} onChange={(e) => setArticleFormData({...articleFormData, category: e.target.value})} /></div>
