@@ -153,6 +153,24 @@ export default function UserInfoCard() {
                 {bio || role}
               </p>
             </div>
+
+            <div>
+              <p className="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
+                Two-Factor Auth (MFA)
+              </p>
+              <p className="text-sm font-medium">
+                {profile?.mfaSetupComplete ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Verified via SMS
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-400">
+                    Not Configured
+                  </span>
+                )}
+              </p>
+            </div>
           </div>
         </div>
 

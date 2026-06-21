@@ -11,6 +11,8 @@ export interface UserProfile {
     role: 'super_admin' | 'editor';
     allowedSites?: string[];
     uid: string;
+    phoneNumber?: string;
+    mfaSetupComplete?: boolean;
 }
 
 interface AuthContextType {
@@ -18,6 +20,8 @@ interface AuthContextType {
     profile: UserProfile | null; // The effective profile (real or impersonated)
     isImpersonating: boolean;
     loading: boolean;
+    mfaVerified: boolean;
+    verifyMfaSession: () => void;
     impersonate: (userId: string) => Promise<void>;
     stopImpersonation: () => void;
 }
@@ -27,6 +31,8 @@ const AuthContext = createContext<AuthContextType>({
     profile: null,
     isImpersonating: false,
     loading: true,
+    mfaVerified: false,
+    verifyMfaSession: () => {},
     impersonate: async () => { },
     stopImpersonation: () => { }
 });
@@ -39,6 +45,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [realProfile, setRealProfile] = useState<UserProfile | null>(null);
     const [impersonatedProfile, setImpersonatedProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [mfaVerified, setMfaVerified] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setMfaVerified(sessionStorage.getItem('dmlabs_session_mfa_verified') === 'true');
+        }
+    }, []);
+
+    const verifyMfaSession = () => {
+        setMfaVerified(true);
+        sessionStorage.setItem('dmlabs_session_mfa_verified', 'true');
+    };
 
     const logAction = async (action: string, details: any) => {
         if (!user) return;
@@ -89,7 +107,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 } else {
                     setRealProfile(null);
                     setImpersonatedProfile(null);
-                    localStorage.removeItem('impersonatedUserId');
+                    setMfaVerified(false);
+                    if (typeof window !== 'undefined') {
+                        sessionStorage.removeItem('dmlabs_session_mfa_verified');
+                        localStorage.removeItem('impersonatedUserId');
+                    }
                 }
             } catch (err) {
                 console.error("Auth state change error:", err);
@@ -154,9 +176,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         profile: impersonatedProfile || realProfile,
         isImpersonating: !!impersonatedProfile,
         loading,
+        mfaVerified,
+        verifyMfaSession,
         impersonate,
         stopImpersonation
-    }), [user, impersonatedProfile, realProfile, loading]);
+    }), [user, impersonatedProfile, realProfile, loading, mfaVerified]);
 
     return (
         <AuthContext.Provider value={value}>

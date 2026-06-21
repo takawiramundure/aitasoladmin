@@ -5,18 +5,32 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, mfaVerified } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && user && pathname !== '/reset-password') {
-      router.replace("/");
+    if (!loading && user) {
+      if (pathname === '/reset-password') return;
+      if (!mfaVerified && (pathname === '/mfa-enroll' || pathname === '/mfa-verify')) return;
+      
+      if (pathname !== '/' && !pathname.startsWith('/cms')) {
+         router.replace("/");
+      }
     }
-  }, [user, loading, router, pathname]);
+  }, [user, loading, router, pathname, mfaVerified]);
 
   if (loading) return null;
-  if (user && pathname !== '/reset-password') return null;
+  
+  if (user) {
+     if (pathname === '/reset-password') {
+        // Allowed
+     } else if (!mfaVerified && (pathname === '/mfa-enroll' || pathname === '/mfa-verify')) {
+        // Allowed
+     } else {
+        return null; // Will redirect
+     }
+  }
 
   return <>{children}</>;
 }
