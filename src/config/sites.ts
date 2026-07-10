@@ -69,6 +69,14 @@ export const SITES: Site[] = [
     description: 'Education Consultancy & Study Abroad',
     databaseId: 'aitahsol-web', // Matched with aitasol-web/.env PROJECT_ID
     usePrefix: false
+  },
+  {
+    id: 'havens',
+    name: "Haven's Social Work",
+    domain: 'havenssocialwork.ca',
+    description: 'Registered Social Work Services for Long-Term Care',
+    databaseId: 'havens-web',
+    usePrefix: false
   }
 ];
 
