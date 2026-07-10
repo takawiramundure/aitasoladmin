@@ -1,11 +1,12 @@
 import admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
 
 // Initialize Firebase Admin SDK
 const app = admin.initializeApp({
     projectId: 'nspc-web'
 }, 'havens-seeder');
 
-const db = app.firestore('havens-web');
+const db = getFirestore(app, 'havens-web');
 
 const SEED_DATA = {
     settings: {

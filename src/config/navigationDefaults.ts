@@ -90,6 +90,13 @@ export const GET_DEFAULT_NAV = (siteId: string): NavigationItem[] => {
                 ] },
                 { id: 'nav-contact', name: 'Contact', path: '/contact', order: 8 },
             ];
+        case 'havens':
+            return [
+                { id: 'nav-home', name: 'Home', path: '/', order: 1 },
+                { id: 'nav-services', name: 'Services', path: '/services', order: 2 },
+                { id: 'nav-why-us', name: 'Why Us', path: '/why-us', order: 3 },
+                { id: 'nav-contact', name: 'Contact', path: '/contact', order: 4 }
+            ];
         case 'nspc':
         default:
             return [
@@ -121,6 +128,11 @@ export const GET_SITE_DEFAULTS = (siteId: string, siteName: string) => {
             return {
                 description: 'Aitasol is a leading education consultancy helping students achieve their dreams of studying abroad in the UK, Canada, USA, and beyond.',
                 keywords: 'study abroad, education consultancy, student visa, university application, Aitasol'
+            };
+        case 'havens':
+            return {
+                description: 'Professional psychosocial support for long-term care and retirement homes across Ontario.',
+                keywords: 'Haven\'s Social Work, psychosocial support, long-term care, retirement homes Ontario, registered social workers'
             };
         default:
             return {
@@ -234,6 +246,19 @@ export const GET_SITE_THEME_DEFAULTS = (siteId: string) => {
                 brandColorDark: '#0F2057',
                 brandColorLight: '#EFF4FF',
                 topBarBg: '#0F2057',
+                headerBg: '#FFFFFF'
+            };
+        case 'havens':
+            return {
+                primary: '#0F2537',
+                secondary: '#1B365D',
+                accent: '#1E847F',
+                textDark: '#1C2A38',
+                textLight: '#FFFFFF',
+                brandColor: '#0F2537',
+                brandColorDark: '#1B365D',
+                brandColorLight: '#F4F7F6',
+                topBarBg: '#0F2537',
                 headerBg: '#FFFFFF'
             };
         default:
