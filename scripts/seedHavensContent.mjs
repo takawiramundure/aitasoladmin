@@ -25,9 +25,9 @@ const SEED_DATA = {
         },
         navigation: [
             { id: 'nav1', name: 'HOME', path: '/' },
-            { id: 'nav2', name: 'SERVICES', path: '#services' },
-            { id: 'nav3', name: 'WHY US', path: '#why-us' },
-            { id: 'nav4', name: 'CONTACT', path: '#contact' }
+            { id: 'nav2', name: 'SERVICES', path: '/services' },
+            { id: 'nav3', name: 'WHY US', path: '/why-us' },
+            { id: 'nav4', name: 'CONTACT', path: '/contact' }
         ]
     },
     content: {
