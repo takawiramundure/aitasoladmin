@@ -32,7 +32,38 @@ export default function SignInForm() {
       // AuthProvider will detect the user change
       router.push("/");
     } catch (err: any) {
-      setError(err.message || "Failed to sign in");
+      let friendlyMessage = "Failed to sign in. Please try again.";
+      if (err.code) {
+        switch (err.code) {
+          case "auth/invalid-credential":
+          case "auth/invalid-login-credentials":
+            friendlyMessage = "Incorrect email or password. Please try again.";
+            break;
+          case "auth/user-not-found":
+            friendlyMessage = "No account found with this email address.";
+            break;
+          case "auth/wrong-password":
+            friendlyMessage = "Incorrect password. Please try again.";
+            break;
+          case "auth/invalid-email":
+            friendlyMessage = "Please enter a valid email address.";
+            break;
+          case "auth/user-disabled":
+            friendlyMessage = "This admin account has been disabled.";
+            break;
+          case "auth/too-many-requests":
+            friendlyMessage = "Too many failed login attempts. Please try again later or reset your password.";
+            break;
+          case "auth/operation-not-allowed":
+            friendlyMessage = "Email/Password login is not enabled. Please contact support.";
+            break;
+          default:
+            friendlyMessage = err.message || friendlyMessage;
+        }
+      } else {
+        friendlyMessage = err.message || friendlyMessage;
+      }
+      setError(friendlyMessage);
     } finally {
       setLoading(false);
     }
