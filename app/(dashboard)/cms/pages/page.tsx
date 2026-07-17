@@ -31,7 +31,9 @@ export default function PagesManager() {
         setLoading(true);
         try {
             const data = await FirestoreService.getPages(currentSite.id);
-            setPages(data);
+            const nonPageDocIds = ['footer', 'header', 'settings', 'theme'];
+            const filteredPages = data.filter(page => !nonPageDocIds.includes(page.id));
+            setPages(filteredPages);
         } catch (err) {
             console.error(err);
             setError("Failed to load pages.");
@@ -96,8 +98,13 @@ export default function PagesManager() {
             'project-black-wellness', 'project-phac-child-welfare', 'project-umoja-neurodivergent',
             'impact', 'success-stories', 'join-us', 'funders', 'volunteer', 'careers'
         ];
+
+        const havensGenericPages = ['why-us', 'about', 'about-us', 'contact'];
         
-        if (currentSite.id === 'kmfw' && genericPages.includes(template)) {
+        if (
+            (currentSite.id === 'kmfw' && genericPages.includes(template)) ||
+            (currentSite.id === 'havens' && havensGenericPages.includes(template))
+        ) {
             router.push(`/cms/content-manager?pageId=${template}&slug=${page.id}`);
         } else {
             router.push(`/cms/${template}?slug=${page.id}`);

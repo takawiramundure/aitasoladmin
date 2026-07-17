@@ -16,7 +16,7 @@ const LayoutContent: React.FC = () => {
   const { isImpersonating, profile, stopImpersonation } = useAuth();
   const [sysConfig, setSysConfig] = useState<{ cmsName?: string, cmsVersion?: string }>({
     cmsName: 'Digital Maples Labs CMS',
-    cmsVersion: '1.3.0'
+    cmsVersion: '1.4.0'
   });
 
   useEffect(() => {

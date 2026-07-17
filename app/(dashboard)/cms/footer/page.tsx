@@ -218,6 +218,30 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
         policy_links: [{ label: 'Privacy Policy', url: '/privacy' }],
         copyright_text: '', developer_text: 'Designed by Digital Maples Labs Inc.', developer_url: 'https://digitalmaples.ca',
     },
+    havens: {
+        logo_url: '',
+        tagline: 'Providing professional psychosocial support without the hiring overhead for long-term care and retirement homes across Ontario.',
+        crisis_banner_enabled: false, crisis_banner_text: '', crisis_banner_number: '', crisis_banner_label: '',
+        email: 'lmushore@uwaterloo.ca',
+        phone: '+289 547 1923',
+        address_line1: 'Ontario, Canada',
+        address_line2: '',
+        appointment_only: false,
+        social_instagram: '', social_twitter: '', social_facebook: '', social_linkedin: '', social_youtube: '',
+        nav_columns: [
+            { heading: 'Quick Links', links: [
+                { label: 'Home', url: '/' },
+                { label: 'Services', url: '/services' },
+                { label: 'Why Us', url: '/why-us' },
+                { label: 'Contact Us', url: '/contact' }
+            ]}
+        ],
+        policy_links: [{ label: 'Privacy Policy', url: '/privacy' }, { label: 'Terms of Service', url: '/terms' }],
+        copyright_text: "Haven's Social Work Inc. All rights reserved.",
+        developer_text: 'Designed by Digital Maples Labs Inc.',
+        developer_url: 'https://digitalmaples.ca',
+        show_brand: true, show_contact: true, show_social: false, show_nav: true, show_policy: true
+    }
 };
 
 const getDefaultFooter = (siteId: string): FooterContent => FOOTER_DEFAULTS[siteId] || FOOTER_DEFAULTS.kmfw;
@@ -239,7 +263,6 @@ const Section = ({ id, isOpen, onToggle, isVisible, onVisibilityToggle, children
     return (
         <div className={sectionCls}>
             <div className="flex items-center">
-                <VersionHistoryManager documentId="footer" siteId={currentSite.id} />
                 <button className={headerCls} onClick={onToggle}>
                     <span className="font-semibold text-gray-800 dark:text-white">{SECTION_LABELS[id]}</span>
                     {isOpen ? <ChevronDown className="w-5 h-5 text-gray-400" /> : <ChevronRight className="w-5 h-5 text-gray-400" />}
@@ -375,7 +398,8 @@ export default function FooterManager() {
                         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Footer Manager</h1>
                         <p className="text-sm text-gray-500 mt-1">Edit footer content for <strong>{currentSite?.name}</strong> — changes go live after saving.</p>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 items-center">
+                        <VersionHistoryManager documentId="footer" siteId={siteId} />
                         <button
                             onClick={handleSeedDefault}
                             disabled={seeding}

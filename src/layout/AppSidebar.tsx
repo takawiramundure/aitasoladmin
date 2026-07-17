@@ -36,462 +36,106 @@ const AppSidebar: React.FC = () => {
   const location = usePathname();
 
   const navItems = useMemo(() => {
-    const commonItems: NavItem[] = [
+    const hasHeroSlider = ['bweic', 'kmfw', 'elwg', 'noel', 'phcg', 'nspc'].includes(currentSite.id);
+    const globalComponentsSubItems = [
+      { name: "Footer Details", path: "/cms/footer" },
+      { name: "Reusable Components", path: "/cms/reusable-components" }
+    ];
+    if (hasHeroSlider) {
+      globalComponentsSubItems.unshift({ name: "Hero Slider", path: "/cms/hero" });
+    }
+
+    const items: NavItem[] = [
       {
         icon: <GridIcon />,
         name: "Dashboard",
         path: "/",
       },
       {
-        icon: <MessageSquare size={20} />,
-        name: "Leads & Forms",
-        path: "/cms/leads",
-      },
-      {
         icon: <PageIcon />,
         name: "Pages Manager",
         path: "/cms/pages",
         new: true,
-      },
-      {
-        icon: <PageIcon />,
-        name: "Forms Manager",
-        path: "/cms/forms",
-        new: true,
-      },
-      {
-        icon: <PlugInIcon />,
-        name: "Reusable Components",
-        path: "/cms/reusable-components",
-        new: true,
       }
     ];
 
-    if (currentSite.id === 'bweic') {
-      return [
-        ...commonItems,
-        {
-          icon: <BoxCubeIcon />,
-          name: "Hero Slider",
-          path: "/cms/hero",
-        },
-        {
-          name: "Home Page Settings",
-          icon: <PageIcon />,
-          path: "/cms/home-settings",
-        },
-        {
-          name: "Who We Are",
-          icon: <UserCircleIcon />,
-          subItems: [
-            { name: "Our Story", path: "/cms/our-story" },
-            { name: "Leadership", path: "/cms/leadership" },
-            { name: "Board Members", path: "/cms/board-members" },
-            { name: "Careers", path: "/cms/careers" },
-          ]
-        },
-        {
-          name: "Our Work",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "Healing & Wellness", path: "/cms/healing-wellness" },
-            { name: "Empowerment", path: "/cms/empowerment" },
-            { name: "Community", path: "/cms/community-belonging" },
-            { name: "Sovereignty Circle", path: "/cms/sovereignty-circle" },
-          ]
-        },
-        {
-          name: "Media Center",
-          icon: <BoxCubeIcon />,
-          subItems: [
-            { name: "Videos", path: "/cms/videos" },
-            { name: "Partners", path: "/cms/partners" },
-            { name: "Media Library", path: "/cms/media" },
-          ]
-        },
-        {
-          name: "Events",
-          icon: <PageIcon />,
-          path: "/cms/upcoming-events",
-        },
-        {
-          icon: <PageIcon />,
-          name: "Take Action",
-          path: "/cms/take-action",
-        },
-        {
-          icon: <GridIcon />,
-          name: "Blog",
-          path: "/cms/blog",
-        },
-        {
-          icon: <BoxCubeIcon />,
-          name: "Shop",
-          path: "/cms/shop",
-        },
-        {
-          icon: <PageIcon />,
-          name: "Footer Details",
-          path: "/cms/footer",
-        },
-      ];
+    // Dynamic Modules group / items
+    const hasBlog = ['bweic', 'kmfw', 'elwg', 'dmlabs', 'noel', 'aitasol', 'phcg', 'nspc'].includes(currentSite.id);
+    const hasEvents = ['bweic', 'kmfw', 'elwg', 'aitasol', 'nspc'].includes(currentSite.id);
+    const hasPortfolio = ['dmlabs', 'noel'].includes(currentSite.id);
+    const hasShop = currentSite.id === 'bweic';
+    const hasApplications = currentSite.id === 'aitasol';
+
+    // Leads & Forms (if they use forms)
+    items.push({
+      icon: <MessageSquare size={20} />,
+      name: "Leads & Forms",
+      path: "/cms/leads",
+    });
+
+    items.push({
+      icon: <PageIcon />,
+      name: "Forms Manager",
+      path: "/cms/forms",
+      new: true,
+    });
+
+    if (hasBlog) {
+      items.push({
+        icon: <GridIcon />,
+        name: "Blog Manager",
+        path: "/cms/blog",
+      });
     }
 
-    if (currentSite.id === 'kmfw') {
-      return [
-        ...commonItems,
-        {
-          icon: <BoxCubeIcon />,
-          name: "Hero Slider",
-          path: "/cms/hero",
-        },
-        {
-          icon: <BoxCubeIcon />,
-          name: "Event Hero (Homepage)",
-          path: "/cms/event-hero",
-        },
-        {
-          name: "Home Page Settings",
-          icon: <PageIcon />,
-          path: "/cms/home-settings",
-        },
-        {
-          icon: <PlugInIcon />,
-          name: "Page Visibility",
-          path: "/cms/page-visibility",
-        },
-        {
-          name: "About KMFW",
-          icon: <UserCircleIcon />,
-          subItems: [
-            { name: "About Us", path: "/cms/about" },
-            { name: "Our Story", path: "/cms/our-story" },
-            { name: "Meet Our Team", path: "/cms/meet-our-team" },
-            { name: "Strategic Plan", path: "/cms/strategic-plan" },
-            { name: "Founder's Message", path: "/cms/founders-message" },
-            { name: "Celebrating 5 Years", path: "/cms/celebrating-5-years" },
-            { name: "Contact Us", path: "/cms/contact" },
-            { name: "Inbound Messages", path: "/cms/messages" },
-          ],
-        },
-        {
-          name: "Services & Programs",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "Services Gateway", path: "/cms/services" },
-            { name: "Grounded Counseling", path: "/cms/content-manager?pageId=grounded-counseling" },
-            { name: "Educational Programs", path: "/cms/content-manager?pageId=educational-programs" },
-            { name: "Advocacy & Education", path: "/cms/content-manager?pageId=advocacy-education" },
-            { name: "Community Support", path: "/cms/content-manager?pageId=community-support" },
-            { name: "System Navigation", path: "/cms/content-manager?pageId=system-navigation" },
-            { name: "PHAC Welfare", path: "/cms/content-manager?pageId=project-phac-child-welfare" },
-          ],
-        },
-        {
-          name: "Research",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "Research Gateway", path: "/cms/research" },
-            { name: "Black Wellness", path: "/cms/project-black-wellness" },
-            { name: "Umoja Program", path: "/cms/project-umoja-neurodivergent" },
-          ]
-        },
-        {
-          name: "Impact",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "Impact Gateway", path: "/cms/content-manager?pageId=impact" },
-            { name: "Upcoming Events", path: "/cms/upcoming-events" },
-            { name: "Black Excellence Gala", path: "/cms/black-excellence-gala" },
-            { name: "Newsletters", path: "/cms/newsletters" },
-            { name: "Success Stories", path: "/cms/content-manager?pageId=success-stories" },
-            { name: "Gallery", path: "/cms/gallery" },
-          ]
-        },
-        {
-          name: "Join Us",
-          icon: <BoxCubeIcon />,
-          subItems: [
-            { name: "Join Us Gateway", path: "/cms/content-manager?pageId=join-us" },
-            { name: "Funders & Sponsors", path: "/cms/content-manager?pageId=funders" },
-            { name: "Partners", path: "/cms/partners" },
-            { name: "Careers", path: "/cms/content-manager?pageId=careers" },
-            { name: "Volunteering", path: "/cms/content-manager?pageId=volunteer" },
-          ]
-        },
-        {
-          name: "News & Blog",
-          icon: <GridIcon />,
-          path: "/cms/blog"
-        },
-        {
-          icon: <BoxCubeIcon />,
-          name: "Media Library",
-          path: "/cms/media",
-        },
-        {
-          icon: <PageIcon />,
-          name: "Footer Details",
-          path: "/cms/footer",
-        },
-      ];
-    }
-
-    if (currentSite.id === 'elwg') {
-      return [
-        ...commonItems,
-        {
-          icon: <BoxCubeIcon />,
-          name: "Hero Slider",
-          path: "/cms/hero",
-        },
-        {
-          name: "Home Page",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "About ELWG", path: "/cms/about" },
-            { name: "Key Causes", path: "/cms/causes" },
-            { name: "Volunteers", path: "/cms/volunteers" },
-            { name: "Why Choose Us", path: "/cms/why-us" },
-            { name: "Impact Quotes", path: "/cms/quotes" },
-          ],
-        },
-        {
-          name: "Programs",
-          icon: <PageIcon />,
-          path: "/cms/programs",
-        },
-        {
-          name: "Interactions",
-          icon: <HorizontaLDots />,
-          subItems: [
-            { name: "Donations", path: "/cms/donations" },
-            { name: "Newsletter", path: "/cms/newsletter" },
-            { name: "Contact Messages", path: "/cms/messages" },
-          ]
-        },
-        {
-          icon: <BoxCubeIcon />,
-          name: "Media Library",
-          path: "/cms/media",
-        },
-        {
-          icon: <PageIcon />,
-          name: "Footer Details",
-          path: "/cms/footer",
-        },
-      ];
-    }
-
-    if (currentSite.id === 'dmlabs') {
-      return [
-        ...commonItems,
-        {
-          name: 'Home Page',
-          icon: <PageIcon />,
-          path: '/cms/home-settings',
-        },
-        {
-          name: 'About Page',
-          icon: <PageIcon />,
-          path: '/cms/about',
-        },
-        {
-          name: 'Portfolio / Projects',
-          icon: <PageIcon />,
-          path: '/cms/portfolio',
-        },
-        {
-          name: 'Services',
-          icon: <PageIcon />,
-          path: '/cms/services',
-        },
-        {
-          name: 'Just Opinions (Blog)',
-          icon: <GridIcon />,
-          path: '/cms/blog',
-        },
-        {
-          name: 'Contact Page',
-          icon: <PageIcon />,
-          path: '/cms/contact',
-        },
-        {
-          name: 'Inbound Messages',
-          icon: <HorizontaLDots />,
-          path: '/cms/messages',
-        },
-        {
-          icon: <BoxCubeIcon />,
-          name: 'Media Library',
-          path: '/cms/media',
-        },
-        {
-          icon: <PageIcon />,
-          name: 'Footer Details',
-          path: '/cms/footer',
-        },
-        {
-          icon: <GridIcon />,
-          name: 'Page SEO Manager',
-          path: '/settings/seo',
-        },
-        {
-          icon: <PlugInIcon />,
-          name: 'Site Settings',
-          path: '/settings/site',
-        },
-      ];
-    }
-
-    if (currentSite.id === 'noel') {
-      return [
-        ...commonItems,
-        {
-          icon: <BoxCubeIcon />,
-          name: "Hero Slider",
-          path: "/cms/hero",
-        },
-        {
-          name: "Page Sections",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "Home Details", path: "/cms/home-settings" },
-            { name: "Services", path: "/cms/noel-services" },
-            { name: "Portfolio / Projects", path: "/cms/portfolio" },
-            { name: "Reviews", path: "/cms/reviews" },
-            { name: "Before & After", path: "/cms/gallery" },
-            { name: "Footer Details", path: "/cms/footer" },
-          ],
-        },
-        {
-          name: "Media Center",
-          icon: <BoxCubeIcon />,
-          subItems: [
-            { name: "Videos", path: "/cms/videos" },
-            { name: "Partners", path: "/cms/partners" },
-            { name: "Media Library", path: "/cms/media" },
-          ]
-        },
-        {
-          icon: <BoxCubeIcon />,
-          name: "Media Library",
-          path: "/cms/media",
-        },
-      ];
-    }
-
-    if (currentSite.id === 'aitasol') {
-      return [
-        ...commonItems,
-        {
-          name: "Application Manager",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "Student Applications", path: "/cms/aitasol-applications" },
-          ]
-        },
-        {
-          name: "Site Content",
-          icon: <BoxCubeIcon />,
-          subItems: [
-            { name: "Home Page", path: "/cms/home-settings" },
-            { name: "About Page", path: "/cms/about" },
-            { name: "Services", path: "/cms/services" },
-            { name: "Destinations", path: "/cms/destinations" },
-            { name: "Universities", path: "/cms/universities" },
-            { name: "Blog / News", path: "/cms/blog" },
-            { name: "Contact Page", path: "/cms/contact" },
-          ]
-        },
-        {
-          name: "Media & Footer",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "Hero Slider", path: "/cms/hero" },
-            { name: "Media Library", path: "/cms/media" },
-            { name: "Footer Details", path: "/cms/footer" },
-          ]
-        },
-      ];
-    }
-
-    if (currentSite.id === 'phcg') {
-      return [
-        ...commonItems,
-        {
-          icon: <BoxCubeIcon />,
-          name: "Hero Slider",
-          path: "/cms/hero",
-        },
-        {
-          name: "Page Sections",
-          icon: <PageIcon />,
-          subItems: [
-            { name: "Home", path: "/cms/home-settings" },
-            { name: "About Us", path: "/cms/about" },
-            { name: "Home Care Solutions", path: "/cms/services" },
-            { name: "Careers", path: "/cms/careers" },
-            { name: "Blog", path: "/cms/blog" },
-            { name: "FAQ", path: "/cms/faq" },
-            { name: "Contact Us", path: "/cms/contact" },
-            { name: "Testimonials", path: "/cms/reviews" },
-            { name: "Footer Details", path: "/cms/footer" },
-          ],
-        },
-        {
-          name: "Inbound Messages",
-          icon: <HorizontaLDots />,
-          subItems: [
-            { name: "Contacts", path: "/cms/messages" },
-            { name: "Appointments", path: "/cms/appointments" },
-            { name: "Job Applications", path: "/cms/applications" },
-          ]
-        },
-        {
-          icon: <BoxCubeIcon />,
-          name: "Media Library",
-          path: "/cms/media",
-        },
-      ];
-    }
-
-    // Default NSPC Menu
-    return [
-      ...commonItems,
-      {
-        icon: <BoxCubeIcon />,
-        name: "Hero Slider",
-        path: "/cms/hero",
-      },
-      {
-        name: "Page Sections",
+    if (hasEvents) {
+      items.push({
         icon: <PageIcon />,
-        subItems: [
-          { name: "About Section", path: "/cms/about" },
-          { name: "Understanding", path: "/cms/understanding" },
-          { name: "Coping Section", path: "/cms/coping" },
-          { name: "24/7 Crisis Support", path: "/cms/crisis-support" },
-          { name: "Programs", path: "/cms/programs" },
-          { name: "Resources", path: "/cms/resources" },
-          { name: "Suicide Facts", path: "/cms/suicide-facts" },
-          { name: "Footer Details", path: "/cms/footer" },
-        ],
-      },
-      {
-        name: "Media Center",
+        name: "Events Manager",
+        path: "/cms/upcoming-events",
+      });
+    }
+
+    if (hasPortfolio) {
+      items.push({
+        icon: <PageIcon />,
+        name: "Portfolio & Projects",
+        path: "/cms/portfolio",
+      });
+    }
+
+    if (hasShop) {
+      items.push({
         icon: <BoxCubeIcon />,
-        subItems: [
-          { name: "Videos", path: "/cms/videos" },
-          { name: "Partners", path: "/cms/partners" },
-        ]
-      },
-      {
-        icon: <BoxCubeIcon />,
-        name: "Media Library",
-        path: "/cms/media",
-      },
-    ];
+        name: "Shop / Store",
+        path: "/cms/shop",
+      });
+    }
+
+    if (hasApplications) {
+      items.push({
+        icon: <PageIcon />,
+        name: "Student Applications",
+        path: "/cms/aitasol-applications",
+      });
+    }
+
+    // Global Components
+    items.push({
+      name: "Global Components",
+      icon: <PlugInIcon />,
+      subItems: globalComponentsSubItems,
+      new: true,
+    });
+
+    // Media Library
+    items.push({
+      icon: <BoxCubeIcon />,
+      name: "Media Library",
+      path: "/cms/media",
+    });
+
+    return items;
   }, [currentSite.id]);
 
 
