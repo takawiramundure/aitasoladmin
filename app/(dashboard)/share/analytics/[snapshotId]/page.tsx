@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router';
+import { useParams, useSearchParams } from 'next/navigation';
 import { FirestoreService } from "@/services/firestore";
 import PageMeta from "@/components/common/PageMeta";
 import EcommerceMetrics from "@/components/ecommerce/EcommerceMetrics";
@@ -14,9 +14,10 @@ import BrowserStatsCard from "@/components/analytics/BrowserStatsCard";
 import { AlertCircle, Clock } from 'lucide-react';
 
 const SharedAnalytics: React.FC = () => {
-    const { snapshotId } = useParams();
-    const [searchParams] = useSearchParams();
-    const siteId = searchParams.get('site') || 'nspc'; // Default or from URL
+    const params = useParams();
+    const snapshotId = typeof params?.snapshotId === 'string' ? params.snapshotId : '';
+    const searchParams = useSearchParams();
+    const siteId = searchParams?.get('site') || 'nspc'; // Default or from URL
     
     const [loading, setLoading] = useState(true);
     const [snapshot, setSnapshot] = useState<any>(null);
