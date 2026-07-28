@@ -27,7 +27,7 @@ export const SITES: Site[] = [
   {
     id: 'kmfw',
     name: 'KMFW',
-    domain: 'kindmindsfamilywellness.org',
+    domain: 'kmfw.org',
     description: 'Kind Minds Family Wellness',
     usePrefix: true
   },
