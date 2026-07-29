@@ -80,8 +80,17 @@ export const SITES: Site[] = [
   }
 ];
 
+// Runtime cache of dynamically registered sites
+export let DYNAMIC_SITES: Site[] = [];
+
+export const registerDynamicSite = (site: Site) => {
+  if (!DYNAMIC_SITES.find(s => s.id === site.id)) {
+    DYNAMIC_SITES.push(site);
+  }
+};
+
 export const getSiteById = (id: string): Site | undefined => {
-  return SITES.find(site => site.id === id);
+  return SITES.find(site => site.id === id) || DYNAMIC_SITES.find(site => site.id === id);
 };
 
 export const getDefaultSite = (): Site => {

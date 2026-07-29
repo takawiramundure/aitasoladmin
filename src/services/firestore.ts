@@ -1631,5 +1631,101 @@ export const FirestoreService = {
             console.error("Error executing rollback:", error);
             throw error;
         }
+    },
+
+    getCustomSites: async (): Promise<any[]> => {
+        try {
+            const dbInstance = getDb('nspc');
+            const docRef = doc(dbInstance, "settings", "sites");
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists() && docSnap.data().sites) {
+                return docSnap.data().sites;
+            }
+            return [];
+        } catch (error) {
+            console.error("Error fetching custom sites:", error);
+            return [];
+        }
+    },
+
+    saveCustomSite: async (site: any): Promise<void> => {
+        try {
+            const dbInstance = getDb('nspc');
+            const docRef = doc(dbInstance, "settings", "sites");
+            const docSnap = await getDoc(docRef);
+            let currentSites = [];
+            if (docSnap.exists() && docSnap.data().sites) {
+                currentSites = docSnap.data().sites;
+            }
+            currentSites = currentSites.filter((s: any) => s.id !== site.id);
+            currentSites.push(site);
+            await setDoc(docRef, { sites: currentSites }, { merge: true });
+        } catch (error) {
+            console.error("Error saving custom site:", error);
+            throw error;
+        }
+    },
+
+    cloneTenantData: async (sourceSiteId: string, destSiteId: string, options: { pages?: boolean; settings?: boolean }): Promise<void> => {
+        try {
+            const srcSite = getSiteById(sourceSiteId);
+            const destSite = getSiteById(destSiteId);
+            
+            const srcDb = getDb(sourceSiteId);
+            const destDb = getDb(destSiteId);
+
+            const srcPrefix = srcSite?.usePrefix !== false ? sourceSiteId : '';
+            const destPrefix = destSite?.usePrefix !== false ? destSiteId : '';
+
+            // 1. Pages/Content cloning
+            if (options.pages) {
+                const srcContentCol = collection(srcDb, srcPrefix ? `${srcPrefix}_content` : 'content');
+                const destContentCol = collection(destDb, destPrefix ? `${destPrefix}_content` : 'content');
+                const snapshot = await getDocs(srcContentCol);
+                
+                for (const document of snapshot.docs) {
+                    const data = document.data();
+                    const docId = document.id;
+                    
+                    const targetDocId = docId.endsWith('_draft') ? docId : `${docId}_draft`;
+                    
+                    const targetDocRef = doc(destContentCol, targetDocId);
+                    await setDoc(targetDocRef, {
+                        ...data,
+                        siteId: destSiteId,
+                        layout: data.layout || {}
+                    });
+                }
+            }
+
+            // 2. Settings cloning
+            if (options.settings) {
+                const srcSettingsCol = collection(srcDb, srcPrefix ? `${srcPrefix}_settings` : 'settings');
+                const destSettingsCol = collection(destDb, destPrefix ? `${destPrefix}_settings` : 'settings');
+                const snapshot = await getDocs(srcSettingsCol);
+                
+                for (const document of snapshot.docs) {
+                    const data = document.data();
+                    const docId = document.id;
+                    
+                    if (docId === 'config') {
+                        await setDoc(doc(destSettingsCol, docId), {
+                            ...data,
+                            siteId: destSiteId,
+                            siteTitle: destSite?.name || data.siteTitle,
+                            branding: {
+                                ...data.branding,
+                                siteName: destSite?.name || data.branding?.siteName
+                            }
+                        });
+                    } else {
+                        await setDoc(doc(destSettingsCol, docId), data);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error cloning tenant data:", error);
+            throw error;
+        }
     }
 };

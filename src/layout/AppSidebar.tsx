@@ -201,6 +201,13 @@ const AppSidebar: React.FC = () => {
         }
       );
     }
+    if (isSuperAdmin) {
+      items.push({
+        icon: <BoxCubeIcon />,
+        name: "Tenant Spawner",
+        path: "/settings/spawner",
+      });
+    }
     return items;
   }, [profile, hasPermission]);
 
