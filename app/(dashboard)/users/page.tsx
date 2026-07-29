@@ -393,9 +393,11 @@ export default function UserManagement() {
                         User Management
                     </h3>
                     <div className="flex gap-3">
-                        <Button size="sm" variant="outline" onClick={() => setIsPermissionsOpen(true)}>
-                            Roles & Permissions
-                        </Button>
+                        {profile?.role === 'super_admin' && (
+                            <Button size="sm" variant="outline" onClick={() => setIsPermissionsOpen(true)}>
+                                Roles & Permissions
+                            </Button>
+                        )}
                         <Button size="sm" onClick={openCreateModal}>+ Add User</Button>
                     </div>
                 </div>
