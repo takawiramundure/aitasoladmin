@@ -1084,6 +1084,7 @@ export default function SEOManager() {
     const [saving, setSaving] = useState(false);
     const [seeding, setSeeding] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+    const [activePreviewTab, setActivePreviewTab] = useState<'google' | 'facebook' | 'twitter'>('google');
 
     // Reset selection when site changes
     useEffect(() => {
@@ -1261,145 +1262,280 @@ export default function SEOManager() {
                         </div>
                     </div>
 
-                    {/* SEO Editor */}
-                    <div className="lg:col-span-3 space-y-5">
-                        {/* Page URL Preview */}
-                        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 flex items-center gap-3">
-                            <Globe className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                            <div>
-                                <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider">Editing</div>
-                                <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
-                                    {currentPage.label} — <code className="text-xs">{currentPage.path}</code>
+                    {/* SEO Editor Workspace */}
+                    <div className="lg:col-span-3">
+                        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6 items-start">
+                            {/* Left: Input Editor Panels */}
+                            <div className="xl:col-span-3 space-y-5">
+                                {/* Page URL Preview */}
+                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 flex items-center gap-3">
+                                    <Globe className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                                    <div>
+                                        <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider">Editing</div>
+                                        <div className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                                            {currentPage.label} — <code className="text-xs">{currentPage.path}</code>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Basic SEO */}
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
+                                    <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                        <Search className="w-5 h-5 text-gray-500" />
+                                        Basic SEO
+                                    </h2>
+
+                                    <div>
+                                        <label className={labelClass}>
+                                            Page Title <span className="text-gray-400 font-normal">(shown in browser tab & search results)</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={pageSEO.title}
+                                            onChange={e => update('title', e.target.value)}
+                                            placeholder={`${currentPage.label} | ${currentSite?.name}`}
+                                            className={inputClass}
+                                            maxLength={70}
+                                        />
+                                        <p className={`text-xs mt-1 ${pageSEO.title.length > 60 ? 'text-amber-500' : 'text-gray-400'}`}>
+                                            {pageSEO.title.length}/70 characters (recommended: under 60)
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label className={labelClass}>
+                                            Meta Description <span className="text-gray-400 font-normal">(shown in Google search results)</span>
+                                        </label>
+                                        <textarea
+                                            value={pageSEO.description}
+                                            onChange={e => update('description', e.target.value)}
+                                            placeholder="Briefly describe this page for search engines..."
+                                            className={textareaClass}
+                                            rows={3}
+                                            maxLength={160}
+                                        />
+                                        <p className={`text-xs mt-1 ${pageSEO.description.length > 155 ? 'text-amber-500' : 'text-gray-400'}`}>
+                                            {pageSEO.description.length}/160 characters (recommended: 120–160)
+                                        </p>
+                                    </div>
+
+                                    <div>
+                                        <label className={labelClass}>
+                                            Keywords <span className="text-gray-400 font-normal">(comma-separated)</span>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={pageSEO.keywords}
+                                            onChange={e => update('keywords', e.target.value)}
+                                            placeholder="e.g. Construction, Renovation, Woodworking"
+                                            className={inputClass}
+                                        />
+                                    </div>
+
+                                    <div className="flex items-center gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
+                                        <input
+                                            id={`noindex-${selectedPage}`}
+                                            type="checkbox"
+                                            checked={pageSEO.noIndex}
+                                            onChange={e => update('noIndex', e.target.checked)}
+                                            className="w-4 h-4 rounded text-blue-600"
+                                        />
+                                        <label htmlFor={`noindex-${selectedPage}`} className="text-sm text-gray-700 dark:text-gray-300">
+                                            Hide this page from search engines (noindex)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* Open Graph / Social */}
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                            <Share2 className="w-5 h-5 text-gray-500" />
+                                            Social Sharing (Open Graph & Twitter)
+                                        </h2>
+                                        <button
+                                            onClick={() => { syncFromTitle(); syncFromDescription(); }}
+                                            className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                        >
+                                            <RefreshCw className="w-3.5 h-3.5" />
+                                            Sync from Basic SEO
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
+                                        These fields control how the page appears when shared on social media platforms.
+                                    </p>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className={labelClass}>OG Title (Facebook / LinkedIn)</label>
+                                            <input type="text" value={pageSEO.ogTitle} onChange={e => update('ogTitle', e.target.value)} placeholder={pageSEO.title} className={inputClass} />
+                                        </div>
+                                        <div>
+                                            <label className={labelClass}>Twitter Title</label>
+                                            <input type="text" value={pageSEO.twitterTitle} onChange={e => update('twitterTitle', e.target.value)} placeholder={pageSEO.title} className={inputClass} />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className={labelClass}>OG Description</label>
+                                            <textarea value={pageSEO.ogDescription} onChange={e => update('ogDescription', e.target.value)} placeholder={pageSEO.description} className={textareaClass} rows={3} />
+                                        </div>
+                                        <div>
+                                            <label className={labelClass}>Twitter Description</label>
+                                            <textarea value={pageSEO.twitterDescription} onChange={e => update('twitterDescription', e.target.value)} placeholder={pageSEO.description} className={textareaClass} rows={3} />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className={labelClass}>
+                                            Social Sharing Image URL <span className="text-gray-400 font-normal">(1200×630px recommended)</span>
+                                        </label>
+                                        <input type="url" value={pageSEO.ogImage} onChange={e => update('ogImage', e.target.value)} placeholder="https://..." className={inputClass} />
+                                    </div>
+                                </div>
+
+                                {/* Save Button */}
+                                <div className="flex justify-end">
+                                    <Button onClick={handleSave} disabled={saving}>
+                                        <Save className="w-4 h-4 mr-2" />
+                                        {saving ? 'Saving...' : 'Save All Changes'}
+                                    </Button>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Basic SEO */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
-                            <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                                <Search className="w-5 h-5 text-gray-500" />
-                                Basic SEO
-                            </h2>
+                            {/* Right: Live Visual Search & Social Previews */}
+                            <div className="xl:col-span-2 space-y-5 xl:sticky xl:top-24">
+                                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
+                                    <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+                                        <Share2 className="w-5 h-5 text-gray-500" />
+                                        Live Preview
+                                    </h2>
 
-                            <div>
-                                <label className={labelClass}>
-                                    Page Title <span className="text-gray-400 font-normal">(shown in browser tab & search results)</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={pageSEO.title}
-                                    onChange={e => update('title', e.target.value)}
-                                    placeholder={`${currentPage.label} | ${currentSite?.name}`}
-                                    className={inputClass}
-                                    maxLength={70}
-                                />
-                                <p className={`text-xs mt-1 ${pageSEO.title.length > 60 ? 'text-amber-500' : 'text-gray-400'}`}>
-                                    {pageSEO.title.length}/70 characters (recommended: under 60)
-                                </p>
-                            </div>
+                                    {/* Tabs */}
+                                    <div className="flex border-b border-gray-200 dark:border-gray-700">
+                                        {(['google', 'facebook', 'twitter'] as const).map((tab) => (
+                                            <button
+                                                key={tab}
+                                                onClick={() => setActivePreviewTab(tab)}
+                                                className={`py-2 px-3 text-xs font-semibold capitalize border-b-2 transition-all ${
+                                                    activePreviewTab === tab
+                                                        ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-bold'
+                                                        : 'border-transparent text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                                }`}
+                                            >
+                                                {tab === 'twitter' ? 'Twitter / X' : tab}
+                                            </button>
+                                        ))}
+                                    </div>
 
-                            <div>
-                                <label className={labelClass}>
-                                    Meta Description <span className="text-gray-400 font-normal">(shown in Google search results)</span>
-                                </label>
-                                <textarea
-                                    value={pageSEO.description}
-                                    onChange={e => update('description', e.target.value)}
-                                    placeholder="Briefly describe this page for search engines..."
-                                    className={textareaClass}
-                                    rows={3}
-                                    maxLength={160}
-                                />
-                                <p className={`text-xs mt-1 ${pageSEO.description.length > 155 ? 'text-amber-500' : 'text-gray-400'}`}>
-                                    {pageSEO.description.length}/160 characters (recommended: 120–160)
-                                </p>
-                            </div>
+                                    {/* Preview Render */}
+                                    <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-gray-900/50">
+                                        {activePreviewTab === 'google' && (
+                                            <div className="space-y-1 font-sans text-left">
+                                                <div className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
+                                                    <span className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center text-[9px] font-bold">G</span>
+                                                    <span className="truncate max-w-[200px]">{`https://${currentSite?.domain || 'example.com'}${currentPage.path}`}</span>
+                                                </div>
+                                                <h3 className="text-lg text-[#1a0dab] dark:text-[#8ab4f8] hover:underline cursor-pointer font-medium leading-tight line-clamp-1">
+                                                    {pageSEO.title || `${currentPage.label} | ${currentSite?.name}`}
+                                                </h3>
+                                                <p className="text-xs text-[#4d5156] dark:text-[#bdc1c6] leading-relaxed break-words line-clamp-3">
+                                                    {pageSEO.description || "Briefly describe this page for search engines..."}
+                                                </p>
+                                            </div>
+                                        )}
 
-                            <div>
-                                <label className={labelClass}>
-                                    Keywords <span className="text-gray-400 font-normal">(comma-separated)</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={pageSEO.keywords}
-                                    onChange={e => update('keywords', e.target.value)}
-                                    placeholder="e.g. Construction, Renovation, Woodworking"
-                                    className={inputClass}
-                                />
-                            </div>
+                                        {activePreviewTab === 'facebook' && (
+                                            <div className="border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm font-sans text-left w-full mx-auto">
+                                                {/* Header */}
+                                                <div className="p-3 flex items-center gap-2 border-b border-gray-100 dark:border-gray-700/50">
+                                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold text-xs">
+                                                        {currentSite?.name?.charAt(0) || 'D'}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-semibold text-xs text-gray-900 dark:text-white leading-tight">{currentSite?.name || 'Digital Maples'}</div>
+                                                        <div className="text-[10px] text-gray-400">Just now · 🌐</div>
+                                                    </div>
+                                                </div>
+                                                {/* Post Text */}
+                                                <div className="p-3 text-xs text-gray-800 dark:text-gray-200 break-words line-clamp-2">
+                                                    {pageSEO.ogDescription || pageSEO.description || "Briefly describe this page for social sharing..."}
+                                                </div>
+                                                {/* Image Block */}
+                                                <div className="relative aspect-[1.91/1] w-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center border-y border-gray-100 dark:border-gray-700">
+                                                    {pageSEO.ogImage ? (
+                                                        <img src={pageSEO.ogImage} alt="OG Card" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-gradient-to-br from-blue-500 to-indigo-600 flex flex-col items-center justify-center p-4 text-white text-center">
+                                                            <div className="font-bold text-sm">{currentSite?.name}</div>
+                                                            <div className="text-[10px] opacity-75 mt-0.5">{currentPage.label}</div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {/* Footer Card */}
+                                                <div className="p-3 bg-gray-50 dark:bg-gray-900/30 border-b border-gray-100 dark:border-gray-700/50">
+                                                    <div className="text-[10px] text-gray-500 uppercase font-semibold tracking-wider">
+                                                        {currentSite?.domain || 'digitalmaples.ca'}
+                                                    </div>
+                                                    <h4 className="font-semibold text-gray-900 dark:text-white text-xs mt-0.5 line-clamp-1">
+                                                        {pageSEO.ogTitle || pageSEO.title || `${currentPage.label} | ${currentSite?.name}`}
+                                                    </h4>
+                                                    <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2 break-words">
+                                                        {pageSEO.ogDescription || pageSEO.description || "Click to learn more."}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
 
-                            <div className="flex items-center gap-3 pt-2 border-t border-gray-100 dark:border-gray-700">
-                                <input
-                                    id={`noindex-${selectedPage}`}
-                                    type="checkbox"
-                                    checked={pageSEO.noIndex}
-                                    onChange={e => update('noIndex', e.target.checked)}
-                                    className="w-4 h-4 rounded text-blue-600"
-                                />
-                                <label htmlFor={`noindex-${selectedPage}`} className="text-sm text-gray-700 dark:text-gray-300">
-                                    Hide this page from search engines (noindex)
-                                </label>
-                            </div>
-                        </div>
-
-                        {/* Open Graph / Social */}
-                        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-                                    <Share2 className="w-5 h-5 text-gray-500" />
-                                    Social Sharing (Open Graph & Twitter)
-                                </h2>
-                                <button
-                                    onClick={() => { syncFromTitle(); syncFromDescription(); }}
-                                    className="flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-800 font-medium"
-                                >
-                                    <RefreshCw className="w-3.5 h-3.5" />
-                                    Sync from Basic SEO
-                                </button>
-                            </div>
-                            <p className="text-xs text-gray-500 bg-gray-50 dark:bg-gray-700 rounded-lg p-3">
-                                These fields control how the page appears when shared on social media platforms.
-                            </p>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className={labelClass}>OG Title (Facebook / LinkedIn)</label>
-                                    <input type="text" value={pageSEO.ogTitle} onChange={e => update('ogTitle', e.target.value)} placeholder={pageSEO.title} className={inputClass} />
+                                        {activePreviewTab === 'twitter' && (
+                                            <div className="border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm font-sans text-left w-full mx-auto">
+                                                {/* Header */}
+                                                <div className="p-3 flex items-center gap-2">
+                                                    <div className="w-8 h-8 rounded-full bg-black dark:bg-gray-700 flex items-center justify-center text-white font-bold text-xs">
+                                                        {currentSite?.name?.charAt(0) || 'X'}
+                                                    </div>
+                                                    <div>
+                                                        <div className="font-bold text-xs text-gray-900 dark:text-white leading-tight flex items-center gap-1">
+                                                            {currentSite?.name || 'Digital Maples'}
+                                                            <span className="text-gray-400 font-normal">@{currentSite?.name?.toLowerCase().replace(/\s+/g, '') || 'site'}</span>
+                                                        </div>
+                                                        <div className="text-[10px] text-gray-400">1m</div>
+                                                    </div>
+                                                </div>
+                                                {/* Post Text */}
+                                                <div className="px-3 pb-3 text-xs text-gray-800 dark:text-gray-200 break-words line-clamp-2">
+                                                    {pageSEO.twitterDescription || pageSEO.description || "Briefly describe this page for Twitter..."}
+                                                </div>
+                                                {/* Summary Large Card */}
+                                                <div className="mx-3 mb-3 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden bg-white dark:bg-gray-800">
+                                                    <div className="relative aspect-[1.91/1] w-full bg-gray-100 dark:bg-gray-900 flex items-center justify-center border-b border-gray-200 dark:border-gray-700">
+                                                        {pageSEO.ogImage ? (
+                                                            <img src={pageSEO.ogImage} alt="Twitter Card" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                                                        ) : (
+                                                            <div className="w-full h-full bg-gradient-to-br from-neutral-800 to-neutral-900 flex flex-col items-center justify-center p-4 text-white text-center">
+                                                                <div className="font-bold text-sm">{currentSite?.name}</div>
+                                                                <div className="text-[10px] opacity-75 mt-0.5">{currentPage.label}</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="p-3 text-xs">
+                                                        <div className="text-[10px] text-gray-400 truncate uppercase">
+                                                            {currentSite?.domain || 'digitalmaples.ca'}
+                                                        </div>
+                                                        <h4 className="font-semibold text-gray-900 dark:text-white mt-0.5 line-clamp-1">
+                                                            {pageSEO.twitterTitle || pageSEO.title || `${currentPage.label} | ${currentSite?.name}`}
+                                                        </h4>
+                                                        <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-2 break-words">
+                                                            {pageSEO.twitterDescription || pageSEO.description || "Click to learn more."}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className={labelClass}>Twitter Title</label>
-                                    <input type="text" value={pageSEO.twitterTitle} onChange={e => update('twitterTitle', e.target.value)} placeholder={pageSEO.title} className={inputClass} />
-                                </div>
                             </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className={labelClass}>OG Description</label>
-                                    <textarea value={pageSEO.ogDescription} onChange={e => update('ogDescription', e.target.value)} placeholder={pageSEO.description} className={textareaClass} rows={3} />
-                                </div>
-                                <div>
-                                    <label className={labelClass}>Twitter Description</label>
-                                    <textarea value={pageSEO.twitterDescription} onChange={e => update('twitterDescription', e.target.value)} placeholder={pageSEO.description} className={textareaClass} rows={3} />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label className={labelClass}>
-                                    Social Sharing Image URL <span className="text-gray-400 font-normal">(1200×630px recommended)</span>
-                                </label>
-                                <input type="url" value={pageSEO.ogImage} onChange={e => update('ogImage', e.target.value)} placeholder="https://..." className={inputClass} />
-                                {pageSEO.ogImage && (
-                                    <img src={pageSEO.ogImage} alt="OG Preview" className="mt-2 h-24 w-auto rounded border object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Save Button */}
-                        <div className="flex justify-end">
-                            <Button onClick={handleSave} disabled={saving}>
-                                <Save className="w-4 h-4 mr-2" />
-                                {saving ? 'Saving...' : 'Save All Changes'}
-                            </Button>
                         </div>
                     </div>
                 </div>
