@@ -11,6 +11,7 @@ import Label from "@/components/form/Label";
 import { Plus, Trash2, Save, Zap, Link, ChevronDown, ChevronRight } from "lucide-react";
 import { FirestoreService } from "@/services/firestore";
 import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
+import { useAuth } from "@/context/AuthContext";
 
 interface FooterLink { label: string; url: string; }
 interface NavColumn { heading: string; links: FooterLink[]; }
@@ -37,6 +38,7 @@ interface FooterContent {
     copyright_text: string;
     developer_text: string;
     developer_url: string;
+    developer_credit_removed?: boolean;
     show_brand: boolean;
     show_contact: boolean;
     show_social: boolean;
@@ -244,7 +246,10 @@ const FOOTER_DEFAULTS: Record<string, FooterContent> = {
     }
 };
 
-const getDefaultFooter = (siteId: string): FooterContent => FOOTER_DEFAULTS[siteId] || FOOTER_DEFAULTS.kmfw;
+const getDefaultFooter = (siteId: string): FooterContent => {
+    const base = FOOTER_DEFAULTS[siteId] || FOOTER_DEFAULTS.kmfw;
+    return { ...base, developer_credit_removed: base.developer_credit_removed || false };
+};
 
 const SECTION_LABELS: Record<string, string> = {
     brand: 'Brand & Logo',
@@ -286,6 +291,8 @@ const Section = ({ id, isOpen, onToggle, isVisible, onVisibilityToggle, children
 
 export default function FooterManager() {
     const { currentSite } = useSite();
+    const { profile } = useAuth();
+    const isSuperAdmin = profile?.role === 'super_admin';
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [seeding, setSeeding] = useState(false);
@@ -442,16 +449,32 @@ export default function FooterManager() {
                         <Label>Copyright Text (leave empty for auto-generated)</Label>
                         <Input value={content.copyright_text} onChange={e => set('copyright_text', e.target.value)} placeholder={`© ${new Date().getFullYear()} ${currentSite?.name || 'Your Organization'}. All rights reserved.`} />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <Label>Developer Credit Text</Label>
-                            <Input value={content.developer_text} onChange={e => set('developer_text', e.target.value)} placeholder="Designed by Digital Maples Labs Inc." />
-                        </div>
-                        <div>
-                            <Label>Developer URL</Label>
-                            <Input value={content.developer_url} onChange={e => set('developer_url', e.target.value)} placeholder="https://digitalmaples.ca" />
-                        </div>
-                    </div>
+                    {isSuperAdmin && (
+                        <>
+                            <div className="flex items-center gap-3 mt-4 mb-2">
+                                <input
+                                    id="developer-credit-removed"
+                                    type="checkbox"
+                                    checked={content.developer_credit_removed || false}
+                                    onChange={e => set('developer_credit_removed', e.target.checked)}
+                                    className="w-4 h-4 text-blue-600 rounded"
+                                />
+                                <Label htmlFor="developer-credit-removed" className="mb-0 cursor-pointer">
+                                    Remove Developer Credit (Paid Version)
+                                </Label>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label>Developer Credit Text</Label>
+                                    <Input value={content.developer_text} onChange={e => set('developer_text', e.target.value)} placeholder="Designed by Digital Maples Labs Inc." />
+                                </div>
+                                <div>
+                                    <Label>Developer URL</Label>
+                                    <Input value={content.developer_url} onChange={e => set('developer_url', e.target.value)} placeholder="https://digitalmaples.ca" />
+                                </div>
+                            </div>
+                        </>
+                    )}
                 </Section>
 
                 {/* Contact Info */}
