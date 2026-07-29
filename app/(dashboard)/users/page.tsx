@@ -21,6 +21,7 @@ interface User {
     email: string;
     role: 'super_admin' | 'editor';
     displayName?: string;
+    phoneNumber?: string;
     allowedSites?: string[];
 }
 
@@ -46,6 +47,8 @@ export default function UserManagement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editUser, setEditUser] = useState<User | null>(null);
     const [newUserEmail, setNewUserEmail] = useState("");
+    const [newUserDisplayName, setNewUserDisplayName] = useState("");
+    const [newUserPhone, setNewUserPhone] = useState("");
     const [newUserRole, setNewUserRole] = useState<'editor' | 'super_admin'>('editor');
     const [selectedSites, setSelectedSites] = useState<string[]>([]);
     const [creating, setCreating] = useState(false);
@@ -98,6 +101,8 @@ export default function UserManagement() {
     const openCreateModal = () => {
         setEditUser(null);
         setNewUserEmail("");
+        setNewUserDisplayName("");
+        setNewUserPhone("");
         setNewUserRole("editor"); // Default to editor
         setSelectedSites([]);
         setIsModalOpen(true);
@@ -106,6 +111,8 @@ export default function UserManagement() {
     const openEditModal = (user: User) => {
         setEditUser(user);
         setNewUserEmail(user.email);
+        setNewUserDisplayName(user.displayName || "");
+        setNewUserPhone(user.phoneNumber || "");
         setNewUserRole(user.role);
         setSelectedSites(user.allowedSites || []);
         setIsModalOpen(true);
@@ -192,6 +199,9 @@ export default function UserManagement() {
             if (editUser) {
                 // UPDATE existing
                 await setDoc(doc(db, 'users', editUser.id), {
+                    displayName: newUserDisplayName,
+                    email: newUserEmail,
+                    phoneNumber: newUserPhone,
                     role: newUserRole,
                     allowedSites: selectedSites
                 }, { merge: true });
@@ -214,7 +224,9 @@ export default function UserManagement() {
                 await deleteApp(secondaryApp);
 
                 await setDoc(doc(db, 'users', newUid), {
+                    displayName: newUserDisplayName,
                     email: newUserEmail,
+                    phoneNumber: newUserPhone,
                     role: newUserRole,
                     allowedSites: selectedSites,
                     createdAt: new Date().toISOString(),
@@ -371,8 +383,14 @@ export default function UserManagement() {
                                 {filteredUsers.map((user) => (
                                     <tr key={user.id} className="border-b border-gray-100 dark:border-gray-800">
                                         <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">
-                                            {user.email || user.displayName || user.id}
-                                            {user.role === 'super_admin' && <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Super Admin</span>}
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-gray-900 dark:text-white">
+                                                    {user.displayName || "No Name"}
+                                                    {user.role === 'super_admin' && <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-normal">Super Admin</span>}
+                                                </span>
+                                                <span className="text-xs text-gray-500">{user.email || user.id}</span>
+                                                {user.phoneNumber && <span className="text-xs text-gray-400">Phone: {user.phoneNumber}</span>}
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3 text-sm">
                                             <div className="flex flex-col gap-1">
@@ -430,13 +448,23 @@ export default function UserManagement() {
                         {editUser ? 'Edit User' : 'Add New User'}
                     </h3>
                     <div className="space-y-4">
+                        {/* Name */}
+                        <div>
+                            <Label>Name</Label>
+                            <Input
+                                type="text"
+                                placeholder="Full Name"
+                                value={newUserDisplayName}
+                                onChange={(e) => setNewUserDisplayName(e.target.value)}
+                            />
+                        </div>
+
                         {/* Email */}
                         <div>
                             <Label>Email</Label>
                             <Input
                                 type="email"
                                 placeholder="user@example.com"
-                                disabled={!!editUser}
                                 value={newUserEmail}
                                 onChange={(e) => setNewUserEmail(e.target.value)}
                             />
@@ -445,6 +473,20 @@ export default function UserManagement() {
                                     An email will be sent immediately prompting the user to set their password.
                                 </p>
                             )}
+                        </div>
+
+                        {/* Phone Number */}
+                        <div>
+                            <Label>Phone Number (for MFA)</Label>
+                            <Input
+                                type="text"
+                                placeholder="+12895550199"
+                                value={newUserPhone}
+                                onChange={(e) => setNewUserPhone(e.target.value)}
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Must include country code, e.g., +12895550199
+                            </p>
                         </div>
 
                         {/* Role - Locked for Editor */}
