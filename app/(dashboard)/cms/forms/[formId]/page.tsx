@@ -8,7 +8,7 @@ import Button from "@/components/ui/button/Button";
 import Label from "@/components/form/Label";
 import Input from "@/components/form/input/InputField";
 import Alert from "@/components/ui/alert/Alert";
-import { Eye, Save, Plus, Trash2, Mail } from 'lucide-react';
+import { Eye, Save, Plus, Trash2, Mail, Webhook, Database, Sparkles, Send, Settings } from 'lucide-react';
 import VersionHistoryManager from "@/components/cms/VersionHistoryManager";
 
 const DEFAULT_DATA = {
@@ -23,12 +23,20 @@ const DEFAULT_DATA = {
     ]
 };
 
+const DEFAULT_WORKFLOWS = [
+    { id: 'database', type: 'database', enabled: true, title: 'Store in Lead Database', desc: 'Saves leads locally into the site lead collections for internal CSV exports.', config: { collection: 'leads' } },
+    { id: 'email', type: 'email', enabled: true, title: 'Send Email Notification', desc: 'Forwards form inputs immediately to the notification recipient.', config: { template: 'default' } },
+    { id: 'webhook', type: 'webhook', enabled: false, title: 'Trigger Webhook URL', desc: 'POSTs submission JSON payload to external webhooks (Zapier, Slack, CRM).', config: { url: '' } },
+    { id: 'auto_responder', type: 'auto_responder', enabled: false, title: 'Send Auto-Responder Email', desc: 'Autosends a personalized thank-you message to the submitter.', config: { subject: 'Thank you for your submission!', body: 'Hello,\n\nWe received your message and will get back to you soon!' } }
+];
+
 export default function DynamicFormEditor({ params }: { params: Promise<{ formId: string }> }) {
     const resolvedParams = use(params);
     const formId = resolvedParams.formId;
     
     const { currentSite } = useSite();
     const [content, setContent] = useState<any>(null);
+    const [workflows, setWorkflows] = useState<any[]>(DEFAULT_WORKFLOWS);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [recipientEmail, setRecipientEmail] = useState("");
@@ -40,7 +48,6 @@ export default function DynamicFormEditor({ params }: { params: Promise<{ formId
     const loadContent = async () => {
         setLoading(true);
         try {
-            // Fetch notification settings
             const settings = await FirestoreService.getSettings(currentSite.id, 'notifications');
             if (settings && settings.recipient_email) {
                 setRecipientEmail(settings.recipient_email);
@@ -48,6 +55,7 @@ export default function DynamicFormEditor({ params }: { params: Promise<{ formId
 
             const data = await FirestoreService.getForm(currentSite.id, formId);
             setContent(data || DEFAULT_DATA);
+            setWorkflows(data?.workflows || DEFAULT_WORKFLOWS);
             if (data?.recipient_email) {
                 setRecipientEmail(data.recipient_email);
             }
@@ -55,6 +63,7 @@ export default function DynamicFormEditor({ params }: { params: Promise<{ formId
             console.error(err);
             setError("Failed to load content.");
             setContent(DEFAULT_DATA);
+            setWorkflows(DEFAULT_WORKFLOWS);
         } finally {
             setLoading(false);
         }
@@ -67,9 +76,10 @@ export default function DynamicFormEditor({ params }: { params: Promise<{ formId
         try {
             await FirestoreService.saveForm(currentSite.id, formId, {
                 ...content,
-                recipient_email: recipientEmail
+                recipient_email: recipientEmail,
+                workflows: workflows
             });
-            setSuccessMsg("Form settings saved successfully!");
+            setSuccessMsg("Form and workflow settings saved successfully!");
             setTimeout(() => setSuccessMsg(""), 3000);
         } catch (err: any) {
             console.error(err);
@@ -221,6 +231,119 @@ export default function DynamicFormEditor({ params }: { params: Promise<{ formId
                                 <Label>Success Message</Label>
                                 <Input value={content.success_message} onChange={e => setContent({...content, success_message: e.target.value})} />
                             </div>
+                        </div>
+                    </div>
+ 
+                    {/* Custom Workflow Automation Pipeline */}
+                    <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] space-y-6">
+                        <div>
+                            <h3 className="text-lg font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                                <Sparkles className="w-5 h-5 text-brand-500" /> Custom Workflow Automation
+                            </h3>
+                            <p className="text-xs text-gray-500 mt-1">Configure lead submission routing actions in real-time without writing code.</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {workflows.map((flow: any) => {
+                                const Icon = flow.type === 'database' ? Database : 
+                                             flow.type === 'webhook' ? Webhook : 
+                                             flow.type === 'auto_responder' ? Send : Mail;
+                                return (
+                                    <div key={flow.id} className="p-4 bg-gray-50 dark:bg-gray-800/40 rounded-xl border border-gray-150 dark:border-gray-800 space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-start gap-3">
+                                                <div className="p-2.5 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-lg text-gray-600 dark:text-gray-300">
+                                                    <Icon size={18} />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-sm text-gray-800 dark:text-white">{flow.title}</h4>
+                                                    <p className="text-xs text-gray-400">{flow.desc}</p>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* Enable Toggle Switch */}
+                                            <label className="flex items-center cursor-pointer">
+                                                <div className="relative">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="sr-only"
+                                                        checked={flow.enabled}
+                                                        onChange={(e) => {
+                                                            const isChecked = e.target.checked;
+                                                            setWorkflows(prev => prev.map(f => f.id === flow.id ? { ...f, enabled: isChecked } : f));
+                                                        }}
+                                                    />
+                                                    <div className={`block w-9 h-5 rounded-full transition-colors ${flow.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-700'}`}></div>
+                                                    <div className={`dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${flow.enabled ? 'transform translate-x-4' : ''}`}></div>
+                                                </div>
+                                            </label>
+                                        </div>
+
+                                        {flow.enabled && (
+                                            <div className="border-t border-gray-150 dark:border-gray-800/60 pt-4 space-y-3 animate-in fade-in slide-in-from-top-1">
+                                                {flow.type === 'webhook' && (
+                                                    <div>
+                                                        <Label>Webhook Payload Target URL</Label>
+                                                        <Input
+                                                            type="url"
+                                                            placeholder="https://hooks.zapier.com/hooks/catch/..."
+                                                            value={flow.config.url || ''}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                setWorkflows(prev => prev.map(f => f.id === flow.id ? { ...f, config: { ...f.config, url: val } } : f));
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {flow.type === 'database' && (
+                                                    <div>
+                                                        <Label>Destination Collection Path</Label>
+                                                        <Input
+                                                            type="text"
+                                                            placeholder="leads"
+                                                            value={flow.config.collection || ''}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                setWorkflows(prev => prev.map(f => f.id === flow.id ? { ...f, config: { ...f.config, collection: val } } : f));
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                {flow.type === 'auto_responder' && (
+                                                    <div className="grid gap-3">
+                                                        <div>
+                                                            <Label>Reply Subject Line</Label>
+                                                            <Input
+                                                                placeholder="e.g. Thanks for your inquiry!"
+                                                                value={flow.config.subject || ''}
+                                                                onChange={(e) => {
+                                                                    const val = e.target.value;
+                                                                    setWorkflows(prev => prev.map(f => f.id === flow.id ? { ...f, config: { ...f.config, subject: val } } : f));
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <Label>Reply Body Text</Label>
+                                                            <textarea
+                                                                rows={3}
+                                                                placeholder="Personalize with {{name}} fields..."
+                                                                value={flow.config.body || ''}
+                                                                className="w-full px-4 py-2 border rounded-xl dark:bg-gray-800 dark:border-gray-700 text-sm"
+                                                                onChange={(e) => {
+                                                                    const val = e.target.value;
+                                                                    setWorkflows(prev => prev.map(f => f.id === flow.id ? { ...f, config: { ...f.config, body: val } } : f));
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
 
