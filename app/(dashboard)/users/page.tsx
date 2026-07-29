@@ -19,28 +19,31 @@ import { useDialog } from "@/context/DialogContext";
 interface User {
     id: string;
     email: string;
-    role: 'super_admin' | 'editor';
+    role: 'super_admin' | 'tenant_admin' | 'editor';
     displayName?: string;
     phoneNumber?: string;
     allowedSites?: string[];
 }
 
-const permissions = [
-    { name: "View Content", editor: true, super_admin: true },
-    { name: "Edit Content", editor: true, super_admin: true },
-    { name: "Manage Media", editor: true, super_admin: true },
-    { name: "Site Settings", editor: true, super_admin: true },
-    { name: "Page SEO", editor: true, super_admin: true },
-    { name: "Manage Users", editor: false, super_admin: true },
-    { name: "Delete Users", editor: false, super_admin: true },
-    { name: "System Settings", editor: false, super_admin: true },
+const PERMISSION_KEYS = [
+    { key: "view_content", label: "View Content" },
+    { key: "edit_content", label: "Edit Content" },
+    { key: "manage_media", label: "Manage Media" },
+    { key: "site_settings", label: "Site Settings" },
+    { key: "page_seo", label: "Page SEO" },
+    { key: "manage_users", label: "Manage Users" },
+    { key: "delete_users", label: "Delete Users" },
+    { key: "system_settings", label: "System Settings" },
+    { key: "view_leads", label: "View Leads / Submissions" },
+    { key: "manage_forms", label: "Manage / Edit Forms" },
+    { key: "impersonate_users", label: "Impersonate Users (View As)" },
 ];
 
 export default function UserManagement() {
     const { confirm, alert: dialogAlert } = useDialog();
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(true);
-    const { user: currentUser, profile, impersonate, isImpersonating, stopImpersonation } = useAuth();
+    const { user: currentUser, profile, impersonate, isImpersonating, stopImpersonation, hasPermission, permissionsConfig, savePermissionsConfig } = useAuth();
     const [showImpersonationModal, setShowImpersonationModal] = useState(false);
 
     // User Edit/Create State
@@ -49,12 +52,20 @@ export default function UserManagement() {
     const [newUserEmail, setNewUserEmail] = useState("");
     const [newUserDisplayName, setNewUserDisplayName] = useState("");
     const [newUserPhone, setNewUserPhone] = useState("");
-    const [newUserRole, setNewUserRole] = useState<'editor' | 'super_admin'>('editor');
+    const [newUserRole, setNewUserRole] = useState<'editor' | 'tenant_admin' | 'super_admin'>('editor');
     const [selectedSites, setSelectedSites] = useState<string[]>([]);
     const [creating, setCreating] = useState(false);
 
     // Permissions Modal State
     const [isPermissionsOpen, setIsPermissionsOpen] = useState(false);
+    const [tempPermissions, setTempPermissions] = useState<Record<string, Record<string, boolean>>>({});
+    const [savingPermissions, setSavingPermissions] = useState(false);
+
+    useEffect(() => {
+        if (isPermissionsOpen) {
+            setTempPermissions(JSON.parse(JSON.stringify(permissionsConfig)));
+        }
+    }, [isPermissionsOpen, permissionsConfig]);
 
     useEffect(() => {
         loadUsers();
@@ -172,12 +183,12 @@ export default function UserManagement() {
             return;
         }
 
-        // Security check for Editors creating users
-        if (profile?.role === 'editor') {
+        // Security check for Non-Super-Admins creating/editing users
+        if (profile?.role !== 'super_admin') {
             if (newUserRole === 'super_admin') {
                 await dialogAlert({
                     title: "Access Denied",
-                    message: "Editors cannot create Super Admins.",
+                    message: "You cannot create or manage Super Admins.",
                     variant: "danger"
                 });
                 return;
@@ -287,6 +298,28 @@ export default function UserManagement() {
                     variant: "danger"
                 });
             }
+        }
+    };
+
+    const handleSavePermissions = async () => {
+        setSavingPermissions(true);
+        try {
+            await savePermissionsConfig(tempPermissions);
+            await dialogAlert({
+                title: "Permissions Saved",
+                message: "Roles and permissions updated successfully.",
+                variant: "success"
+            });
+            setIsPermissionsOpen(false);
+        } catch (error: any) {
+            console.error("Failed to save permissions:", error);
+            await dialogAlert({
+                title: "Failed to Save",
+                message: "Could not save permissions: " + error.message,
+                variant: "danger"
+            });
+        } finally {
+            setSavingPermissions(false);
         }
     };
 
@@ -410,7 +443,7 @@ export default function UserManagement() {
                                             >
                                                 <EyeIcon size={18} />
                                             </button>
-                                            {profile?.role === 'super_admin' && (
+                                            {hasPermission('manage_users') && (
                                                 <button
                                                     title="Send Password Reset Link"
                                                     onClick={() => handleSendResetLink(user.email)}
@@ -419,20 +452,24 @@ export default function UserManagement() {
                                                     <KeyRoundIcon size={18} />
                                                 </button>
                                             )}
-                                            <button
-                                                title="Edit"
-                                                onClick={() => openEditModal(user)}
-                                                className="p-1 hover:text-gray-900 transition-colors"
-                                            >
-                                                <PencilIcon size={18} />
-                                            </button>
-                                            <button
-                                                title="Delete"
-                                                onClick={() => handleDeleteUser(user.id, user.email)}
-                                                className="p-1 hover:text-red-600 transition-colors"
-                                            >
-                                                <XIcon size={18} />
-                                            </button>
+                                            {hasPermission('manage_users') && (
+                                                <button
+                                                    title="Edit"
+                                                    onClick={() => openEditModal(user)}
+                                                    className="p-1 hover:text-gray-900 transition-colors"
+                                                >
+                                                    <PencilIcon size={18} />
+                                                </button>
+                                            )}
+                                            {hasPermission('delete_users') && (
+                                                <button
+                                                    title="Delete"
+                                                    onClick={() => handleDeleteUser(user.id, user.email)}
+                                                    className="p-1 hover:text-red-600 transition-colors"
+                                                >
+                                                    <XIcon size={18} />
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
@@ -489,7 +526,7 @@ export default function UserManagement() {
                             </p>
                         </div>
 
-                        {/* Role - Locked for Editor */}
+                        {/* Role - Allowed options based on current user's role */}
                         {profile?.role === 'super_admin' ? (
                             <div>
                                 <Label>Role</Label>
@@ -499,7 +536,20 @@ export default function UserManagement() {
                                     onChange={(e) => setNewUserRole(e.target.value as any)}
                                 >
                                     <option value="editor">Editor</option>
+                                    <option value="tenant_admin">Tenant Admin</option>
                                     <option value="super_admin">Super Admin</option>
+                                </select>
+                            </div>
+                        ) : hasPermission('manage_users') ? (
+                            <div>
+                                <Label>Role</Label>
+                                <select
+                                    className="w-full rounded-lg border border-gray-300 bg-transparent px-4 py-3 text-sm text-gray-900 focus:border-brand-500 focus:outline-none dark:border-gray-700 dark:text-white"
+                                    value={newUserRole}
+                                    onChange={(e) => setNewUserRole(e.target.value as any)}
+                                >
+                                    <option value="editor">Editor</option>
+                                    <option value="tenant_admin">Tenant Admin</option>
                                 </select>
                             </div>
                         ) : (
@@ -509,8 +559,8 @@ export default function UserManagement() {
                             </div>
                         )}
 
-                        {/* Site Access - Only for Editors */}
-                        {newUserRole === 'editor' && (
+                        {/* Site Access - For Editors and Tenant Admins */}
+                        {newUserRole !== 'super_admin' && (
                             <div>
                                 <Label>Allowed Sites</Label>
                                 <div className="space-y-2 mt-2 border p-3 rounded-lg bg-gray-50">
@@ -544,37 +594,73 @@ export default function UserManagement() {
                     </div>
                 </Modal>
 
-                {/* Permissions Modal (Unchanged) */}
-                <Modal isOpen={isPermissionsOpen} onClose={() => setIsPermissionsOpen(false)} className="max-w-2xl p-6">
+                {/* Permissions Modal (Interactive) */}
+                <Modal isOpen={isPermissionsOpen} onClose={() => setIsPermissionsOpen(false)} className="max-w-3xl p-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Roles & Permissions</h3>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                         <table className="min-w-full text-left text-sm whitespace-nowrap">
-                            <thead className="uppercase tracking-wider border-b-2 border-gray-100 dark:border-gray-700">
+                            <thead className="uppercase tracking-wider border-b-2 border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-900">
                                 <tr>
                                     <th scope="col" className="px-6 py-4">Permission</th>
                                     <th scope="col" className="px-6 py-4 text-center text-blue-600">Editor</th>
+                                    <th scope="col" className="px-6 py-4 text-center text-green-600">Tenant Admin</th>
                                     <th scope="col" className="px-6 py-4 text-center text-purple-600">Super Admin</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                                {permissions.map((perm) => (
-                                    <tr key={perm.name} className="hover:bg-gray-50 dark:hover:bg-white/5">
+                                {PERMISSION_KEYS.map((perm) => (
+                                    <tr key={perm.key} className="hover:bg-gray-50 dark:hover:bg-white/5">
                                         <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                            {perm.name}
+                                            {perm.label}
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <input type="checkbox" checked={perm.editor} readOnly className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500" />
+                                            <input
+                                                type="checkbox"
+                                                checked={!!tempPermissions.editor?.[perm.key]}
+                                                disabled={profile?.role !== 'super_admin'}
+                                                onChange={(e) => {
+                                                    const updated = { ...tempPermissions };
+                                                    if (!updated.editor) updated.editor = {};
+                                                    updated.editor[perm.key] = e.target.checked;
+                                                    setTempPermissions(updated);
+                                                }}
+                                                className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                                            />
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            <input type="checkbox" checked={perm.super_admin} readOnly className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500" />
+                                            <input
+                                                type="checkbox"
+                                                checked={!!tempPermissions.tenant_admin?.[perm.key]}
+                                                disabled={profile?.role !== 'super_admin'}
+                                                onChange={(e) => {
+                                                    const updated = { ...tempPermissions };
+                                                    if (!updated.tenant_admin) updated.tenant_admin = {};
+                                                    updated.tenant_admin[perm.key] = e.target.checked;
+                                                    setTempPermissions(updated);
+                                                }}
+                                                className="w-5 h-5 text-green-600 rounded focus:ring-green-500 cursor-pointer disabled:opacity-50"
+                                            />
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={true}
+                                                disabled
+                                                className="w-5 h-5 text-purple-600 rounded focus:ring-purple-500 opacity-50"
+                                            />
                                         </td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                    <div className="mt-6 flex justify-end">
-                        <Button variant="outline" onClick={() => setIsPermissionsOpen(false)}>Close</Button>
+                    <div className="mt-6 flex justify-end gap-3">
+                        <Button variant="outline" onClick={() => setIsPermissionsOpen(false)}>Cancel</Button>
+                        {profile?.role === 'super_admin' && (
+                            <Button onClick={handleSavePermissions} disabled={savingPermissions}>
+                                {savingPermissions ? "Saving..." : "Save Permissions"}
+                            </Button>
+                        )}
                     </div>
                 </Modal>
             </div>

@@ -32,7 +32,7 @@ type NavItem = {
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const { currentSite } = useSite();
-  const { profile } = useAuth();
+  const { profile, hasPermission } = useAuth();
   const location = usePathname();
 
   const navItems = useMemo(() => {
@@ -143,6 +143,10 @@ const AppSidebar: React.FC = () => {
   const othersItems = useMemo(() => {
     const isSuperAdmin = profile?.role === 'super_admin';
     const hasAllowedSites = (profile?.allowedSites?.length || 0) > 0;
+    const canManageUsers = hasPermission('manage_users');
+    const canSystemSettings = hasPermission('system_settings');
+    const canSiteSettings = hasPermission('site_settings');
+    const canPageSeo = hasPermission('page_seo');
     
     const items: NavItem[] = [
       {
@@ -152,34 +156,38 @@ const AppSidebar: React.FC = () => {
       }
     ];
 
-    // Show Analytics to Super Admins OR Editors with at least one site
+    // Show Analytics to Super Admins OR anyone with at least one site
     if (isSuperAdmin || hasAllowedSites) {
       items.unshift({
         icon: <PieChartIcon />,
         name: "Internal Analytics",
         path: "/analytics",
       });
-      items.push(
-        {
+      if (canSiteSettings) {
+        items.push({
           icon: <PlugInIcon />,
           name: "Global Site Settings",
           path: "/settings/site",
-        },
-        {
+        });
+      }
+      if (canPageSeo) {
+        items.push({
           icon: <GridIcon />,
           name: "Page SEO Manager",
           path: "/settings/seo",
-        }
-      );
+        });
+      }
     }
 
-    if (isSuperAdmin) {
+    if (canManageUsers) {
       items.unshift({
         icon: <UserCircleIcon />,
         name: "Users",
         path: "/users",
       });
-      
+    }
+
+    if (canSystemSettings) {
       items.push(
         {
           icon: <PlugInIcon />,
@@ -194,7 +202,7 @@ const AppSidebar: React.FC = () => {
       );
     }
     return items;
-  }, [profile]);
+  }, [profile, hasPermission]);
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";

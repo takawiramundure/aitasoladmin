@@ -8,7 +8,7 @@ export interface UserProfile {
     email: string;
     displayName?: string;
     photoURL?: string;
-    role: 'super_admin' | 'editor';
+    role: 'super_admin' | 'tenant_admin' | 'editor';
     allowedSites?: string[];
     uid: string;
     phoneNumber?: string;
@@ -24,6 +24,9 @@ interface AuthContextType {
     verifyMfaSession: () => void;
     impersonate: (userId: string) => Promise<void>;
     stopImpersonation: () => void;
+    hasPermission: (permission: string) => boolean;
+    permissionsConfig: Record<string, Record<string, boolean>>;
+    savePermissionsConfig: (config: Record<string, Record<string, boolean>>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,11 +37,43 @@ const AuthContext = createContext<AuthContextType>({
     mfaVerified: false,
     verifyMfaSession: () => {},
     impersonate: async () => { },
-    stopImpersonation: () => { }
+    stopImpersonation: () => { },
+    hasPermission: () => false,
+    permissionsConfig: {},
+    savePermissionsConfig: async () => {}
 });
 
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from "@/firebaseConfig";
+
+const DEFAULT_PERMISSIONS: Record<string, Record<string, boolean>> = {
+    editor: {
+        view_content: true,
+        edit_content: true,
+        manage_media: true,
+        site_settings: true,
+        page_seo: true,
+        manage_users: false,
+        delete_users: false,
+        system_settings: false,
+        view_leads: true,
+        manage_forms: false,
+        impersonate_users: false,
+    },
+    tenant_admin: {
+        view_content: true,
+        edit_content: true,
+        manage_media: true,
+        site_settings: true,
+        page_seo: true,
+        manage_users: true,
+        delete_users: true,
+        system_settings: false,
+        view_leads: true,
+        manage_forms: true,
+        impersonate_users: false,
+    }
+};
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
@@ -46,6 +81,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [impersonatedProfile, setImpersonatedProfile] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
     const [mfaVerified, setMfaVerified] = useState(false);
+    const [permissionsConfig, setPermissionsConfig] = useState<Record<string, Record<string, boolean>>>(DEFAULT_PERMISSIONS);
+
+    useEffect(() => {
+        const loadPermissions = async () => {
+            try {
+                const docRef = doc(db, 'settings', 'permissions');
+                const docSnap = await getDoc(docRef);
+                if (docSnap.exists()) {
+                    setPermissionsConfig(docSnap.data() as Record<string, Record<string, boolean>>);
+                }
+            } catch (e) {
+                console.error("Failed to load permissions config:", e);
+            }
+        };
+        loadPermissions();
+    }, []);
+
+    const savePermissionsConfig = async (newConfig: Record<string, Record<string, boolean>>) => {
+        try {
+            await setDoc(doc(db, 'settings', 'permissions'), newConfig);
+            setPermissionsConfig(newConfig);
+        } catch (e) {
+            console.error("Failed to save permissions config:", e);
+            throw e;
+        }
+    };
+
+    const hasPermission = (permission: string): boolean => {
+        const activeProfile = impersonatedProfile || realProfile;
+        if (!activeProfile) return false;
+        if (activeProfile.role === 'super_admin') return true;
+        const role = activeProfile.role || 'editor';
+        return !!permissionsConfig[role]?.[permission];
+    };
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -179,8 +248,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         mfaVerified,
         verifyMfaSession,
         impersonate,
-        stopImpersonation
-    }), [user, impersonatedProfile, realProfile, loading, mfaVerified]);
+        stopImpersonation,
+        hasPermission,
+        permissionsConfig,
+        savePermissionsConfig
+    }), [user, impersonatedProfile, realProfile, loading, mfaVerified, permissionsConfig]);
 
     return (
         <AuthContext.Provider value={value}>

@@ -126,15 +126,21 @@ export default function App() {
                     <Route path="/cms/join-us" element={<ContentManager />} />
 
                     {/* Protected Management Routes */}
-                    <Route element={<ProtectedRoute allowedRoles={['super_admin']} />}>
+                    <Route element={<ProtectedRoute requiredPermission="manage_users" />}>
                       <Route path="/users" element={<UserManagement />} />
+                    </Route>
+                    <Route element={<ProtectedRoute requiredPermission="system_settings" />}>
                       <Route path="/settings" element={<SystemSettings />} />
                       <Route path="/cms/page-visibility" element={<PageVisibilityManager />} />
                     </Route>
                     {/* General Protected Routes */}
-                    <Route element={<ProtectedRoute allowedRoles={['super_admin', 'editor']} />}>
+                    <Route element={<ProtectedRoute allowedRoles={['super_admin', 'tenant_admin', 'editor']} />}>
                       <Route path="/profile" element={<UserProfiles />} />
+                    </Route>
+                    <Route element={<ProtectedRoute requiredPermission="site_settings" />}>
                       <Route path="/settings/site" element={<SiteSettingsManager />} />
+                    </Route>
+                    <Route element={<ProtectedRoute requiredPermission="page_seo" />}>
                       <Route path="/settings/seo" element={<SEOManager />} />
                     </Route>
                     <Route path="/calendar" element={<Calendar />} />
