@@ -231,6 +231,8 @@ export default function RollbackManager() {
     // Details Modal State
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
     const [activeItem, setActiveItem] = useState<any>(null);
+    const [viewMode, setViewMode] = useState<'table' | 'timeline'>('timeline');
+    const [selectedTimelineIndex, setSelectedTimelineIndex] = useState<number>(0);
 
     // Sync state site ID with current site context
     useEffect(() => {
@@ -401,22 +403,202 @@ export default function RollbackManager() {
                                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                                 Refresh
                             </Button>
+
+                            {/* View Mode Toggle */}
+                            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-xl p-1 border border-gray-200 dark:border-gray-700">
+                                <button
+                                    onClick={() => setViewMode('timeline')}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                                        viewMode === 'timeline'
+                                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                    }`}
+                                >
+                                    <History size={14} />
+                                    Time Travel
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('table')}
+                                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                                        viewMode === 'table'
+                                            ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                    }`}
+                                >
+                                    <Database size={14} />
+                                    Logs Table
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Feedback Alerts */}
                 {errorMsg && <Alert variant="error" title="Error" message={errorMsg} />}
-                {successMsg && <Alert variant="success" title="Success" message={successMsg} />}
-
-                {/* Activity List Card */}
-                <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-white/[0.03] shadow-sm">
-                    {loading ? (
-                        <div className="text-center py-20">
-                            <RefreshCw className="animate-spin text-brand-500 mx-auto mb-4" size={32} />
-                            <p className="text-gray-500 font-medium">Fetching historical event logs...</p>
+                {successMsg && <Alert variant="success" title="Success" message={successMsg} />}                {/* Activity List Card or Timeline */}
+                {loading ? (
+                    <div className="rounded-2xl border border-gray-200 bg-white p-20 dark:border-gray-800 dark:bg-white/[0.03] shadow-sm text-center">
+                        <RefreshCw className="animate-spin text-brand-500 mx-auto mb-4" size={32} />
+                        <p className="text-gray-500 font-medium">Fetching historical event logs...</p>
+                    </div>
+                ) : viewMode === 'timeline' ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+                        {/* Timeline Column (2 cols) */}
+                        <div className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] shadow-sm space-y-4 max-h-[70vh] overflow-y-auto">
+                            <h3 className="font-bold text-gray-800 dark:text-white text-base">Revision Timeline</h3>
+                            {filteredHistory.length === 0 ? (
+                                <div className="text-center py-10 text-gray-450 italic">No revision history found.</div>
+                            ) : (
+                                <div className="relative border-l border-gray-200 dark:border-gray-800 ml-4 space-y-6 py-2">
+                                    {filteredHistory.map((item, idx) => {
+                                        const isActive = idx === selectedTimelineIndex;
+                                        const dateStr = new Date(item.timestamp).toLocaleString(undefined, {
+                                            dateStyle: 'medium',
+                                            timeStyle: 'short'
+                                        });
+                                        return (
+                                            <div
+                                                key={item.id}
+                                                onClick={() => setSelectedTimelineIndex(idx)}
+                                                className={`relative pl-8 cursor-pointer group transition-all`}
+                                            >
+                                                {/* Bullet */}
+                                                <div className={`absolute left-0 -translate-x-1/2 w-4 h-4 rounded-full border-2 bg-white dark:bg-gray-900 transition-all ${
+                                                    isActive 
+                                                        ? 'border-blue-600 dark:border-blue-400 scale-125' 
+                                                        : 'border-gray-300 dark:border-gray-700 group-hover:border-gray-400'
+                                                }`} />
+                                                {/* Card */}
+                                                <div className={`p-4 rounded-xl border transition-all ${
+                                                    isActive
+                                                        ? 'bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/60 shadow-sm'
+                                                        : 'bg-transparent border-transparent hover:bg-gray-50 dark:hover:bg-gray-800/20'
+                                                }`}>
+                                                    <div className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{dateStr}</div>
+                                                    <div className="font-semibold text-sm text-gray-800 dark:text-gray-200 mt-1 capitalize">
+                                                        {item.action || 'update'} {getCollectionLabel(item.collectionName)}
+                                                    </div>
+                                                    <div className="text-xs font-mono text-gray-500 mt-1 truncate">ID: {item.documentId}</div>
+                                                    <div className="text-xs text-gray-400 dark:text-gray-500 mt-1 flex items-center gap-1">
+                                                        <User size={12} />
+                                                        By {item.updatedBy || 'system'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
                         </div>
-                    ) : (
+
+                        {/* Interactive Visual Comparison Column (3 cols) */}
+                        <div className="lg:col-span-3 space-y-6">
+                            {filteredHistory[selectedTimelineIndex] ? (
+                                <div className="rounded-2xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-white/[0.03] shadow-sm space-y-6">
+                                    <div className="flex items-center justify-between border-b border-gray-150 dark:border-gray-800 pb-4">
+                                        <div>
+                                            <h3 className="font-bold text-gray-800 dark:text-white text-base">Visual Version Comparison</h3>
+                                            <p className="text-xs text-gray-400 mt-1">Comparing revision state</p>
+                                        </div>
+                                        <Button
+                                            variant="primary"
+                                            size="sm"
+                                            onClick={() => handleRollback(filteredHistory[selectedTimelineIndex])}
+                                            disabled={rollbackSaving}
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <RotateCcw size={14} />
+                                            Restore Version
+                                        </Button>
+                                    </div>
+
+                                    {/* Visual Mock Renderer depending on collection type */}
+                                    {(() => {
+                                        const item = filteredHistory[selectedTimelineIndex];
+                                        const prev = item.previousData || {};
+                                        const next = item.newData || {};
+                                        
+                                        // Case 1: Hero Slider component
+                                        if (item.collectionName === 'hero' || item.collectionName === 'hero_slider') {
+                                            return (
+                                                <div className="space-y-4">
+                                                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-450">Hero Slider Layout Difference</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {/* Before */}
+                                                        <div className="p-4 rounded-xl border border-red-100 bg-red-50/20 dark:border-red-950/30 dark:bg-red-950/10 space-y-2">
+                                                            <div className="text-xs font-bold text-red-600 uppercase">Before Edit</div>
+                                                            {prev.image ? (
+                                                                <img src={prev.image} alt="prev" className="w-full h-24 object-cover rounded-lg border" />
+                                                            ) : (
+                                                                <div className="w-full h-24 bg-gray-105 dark:bg-gray-800 rounded-lg flex items-center justify-center text-xs text-gray-450">No Image</div>
+                                                            )}
+                                                            <div className="font-bold text-sm text-gray-800 dark:text-white">{prev.title || 'Untitled'}</div>
+                                                            <div className="text-xs text-gray-500 line-clamp-2">{prev.description || 'No description'}</div>
+                                                        </div>
+                                                        {/* After */}
+                                                        <div className="p-4 rounded-xl border border-green-100 bg-green-50/20 dark:border-green-950/30 dark:bg-green-950/10 space-y-2">
+                                                            <div className="text-xs font-bold text-green-600 uppercase">After Edit</div>
+                                                            {next.image ? (
+                                                                <img src={next.image} alt="next" className="w-full h-24 object-cover rounded-lg border" />
+                                                            ) : (
+                                                                <div className="w-full h-24 bg-gray-105 dark:bg-gray-800 rounded-lg flex items-center justify-center text-xs text-gray-455">No Image</div>
+                                                            )}
+                                                            <div className="font-bold text-sm text-gray-800 dark:text-white">{next.title || 'Untitled'}</div>
+                                                            <div className="text-xs text-gray-500 line-clamp-2">{next.description || 'No description'}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+
+                                        // Case 2: Settings (Themes/Branding)
+                                        if (item.collectionName === 'settings' && (item.documentId === 'theme' || item.documentId === 'branding')) {
+                                            return (
+                                                <div className="space-y-4">
+                                                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-450">Visual Theme Color Changes</h4>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        {/* Before */}
+                                                        <div className="p-4 rounded-xl border border-gray-150 dark:border-gray-805 bg-gray-50/50 space-y-3">
+                                                            <div className="text-xs font-bold text-gray-400 uppercase">Before Theme</div>
+                                                            <div className="flex gap-2">
+                                                                {['primaryColor', 'secondaryColor', 'accentColor'].map(key => prev[key] && (
+                                                                    <div key={key} className="flex flex-col items-center gap-1">
+                                                                        <div className="w-8 h-8 rounded-full border shadow-sm" style={{ backgroundColor: prev[key] }} />
+                                                                        <span className="text-[10px] text-gray-450 capitalize">{key.replace('Color', '')}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        {/* After */}
+                                                        <div className="p-4 rounded-xl border border-gray-150 dark:border-gray-805 bg-gray-50/50 space-y-3">
+                                                            <div className="text-xs font-bold text-gray-400 uppercase">After Theme</div>
+                                                            <div className="flex gap-2">
+                                                                {['primaryColor', 'secondaryColor', 'accentColor'].map(key => next[key] && (
+                                                                    <div key={key} className="flex flex-col items-center gap-1">
+                                                                        <div className="w-8 h-8 rounded-full border shadow-sm" style={{ backgroundColor: next[key] }} />
+                                                                        <span className="text-[10px] text-gray-455 capitalize">{key.replace('Color', '')}</span>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        }
+
+                                        // Default: Structured Field diff rendering
+                                        return <VisualDiff prev={prev} next={next} />;
+                                    })()}
+                                </div>
+                            ) : (
+                                <div className="rounded-2xl border border-gray-200 bg-white p-10 dark:border-gray-800 dark:bg-white/[0.03] shadow-sm text-center text-gray-400 italic">
+                                    Select a revision from the timeline to see differences.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden dark:border-gray-800 dark:bg-white/[0.03] shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left text-sm text-gray-600 dark:text-gray-400">
                                 <thead className="bg-gray-50 text-gray-700 dark:bg-gray-800/60 dark:text-gray-300 border-b border-gray-150 dark:border-gray-800">
@@ -501,13 +683,13 @@ export default function RollbackManager() {
                                 </tbody>
                             </table>
                             {filteredHistory.length === 0 && (
-                                <div className="text-center py-16 text-gray-500">
+                                <div className="text-center py-16 text-gray-505">
                                     No historical logs matched your selection.
                                 </div>
                             )}
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
             {/* Visual Diff Details Modal */}
