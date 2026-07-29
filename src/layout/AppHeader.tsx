@@ -196,16 +196,16 @@ const AppHeader: React.FC = () => {
             {/* Cross Icon */}
           </button>
 
-          <Link href="/" className="lg:hidden">
+          <Link href="/" className="lg:hidden flex items-center">
             <img
-              className="dark:hidden"
-              src="/images/logo/logo.svg"
-              alt="Logo"
+              className="dark:hidden h-8 w-auto"
+              src="/images/logo/digital-maples-logo.png"
+              alt="Digital Maples Logo"
             />
             <img
-              className="hidden dark:block"
-              src="/images/logo/logo-dark.svg"
-              alt="Logo"
+              className="hidden dark:block h-8 w-auto"
+              src="/images/logo/digital-maples-logo-white.png"
+              alt="Digital Maples Logo"
             />
           </Link>
 
