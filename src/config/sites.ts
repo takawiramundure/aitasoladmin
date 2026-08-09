@@ -15,6 +15,7 @@ export const RAW_SITES: Site[] = [
     domain: 'niagarasuicidepreventioncoalition.ca',
     description: 'Niagara Suicide Prevention Coalition',
     ga4PropertyId: '509768055',
+    databaseId: 'nspc-web',
     usePrefix: true
   },
   {
@@ -22,6 +23,7 @@ export const RAW_SITES: Site[] = [
     name: 'BWEIC',
     domain: 'bweic.netlify.app',
     description: 'Black Women Empowerment Initiative Canada',
+    databaseId: 'bweic-web',
     usePrefix: true
   },
   {
@@ -29,6 +31,7 @@ export const RAW_SITES: Site[] = [
     name: 'KMFW',
     domain: 'kmfw.org',
     description: 'Kind Minds Family Wellness',
+    databaseId: 'kmfw-web',
     usePrefix: true
   },
   {
@@ -44,6 +47,7 @@ export const RAW_SITES: Site[] = [
     name: 'Noel Construction',
     domain: 'noelconstruction.web.app',
     description: 'High-End Renovation & Woodworking',
+    databaseId: 'noel-web',
     usePrefix: true
   },
   {
