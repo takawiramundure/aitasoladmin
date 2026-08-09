@@ -20,7 +20,15 @@ export default function SiteSelector() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    return (
+    // Hide selector if in single-tenant mode or only 1 site is available
+    if (process.env.NEXT_PUBLIC_SINGLE_TENANT_ID || sites.length <= 1) {
+        return (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-gray-700 bg-gray-50 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span>{currentSite.name} Admin</span>
+            </div>
+        );
+    }
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}

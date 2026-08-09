@@ -8,7 +8,7 @@ export interface Site {
   usePrefix?: boolean; // Default true: whether to use `${siteId}_` prefixes for collections
 }
 
-export const SITES: Site[] = [
+export const RAW_SITES: Site[] = [
   {
     id: 'nspc',
     name: 'NSPC',
@@ -79,6 +79,12 @@ export const SITES: Site[] = [
     usePrefix: false
   }
 ];
+
+// If NEXT_PUBLIC_SINGLE_TENANT_ID is set at build time, isolate configuration exclusively to that tenant
+const singleTenantId = process.env.NEXT_PUBLIC_SINGLE_TENANT_ID;
+export const SITES: Site[] = singleTenantId
+  ? RAW_SITES.filter(site => site.id === singleTenantId)
+  : RAW_SITES;
 
 // Runtime cache of dynamically registered sites
 export let DYNAMIC_SITES: Site[] = [];
