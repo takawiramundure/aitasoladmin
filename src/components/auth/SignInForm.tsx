@@ -80,28 +80,12 @@ export default function SignInForm() {
 
     try {
       const continueUrl = window.location.origin + '/signin';
-      await sendPasswordResetEmail(auth, email, {
-        url: continueUrl
-      });
       
-      // Since reset password is run unauthenticated (from the signin screen),
-      // we log it to audit_logs in the centralized (default) database.
-      const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
-      const { db } = await import("@/firebaseConfig");
-      await addDoc(collection(db, 'audit_logs'), {
-        timestamp: serverTimestamp(),
-        userId: "anonymous",
-        userEmail: email,
-        action: "password_reset_request",
-        details: {
-          email: email,
-          requestedFrom: window.location.origin
-        },
-        realRole: "anonymous",
-        activeRole: "anonymous"
-      });
+      const { getFunctions, httpsCallable } = await import("firebase/functions");
+      const sendCustomReset = httpsCallable(getFunctions(), "sendCustomPasswordResetEmail");
+      await sendCustomReset({ email, continueUrl });
 
-      setMessage("A password reset email has been sent. Please check your inbox.");
+      setMessage("A password reset email has been sent via Resend. Please check your inbox.");
     } catch (err: any) {
       setError(err.message || "Failed to send reset email");
     } finally {
