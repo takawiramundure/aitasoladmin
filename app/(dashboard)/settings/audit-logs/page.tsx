@@ -36,6 +36,10 @@ export default function AuditLogsPage() {
   const [resendLoading, setResendLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
   const isSuperAdmin = profile?.role === "super_admin";
 
   useEffect(() => {
@@ -46,6 +50,8 @@ export default function AuditLogsPage() {
         fetchResendLogs();
       }
     }
+    // Reset page index on tab change
+    setCurrentPage(1);
   }, [isSuperAdmin, activeTab]);
 
   const fetchLogs = async () => {
@@ -56,7 +62,7 @@ export default function AuditLogsPage() {
       const logsQuery = query(
         collection(dbInstance, "audit_logs"),
         orderBy("timestamp", "desc"),
-        limit(100)
+        limit(200) // Increase limits to support client pagination of deeper rows
       );
       const querySnapshot = await getDocs(logsQuery);
       const fetchedLogs: AuditLog[] = [];
@@ -104,6 +110,17 @@ export default function AuditLogsPage() {
     );
   }
 
+  // Client-side pagination computations
+  const currentItems = activeTab === "system" ? logs : resendLogs;
+  const totalItems = currentItems.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  
+  // Adjust page boundary if size changed
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (validCurrentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedItems = currentItems.slice(startIndex, endIndex);
+
   return (
     <>
       <PageMeta
@@ -139,11 +156,36 @@ export default function AuditLogsPage() {
           </button>
         </div>
 
+        {/* Page Size & Pagination Summary Controls */}
+        <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 dark:bg-boxdark border border-stroke dark:border-strokedark rounded-sm">
+          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <span>Show</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="bg-transparent border border-stroke dark:border-strokedark rounded px-2 py-1 text-sm font-medium focus:outline-none focus:border-primary"
+            >
+              <option value={20}>20</option>
+              <option value={30}>30</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span>entries</span>
+          </div>
+
+          <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+            Showing {totalItems > 0 ? startIndex + 1 : 0} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+          </div>
+        </div>
+
         {activeTab === "system" ? (
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke py-4 px-7 dark:border-strokedark flex items-center justify-between">
               <h3 className="font-medium text-black dark:text-white">
-                Recent System Events (Max 100)
+                Recent System Events
               </h3>
               <button
                 onClick={fetchLogs}
@@ -170,7 +212,7 @@ export default function AuditLogsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stroke dark:divide-strokedark">
-                      {logs.map((log) => (
+                      {(paginatedItems as AuditLog[]).map((log) => (
                         <tr key={log.id} className="hover:bg-gray-50/50 dark:hover:bg-meta-4/5">
                           <td className="py-4 px-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                             {log.timestamp?.toDate ? log.timestamp.toDate().toLocaleString() : "Pending..."}
@@ -236,7 +278,7 @@ export default function AuditLogsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stroke dark:divide-strokedark">
-                      {resendLogs.map((item) => (
+                      {(paginatedItems as ResendEmailLog[]).map((item) => (
                         <tr key={item.id} className="hover:bg-gray-50/50 dark:hover:bg-meta-4/5">
                           <td className="py-4 px-4 whitespace-nowrap text-xs text-gray-500 dark:text-gray-400">
                             {new Date(item.created_at).toLocaleString()}
@@ -250,7 +292,7 @@ export default function AuditLogsPage() {
                             {item.subject}
                           </td>
                           <td className="py-4 px-4 whitespace-nowrap">
-                            <span className={`inline-flex rounded-full px-2 in-py-0.5 text-xs font-medium ${
+                            <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                               item.status === "sent" || item.status === "delivered" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" :
                               item.status === "bounced" || item.status === "failed" ? "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400" :
                               "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
@@ -268,6 +310,39 @@ export default function AuditLogsPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* Pagination Footer controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-end gap-2 p-4 bg-white dark:bg-boxdark border border-stroke dark:border-strokedark rounded-sm">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={validCurrentPage === 1}
+              className="px-3 py-1.5 text-sm font-semibold rounded border border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4/20 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Previous
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageIdx) => (
+              <button
+                key={pageIdx}
+                onClick={() => setCurrentPage(pageIdx)}
+                className={`px-3 py-1.5 text-sm font-semibold rounded border ${
+                  validCurrentPage === pageIdx
+                    ? "border-primary bg-primary text-white"
+                    : "border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4/20"
+                }`}
+              >
+                {pageIdx}
+              </button>
+            ))}
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={validCurrentPage === totalPages}
+              className="px-3 py-1.5 text-sm font-semibold rounded border border-stroke dark:border-strokedark hover:bg-gray-50 dark:hover:bg-meta-4/20 disabled:opacity-50 disabled:pointer-events-none"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>
