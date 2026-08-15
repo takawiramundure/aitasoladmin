@@ -132,8 +132,8 @@ export default function AuditLogsPage() {
                             {log.action}
                           </span>
                         </td>
-                        <td className="py-4 px-4 text-xs font-mono text-gray-600 dark:text-gray-400 max-w-xs truncate">
-                          {log.details ? JSON.stringify(log.details) : "—"}
+                        <td className="py-4 px-4 text-xs font-mono text-gray-600 dark:text-gray-400 break-all whitespace-pre-wrap max-w-md">
+                          {log.details ? JSON.stringify(log.details, null, 2) : "—"}
                         </td>
                       </tr>
                     ))}
