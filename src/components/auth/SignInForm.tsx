@@ -29,7 +29,17 @@ export default function SignInForm() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      // AuthProvider will detect the user change
+      
+      // If we signed in after returning from a password reset redirect, send back to the original subdomain
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const redirectOrigin = params.get('redirect_origin');
+        if (redirectOrigin) {
+          window.location.href = redirectOrigin;
+          return;
+        }
+      }
+
       router.push("/");
     } catch (err: any) {
       let friendlyMessage = "Failed to sign in. Please try again.";
@@ -80,8 +90,10 @@ export default function SignInForm() {
     setMessage("");
 
     try {
-      // Use Firebase's default handler domain but route back to the original subdomain on completion
-      const continueUrl = window.location.origin + '/signin';
+      // Use the project's default Firebaseapp domain (which is always authorized) for the continueUrl
+      // and append the dynamic subdomain so we can route the user back afterward.
+      const authorizedDomain = 'https://nspc-web.firebaseapp.com';
+      const continueUrl = `${authorizedDomain}/signin?redirect_origin=${encodeURIComponent(window.location.origin)}`;
       await sendPasswordResetEmail(auth, email, {
         url: continueUrl
       });
