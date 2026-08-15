@@ -153,9 +153,8 @@ export default function UserManagement() {
 
         if (isConfirmed) {
             try {
-                const auth = getAuth();
                 await sendPasswordResetEmail(auth, email, {
-                    url: window.location.origin + '/reset-password',
+                    url: window.location.origin + '/signin',
                 });
                 await dialogAlert({
                     title: "Email Sent",
@@ -239,7 +238,7 @@ export default function UserManagement() {
                 const userCredential = await createUserWithEmailAndPassword(secondaryAuth, newUserEmail, randomPassword);
                 const newUid = userCredential.user.uid;
                 await sendPasswordResetEmail(secondaryAuth, newUserEmail, {
-                    url: window.location.origin + '/reset-password',
+                    url: window.location.origin + '/signin',
                 });
                 await signOut(secondaryAuth);
                 await deleteApp(secondaryApp);

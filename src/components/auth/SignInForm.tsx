@@ -80,8 +80,10 @@ export default function SignInForm() {
     setMessage("");
 
     try {
+      // Use Firebase's default handler domain but route back to the original subdomain on completion
+      const continueUrl = window.location.origin + '/signin';
       await sendPasswordResetEmail(auth, email, {
-        url: window.location.origin + '/reset-password',
+        url: continueUrl
       });
       setMessage("A password reset email has been sent. Please check your inbox.");
     } catch (err: any) {
