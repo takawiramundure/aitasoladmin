@@ -29,25 +29,16 @@ export default function AuthorizedDomainsPage() {
 
   const fetchDomains = async () => {
     setLoading(true);
+    setError("");
     try {
-      const dbInstance = getDb("nspc");
-      const docRef = doc(dbInstance, "settings", "authorized_domains");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists() && docSnap.data().domains) {
-        setDomains(docSnap.data().domains);
-      } else {
-        // Default fallbacks
-        const defaults = [
-          "localhost",
-          "niagarasuicidepreventioncoalition.ca",
-          "nspc-web.firebaseapp.com",
-          "nspc-web.web.app",
-        ];
-        setDomains(defaults);
-      }
+      const { getFunctions, httpsCallable } = await import("firebase/functions");
+      const getAuthorizedDomains = httpsCallable(getFunctions(), "getAuthorizedDomains");
+      const res = await getAuthorizedDomains();
+      const fetchedDomains = (res.data as any).domains || [];
+      setDomains(fetchedDomains);
     } catch (err: any) {
       console.error("Error fetching authorized domains:", err);
-      setError("Failed to load authorized domains.");
+      setError(err.message || "Failed to load authorized domains.");
     } finally {
       setLoading(false);
     }
@@ -59,7 +50,6 @@ export default function AuthorizedDomainsPage() {
 
     const cleanedDomain = newDomain.trim().toLowerCase();
     
-    // Simple validation (must not contain spaces, protocol, etc.)
     if (cleanedDomain.includes(" ") || cleanedDomain.startsWith("http://") || cleanedDomain.startsWith("https://")) {
       setError("Please enter a raw domain name (e.g. bk.bweic.org) without http:// or https://");
       return;
@@ -75,19 +65,19 @@ export default function AuthorizedDomainsPage() {
     setSuccess("");
 
     try {
-      const updatedDomains = [...domains, cleanedDomain];
-      const dbInstance = getDb("nspc");
-      await setDoc(doc(dbInstance, "settings", "authorized_domains"), {
-        domains: updatedDomains,
-        lastUpdated: new Date().toISOString(),
-        updatedBy: profile?.email || "system"
-      });
-
-      setDomains(updatedDomains);
-      setNewDomain("");
-      setSuccess(`Added ${cleanedDomain} successfully!`);
+      const { getFunctions, httpsCallable } = await import("firebase/functions");
+      const addAuthorizedDomain = httpsCallable(getFunctions(), "addAuthorizedDomain");
+      const res = await addAuthorizedDomain({ domain: cleanedDomain });
+      
+      if ((res.data as any).success) {
+        setDomains((res.data as any).domains || []);
+        setNewDomain("");
+        setSuccess(`Added ${cleanedDomain} successfully!`);
+      } else {
+        throw new Error("Failed to add domain.");
+      }
     } catch (err: any) {
-      setError("Failed to save changes.");
+      setError(err.message || "Failed to save changes.");
     } finally {
       setSaving(false);
     }
@@ -108,18 +98,18 @@ export default function AuthorizedDomainsPage() {
     setSuccess("");
 
     try {
-      const updatedDomains = domains.filter((d) => d !== domainToDelete);
-      const dbInstance = getDb("nspc");
-      await setDoc(doc(dbInstance, "settings", "authorized_domains"), {
-        domains: updatedDomains,
-        lastUpdated: new Date().toISOString(),
-        updatedBy: profile?.email || "system"
-      });
+      const { getFunctions, httpsCallable } = await import("firebase/functions");
+      const removeAuthorizedDomain = httpsCallable(getFunctions(), "removeAuthorizedDomain");
+      const res = await removeAuthorizedDomain({ domain: domainToDelete });
 
-      setDomains(updatedDomains);
-      setSuccess(`Removed ${domainToDelete} successfully!`);
+      if ((res.data as any).success) {
+        setDomains((res.data as any).domains || []);
+        setSuccess(`Removed ${domainToDelete} successfully!`);
+      } else {
+        throw new Error("Failed to delete domain.");
+      }
     } catch (err: any) {
-      setError("Failed to delete domain.");
+      setError(err.message || "Failed to delete domain.");
     } finally {
       setSaving(false);
     }
@@ -149,19 +139,11 @@ export default function AuthorizedDomainsPage() {
         {/* Instructions Alert */}
         <div className="rounded-sm border border-stroke bg-blue-50/50 p-6 shadow-default dark:border-strokedark dark:bg-boxdark/50">
           <h4 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-2">
-            ⚠️ Firebase Authentication Domain Whitelisting
+            🌐 Live Firebase Auth Domain Whitelisting
           </h4>
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            Firebase Authentication requires every domain that initiates user authentication or password resets to be listed in the **Authorized Domains** configuration of your Firebase Console.
+            This manager fetches and updates authorized domains directly from your Firebase project config in real-time. Adding or deleting a domain here updates your Firebase Authentication settings instantly.
           </p>
-          <div className="mt-4 p-4 bg-white dark:bg-boxdark border border-stroke rounded-lg">
-            <p className="text-sm font-semibold text-black dark:text-white mb-2">How to sync changes to Firebase:</p>
-            <ol className="list-decimal pl-5 text-xs text-gray-600 dark:text-gray-400 space-y-2">
-              <li>Copy the new domain name below.</li>
-              <li>Go to your **Firebase Console** &gt; **Authentication** &gt; **Settings** &gt; **Authorized domains**.</li>
-              <li>Click **Add Domain**, paste it there, and save!</li>
-            </ol>
-          </div>
         </div>
 
         {error && <Alert variant="danger" title="Error" message={error} />}
