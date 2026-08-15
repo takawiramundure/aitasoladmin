@@ -1,5 +1,5 @@
-import { getDb, auth } from "@/firebaseConfig";
-import { getSiteById } from "@/config/sites";
+import { db, getDb, auth } from "@/firebaseConfig";
+import { getSiteById, SITES } from "@/config/sites";
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, addDoc, deleteDoc, query, where, orderBy } from "firebase/firestore";
 import { SiteSettings } from "@/types/siteSettings";
 
@@ -284,10 +284,47 @@ export const FirestoreService = {
     // User Management
     getUsers: async (): Promise<any[]> => {
         try {
-            const dbInstance = getDb('nspc'); // Use any site to get the shared project app, or getDb with no id if we modify it
-            const usersRef = collection(dbInstance, "users");
-            const snapshot = await getDocs(usersRef);
-            return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const userMap = new Map<string, any>();
+
+            // Query across default database AND all configured tenant databases
+            const databasesToQuery = [
+                { id: '(default)', instance: db },
+                ...SITES.map(site => ({ id: site.id, instance: getDb(site.id) }))
+            ];
+
+            await Promise.all(
+                databasesToQuery.map(async (dbObj) => {
+                    try {
+                        const usersRef = collection(dbObj.instance, "users");
+                        const snapshot = await getDocs(usersRef);
+                        snapshot.docs.forEach((d) => {
+                            const data = d.data();
+                            const existing = userMap.get(d.id);
+                            if (!existing) {
+                                userMap.set(d.id, { id: d.id, ...data });
+                            } else {
+                                // Merge allowedSites if defined across tenant databases
+                                const combinedSites = Array.from(
+                                    new Set([
+                                        ...(existing.allowedSites || []),
+                                        ...(data.allowedSites || []),
+                                        ...(dbObj.id !== '(default)' ? [dbObj.id] : [])
+                                    ])
+                                );
+                                userMap.set(d.id, {
+                                    ...existing,
+                                    ...data,
+                                    allowedSites: combinedSites
+                                });
+                            }
+                        });
+                    } catch (err) {
+                        console.warn(`Could not fetch users from database '${dbObj.id}':`, err);
+                    }
+                })
+            );
+
+            return Array.from(userMap.values());
         } catch (error) {
             console.error("Error fetching users:", error);
             return [];
@@ -296,9 +333,21 @@ export const FirestoreService = {
 
     updateUserRole: async (userId: string, role: 'super_admin' | 'editor') => {
         try {
-            const dbInstance = getDb('nspc'); // Users are global to the project
-            const userRef = doc(dbInstance, "users", userId);
-            await setDoc(userRef, { role }, { merge: true });
+            // Update user role across all tenant databases
+            await Promise.all(
+                SITES.map(async (site) => {
+                    try {
+                        const dbInstance = getDb(site.id);
+                        const userRef = doc(dbInstance, "users", userId);
+                        const docSnap = await getDoc(userRef);
+                        if (docSnap.exists()) {
+                            await setDoc(userRef, { role }, { merge: true });
+                        }
+                    } catch (err) {
+                        console.warn(`Could not update user role in site database '${site.id}':`, err);
+                    }
+                })
+            );
         } catch (error) {
             console.error("Error updating user role:", error);
             throw error;

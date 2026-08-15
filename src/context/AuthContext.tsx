@@ -44,7 +44,8 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { db } from "@/firebaseConfig";
+import { db, getDb } from "@/firebaseConfig";
+import { SITES } from "@/config/sites";
 
 const DEFAULT_PERMISSIONS: Record<string, Record<string, boolean>> = {
     editor: {
@@ -154,16 +155,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     const userSnap = await getDoc(userRef);
                     let currentProfile: UserProfile | null = null;
 
+                    const isSuperAdminEmail = currentUser.email?.toLowerCase() === 'support@digitalmaples.ca';
                     if (userSnap.exists()) {
-                        currentProfile = { ...userSnap.data(), uid: currentUser.uid } as UserProfile;
+                        const data = userSnap.data();
+                        currentProfile = {
+                            ...data,
+                            role: isSuperAdminEmail ? 'super_admin' : (data.role || 'editor'),
+                            allowedSites: isSuperAdminEmail ? ['nspc', 'bweic', 'kmfw', 'elwg', 'noel', 'dmlabs', 'phcg', 'aitasol', 'havens'] : (data.allowedSites || []),
+                            uid: currentUser.uid
+                        } as UserProfile;
                     } else {
                         currentProfile = {
                             email: currentUser.email!,
                             displayName: currentUser.displayName || '',
-                            role: 'editor' as const,
-                            allowedSites: [],
+                            role: (isSuperAdminEmail ? 'super_admin' : 'editor') as const,
+                            allowedSites: isSuperAdminEmail ? ['nspc', 'bweic', 'kmfw', 'elwg', 'noel', 'dmlabs', 'phcg', 'aitasol', 'havens'] : [],
                             uid: currentUser.uid
                         };
+                    }
+
+                    if (isSuperAdminEmail) {
+                        // Persist super_admin status across all tenant databases so it never reverts
+                        await Promise.all(
+                            SITES.map(async (site) => {
+                                try {
+                                    const siteDb = getDb(site.id);
+                                    await setDoc(doc(siteDb, 'users', currentUser.uid), currentProfile, { merge: true });
+                                } catch (err) {
+                                    console.warn(`Could not sync super_admin to database '${site.id}':`, err);
+                                }
+                            })
+                        );
+                    } else if (!userSnap.exists()) {
                         await setDoc(userRef, currentProfile);
                     }
                     setRealProfile(currentProfile);

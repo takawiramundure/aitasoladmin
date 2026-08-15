@@ -9,7 +9,7 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import { useAuth } from "@/context/AuthContext";
 import { doc, setDoc } from "firebase/firestore";
-import { db, firebaseConfig } from "@/firebaseConfig";
+import { db, getDb, firebaseConfig } from "@/firebaseConfig";
 import { initializeApp, deleteApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "firebase/auth";
 import { EyeIcon, PencilIcon, XIcon, AlertTriangleIcon, KeyRoundIcon } from "lucide-react";
@@ -208,17 +208,27 @@ export default function UserManagement() {
         setCreating(true);
         try {
             if (editUser) {
-                // UPDATE existing
-                await setDoc(doc(db, 'users', editUser.id), {
+                // UPDATE existing across all tenant databases
+                const userData = {
                     displayName: newUserDisplayName,
                     email: newUserEmail,
                     phoneNumber: newUserPhone,
                     role: newUserRole,
                     allowedSites: selectedSites
-                }, { merge: true });
+                };
+                await Promise.all(
+                    SITES.map(async (site) => {
+                        try {
+                            const siteDb = getDb(site.id);
+                            await setDoc(doc(siteDb, 'users', editUser.id), userData, { merge: true });
+                        } catch (err) {
+                            console.warn(`Could not sync updated user to site database '${site.id}':`, err);
+                        }
+                    })
+                );
                 await dialogAlert({
                     title: "Success",
-                    message: "User updated successfully",
+                    message: "User updated successfully across all tenant databases",
                     variant: "success"
                 });
             } else {
@@ -234,7 +244,7 @@ export default function UserManagement() {
                 await signOut(secondaryAuth);
                 await deleteApp(secondaryApp);
 
-                await setDoc(doc(db, 'users', newUid), {
+                const newUserData = {
                     displayName: newUserDisplayName,
                     email: newUserEmail,
                     phoneNumber: newUserPhone,
@@ -242,7 +252,17 @@ export default function UserManagement() {
                     allowedSites: selectedSites,
                     createdAt: new Date().toISOString(),
                     pending: false
-                });
+                };
+                await Promise.all(
+                    SITES.map(async (site) => {
+                        try {
+                            const siteDb = getDb(site.id);
+                            await setDoc(doc(siteDb, 'users', newUid), newUserData);
+                        } catch (err) {
+                            console.warn(`Could not sync new user to site database '${site.id}':`, err);
+                        }
+                    })
+                );
                 await dialogAlert({
                     title: "User Created",
                     message: `User created successfully! A password reset email has been sent to ${newUserEmail} so they can set their own password.`,
