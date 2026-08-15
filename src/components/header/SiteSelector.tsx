@@ -29,6 +29,8 @@ export default function SiteSelector() {
             </div>
         );
     }
+
+    return (
         <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => setIsOpen(!isOpen)}
