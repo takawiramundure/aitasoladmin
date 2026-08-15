@@ -206,6 +206,10 @@ const AppSidebar: React.FC = () => {
         icon: <BoxCubeIcon />,
         name: "Tenant Spawner",
         path: "/settings/spawner",
+      }, {
+        icon: <PlugInIcon />,
+        name: "Authorized Domains",
+        path: "/settings/authorized-domains",
       });
     }
     return items;
