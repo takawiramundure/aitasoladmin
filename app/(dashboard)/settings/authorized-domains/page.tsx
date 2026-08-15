@@ -118,7 +118,7 @@ export default function AuthorizedDomainsPage() {
   if (!isSuperAdmin) {
     return (
       <div className="p-6">
-        <Alert variant="danger" title="Access Denied" message="Only Super Admins can manage Authorized Domains configuration." />
+        <Alert variant="error" title="Access Denied" message="Only Super Admins can manage Authorized Domains configuration." />
       </div>
     );
   }
@@ -146,7 +146,7 @@ export default function AuthorizedDomainsPage() {
           </p>
         </div>
 
-        {error && <Alert variant="danger" title="Error" message={error} />}
+        {error && <Alert variant="error" title="Error" message={error} />}
         {success && <Alert variant="success" title="Success" message={success} />}
 
         {/* Add New Domain Form */}
