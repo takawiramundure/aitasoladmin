@@ -157,10 +157,10 @@ export default function UserManagement() {
                     url: window.location.origin + '/signin',
                 });
                 
-                // Log action to audit logs collection
-                const { getFirestore, collection, addDoc, serverTimestamp } = await import("firebase/firestore");
-                const dbInstance = getFirestore();
-                await addDoc(collection(dbInstance, 'audit_logs'), {
+                // Log action to audit logs collection in the centralized (default) database
+                const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+                const { db } = await import("@/firebaseConfig");
+                await addDoc(collection(db, 'audit_logs'), {
                     timestamp: serverTimestamp(),
                     userId: auth.currentUser?.uid || "unknown",
                     userEmail: auth.currentUser?.email || "unknown",

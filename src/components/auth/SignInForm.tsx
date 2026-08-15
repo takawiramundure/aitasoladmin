@@ -85,11 +85,10 @@ export default function SignInForm() {
       });
       
       // Since reset password is run unauthenticated (from the signin screen),
-      // we log it to audit_logs dynamically via a Cloud Function or directly to a server action.
-      // We will create a Firestore document in 'audit_logs' with anonymous initiator metadata.
-      const { getFirestore, collection, addDoc, serverTimestamp } = await import("firebase/firestore");
-      const dbInstance = getFirestore();
-      await addDoc(collection(dbInstance, 'audit_logs'), {
+      // we log it to audit_logs in the centralized (default) database.
+      const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+      const { db } = await import("@/firebaseConfig");
+      await addDoc(collection(db, 'audit_logs'), {
         timestamp: serverTimestamp(),
         userId: "anonymous",
         userEmail: email,

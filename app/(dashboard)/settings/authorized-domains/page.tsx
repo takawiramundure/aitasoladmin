@@ -75,9 +75,9 @@ export default function AuthorizedDomainsPage() {
         setSuccess(`Added ${cleanedDomain} successfully!`);
         
         // Log action
-        const { getFirestore, collection, addDoc, serverTimestamp } = await import("firebase/firestore");
-        const dbInstance = getFirestore();
-        await addDoc(collection(dbInstance, 'audit_logs'), {
+        const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+        const { db } = await import("@/firebaseConfig");
+        await addDoc(collection(db, 'audit_logs'), {
           timestamp: serverTimestamp(),
           userId: profile?.uid || "unknown",
           userEmail: profile?.email || "unknown",
@@ -122,9 +122,9 @@ export default function AuthorizedDomainsPage() {
         setSuccess(`Removed ${domainToDelete} successfully!`);
 
         // Log action
-        const { getFirestore, collection, addDoc, serverTimestamp } = await import("firebase/firestore");
-        const dbInstance = getFirestore();
-        await addDoc(collection(dbInstance, 'audit_logs'), {
+        const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+        const { db } = await import("@/firebaseConfig");
+        await addDoc(collection(db, 'audit_logs'), {
           timestamp: serverTimestamp(),
           userId: profile?.uid || "unknown",
           userEmail: profile?.email || "unknown",
