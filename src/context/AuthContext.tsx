@@ -175,6 +175,31 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     }
 
                     if (isSuperAdminEmail) {
+                        // For super admin, we should preserve their setup MFA settings (phoneNumber and mfaSetupComplete)
+                        // If they have it set in the current database, use it. If not, try to read it from other databases to sync it.
+                        let mfaPhone = currentProfile.phoneNumber;
+                        let mfaDone = currentProfile.mfaSetupComplete;
+                        
+                        if (!mfaPhone || !mfaDone) {
+                            for (const site of SITES) {
+                                try {
+                                    const siteDb = getDb(site.id);
+                                    const snap = await getDoc(doc(siteDb, 'users', currentUser.uid));
+                                    if (snap.exists()) {
+                                        const d = snap.data();
+                                        if (d.phoneNumber && d.mfaSetupComplete) {
+                                            mfaPhone = d.phoneNumber;
+                                            mfaDone = true;
+                                            break;
+                                        }
+                                    }
+                                } catch (e) {}
+                            }
+                        }
+
+                        if (mfaPhone) currentProfile.phoneNumber = mfaPhone;
+                        if (mfaDone) currentProfile.mfaSetupComplete = mfaDone;
+
                         // Persist super_admin status across all tenant databases so it never reverts
                         await Promise.all(
                             SITES.map(async (site) => {

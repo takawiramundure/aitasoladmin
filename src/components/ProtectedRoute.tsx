@@ -18,7 +18,7 @@ export default function ProtectedRoute({ allowedRoles, requiredPermission, child
         if (!loading) {
             if (!user) {
                 router.replace('/signin');
-            } else if (!mfaVerified && profile?.role !== 'super_admin') {
+            } else if (!mfaVerified) {
                 if (profile && profile.mfaSetupComplete) {
                     router.replace('/mfa-verify');
                 } else if (profile) {
@@ -36,7 +36,7 @@ export default function ProtectedRoute({ allowedRoles, requiredPermission, child
 
     if (!user) return null;
 
-    if (!mfaVerified && profile?.role !== 'super_admin') return null;
+    if (!mfaVerified) return null;
 
     if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
         return null;
