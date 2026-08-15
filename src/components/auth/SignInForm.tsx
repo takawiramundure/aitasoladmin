@@ -79,12 +79,29 @@ export default function SignInForm() {
     setMessage("");
 
     try {
-      // Direct redirect URL back to the custom tenant subdomain (e.g. bk.bweic.org)
-      // Note: This subdomain must be added to Firebase Auth Authorized Domains first.
       const continueUrl = window.location.origin + '/signin';
       await sendPasswordResetEmail(auth, email, {
         url: continueUrl
       });
+      
+      // Since reset password is run unauthenticated (from the signin screen),
+      // we log it to audit_logs dynamically via a Cloud Function or directly to a server action.
+      // We will create a Firestore document in 'audit_logs' with anonymous initiator metadata.
+      const { getFirestore, collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+      const dbInstance = getFirestore();
+      await addDoc(collection(dbInstance, 'audit_logs'), {
+        timestamp: serverTimestamp(),
+        userId: "anonymous",
+        userEmail: email,
+        action: "password_reset_request",
+        details: {
+          email: email,
+          requestedFrom: window.location.origin
+        },
+        realRole: "anonymous",
+        activeRole: "anonymous"
+      });
+
       setMessage("A password reset email has been sent. Please check your inbox.");
     } catch (err: any) {
       setError(err.message || "Failed to send reset email");

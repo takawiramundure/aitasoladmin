@@ -210,6 +210,10 @@ const AppSidebar: React.FC = () => {
         icon: <PlugInIcon />,
         name: "Authorized Domains",
         path: "/settings/authorized-domains",
+      }, {
+        icon: <HorizontaLDots />,
+        name: "Audit Logs",
+        path: "/settings/audit-logs",
       });
     }
     return items;

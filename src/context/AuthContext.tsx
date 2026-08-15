@@ -27,6 +27,7 @@ interface AuthContextType {
     hasPermission: (permission: string) => boolean;
     permissionsConfig: Record<string, Record<string, boolean>>;
     savePermissionsConfig: (config: Record<string, Record<string, boolean>>) => Promise<void>;
+    logAction: (action: string, details: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -40,7 +41,8 @@ const AuthContext = createContext<AuthContextType>({
     stopImpersonation: () => { },
     hasPermission: () => false,
     permissionsConfig: {},
-    savePermissionsConfig: async () => {}
+    savePermissionsConfig: async () => {},
+    logAction: async () => {}
 });
 
 import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
@@ -299,7 +301,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         stopImpersonation,
         hasPermission,
         permissionsConfig,
-        savePermissionsConfig
+        savePermissionsConfig,
+        logAction
     }), [user, impersonatedProfile, realProfile, loading, mfaVerified, permissionsConfig]);
 
     return (

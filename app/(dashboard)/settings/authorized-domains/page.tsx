@@ -73,6 +73,21 @@ export default function AuthorizedDomainsPage() {
         setDomains((res.data as any).domains || []);
         setNewDomain("");
         setSuccess(`Added ${cleanedDomain} successfully!`);
+        
+        // Log action
+        const { getFirestore, collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+        const dbInstance = getFirestore();
+        await addDoc(collection(dbInstance, 'audit_logs'), {
+          timestamp: serverTimestamp(),
+          userId: profile?.uid || "unknown",
+          userEmail: profile?.email || "unknown",
+          action: "authorized_domain_add",
+          details: {
+            domain: cleanedDomain
+          },
+          realRole: profile?.role || "unknown",
+          activeRole: profile?.role || "unknown"
+        });
       } else {
         throw new Error("Failed to add domain.");
       }
@@ -105,6 +120,21 @@ export default function AuthorizedDomainsPage() {
       if ((res.data as any).success) {
         setDomains((res.data as any).domains || []);
         setSuccess(`Removed ${domainToDelete} successfully!`);
+
+        // Log action
+        const { getFirestore, collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+        const dbInstance = getFirestore();
+        await addDoc(collection(dbInstance, 'audit_logs'), {
+          timestamp: serverTimestamp(),
+          userId: profile?.uid || "unknown",
+          userEmail: profile?.email || "unknown",
+          action: "authorized_domain_remove",
+          details: {
+            domain: domainToDelete
+          },
+          realRole: profile?.role || "unknown",
+          activeRole: profile?.role || "unknown"
+        });
       } else {
         throw new Error("Failed to delete domain.");
       }

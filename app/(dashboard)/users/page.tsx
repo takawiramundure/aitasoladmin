@@ -156,6 +156,23 @@ export default function UserManagement() {
                 await sendPasswordResetEmail(auth, email, {
                     url: window.location.origin + '/signin',
                 });
+                
+                // Log action to audit logs collection
+                const { getFirestore, collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+                const dbInstance = getFirestore();
+                await addDoc(collection(dbInstance, 'audit_logs'), {
+                    timestamp: serverTimestamp(),
+                    userId: auth.currentUser?.uid || "unknown",
+                    userEmail: auth.currentUser?.email || "unknown",
+                    action: "admin_password_reset_trigger",
+                    details: {
+                        targetUserEmail: email,
+                        triggeredFrom: "User Manager"
+                    },
+                    realRole: "admin",
+                    activeRole: "admin"
+                });
+
                 await dialogAlert({
                     title: "Email Sent",
                     message: `A password reset email has been sent to ${email}.`,
