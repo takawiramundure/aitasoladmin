@@ -231,6 +231,7 @@ export default function AuditLogsPage() {
                         <th className="py-3 px-4">Sent At</th>
                         <th className="py-3 px-4">Recipient</th>
                         <th className="py-3 px-4">Subject</th>
+                        <th className="py-3 px-4">Status</th>
                         <th className="py-3 px-4">Message ID</th>
                       </tr>
                     </thead>
@@ -247,6 +248,15 @@ export default function AuditLogsPage() {
                           </td>
                           <td className="py-4 px-4 whitespace-nowrap text-xs">
                             {item.subject}
+                          </td>
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <span className={`inline-flex rounded-full px-2 in-py-0.5 text-xs font-medium ${
+                              item.status === "sent" || item.status === "delivered" ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400" :
+                              item.status === "bounced" || item.status === "failed" ? "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400" :
+                              "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
+                            }`}>
+                              {item.status || "sent"}
+                            </span>
                           </td>
                           <td className="py-4 px-4 text-xs font-mono text-gray-600 dark:text-gray-400 break-all">
                             {item.id}
