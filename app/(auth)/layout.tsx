@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     if (!loading && user) {
-      if (pathname === '/reset-password') return;
+      if (pathname === '/reset-password' || pathname === '/change-password') return;
       if (!mfaVerified && (pathname === '/mfa-enroll' || pathname === '/mfa-verify')) return;
       
       if (pathname !== '/' && !pathname.startsWith('/cms')) {
@@ -23,7 +23,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   if (loading) return null;
   
   if (user) {
-     if (pathname === '/reset-password') {
+     if (pathname === '/reset-password' || pathname === '/change-password') {
         // Allowed
      } else if (!mfaVerified && (pathname === '/mfa-enroll' || pathname === '/mfa-verify')) {
         // Allowed

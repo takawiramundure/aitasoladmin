@@ -24,6 +24,23 @@ export default function ProtectedRoute({ allowedRoles, requiredPermission, child
                 } else if (profile) {
                     router.replace('/mfa-enroll');
                 }
+            } else if (profile && profile.tempPasswordActive) {
+                let expired = false;
+                if (profile.tempPasswordExpiresAt) {
+                    const expiryMs = typeof profile.tempPasswordExpiresAt.toMillis === 'function'
+                        ? profile.tempPasswordExpiresAt.toMillis()
+                        : new Date(profile.tempPasswordExpiresAt).getTime();
+                    expired = Date.now() > expiryMs;
+                }
+                if (expired) {
+                    const { signOut } = require("firebase/auth");
+                    const { auth } = require("@/firebaseConfig");
+                    signOut(auth).then(() => {
+                        router.replace('/signin?expired=true');
+                    });
+                } else {
+                    router.replace('/change-password');
+                }
             } else if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
                 router.replace('/unauthorized');
             } else if (requiredPermission && !hasPermission(requiredPermission)) {
@@ -37,6 +54,10 @@ export default function ProtectedRoute({ allowedRoles, requiredPermission, child
     if (!user) return null;
 
     if (!mfaVerified) return null;
+
+    if (profile && profile.tempPasswordActive) {
+        return null;
+    }
 
     if (allowedRoles && profile && !allowedRoles.includes(profile.role)) {
         return null;

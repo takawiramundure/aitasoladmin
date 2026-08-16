@@ -12,9 +12,10 @@ import { doc, setDoc } from "firebase/firestore";
 import { db, getDb, firebaseConfig } from "@/firebaseConfig";
 import { initializeApp, deleteApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "firebase/auth";
-import { EyeIcon, PencilIcon, XIcon, AlertTriangleIcon, KeyRoundIcon } from "lucide-react";
+import { EyeIcon, PencilIcon, XIcon, AlertTriangleIcon, KeyRoundIcon, Lock } from "lucide-react";
 import { SITES } from "@/config/sites";
 import { useDialog } from "@/context/DialogContext";
+import { getFunctions, httpsCallable } from "firebase/functions";
 
 interface User {
     id: string;
@@ -185,6 +186,40 @@ export default function UserManagement() {
                     message: "Failed to send reset email: " + error.message,
                     variant: "danger"
                 });
+            }
+        }
+    };
+
+    const handleAssignTempPassword = async (userId: string, email: string) => {
+        const tempPassword = generatePassword();
+        const isConfirmed = await confirm({
+            title: "Assign Temporary Password",
+            message: `Are you sure you want to generate a 12-hour temporary password for ${email}?`,
+            variant: "warning",
+            confirmLabel: "Generate Password"
+        });
+
+        if (isConfirmed) {
+            setLoading(true);
+            try {
+                const functions = getFunctions();
+                const setTempPasswordFn = httpsCallable(functions, "setTemporaryPassword");
+                await setTempPasswordFn({ targetUid: userId, password: tempPassword });
+
+                await dialogAlert({
+                    title: "Temporary Password Assigned",
+                    message: `Temporary password set successfully! Please copy and send this temporary password securely to the user: ${tempPassword} (expires in 12 hours).`,
+                    variant: "success"
+                });
+            } catch (error: any) {
+                console.error("Error setting temporary password:", error);
+                await dialogAlert({
+                    title: "Failed to Set Password",
+                    message: error.message || "Failed to assign temporary password.",
+                    variant: "danger"
+                });
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -488,6 +523,15 @@ export default function UserManagement() {
                                                     className="p-1 hover:text-yellow-600 transition-colors"
                                                 >
                                                     <KeyRoundIcon size={18} />
+                                                </button>
+                                            )}
+                                            {hasPermission('manage_users') && (
+                                                <button
+                                                    title="Assign Temporary Password"
+                                                    onClick={() => handleAssignTempPassword(user.id, user.email)}
+                                                    className="p-1 hover:text-teal-600 transition-colors"
+                                                >
+                                                    <Lock size={18} />
                                                 </button>
                                             )}
                                             {hasPermission('manage_users') && (

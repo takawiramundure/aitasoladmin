@@ -10,7 +10,11 @@ import Button from "../ui/button/Button";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 
-export default function SignInForm() {
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import Alert from "@/components/ui/alert/Alert";
+
+function SignInFormContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const [email, setEmail] = useState("");
@@ -20,6 +24,13 @@ export default function SignInForm() {
   const [loading, setLoading] = useState(false);
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("expired") === "true") {
+      setError("Your temporary password has expired (valid for 12 hours). Please request a password reset link below.");
+    }
+  }, [searchParams]);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,8 +131,8 @@ export default function SignInForm() {
             {isForgotPassword ? (
               <form onSubmit={handleResetPassword}>
                 <div className="space-y-6">
-                  {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
-                  {message && <div className="text-green-600 text-sm mb-4 p-3 bg-green-50 rounded-lg border border-green-200">{message}</div>}
+                  {error && <Alert variant="error" title="Reset Failed" message={error} />}
+                  {message && <Alert variant="success" title="Link Dispatched" message={message} />}
                   <div>
                     <Label>
                       Email <span className="text-error-500">*</span>{" "}
@@ -153,7 +164,7 @@ export default function SignInForm() {
             ) : (
               <form onSubmit={handleSignIn}>
                 <div className="space-y-6">
-                  {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
+                  {error && <Alert variant="error" title="Login Failed" message={error} />}
                   <div>
                     <Label>
                       Email <span className="text-error-500">*</span>{" "}
@@ -214,5 +225,15 @@ export default function SignInForm() {
         </div>
       </div>
     </div>
+  );
+}
+
+import { Suspense } from "react";
+
+export default function SignInForm() {
+  return (
+    <Suspense fallback={<div>Loading Sign In Form...</div>}>
+      <SignInFormContent />
+    </Suspense>
   );
 }

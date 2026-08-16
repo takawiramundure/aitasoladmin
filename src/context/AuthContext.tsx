@@ -13,6 +13,8 @@ export interface UserProfile {
     uid: string;
     phoneNumber?: string;
     mfaSetupComplete?: boolean;
+    tempPasswordActive?: boolean;
+    tempPasswordExpiresAt?: any;
 }
 
 interface AuthContextType {
