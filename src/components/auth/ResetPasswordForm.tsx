@@ -72,40 +72,36 @@ function ResetPasswordFormContent() {
   };
 
   return (
-    <div className="flex flex-col flex-1">
-      <div className="w-full max-w-md pt-10 mx-auto"></div>
-      <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
+    <div className="flex flex-col flex-1 min-h-screen items-center justify-center p-4">
+      <div className="w-full max-w-md bg-white dark:bg-boxdark rounded-2xl border border-stroke dark:border-strokedark shadow-default p-8 space-y-6 backdrop-blur-md bg-opacity-95 dark:bg-opacity-95">
         <div>
-          <div className="mb-5 sm:mb-8">
-            <h1 className="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-              Reset Your Password
+          <div className="mb-6 text-center">
+            <h1 className="mb-2 font-bold text-title-md text-gray-900 dark:text-white bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Set New Password
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {verifying 
                 ? "Verifying reset code..." 
                 : validCode 
-                  ? `Set a new password for ${email}` 
+                  ? `Choose a secure password for ${email}` 
                   : "Unable to reset password"}
             </p>
           </div>
-          <div>
-            <div className="relative py-3 sm:py-5">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200 dark:border-gray-800"></div>
-              </div>
-            </div>
 
+          <div>
             {success ? (
               <Alert variant="success" title="Success" message="Your password has been reset successfully. Redirecting to sign in..." />
             ) : verifying ? (
-              <div className="text-sm text-gray-500 dark:text-gray-400">Please wait...</div>
+              <div className="text-center py-4 text-sm text-gray-500 dark:text-gray-400">
+                <span className="inline-block animate-pulse">Verifying reset code request...</span>
+              </div>
             ) : validCode ? (
               <form onSubmit={handleResetPassword}>
                 <div className="space-y-6">
-                  {error && <Alert variant="error" title="Error" message={error} />}
+                  {error && <Alert variant="error" title="Reset Failed" message={error} />}
                   
-                  <div>
-                    <Label>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
                       New Password <span className="text-error-500">*</span>
                     </Label>
                     <div className="relative">
@@ -114,6 +110,7 @@ function ResetPasswordFormContent() {
                         placeholder="Enter your new password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        className="h-11 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                       <span
                         onClick={() => setShowPassword(!showPassword)}
@@ -128,17 +125,17 @@ function ResetPasswordFormContent() {
                     </div>
                   </div>
                   
-                  <div>
-                    <Button className="w-full" size="sm" disabled={loading} type="submit">
-                      {loading ? "Resetting..." : "Reset Password"}
+                  <div className="pt-2">
+                    <Button className="w-full h-11 text-sm font-semibold shadow-md hover:shadow-lg transition-all" disabled={loading} type="submit">
+                      {loading ? "Resetting Password..." : "Update Password"}
                     </Button>
                   </div>
                 </div>
               </form>
             ) : (
-              <div>
-                {error && <Alert variant="error" title="Error" message={error} />}
-                <Button className="w-full mt-4" size="sm" onClick={() => router.push("/signin")}>
+              <div className="space-y-6">
+                {error && <Alert variant="error" title="Expired Request" message={error} />}
+                <Button className="w-full h-11 mt-4 text-sm font-semibold shadow-md hover:shadow-lg transition-all" onClick={() => router.push("/signin")}>
                   Return to Sign In
                 </Button>
               </div>
