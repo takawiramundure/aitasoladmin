@@ -102,18 +102,34 @@ export default function MFAVerifyPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 pt-2">
+              <div className="flex flex-col gap-3 pt-2 text-center">
                 <Button className="w-full h-11 text-sm font-semibold shadow-md hover:shadow-lg transition-all" disabled={loading} type="submit">
                   {loading ? "Verifying..." : "Verify Code"}
                 </Button>
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={resending || loading}
-                  className="text-xs font-semibold text-primary hover:underline transition-all disabled:opacity-50 mt-1"
-                >
-                  {resending ? "Resending Code..." : "Didn't receive a code? Resend"}
-                </button>
+                
+                <div className="flex items-center justify-between mt-2 px-1">
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resending || loading}
+                    className="text-xs font-semibold text-primary hover:underline transition-all disabled:opacity-50"
+                  >
+                    {resending ? "Resending Code..." : "Resend Code"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const { signOut } = await import("firebase/auth");
+                      const { auth } = await import("@/firebaseConfig");
+                      await signOut(auth);
+                      router.replace("/signin");
+                    }}
+                    className="text-xs font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"
+                  >
+                    Back to Login
+                  </button>
+                </div>
               </div>
             </form>
           </div>
