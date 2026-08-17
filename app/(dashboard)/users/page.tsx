@@ -197,8 +197,8 @@ export default function UserManagement() {
                 const { db } = await import("@/firebaseConfig");
                 await addDoc(collection(db, 'audit_logs'), {
                     timestamp: serverTimestamp(),
-                    userId: auth.currentUser?.uid || "unknown",
-                    userEmail: auth.currentUser?.email || "unknown",
+                    userId: currentUser?.uid || "unknown",
+                    userEmail: currentUser?.email || "unknown",
                     action: "admin_password_reset_trigger",
                     details: {
                         targetUserEmail: email,
@@ -315,8 +315,8 @@ export default function UserManagement() {
                 const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
                 await addDoc(collection(db, 'audit_logs'), {
                     timestamp: serverTimestamp(),
-                    userId: auth.currentUser?.uid || "unknown",
-                    userEmail: auth.currentUser?.email || "unknown",
+                    userId: currentUser?.uid || "unknown",
+                    userEmail: currentUser?.email || "unknown",
                     action: "admin_user_update",
                     details: {
                         targetUserUid: editUser.id,
@@ -370,8 +370,8 @@ export default function UserManagement() {
                 const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
                 await addDoc(collection(db, 'audit_logs'), {
                     timestamp: serverTimestamp(),
-                    userId: auth.currentUser?.uid || "unknown",
-                    userEmail: auth.currentUser?.email || "unknown",
+                    userId: currentUser?.uid || "unknown",
+                    userEmail: currentUser?.email || "unknown",
                     action: "admin_user_create",
                     details: {
                         targetUserUid: newUid,
@@ -431,8 +431,8 @@ export default function UserManagement() {
                 const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
                 await addDoc(collection(db, 'audit_logs'), {
                     timestamp: serverTimestamp(),
-                    userId: auth.currentUser?.uid || "unknown",
-                    userEmail: auth.currentUser?.email || "unknown",
+                    userId: currentUser?.uid || "unknown",
+                    userEmail: currentUser?.email || "unknown",
                     action: "admin_user_delete",
                     details: {
                         targetUserUid: userId,
