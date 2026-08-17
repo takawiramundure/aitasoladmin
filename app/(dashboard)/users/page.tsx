@@ -63,6 +63,12 @@ export default function UserManagement() {
     const [tempPermissions, setTempPermissions] = useState<Record<string, Record<string, boolean>>>({});
     const [savingPermissions, setSavingPermissions] = useState(false);
 
+    // Search, Filter & Pagination states
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedTenant, setSelectedTenant] = useState("all");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(20);
+
     useEffect(() => {
         if (isPermissionsOpen) {
             setTempPermissions(JSON.parse(JSON.stringify(permissionsConfig)));
@@ -85,25 +91,51 @@ export default function UserManagement() {
         }
     };
 
-    // Filter users based on current user's role
+    // Filter users based on current user's role, search query, and tenant dropdown selection
     const filteredUsers = useMemo(() => {
         if (!profile) return [];
-        if (profile.role === 'super_admin') return allUsers.filter(u => u.deleted !== true);
+        
+        let users = allUsers;
+        if (profile.role !== 'super_admin') {
+            // If Editor/Tenant Admin, filter out Super Admins and users from other sites
+            users = allUsers.filter(u => {
+                if (u.deleted === true) return false;
+                if (u.role === 'super_admin') return false;
+                if (u.id === profile.uid) return true;
+                const mySites = profile.allowedSites || [];
+                const theirSites = u.allowedSites || [];
+                return mySites.some(site => theirSites.includes(site));
+            });
+        } else {
+            // If Super Admin, just hide soft-deleted users
+            users = allUsers.filter(u => u.deleted !== true);
+        }
 
-        // If Editor, filter out Super Admins and users from other sites
-        return allUsers.filter(u => {
-            if (u.deleted === true) return false; // Hide soft-deleted users
-            if (u.role === 'super_admin') return false; // Hide Super Admins
+        // Apply Search query
+        const queryStr = searchQuery.toLowerCase();
+        if (queryStr) {
+            users = users.filter(u => {
+                const cleanEmail = (u.email || '').toLowerCase();
+                const cleanName = (u.displayName || '').toLowerCase();
+                return cleanEmail.includes(queryStr) || cleanName.includes(queryStr);
+            });
+        }
 
-            // Show if user is me
-            if (u.id === profile.uid) return true;
+        // Apply Tenant Filter dropdown selection
+        if (selectedTenant !== 'all') {
+            users = users.filter(u => u.allowedSites?.includes(selectedTenant));
+        }
 
-            // Show if user shares at least one site with me
-            const mySites = profile.allowedSites || [];
-            const theirSites = u.allowedSites || [];
-            return mySites.some(site => theirSites.includes(site));
-        });
-    }, [allUsers, profile]);
+        return users;
+    }, [allUsers, profile, searchQuery, selectedTenant]);
+
+    // Client-side pagination computations
+    const totalItems = filteredUsers.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const validCurrentPage = Math.min(currentPage, totalPages);
+    const startIndex = (validCurrentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 
     // Available Sites for Assignment (Filtered for Editor)
     const availableSitesToAssign = useMemo(() => {
@@ -279,6 +311,23 @@ export default function UserManagement() {
                         }
                     })
                 );
+                // Log action to audit logs collection
+                const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+                await addDoc(collection(db, 'audit_logs'), {
+                    timestamp: serverTimestamp(),
+                    userId: auth.currentUser?.uid || "unknown",
+                    userEmail: auth.currentUser?.email || "unknown",
+                    action: "admin_user_update",
+                    details: {
+                        targetUserUid: editUser.id,
+                        targetUserEmail: newUserEmail,
+                        role: newUserRole,
+                        allowedSites: selectedSites
+                    },
+                    realRole: "admin",
+                    activeRole: "admin"
+                });
+
                 await dialogAlert({
                     title: "Success",
                     message: "User updated successfully across all tenant databases",
@@ -316,6 +365,24 @@ export default function UserManagement() {
                         }
                     })
                 );
+
+                // Log action to audit logs collection
+                const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+                await addDoc(collection(db, 'audit_logs'), {
+                    timestamp: serverTimestamp(),
+                    userId: auth.currentUser?.uid || "unknown",
+                    userEmail: auth.currentUser?.email || "unknown",
+                    action: "admin_user_create",
+                    details: {
+                        targetUserUid: newUid,
+                        targetUserEmail: newUserEmail,
+                        role: newUserRole,
+                        allowedSites: selectedSites
+                    },
+                    realRole: "admin",
+                    activeRole: "admin"
+                });
+
                 await dialogAlert({
                     title: "User Created",
                     message: `User created successfully! A password reset email has been sent to ${newUserEmail} so they can set their own password.`,
@@ -495,6 +562,69 @@ export default function UserManagement() {
                     </div>
                 </div>
 
+                {/* Advanced Filtering & Controls */}
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 rounded-xl border border-gray-150 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.01]">
+                    <div className="flex flex-wrap items-center gap-4">
+                        {/* Page Size Selection */}
+                        <div className="flex items-center gap-2 text-sm text-gray-500">
+                            <span>Show</span>
+                            <select
+                                value={pageSize}
+                                onChange={(e) => {
+                                    setPageSize(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                className="bg-transparent border border-gray-200 dark:border-gray-800 rounded px-2 py-1 text-sm font-medium focus:outline-none focus:border-primary text-gray-800 dark:text-gray-200"
+                            >
+                                <option value={20}>20</option>
+                                <option value={30}>30</option>
+                                <option value={50}>50</option>
+                                <option value={100}>100</option>
+                            </select>
+                            <span>entries</span>
+                        </div>
+
+                        {/* Tenant Dropdown (Super Admin Only) */}
+                        {profile?.role === 'super_admin' && (
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <span>Tenant:</span>
+                                <select
+                                    value={selectedTenant}
+                                    onChange={(e) => {
+                                        setSelectedTenant(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                    className="bg-transparent border border-gray-200 dark:border-gray-800 rounded px-2 py-1 text-sm font-medium focus:outline-none focus:border-primary text-gray-800 dark:text-gray-200"
+                                >
+                                    <option value="all">All Tenants</option>
+                                    {SITES.map((site) => (
+                                        <option key={site.id} value={site.id}>
+                                            {site.name} ({site.id})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Search Bar Input */}
+                    <div className="flex items-center gap-4">
+                        <input
+                            type="text"
+                            placeholder="Search users..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="bg-transparent border border-gray-200 dark:border-gray-800 rounded px-3 py-1.5 text-sm font-medium focus:outline-none focus:border-primary w-60 text-gray-800 dark:text-gray-200"
+                        />
+                        <div className="text-sm text-gray-500 font-medium">
+                            Showing {totalItems > 0 ? startIndex + 1 : 0} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+                        </div>
+                    </div>
+                </div>
+
                 {loading ? (
                     <div>Loading users...</div>
                 ) : (
@@ -508,7 +638,7 @@ export default function UserManagement() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredUsers.map((user) => (
+                                {paginatedUsers.map((user) => (
                                     <tr key={user.id} className="border-b border-gray-100 dark:border-gray-800">
                                         <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">
                                             <div className="flex flex-col">
@@ -580,6 +710,39 @@ export default function UserManagement() {
                             </tbody>
                         </table>
                         {filteredUsers.length === 0 && <div className="p-4 text-center text-gray-500">No users found available for your role.</div>}
+                    </div>
+                )}
+
+                {/* Pagination Footer controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-end gap-2 mt-6 p-4 rounded-xl border border-gray-150 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.01]">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                            disabled={validCurrentPage === 1}
+                            className="px-3 py-1.5 text-sm font-semibold rounded border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-50 disabled:pointer-events-none text-gray-800 dark:text-gray-200"
+                        >
+                            Previous
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageIdx) => (
+                            <button
+                                key={pageIdx}
+                                onClick={() => setCurrentPage(pageIdx)}
+                                className={`px-3 py-1.5 text-sm font-semibold rounded border ${
+                                    validCurrentPage === pageIdx
+                                        ? "border-primary bg-primary text-white"
+                                        : "border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-white/5 text-gray-800 dark:text-gray-200"
+                                }`}
+                            >
+                                {pageIdx}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                            disabled={validCurrentPage === totalPages}
+                            className="px-3 py-1.5 text-sm font-semibold rounded border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-white/5 disabled:opacity-50 disabled:pointer-events-none text-gray-800 dark:text-gray-200"
+                        >
+                            Next
+                        </button>
                     </div>
                 )}
 
