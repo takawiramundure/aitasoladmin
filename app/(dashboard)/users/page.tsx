@@ -301,13 +301,16 @@ export default function UserManagement() {
                     role: newUserRole,
                     allowedSites: selectedSites
                 };
+                const dbsToUpdate = [
+                    { id: '(default)', instance: db },
+                    ...SITES.map(site => ({ id: site.id, instance: getDb(site.id) }))
+                ];
                 await Promise.all(
-                    SITES.map(async (site) => {
+                    dbsToUpdate.map(async (dbObj) => {
                         try {
-                            const siteDb = getDb(site.id);
-                            await setDoc(doc(siteDb, 'users', editUser.id), userData, { merge: true });
+                            await setDoc(doc(dbObj.instance, 'users', editUser.id), userData, { merge: true });
                         } catch (err) {
-                            console.warn(`Could not sync updated user to site database '${site.id}':`, err);
+                            console.warn(`Could not sync updated user to database '${dbObj.id}':`, err);
                         }
                     })
                 );
@@ -355,13 +358,16 @@ export default function UserManagement() {
                     createdAt: new Date().toISOString(),
                     pending: false
                 };
+                const dbsToUpdate = [
+                    { id: '(default)', instance: db },
+                    ...SITES.map(site => ({ id: site.id, instance: getDb(site.id) }))
+                ];
                 await Promise.all(
-                    SITES.map(async (site) => {
+                    dbsToUpdate.map(async (dbObj) => {
                         try {
-                            const siteDb = getDb(site.id);
-                            await setDoc(doc(siteDb, 'users', newUid), newUserData);
+                            await setDoc(doc(dbObj.instance, 'users', newUid), newUserData);
                         } catch (err) {
-                            console.warn(`Could not sync new user to site database '${site.id}':`, err);
+                            console.warn(`Could not sync new user to database '${dbObj.id}':`, err);
                         }
                     })
                 );
@@ -648,6 +654,23 @@ export default function UserManagement() {
                                                 </span>
                                                 <span className="text-xs text-gray-500">{user.email || user.id}</span>
                                                 {user.phoneNumber && <span className="text-xs text-gray-400">Phone: {user.phoneNumber}</span>}
+                                                
+                                                {/* Tenant / Allowed Sites Pills */}
+                                                <div className="flex flex-wrap gap-1 mt-1.5">
+                                                    {user.role === 'super_admin' ? (
+                                                        <span className="inline-flex items-center rounded-full bg-purple-50 px-2 py-0.5 text-[10px] font-semibold text-purple-700 ring-1 ring-inset ring-purple-700/10 uppercase">
+                                                            All Tenants (Global Access)
+                                                        </span>
+                                                    ) : user.allowedSites && user.allowedSites.length > 0 ? (
+                                                        user.allowedSites.map((siteId) => (
+                                                            <span key={siteId} className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10 uppercase">
+                                                                {siteId}
+                                                            </span>
+                                                        ))
+                                                    ) : (
+                                                        <span className="text-[10px] text-gray-400 font-medium">No site access assigned</span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-sm">
