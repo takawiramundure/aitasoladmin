@@ -24,6 +24,7 @@ interface User {
     displayName?: string;
     phoneNumber?: string;
     allowedSites?: string[];
+    deleted?: boolean;
 }
 
 const PERMISSION_KEYS = [
@@ -87,10 +88,11 @@ export default function UserManagement() {
     // Filter users based on current user's role
     const filteredUsers = useMemo(() => {
         if (!profile) return [];
-        if (profile.role === 'super_admin') return allUsers;
+        if (profile.role === 'super_admin') return allUsers.filter(u => u.deleted !== true);
 
         // If Editor, filter out Super Admins and users from other sites
         return allUsers.filter(u => {
+            if (u.deleted === true) return false; // Hide soft-deleted users
             if (u.role === 'super_admin') return false; // Hide Super Admins
 
             // Show if user is me
@@ -352,22 +354,42 @@ export default function UserManagement() {
         });
 
         if (isConfirmed) {
+            setLoading(true);
             try {
-                const { deleteDoc, doc } = await import("firebase/firestore");
-                await deleteDoc(doc(db, "users", userId));
+                const functions = getFunctions();
+                const deleteUserFn = httpsCallable(functions, "deleteUserFromAuth");
+                await deleteUserFn({ targetUid: userId });
+
+                // Also log action locally for audit logs
+                const { collection, addDoc, serverTimestamp } = await import("firebase/firestore");
+                await addDoc(collection(db, 'audit_logs'), {
+                    timestamp: serverTimestamp(),
+                    userId: auth.currentUser?.uid || "unknown",
+                    userEmail: auth.currentUser?.email || "unknown",
+                    action: "admin_user_delete",
+                    details: {
+                        targetUserUid: userId,
+                        targetUserEmail: email
+                    },
+                    realRole: "admin",
+                    activeRole: "admin"
+                });
+
                 loadUsers();
                 await dialogAlert({
                     title: "User Deleted",
-                    message: "The user has been successfully removed.",
+                    message: "The user has been successfully removed from authentication, and their Firestore profile has been soft-deleted to preserve history.",
                     variant: "success"
                 });
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Error deleting user:", error);
                 await dialogAlert({
                     title: "Delete Error",
-                    message: "Failed to delete user. Please try again.",
+                    message: error.message || "Failed to delete user. Please try again.",
                     variant: "danger"
                 });
+            } finally {
+                setLoading(false);
             }
         }
     };
