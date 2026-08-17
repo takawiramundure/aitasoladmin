@@ -5,7 +5,10 @@ import PageBreadcrumb from "@/components/common/PageBreadCrumb";
 import PageMeta from "@/components/common/PageMeta";
 import { useAuth } from "@/context/AuthContext";
 import Alert from "@/components/ui/alert/Alert";
-import { collection, query, orderBy, limit, getDocs, getFirestore } from "firebase/firestore";
+import { collection, query, orderBy, limit, getDocs, getFirestore, where } from "firebase/firestore";
+import { FirestoreService } from "@/services/firestore";
+import { SITES } from "@/config/sites";
+import { AlertTriangleIcon } from "lucide-react";
 
 interface AuditLog {
   id: string;
@@ -31,10 +34,16 @@ export default function AuditLogsPage() {
   const { profile } = useAuth();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [resendLogs, setResendLogs] = useState<ResendEmailLog[]>([]);
-  const [activeTab, setActiveTab] = useState<"system" | "resend">("system");
+  const [deletedUsers, setDeletedUsers] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"system" | "resend" | "deleted">("system");
   const [loading, setLoading] = useState(true);
   const [resendLoading, setResendLoading] = useState(false);
+  const [deletedLoading, setDeletedLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Filter & Search states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTenant, setSelectedTenant] = useState("all");
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -46,8 +55,10 @@ export default function AuditLogsPage() {
     if (isSuperAdmin) {
       if (activeTab === "system") {
         fetchLogs();
-      } else {
+      } else if (activeTab === "resend") {
         fetchResendLogs();
+      } else {
+        fetchDeletedUsers();
       }
     }
     // Reset page index on tab change
@@ -102,6 +113,36 @@ export default function AuditLogsPage() {
     }
   };
 
+  const fetchDeletedUsers = async () => {
+    setDeletedLoading(true);
+    setError("");
+    try {
+      const data = await FirestoreService.getUsers();
+      const softDeleted = data.filter((u: any) => u.deleted === true);
+      const dbInstance = getFirestore();
+      
+      const populated = await Promise.all(softDeleted.map(async (u: any) => {
+        try {
+          const q = query(collection(dbInstance, "audit_logs"), where("userId", "==", u.id));
+          const logsSnap = await getDocs(q);
+          return {
+            ...u,
+            recordCount: logsSnap.size
+          };
+        } catch(e) {
+          console.warn(`Could not count logs for deleted user ${u.id}:`, e);
+          return { ...u, recordCount: 0 };
+        }
+      }));
+      setDeletedUsers(populated);
+    } catch (err: any) {
+      console.error("Error fetching soft-deleted users:", err);
+      setError(err.message || "Failed to load soft-deleted users.");
+    } finally {
+      setDeletedLoading(false);
+    }
+  };
+
   if (!isSuperAdmin) {
     return (
       <div className="p-6">
@@ -110,16 +151,49 @@ export default function AuditLogsPage() {
     );
   }
 
-  // Client-side pagination computations
-  const currentItems = activeTab === "system" ? logs : resendLogs;
-  const totalItems = currentItems.length;
+  // Client-side filtering & pagination computations
+  let filteredItems: any[] = [];
+  if (activeTab === "system") {
+    filteredItems = logs.filter(log => {
+      const search = searchQuery.toLowerCase();
+      if (!search) return true;
+      return (
+        (log.userEmail || '').toLowerCase().includes(search) ||
+        (log.userId || '').toLowerCase().includes(search) ||
+        (log.action || '').toLowerCase().includes(search)
+      );
+    });
+  } else if (activeTab === "resend") {
+    filteredItems = resendLogs.filter(log => {
+      const search = searchQuery.toLowerCase();
+      if (!search) return true;
+      return (
+        log.to.some(email => email.toLowerCase().includes(search)) ||
+        (log.subject || '').toLowerCase().includes(search)
+      );
+    });
+  } else {
+    filteredItems = deletedUsers.filter(u => {
+      const cleanEmail = u.email.replace(/^deleted\+\d+\+/, '').toLowerCase();
+      const cleanName = (u.displayName || '').replace(/^Deleted User \(/, '').replace(/\)$/, '').toLowerCase();
+      const search = searchQuery.toLowerCase();
+      const matchesSearch = cleanEmail.includes(search) || cleanName.includes(search);
+      
+      if (selectedTenant === "all") {
+        return matchesSearch;
+      }
+      return matchesSearch && u.allowedSites?.includes(selectedTenant);
+    });
+  }
+
+  const totalItems = filteredItems.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   
   // Adjust page boundary if size changed
   const validCurrentPage = Math.min(currentPage, totalPages);
   const startIndex = (validCurrentPage - 1) * pageSize;
   const endIndex = startIndex + pageSize;
-  const paginatedItems = currentItems.slice(startIndex, endIndex);
+  const paginatedItems = filteredItems.slice(startIndex, endIndex);
 
   return (
     <>
@@ -154,30 +228,78 @@ export default function AuditLogsPage() {
           >
             Outbound Email Traffic (Resend)
           </button>
+          <button
+            onClick={() => setActiveTab("deleted")}
+            className={`py-3 px-4 text-sm font-semibold border-b-2 transition-all ${
+              activeTab === "deleted"
+                ? "border-primary text-primary"
+                : "border-transparent text-gray-500 hover:text-primary"
+            }`}
+          >
+            Soft-Deleted Accounts
+          </button>
         </div>
 
-        {/* Page Size & Pagination Summary Controls */}
+        {/* Page Size, Search, & Filtering Controls */}
         <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 dark:bg-boxdark border border-stroke dark:border-strokedark rounded-sm">
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-            <span>Show</span>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="bg-transparent border border-stroke dark:border-strokedark rounded px-2 py-1 text-sm font-medium focus:outline-none focus:border-primary"
-            >
-              <option value={20}>20</option>
-              <option value={30}>30</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span>entries</span>
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Page Size Select */}
+            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+              <span>Show</span>
+              <select
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="bg-transparent border border-stroke dark:border-strokedark rounded px-2 py-1 text-sm font-medium focus:outline-none focus:border-primary text-black dark:text-white"
+              >
+                <option value={20}>20</option>
+                <option value={30}>30</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span>entries</span>
+            </div>
+
+            {/* Tenant Filter (Active on system and soft-deleted tabs) */}
+            {activeTab === "deleted" && (
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <span>Tenant:</span>
+                <select
+                  value={selectedTenant}
+                  onChange={(e) => {
+                    setSelectedTenant(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="bg-transparent border border-stroke dark:border-strokedark rounded px-2 py-1 text-sm font-medium focus:outline-none focus:border-primary text-black dark:text-white"
+                >
+                  <option value="all">All Tenants</option>
+                  {SITES.map((site) => (
+                    <option key={site.id} value={site.id}>
+                      {site.name} ({site.id})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
-          <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
-            Showing {totalItems > 0 ? startIndex + 1 : 0} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+          {/* Search bar */}
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder={`Search ${activeTab === 'deleted' ? 'accounts' : 'logs'}...`}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-transparent border border-stroke dark:border-strokedark rounded px-3 py-1.5 text-sm font-medium focus:outline-none focus:border-primary w-60 text-black dark:text-white"
+            />
+            <div className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              Showing {totalItems > 0 ? startIndex + 1 : 0} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+            </div>
           </div>
         </div>
 
@@ -246,7 +368,7 @@ export default function AuditLogsPage() {
               )}
             </div>
           </div>
-        ) : (
+        ) : activeTab === "resend" ? (
           <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
             <div className="border-b border-stroke py-4 px-7 dark:border-strokedark flex items-center justify-between">
               <h3 className="font-medium text-black dark:text-white">
@@ -305,6 +427,93 @@ export default function AuditLogsPage() {
                           </td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+            <div className="border-b border-stroke py-4 px-7 dark:border-strokedark flex items-center justify-between">
+              <h3 className="font-medium text-black dark:text-white flex items-center gap-2">
+                <AlertTriangleIcon size={18} className="text-yellow-600" />
+                Soft-Deleted Accounts (Audit Log Trail)
+              </h3>
+              <button
+                onClick={fetchDeletedUsers}
+                disabled={deletedLoading}
+                className="text-xs text-primary hover:underline font-semibold"
+              >
+                {deletedLoading ? "Refreshing..." : "Refresh User Records"}
+              </button>
+            </div>
+            <div className="p-7">
+              {deletedLoading ? (
+                <div className="text-gray-500 dark:text-gray-400">Loading soft-deleted user records...</div>
+              ) : paginatedItems.length === 0 ? (
+                <div className="text-gray-500 dark:text-gray-400">No soft-deleted accounts found matching filters.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full table-auto border-collapse text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-stroke dark:border-strokedark bg-gray-50 dark:bg-meta-4/20 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                        <th className="py-3 px-4">User</th>
+                        <th className="py-3 px-4">Tenant Database</th>
+                        <th className="py-3 px-4">Deleted By</th>
+                        <th className="py-3 px-4">Deleted At</th>
+                        <th className="py-3 px-4 text-center">Linked Records</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-stroke dark:divide-strokedark">
+                      {paginatedItems.map((user: any) => {
+                        const cleanEmail = user.email.replace(/^deleted\+\d+\+/, '');
+                        const cleanName = user.displayName?.replace(/^Deleted User \(/, '').replace(/\)$/, '') || 'No Name';
+                        
+                        let displayDate = 'N/A';
+                        if (user.deletedAt) {
+                          try {
+                            const d = typeof user.deletedAt.toDate === 'function' ? user.deletedAt.toDate() : new Date(user.deletedAt);
+                            displayDate = d.toLocaleString();
+                          } catch(e) {}
+                        }
+
+                        return (
+                          <tr key={user.id} className="hover:bg-gray-50/50 dark:hover:bg-meta-4/5">
+                            <td className="py-4 px-4 text-sm text-gray-800 dark:text-gray-200">
+                              <div className="flex flex-col">
+                                <span className="font-semibold text-black dark:text-white">{cleanName}</span>
+                                <span className="text-xs text-gray-500">{cleanEmail}</span>
+                                <span className="text-[10px] text-gray-400">UID: {user.id}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 px-4 whitespace-nowrap text-xs">
+                              {user.allowedSites && user.allowedSites.length > 0 ? (
+                                <div className="flex flex-wrap gap-1">
+                                  {user.allowedSites.map((siteId: string) => (
+                                    <span key={siteId} className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded text-[10px] uppercase font-semibold">
+                                      {siteId}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">—</span>
+                              )}
+                            </td>
+                            <td className="py-4 px-4 whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">
+                              {user.deletedByEmail || 'Unknown Admin'}
+                            </td>
+                            <td className="py-4 px-4 whitespace-nowrap text-xs text-gray-500">
+                              {displayDate}
+                            </td>
+                            <td className="py-4 px-4 text-center font-medium">
+                              <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
+                                {user.recordCount || 0} events
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

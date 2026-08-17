@@ -69,8 +69,6 @@ export default function UserManagement() {
         }
     }, [isPermissionsOpen, permissionsConfig]);
 
-    const [deletedUsers, setDeletedUsers] = useState<(User & { recordCount?: number; deletedAt?: any; deletedByEmail?: string })[]>([]);
-
     useEffect(() => {
         loadUsers();
     }, []);
@@ -80,23 +78,6 @@ export default function UserManagement() {
         try {
             const data = await FirestoreService.getUsers();
             setAllUsers(data as User[]);
-
-            // Fetch soft-deleted users and their record counts
-            const softDeleted = data.filter((u: any) => u.deleted === true);
-            const populated = await Promise.all(softDeleted.map(async (u: any) => {
-                try {
-                    const q = query(collection(db, "audit_logs"), where("userId", "==", u.id));
-                    const logsSnap = await getDocs(q);
-                    return {
-                        ...u,
-                        recordCount: logsSnap.size
-                    };
-                } catch(e) {
-                    console.warn(`Could not count logs for deleted user ${u.id}:`, e);
-                    return { ...u, recordCount: 0 };
-                }
-            }));
-            setDeletedUsers(populated);
         } catch (error) {
             console.error("Failed to load users", error);
         } finally {
@@ -602,70 +583,7 @@ export default function UserManagement() {
                     </div>
                 )}
 
-                {/* Soft-Deleted Accounts Section (Super Admin Only) */}
-                {profile?.role === 'super_admin' && (
-                    <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
-                        <h4 className="text-md font-semibold text-gray-800 dark:text-white mb-4 flex items-center gap-2">
-                            <AlertTriangleIcon size={18} className="text-yellow-600" />
-                            Soft-Deleted Accounts (Audit Log Trail)
-                        </h4>
-                        {deletedUsers.length === 0 ? (
-                            <div className="text-sm text-gray-500 italic p-4 text-center border border-dashed border-gray-200 dark:border-gray-800 rounded-lg bg-gray-50/50 dark:bg-white/[0.01]">
-                                No soft-deleted user records found in database.
-                            </div>
-                        ) : (
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full">
-                                    <thead>
-                                        <tr className="border-b border-gray-200 dark:border-gray-700">
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Deleted By</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Deleted At</th>
-                                            <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider text-center">Linked Records</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {deletedUsers.map((user) => {
-                                            // Clean up prefix for display (e.g. deleted+1786810434+admin@bweic.org -> admin@bweic.org)
-                                            const cleanEmail = user.email.replace(/^deleted\+\d+\+/, '');
-                                            const cleanName = user.displayName?.replace(/^Deleted User \(/, '').replace(/\)$/, '') || 'No Name';
-                                            
-                                            let displayDate = 'N/A';
-                                            if (user.deletedAt) {
-                                                try {
-                                                    const d = typeof user.deletedAt.toDate === 'function' ? user.deletedAt.toDate() : new Date(user.deletedAt);
-                                                    displayDate = d.toLocaleString();
-                                                } catch(e) {}
-                                            }
 
-                                            return (
-                                                <tr key={user.id} className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-white/[0.01]">
-                                                    <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">
-                                                        <div className="flex flex-col">
-                                                            <span className="font-semibold text-gray-700 dark:text-gray-300">{cleanName}</span>
-                                                            <span className="text-xs text-gray-500">{cleanEmail}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-                                                        {user.deletedByEmail || 'Unknown Admin'}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-xs text-gray-500">
-                                                        {displayDate}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-sm text-center font-medium">
-                                                        <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                                                            {user.recordCount || 0} event logs
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
-                    </div>
-                )}
 
                 {/* Add/Edit Modal (Unchanged) */}
                 <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} className="max-w-md p-6">
